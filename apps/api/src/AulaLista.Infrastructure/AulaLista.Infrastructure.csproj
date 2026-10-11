@@ -7,10 +7,14 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
     <PackageReference Include="Hangfire.Core" Version="1.8.25" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.12" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="QuestPDF" Version="2026.9.1" />
   </ItemGroup>
@@ -20,6 +24,11 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="AulaLista.Pruebas.Integracion" />
+    <InternalsVisibleTo Include="AulaLista.Pruebas.Unit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Cuentas\contrasenas-comunes.txt" LogicalName="AulaLista.Infrastructure.Cuentas.contrasenas-comunes.txt" />
   </ItemGroup>
 
 </Project>

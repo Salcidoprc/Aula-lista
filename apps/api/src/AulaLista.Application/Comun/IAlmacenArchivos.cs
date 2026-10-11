@@ -8,4 +8,7 @@ public interface IAlmacenArchivos
     Task<Stream?> AbrirAsync(string ruta, CancellationToken cancellationToken);
 
     Task BorrarAsync(string ruta, CancellationToken cancellationToken);
+
+    /// <summary>Borra los archivos de una carpeta creados antes de una fecha.</summary>
+    Task<int> BorrarAnterioresAsync(string carpeta, DateTimeOffset antesDe, CancellationToken cancellationToken);
 }

@@ -1,4 +1,5 @@
 using AulaLista.Infrastructure.Persistencia;
+using AulaLista.Infrastructure.Trabajos;
 
 namespace AulaLista.Api.Comun;
 
@@ -8,11 +9,12 @@ namespace AulaLista.Api.Comun;
 /// </summary>
 internal sealed class TransaccionPorSolicitud(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, AulaListaDbContext db)
+    public async Task InvokeAsync(HttpContext context, AulaListaDbContext db, IDespachoTrabajos despacho)
     {
         if (!context.Request.Path.StartsWithSegments("/api") || context.User.Identity?.IsAuthenticated != true)
         {
             await next(context);
+            despacho.Despachar();
             return;
         }
 
@@ -21,6 +23,7 @@ internal sealed class TransaccionPorSolicitud(RequestDelegate next)
         if (context.Response.StatusCode < 400)
         {
             await transaccion.CommitAsync(context.RequestAborted);
+            despacho.Despachar();
         }
     }
 }

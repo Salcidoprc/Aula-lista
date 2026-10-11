@@ -140,10 +140,16 @@ public sealed class SolicitarEliminacionCasoUso(
 }
 
 /// <summary>Trabajo diario de retención (RNF-009): borra las cuentas con eliminación pedida hace 30 días.</summary>
-public sealed class RetencionCuentasTrabajo(IRetencionCuentas retencion, TimeProvider reloj)
+/// También borra los archivos de exportaciones vencidas.
+public sealed class RetencionCuentasTrabajo(IRetencionCuentas retencion, IAlmacenArchivos almacen, TimeProvider reloj)
 {
+    public const string CarpetaExportaciones = "exportaciones";
     public static readonly TimeSpan PlazoBorrado = TimeSpan.FromDays(30);
 
-    public Task<int> EjecutarAsync(CancellationToken ct) =>
-        retencion.EliminarVencidasAsync(reloj.GetUtcNow() - PlazoBorrado, ct);
+    public async Task<int> EjecutarAsync(CancellationToken ct)
+    {
+        var ahora = reloj.GetUtcNow();
+        await almacen.BorrarAnterioresAsync(CarpetaExportaciones, ahora - Exportacion.Vigencia, ct);
+        return await retencion.EliminarVencidasAsync(ahora - PlazoBorrado, ct);
+    }
 }
