@@ -20,7 +20,9 @@ test.describe('H0: la app arranca y habla con la API', () => {
     await page.goto('/cuenta/entrar');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    const resultado = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    const resultado = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
 
     expect(resultado.violations).toEqual([]);
   });

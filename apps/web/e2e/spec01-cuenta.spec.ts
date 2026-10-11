@@ -9,7 +9,10 @@ import {
 } from './cuenta';
 
 test.describe('SPEC-01: cuenta y acceso del docente', () => {
-  test('RF-001: se registra, completa su perfil y verifica su correo', async ({ page, request }) => {
+  test('RF-001: se registra, completa su perfil y verifica su correo', async ({
+    page,
+    request,
+  }) => {
     const correo = correoNuevo();
     await page.goto('/cuenta/registro');
     await expect(page).toHaveTitle('Crea tu cuenta · Aula Lista');
@@ -69,7 +72,11 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await expect(page).toHaveURL(/\/ajustes$/);
   });
 
-  test('RF-003: recupera su contraseña con el enlace del correo', async ({ page, request, browser }) => {
+  test('RF-003: recupera su contraseña con el enlace del correo', async ({
+    page,
+    request,
+    browser,
+  }) => {
     const otra = await browser.newContext();
     const correo = await registrarYCompletarPerfil(await otra.newPage());
     await otra.close();
@@ -94,11 +101,15 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Mis grupos' })).toBeVisible();
   });
 
-  test('RF-002: sin credenciales de Google, el botón avisa y deja entrar con correo', async ({ page }) => {
+  test('RF-002: sin credenciales de Google, el botón avisa y deja entrar con correo', async ({
+    page,
+  }) => {
     await page.goto('/cuenta/entrar');
     await page.getByRole('link', { name: 'Continuar con Google' }).click();
 
-    await expect(page.getByRole('alert')).toHaveText('Entrar con Google todavía no está disponible. Usa tu correo.');
+    await expect(page.getByRole('alert')).toHaveText(
+      'Entrar con Google todavía no está disponible. Usa tu correo.',
+    );
   });
 
   test('RF-007 y RF-008: exporta sus datos y elimina su cuenta', async ({ page }) => {
@@ -119,6 +130,8 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByRole('button', { name: 'Eliminar mi cuenta' }).click();
     const dialogo = page.getByRole('dialog', { name: '¿Eliminar tu cuenta?' });
     await expect(dialogo).toBeVisible();
+    // axe mide el contraste con la opacidad real: se espera a que termine el fundido de entrada.
+    await expect(dialogo).toHaveCSS('opacity', '1');
     await sinFallasDeAccesibilidad(page);
     await dialogo.getByLabel('Escribe tu contraseña para confirmar').fill(CONTRASENA);
     await dialogo.getByRole('button', { name: 'Eliminar cuenta' }).click();

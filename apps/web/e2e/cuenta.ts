@@ -8,11 +8,17 @@ export function correoNuevo(): string {
 }
 
 /** Último enlace con token que recibió una dirección en el buzón de desarrollo de la API. */
-export async function enlaceDelCorreo(request: APIRequestContext, para: string, asunto: RegExp): Promise<string> {
+export async function enlaceDelCorreo(
+  request: APIRequestContext,
+  para: string,
+  asunto: RegExp,
+): Promise<string> {
   let enlace: string | undefined;
   await expect
     .poll(async () => {
-      const respuesta = await request.get(`/api/v1/desarrollo/correos?para=${encodeURIComponent(para)}`);
+      const respuesta = await request.get(
+        `/api/v1/desarrollo/correos?para=${encodeURIComponent(para)}`,
+      );
       const correos = (await respuesta.json()) as { asunto: string; texto: string }[];
       const correo = correos.find((c) => asunto.test(c.asunto));
       enlace = correo?.texto.match(/https?:\/\/\S+/)?.[0];
@@ -25,12 +31,17 @@ export async function enlaceDelCorreo(request: APIRequestContext, para: string, 
 }
 
 export async function sinFallasDeAccesibilidad(page: Page): Promise<void> {
-  const resultado = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  const resultado = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
   expect(resultado.violations).toEqual([]);
 }
 
 /** Crea la cuenta desde la pantalla de registro y completa la bienvenida. */
-export async function registrarYCompletarPerfil(page: Page, correo = correoNuevo()): Promise<string> {
+export async function registrarYCompletarPerfil(
+  page: Page,
+  correo = correoNuevo(),
+): Promise<string> {
   await page.goto('/cuenta/registro');
   await page.getByLabel('Correo').fill(correo);
   await page.getByLabel('Contraseña nueva').fill(CONTRASENA);
