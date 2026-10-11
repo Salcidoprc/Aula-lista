@@ -13,7 +13,7 @@ import { SaludService } from '../../core/salud/salud.service';
       <p class="descripcion">{{ t('descripcion') }}</p>
 
       <div class="estado" role="status" [attr.data-estado]="salud.estado()">
-        <span class="estacion" aria-hidden="true"></span>
+        <span class="indicador" aria-hidden="true"></span>
         <span>{{ t('estado.' + salud.estado()) }}</span>
         @if (salud.estado() === 'sinServidor') {
           <button type="button" class="reintentar" (click)="salud.revisar()">
@@ -41,7 +41,7 @@ import { SaludService } from '../../core/salud/salud.service';
     }
 
     .estado {
-      --color-estacion: var(--color-texto-tenue);
+      --color-indicador: var(--color-texto-tenue);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -51,19 +51,19 @@ import { SaludService } from '../../core/salud/salud.service';
     }
 
     .estado[data-estado='enLinea'] {
-      --color-estacion: var(--color-exito);
+      --color-indicador: var(--color-exito);
     }
 
     .estado[data-estado='sinServidor'] {
-      --color-estacion: var(--color-peligro);
+      --color-indicador: var(--color-peligro);
       color: var(--color-peligro-tinta);
     }
 
-    .estacion {
+    .indicador {
       width: 0.875rem;
       height: 0.875rem;
-      border-radius: var(--radio-estacion);
-      border: 3px solid var(--color-estacion);
+      border-radius: var(--radio-pleno);
+      border: 3px solid var(--color-indicador);
       background: var(--color-superficie);
       transition: border-color var(--dur-small) var(--ease-out);
     }
@@ -72,7 +72,7 @@ import { SaludService } from '../../core/salud/salud.service';
       min-height: var(--tactil-minimo);
       padding: 0 var(--espacio-4);
       border: 0;
-      border-radius: var(--radio-md);
+      border-radius: var(--radio-lg);
       background: var(--color-accion);
       color: var(--color-sobre-accion);
       font-weight: var(--peso-medio);

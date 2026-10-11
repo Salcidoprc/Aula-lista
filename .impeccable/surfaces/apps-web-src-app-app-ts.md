@@ -11,14 +11,14 @@ Modo: Operate. Audiencia: docente de primaria o secundaria en celular. Tarea: ca
 
 ## Direction contract
 
-THESIS: Cada grupo es una línea con su color y el periodo se recorre como estaciones; se rechaza el panel genérico gris con tarjetas y un acento azul.
+THESIS: Cada grupo tiene el color de su grado, como las portadas de los libros de texto gratuitos; la cabecera es una portada con el número del grado grande y recortado. Se rechaza el panel genérico gris con tarjetas.
 
-OWN-WORLD: Fondo de concreto cálido claro, superficies entintadas casi blancas, acción en rosa de línea, ocho colores de línea de luminosidad pareja, Overpass con cifras tabulares, esquinas de letrero, estaciones circulares con borde grueso.
+OWN-WORLD: Fondo de papel cálido, tinta azul pizarra, acción en azul de cuaderno, nueve colores de grado de luminosidad pareja con base, tinta y tinte, Lexend con dígitos tabulares ("Aula Cifras"), controles de 10 a 12 px, tapas de libro con lomo.
 
-STORY: El docente abre la app, ve la línea de su grupo bajo la barra, sabe en qué estación va el periodo y captura sin pensar en la interfaz.
+STORY: El docente abre la app, ve la portada del color de su grupo con el número del grado, reconoce el grupo sin leer y captura sin pensar en la interfaz.
 
-FIRST VIEWPORT: Barra superior con el nombre del grupo y la franja de su línea de 6 px; debajo, la línea del periodo con estaciones (actividades, cierre, boletas) y la acción principal (Capturar) al alcance del pulgar abajo.
+FIRST VIEWPORT: Portada a todo el ancho con el nombre del grupo y su número de grado recortado; debajo, el contenido de la pantalla y la acción principal (Capturar) al alcance del pulgar abajo. Sin grupo, portada azul con el nombre de la app.
 
-FORM: Señalética de transporte público, cuarto lugar de la lista propia; seed e9577082 (tirada degradada, sin retadores).
+FORM: "Libros de texto", elegido por el dueño del producto el 11/10/2026 entre tres propuestas (ADR-0010). Reemplaza "Líneas y estaciones".
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

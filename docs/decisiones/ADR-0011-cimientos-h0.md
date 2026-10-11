@@ -11,7 +11,7 @@ H0 deja listo el repositorio para construir los módulos. Varias piezas no estab
 - **Versiones:** .NET SDK 10.0 (fijado en `apps/api/global.json`), Angular 22, Node 24 LTS (Angular 22 exige Node 22.22.3 o superior), PostgreSQL 18.
 - **Contrato de la API:** el documento OpenAPI se genera al compilar la API (`Microsoft.Extensions.ApiDescription.Server`) en `apps/api/openapi/v1.json` y se versiona. El cliente Angular se genera de ese archivo con `ng-openapi-gen` en `src/app/api`. CI falla si alguno de los dos no está al día.
 - **Textos:** Transloco con `public/i18n/es-MX.json`.
-- **Tipografía:** Overpass (variable, autoalojada con Fontsource), con cifras tabulares y español completo, en línea con la regla 07.
+- **Tipografía:** Overpass (variable, autoalojada con Fontsource), con cifras tabulares y español completo, en línea con la regla 07. *Reemplazada el 11/10/2026 por Lexend con el estilo "Libros de texto" (ver ADR-0010).*
 - **Migraciones:** la imagen de la API acepta `--migrar`, que aplica las migraciones con el rol `app_migraciones` y termina. Coolify lo ejecuta antes de arrancar la nueva versión; docker-compose lo hace con el servicio `migraciones`.
 - **RLS por solicitud:** cada solicitud autenticada a `/api` abre una transacción y un interceptor de EF Core fija `app.docente_id` y `app.tutor_id` con alcance local (equivalente a `SET LOCAL`).
 - **Tokens de acceso:** JWT firmado con clave simétrica de configuración (`Jwt__ClaveFirma`). La emisión y la renovación llegan en H1 (SPEC-01).
