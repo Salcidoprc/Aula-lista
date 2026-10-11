@@ -1,7 +1,9 @@
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
+using AulaLista.Application.Grupos;
 using AulaLista.Infrastructure.Comun;
 using AulaLista.Infrastructure.Cuentas;
+using AulaLista.Infrastructure.Grupos;
 using AulaLista.Infrastructure.Persistencia;
 using AulaLista.Infrastructure.Trabajos;
 using Hangfire;
@@ -34,6 +36,10 @@ public static class DependencyInjection
         services.AddScoped<IGeneradorExportacion, GeneradorExportacion>();
         services.AddSingleton<IListaContrasenasComunes, ListaContrasenasComunes>();
         services.AddSingleton<ILimitadorIntentos, LimitadorIntentosEnMemoria>();
+
+        services.AddScoped<IRepositorioGrupos, RepositorioGrupos>();
+        services.AddScoped<ITutores, Tutores>();
+        services.AddSingleton<IHojasDeCalculo, HojasDeCalculo>();
 
         services.AddOptions<OpcionesAlmacen>().Bind(configuration.GetSection(OpcionesAlmacen.Seccion)).ValidateDataAnnotations();
         services.AddSingleton<IAlmacenArchivos, AlmacenArchivosLocal>();

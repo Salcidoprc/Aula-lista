@@ -1,4 +1,5 @@
 using AulaLista.Domain.Cuentas;
+using AulaLista.Domain.Grupos;
 
 namespace AulaLista.Application.Comun;
 
@@ -20,5 +21,6 @@ public static class CodigosError
         ValidacionFallida,
         ErrorInterno,
         .. ErroresCuentas.Todos.Select(e => e.Codigo),
+        .. ErroresGrupos.Todos.Select(e => e.Codigo),
     ];
 }

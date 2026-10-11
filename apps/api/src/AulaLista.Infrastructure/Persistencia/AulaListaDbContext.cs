@@ -21,6 +21,18 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<CicloEscolar> CiclosEscolares => Set<CicloEscolar>();
 
+    public DbSet<Unidad> Unidades => Set<Unidad>();
+
+    public DbSet<Grupo> Grupos => Set<Grupo>();
+
+    public DbSet<Periodo> Periodos => Set<Periodo>();
+
+    public DbSet<Alumno> Alumnos => Set<Alumno>();
+
+    public DbSet<VinculoTutor> VinculosTutor => Set<VinculoTutor>();
+
+    public DbSet<Importacion> Importaciones => Set<Importacion>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -45,5 +57,12 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<Docente>().HasQueryFilter(d => d.Id == DocenteActual);
         modelBuilder.Entity<AceptacionLegal>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<Exportacion>().HasQueryFilter(e => e.DocenteId == DocenteActual);
+        modelBuilder.Entity<CicloEscolar>().HasQueryFilter(c => c.DocenteId == DocenteActual);
+        modelBuilder.Entity<Unidad>().HasQueryFilter(u => u.DocenteId == DocenteActual);
+        modelBuilder.Entity<Grupo>().HasQueryFilter(g => g.DocenteId == DocenteActual);
+        modelBuilder.Entity<Periodo>().HasQueryFilter(p => p.DocenteId == DocenteActual);
+        modelBuilder.Entity<Alumno>().HasQueryFilter(a => a.DocenteId == DocenteActual);
+        modelBuilder.Entity<VinculoTutor>().HasQueryFilter(v => v.DocenteId == DocenteActual);
+        modelBuilder.Entity<Importacion>().HasQueryFilter(i => i.DocenteId == DocenteActual);
     }
 }

@@ -76,6 +76,9 @@ public sealed record DatosExportacion(
     string Correo,
     Docente Perfil,
     IReadOnlyList<AceptacionLegal> Aceptaciones,
+    IReadOnlyList<Grupos.CicloDto> Ciclos,
+    IReadOnlyList<Grupos.GrupoDto> Grupos,
+    IReadOnlyList<Grupos.AlumnoDto> Alumnos,
     DateTimeOffset GeneradaEn);
 
 /// <summary>Borra las cuentas cuya eliminación se pidió hace 30 días o más (RN-006, RNF-009).</summary>

@@ -19,3 +19,4 @@ Formato: contexto, decisión, alternativas consideradas, consecuencias.
 | [ADR-0011](ADR-0011-cimientos-h0.md) | Herramientas y decisiones de los cimientos (H0) | Aceptada | 11/10/2026 |
 | [ADR-0012](ADR-0012-tipos-de-rubro-extensibles.md) | Tipos de rubro como catálogo administrable con comportamientos en código | Aceptada | 11/10/2026 |
 | [ADR-0013](ADR-0013-cuenta-docente.md) | Cuenta docente: tablas sin RLS por clave de búsqueda, tokens con hash, Hangfire tras el commit y retención | Aceptada | 11/10/2026 |
+| [ADR-0014](ADR-0014-grupos-alumnos-tutores.md) | Grupos, alumnos y tutores: tutor compartido por función, unidades sin traslape, numeración de lista e importación sin guardar archivos | Aceptada | 11/10/2026 |

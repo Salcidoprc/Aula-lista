@@ -430,6 +430,944 @@
         }
       }
     },
+    "/api/v1/ciclos": {
+      "get": {
+        "tags": [
+          "Ciclos"
+        ],
+        "operationId": "ListarCiclos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CicloDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Ciclos"
+        ],
+        "operationId": "CrearCiclo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCiclo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CicloDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ciclos/{id}": {
+      "get": {
+        "tags": [
+          "Ciclos"
+        ],
+        "operationId": "ObtenerCiclo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CicloDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Ciclos"
+        ],
+        "operationId": "EditarCiclo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarCiclo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CicloDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ciclos/{id}/unidades": {
+      "put": {
+        "tags": [
+          "Ciclos"
+        ],
+        "operationId": "ReemplazarUnidades",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReemplazarUnidades"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CicloDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos": {
+      "get": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "ListarGrupos",
+        "parameters": [
+          {
+            "name": "archivados",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrupoDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "CrearGrupo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearGrupo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrupoDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/lote": {
+      "post": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "CrearGruposLote",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearGruposLote"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrupoDto"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}": {
+      "get": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "ObtenerGrupo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrupoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "EditarGrupo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarGrupo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrupoDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "BorrarGrupo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/archivar": {
+      "post": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "ArchivarGrupo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/periodos": {
+      "get": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "ListarPeriodos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PeriodoDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/alumnos": {
+      "get": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "ListarAlumnos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlumnoDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "AgregarAlumno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgregarAlumno"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlumnoDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/importaciones": {
+      "post": {
+        "tags": [
+          "Grupos"
+        ],
+        "operationId": "CrearImportacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/FormularioImportacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VistaPreviaImportacion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alumnos/{id}": {
+      "get": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "ObtenerAlumno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlumnoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "EditarAlumno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarAlumno"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlumnoDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "DarDeBajaAlumno",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/alumnos/{id}/tutores": {
+      "get": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "ListarTutores",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TutorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "VincularTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VincularTutor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorVinculado"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alumnos/{id}/tutores/{tutorId}": {
+      "put": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "EditarTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tutorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarTutor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "DesvincularTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tutorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/importaciones/{id}/confirmar": {
+      "post": {
+        "tags": [
+          "Importaciones"
+        ],
+        "operationId": "ConfirmarImportacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmarImportacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoImportacion"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/importaciones/plantilla": {
+      "get": {
+        "tags": [
+          "Importaciones"
+        ],
+        "operationId": "DescargarPlantilla",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/cuentas/google/inicio": {
       "get": {
         "tags": [
@@ -476,6 +1414,77 @@
           }
         }
       },
+      "AgregarAlumno": {
+        "required": [
+          "nombres",
+          "apellidos"
+        ],
+        "type": "object",
+        "properties": {
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AlumnoDto": {
+        "required": [
+          "id",
+          "grupoId",
+          "numeroLista",
+          "nombres",
+          "apellidos",
+          "trato",
+          "bajaEn",
+          "tutores"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numeroLista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "trato": {
+            "type": "string"
+          },
+          "bajaEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "tutores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TutorDto"
+            }
+          }
+        }
+      },
       "CambiarContrasena": {
         "required": [
           "actual",
@@ -494,6 +1503,167 @@
           }
         }
       },
+      "CicloDto": {
+        "required": [
+          "id",
+          "nombre",
+          "inicio",
+          "fin",
+          "tipoUnidad",
+          "unidades"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          },
+          "tipoUnidad": {
+            "type": "string"
+          },
+          "unidades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnidadDto"
+            }
+          }
+        }
+      },
+      "ConfirmarImportacion": {
+        "required": [
+          "filas"
+        ],
+        "type": "object",
+        "properties": {
+          "filas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilaImportacion"
+            }
+          }
+        }
+      },
+      "CrearCiclo": {
+        "required": [
+          "nombre",
+          "inicio",
+          "fin",
+          "tipoUnidad",
+          "cantidadUnidades"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          },
+          "tipoUnidad": {
+            "type": "string"
+          },
+          "cantidadUnidades": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "CrearGrupo": {
+        "required": [
+          "nombre",
+          "nivel",
+          "grado",
+          "materia",
+          "cicloId"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cicloId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "CrearGruposLote": {
+        "required": [
+          "nivel",
+          "grado",
+          "materia",
+          "cicloId",
+          "nombres"
+        ],
+        "type": "object",
+        "properties": {
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cicloId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "DocumentoPendiente": {
         "required": [
           "documento",
@@ -508,6 +1678,314 @@
             "type": "string"
           }
         }
+      },
+      "EditarAlumno": {
+        "required": [
+          "nombres",
+          "apellidos",
+          "trato",
+          "numeroLista"
+        ],
+        "type": "object",
+        "properties": {
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "trato": {
+            "type": "string"
+          },
+          "numeroLista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "EditarCiclo": {
+        "required": [
+          "nombre",
+          "inicio",
+          "fin"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "EditarGrupo": {
+        "required": [
+          "nombre",
+          "grado",
+          "materia",
+          "califMinima",
+          "califAprobatoria",
+          "decimalesFinal",
+          "redondeo"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "califAprobatoria": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "redondeo": {
+            "type": "string"
+          }
+        }
+      },
+      "EditarTutor": {
+        "required": [
+          "nombre",
+          "correo",
+          "parentesco"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentesco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ErrorDeFila": {
+        "required": [
+          "fila",
+          "codigo"
+        ],
+        "type": "object",
+        "properties": {
+          "fila": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string"
+          }
+        }
+      },
+      "FilaImportacion": {
+        "required": [
+          "nombres",
+          "apellidos",
+          "tutores"
+        ],
+        "type": "object",
+        "properties": {
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "tutores": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/TutorImportado"
+            }
+          }
+        }
+      },
+      "FormularioImportacion": {
+        "type": "object",
+        "properties": {
+          "archivo": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/IFormFile"
+              }
+            ]
+          },
+          "texto": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "GrupoDto": {
+        "required": [
+          "id",
+          "nombre",
+          "nivel",
+          "grado",
+          "materia",
+          "cicloId",
+          "cicloNombre",
+          "plan",
+          "alumnosActivos",
+          "califMinima",
+          "califAprobatoria",
+          "decimalesFinal",
+          "redondeo",
+          "archivadoEn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cicloId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cicloNombre": {
+            "type": "string"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "alumnosActivos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "califAprobatoria": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "redondeo": {
+            "type": "string"
+          },
+          "archivadoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "IFormFile": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "binary"
       },
       "IniciarSesion": {
         "required": [
@@ -601,6 +2079,50 @@
           }
         }
       },
+      "PeriodoDto": {
+        "required": [
+          "id",
+          "unidadId",
+          "nombre",
+          "orden",
+          "inicio",
+          "fin",
+          "estado"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unidadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -636,6 +2158,20 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "ReemplazarUnidades": {
+        "required": [
+          "unidades"
+        ],
+        "type": "object",
+        "properties": {
+          "unidades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnidadEditada"
+            }
           }
         }
       },
@@ -737,6 +2273,47 @@
           }
         }
       },
+      "ResultadoImportacion": {
+        "required": [
+          "guardados",
+          "omitidosPorError",
+          "omitidosPorLimite",
+          "errores"
+        ],
+        "type": "object",
+        "properties": {
+          "guardados": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "omitidosPorError": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "omitidosPorLimite": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "errores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDeFila"
+            }
+          }
+        }
+      },
       "SolicitarEliminacion": {
         "required": [
           "contrasena"
@@ -772,6 +2349,232 @@
             "type": "string"
           }
         }
+      },
+      "TutorDto": {
+        "required": [
+          "id",
+          "nombre",
+          "telefono",
+          "correo",
+          "parentesco"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentesco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "TutorImportado": {
+        "required": [
+          "nombre",
+          "telefono",
+          "correo",
+          "parentesco"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "telefono": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentesco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "TutorVinculado": {
+        "required": [
+          "tutor",
+          "yaRegistrado"
+        ],
+        "type": "object",
+        "properties": {
+          "tutor": {
+            "$ref": "#/components/schemas/TutorDto"
+          },
+          "yaRegistrado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UnidadDto": {
+        "required": [
+          "id",
+          "nombre",
+          "orden",
+          "inicio",
+          "fin"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "UnidadEditada": {
+        "required": [
+          "id",
+          "nombre",
+          "inicio",
+          "fin"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "VincularTutor": {
+        "required": [
+          "nombre",
+          "telefono",
+          "correo",
+          "parentesco"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentesco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "VistaPreviaImportacion": {
+        "required": [
+          "id",
+          "origen",
+          "encabezados",
+          "filas",
+          "mapeo",
+          "disponibles"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origen": {
+            "type": "string"
+          },
+          "encabezados": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filas": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "mapeo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "disponibles": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
       }
     }
   },
@@ -781,6 +2584,18 @@
     },
     {
       "name": "Docente"
+    },
+    {
+      "name": "Ciclos"
+    },
+    {
+      "name": "Grupos"
+    },
+    {
+      "name": "Alumnos"
+    },
+    {
+      "name": "Importaciones"
     }
   ]
 }
