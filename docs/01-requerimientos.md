@@ -46,7 +46,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-031 | El docente copia los rubros de otro periodo o de otro grupo. | M |
 | RF-032 | El docente crea las actividades que quiera dentro de un rubro (nombre y fecha dentro de la unidad); el rubro promedia sus actividades. | M |
 | RF-033 | El docente captura calificaciones en una tabla alumnos por actividades, usable en celular y en computadora. | M |
-| RF-034 | Una celda puede marcarse como "No entregó" (cuenta como la calificación mínima) o "Exento" (no cuenta). | M |
+| RF-034 | Al agregar un rubro o un criterio, el docente elige si se califica con número o por cumplimiento (✅ cumplió / ❌ no cumplió) y cuál es su calificación mínima. Una celda puede marcarse como "No entregó" (cuenta como la mínima) o "Exento" (no cuenta). | M |
 | RF-035 | El sistema calcula el promedio de cada rubro y la calificación del periodo en tiempo real. Las calificaciones admiten hasta 2 decimales; cada grupo elige cuántos decimales muestra la calificación final (0, 1 o 2) y el sentido del redondeo (arriba, abajo o al más cercano). | M |
 | RF-036 | El docente registra notas por alumno (texto o dictado del teclado del sistema) con etiqueta opcional: fortaleza, área de mejora o conducta. | M |
 | RF-037 | La captura de calificaciones y notas funciona sin conexión y se sincroniza sola al recuperar la señal. | M |

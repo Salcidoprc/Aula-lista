@@ -13,6 +13,8 @@
 | Tipo de rubro | Entrada del catálogo que gestiona el administrador (por ejemplo Participaciones). Define el comportamiento y los nombres sugeridos. | `TipoRubro` |
 | Comportamiento | Forma de calcular y capturar un rubro, implementada en código: `actividades` o `asistencia` en el MVP. | `ComportamientoRubro` |
 | Panel de administración | Área `/admin` del equipo de Aula Lista para operar el producto. | — |
+| Forma de calificar | Cómo se captura un rubro o criterio: con número (de la mínima a 10) o por cumplimiento (✅ vale 10, ❌ vale la mínima). | `FormaCalificar` |
+| Calificación mínima del rubro | Lo menos que un alumno puede obtener en un rubro o criterio; también es lo que vale "No entregó". | `CalificacionMinima` |
 | Criterio | Subrubro con peso dentro de un rubro (por ejemplo Información 40% en Exposición). | `Criterio` |
 | Equipo | Grupo de alumnos dentro de un grupo para calificar una actividad en conjunto. | `Equipo` |
 | Actividad | Evaluación concreta dentro de un rubro (tarea del 12/09). | `Actividad` |

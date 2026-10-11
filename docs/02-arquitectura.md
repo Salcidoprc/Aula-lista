@@ -93,18 +93,18 @@ erDiagram
 | `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
 | `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
 | `periodo` | grupo_id, unidad_id, estado (abierto, en_cierre, cerrado) | Uno por grupo y unidad (RN-025); nombre y fechas vienen de la unidad |
-| `tipo_rubro` | nombre, descripcion, icono, comportamiento (actividades, asistencia), nombres_sugeridos (text[]), orden, activo | Catálogo global sin `docente_id`; lo edita solo `admin` (ADR-0012) |
+| `tipo_rubro` | nombre, descripcion, icono, comportamiento (actividades, asistencia), forma_sugerida (numerica, cumplimiento), nombres_sugeridos (text[]), orden, activo | Catálogo global sin `docente_id`; lo edita solo `admin` (ADR-0012) |
 | `auditoria_admin` | admin_id, accion, entidad, entidad_id, antes (jsonb), despues (jsonb), fecha | Inmutable |
-| `rubro` | periodo_id, nombre, tipo_rubro_id, peso (decimal 5,2), orden | Pesos suman 100 por periodo |
-| `criterio` | rubro_id, nombre, peso (decimal 5,2), orden | Subrubro; pesos suman 100 por rubro (RN-111) |
+| `rubro` | periodo_id, nombre, tipo_rubro_id, peso (decimal 5,2), forma (numerica, cumplimiento), calif_minima (decimal 4,2), orden | Pesos suman 100 por periodo |
+| `criterio` | rubro_id, nombre, peso (decimal 5,2), forma (numerica, cumplimiento), calif_minima (decimal 4,2), orden | Subrubro; pesos suman 100 por rubro (RN-111) |
 | `actividad` | rubro_id, nombre, fecha, modo (individual, por_equipo), orden | |
 | `equipo` | grupo_id, docente_id, nombre | |
 | `equipo_alumno` | equipo_id, alumno_id | Un alumno en un equipo a la vez (RN-114) |
 | `actividad_equipo` | actividad_id, nombre_equipo, alumno_id | Composición con que se calificó (RN-116) |
 | `toma_asistencia` | grupo_id, docente_id, fecha | Única por grupo y fecha (RN-100); la unidad se deduce de la fecha |
 | `asistencia` | toma_asistencia_id, alumno_id, estado (presente, retardo, falta, justificada), version | Única por toma y alumno |
-| `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |
-| `calificacion_criterio` | actividad_id, alumno_id, criterio_id, valor (decimal 4,2) | Detalle por criterio |
+| `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |
+| `calificacion_criterio` | actividad_id, alumno_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio |
 | `alumno` | grupo_id, nombres, apellidos, numero_lista, trato (neutro, el, ella), seudonimo, baja_en | Sin CURP ni fecha de nacimiento |
 | `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061 |
 | `vinculo_tutor` | alumno_id, tutor_id, parentesco | Máximo 3 tutores por alumno |

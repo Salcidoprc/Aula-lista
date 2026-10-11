@@ -22,7 +22,7 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 | --- | --- |
 | RN-030 | La escala es de 0 a 10 con hasta dos decimales (por ejemplo 8.75). Cada grupo define la calificación mínima reportable (por defecto 5) y la aprobatoria (por defecto 6). |
 | RN-031 | Los rubros se definen por periodo (unidad del grupo). Los pesos de los rubros de un periodo deben sumar exactamente 100. No se puede iniciar el cierre si no suman 100. |
-| RN-032 | Un rubro de tipo actividades tiene de 0 a N actividades (sin límite práctico) y todas pesan igual dentro del rubro. Promedio del rubro = media aritmética de sus actividades calificadas. "Exento" no cuenta; "No entregó" cuenta como la calificación mínima del grupo; una celda vacía no cuenta. Ejemplo: Actividades vale 30% y el alumno tiene 8, 9, 10, 7 y 6 en sus 5 actividades; el promedio del rubro es 8 y aporta 8 × 30 / 100 = 2.4 a la calificación de la unidad. |
+| RN-032 | Un rubro de tipo actividades tiene de 0 a N actividades (sin límite práctico) y todas pesan igual dentro del rubro. Promedio del rubro = media aritmética de sus actividades calificadas. "Exento" no cuenta; "No entregó" cuenta como la calificación mínima del rubro (RN-118); una celda vacía no cuenta. Ejemplo: Actividades vale 30% y el alumno tiene 8, 9, 10, 7 y 6 en sus 5 actividades; el promedio del rubro es 8 y aporta 8 × 30 / 100 = 2.4 a la calificación de la unidad. |
 | RN-033 | Calificación del periodo = suma de (promedio del rubro × peso) / 100, solo con rubros que tienen al menos una actividad calificada. Si un rubro no tiene datos, su peso se reparte proporcionalmente entre los demás y se muestra una advertencia. |
 | RN-034 | Ninguna calificación del periodo puede ser menor que la mínima reportable: si el cálculo da menos, se reporta la mínima. |
 | RN-035 | Los cálculos se hacen con decimales exactos (`decimal` en .NET, `numeric` en Postgres) sin redondear en pasos intermedios. Promedios de rubro y calificación del periodo se muestran con 2 decimales. La calificación final (la de la boleta) usa la configuración del grupo: decimales (0, 1 o 2; por defecto 2) y sentido del redondeo (hacia arriba, hacia abajo o al más cercano con medio hacia arriba; por defecto al más cercano). Ejemplo: 7.456 con 1 decimal da 7.5 hacia arriba, 7.4 hacia abajo y 7.5 al más cercano. La mínima reportable (RN-034) se aplica después de redondear. |
@@ -43,6 +43,9 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 | RN-115 | Cada actividad se califica de forma `individual` (por defecto) o `por_equipo`. Por equipo, el docente captura una calificación (o sus criterios) por equipo y se copia a cada integrante. Después puede ajustar a un integrante por separado; esa celda queda marcada como ajustada y ya no cambia al recalificar al equipo. Un alumno sin equipo se califica individualmente. |
 | RN-116 | Una actividad por equipo guarda la composición de los equipos con la que se calificó. Reorganizar los equipos después no cambia las calificaciones ya capturadas. |
 | RN-117 | El cálculo de promedios no cambia: cada alumno siempre tiene su propia calificación por actividad, venga de captura individual, de su equipo o de un ajuste. |
+| RN-118 | Al agregar un rubro de actividades el docente elige su forma de calificar y su calificación mínima. Forma: `numerica` (de la mínima a 10, con hasta 2 decimales; por defecto) o `cumplimiento` (✅ cumplió o ❌ no cumplió). Mínima: de 0 a 10, por defecto la mínima reportable del grupo (RN-030). En `cumplimiento`, ✅ vale 10 y ❌ vale la mínima. En `numerica` no se acepta un valor menor que la mínima (`calificacion_menor_a_minima`). "No entregó" vale la mínima en ambas formas y "Exento" no cuenta. Ejemplo: Tareas por cumplimiento con mínima 5 y un alumno con 4 ✅ y 1 ❌ da (10 × 4 + 5) / 5 = 9.00. |
+| RN-119 | Si el rubro tiene criterios, cada criterio elige su propia forma de calificar y su propia mínima con las mismas reglas de RN-118, y la actividad se calcula con RN-112. Ejemplo: Exposición con Información 40% numérica, Presentación 30% numérica y Material de apoyo 30% por cumplimiento con mínima 0; con 9, 8 y ❌ da 3.6 + 2.4 + 0 = 6.00. |
+| RN-120 | La forma de calificar de un rubro o criterio solo se cambia mientras no tenga calificaciones. La mínima se puede cambiar hasta iniciar el cierre (RN-037) y recalcula las celdas "No entregó" y ❌; si hay valores numéricos menores que la nueva mínima, se avisa cuántos son y no se guarda hasta corregirlos. El tipo de rubro del catálogo puede sugerir una forma por defecto (por ejemplo Tareas por cumplimiento). |
 
 ## Notas por alumno
 
@@ -54,7 +57,7 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 
 Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable como base, mejorado con los skills de animación y diseño); los movimientos de este módulo están en su catálogo.
 
-- **Vista por actividad (celular):** lista de alumnos con un campo numérico grande por alumno; al escribir y confirmar pasa al siguiente. Botones rápidos 10, 9, 8, 7, 6, 5, "No entregó" y "Exento". Si el rubro tiene criterios, cada alumno muestra un campo por criterio y su resultado calculado. Si la actividad es por equipo, la lista muestra equipos con sus integrantes; al tocar un integrante se ajusta solo a él.
+- **Vista por actividad (celular):** lista de alumnos con un campo numérico grande por alumno; al escribir y confirmar pasa al siguiente. Botones rápidos 10, 9, 8, 7, 6, 5, "No entregó" y "Exento". En un rubro por cumplimiento cada alumno tiene dos botones grandes, ✅ y ❌, y un botón "Todos cumplieron" para marcar al grupo de una vez. Si el rubro tiene criterios, cada alumno muestra un campo por criterio (numérico o ✅/❌, según el criterio) y su resultado calculado. Si la actividad es por equipo, la lista muestra equipos con sus integrantes; al tocar un integrante se ajusta solo a él.
 - **Rubros del periodo:** lista de rubros con tipo, peso y criterios; suma de pesos visible en todo momento.
 - **Equipos del grupo:** crear equipos, mover alumnos entre equipos y ver quién no tiene equipo.
 - **Vista de tabla (computadora):** alumnos por actividades con navegación por teclado (flechas, Enter, Tab) y pegado desde Excel.
@@ -95,7 +98,10 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un rubro de tipo asistencia, cuando el docente abre la captura, entonces no puede crear actividades en él y ve el porcentaje calculado de cada alumno.
 - Dado un docente sin conexión, cuando captura 30 calificaciones y cierra la app, entonces al reabrirla con conexión las 30 llegan al servidor sin duplicados.
 - Dados pesos que suman 95, cuando el docente intenta iniciar el cierre, entonces se rechaza con `pesos_no_suman_100`.
-- Dada una celda marcada "No entregó" en un grupo con mínima 5, entonces cuenta como 5 en el promedio del rubro.
+- Dada una celda marcada "No entregó" en un rubro con mínima 5, entonces cuenta como 5 en el promedio del rubro.
+- Dado un rubro por cumplimiento con mínima 5, cuando un alumno tiene 4 ✅ y 1 ❌, entonces su promedio del rubro es 9.00.
+- Dado un rubro numérico con mínima 5, cuando el docente captura 3, entonces se rechaza con `calificacion_menor_a_minima`.
+- Dado un criterio por cumplimiento con mínima 0 y peso 30, cuando el alumno obtiene ❌, entonces ese criterio aporta 0 a la actividad.
 - Dada la vista por actividad en un Android de gama baja, entonces capturar 30 calificaciones con los botones rápidos toma menos de 90 segundos en prueba de usabilidad.
 
 ## Fuera de alcance

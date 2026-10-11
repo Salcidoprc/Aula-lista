@@ -41,7 +41,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | ID | Regla |
 | --- | --- |
 | RN-090 | El panel no muestra nombres de alumnos, teléfonos, correos de tutores, notas ni observaciones. Los docentes se muestran con su correo y nombre. |
-| RN-091 | Un tipo de rubro tiene nombre, descripción, icono, comportamiento, nombres de rubro sugeridos, orden y estado (activo o inactivo). El comportamiento se elige de los que existen en el código desplegado (en el MVP: `actividades` y `asistencia`, ADR-0012). |
+| RN-091 | Un tipo de rubro tiene nombre, descripción, icono, comportamiento, forma de calificar sugerida (numérica o por cumplimiento), nombres de rubro sugeridos, orden y estado (activo o inactivo). El comportamiento se elige de los que existen en el código desplegado (en el MVP: `actividades` y `asistencia`, ADR-0012). |
 | RN-092 | El administrador crea un tipo nuevo con un comportamiento existente y queda disponible para los docentes al instante (por ejemplo "Participaciones" o "Laboratorio" con comportamiento `actividades`). |
 | RN-093 | Un comportamiento nuevo (otra forma de calcular o de capturar, con su propia pantalla) se desarrolla: primero se documenta en la spec que corresponda, luego se implementa con su cálculo, su pantalla de captura y sus vectores de prueba, y al desplegarse aparece como opción en el panel. |
 | RN-094 | Un tipo con rubros que lo usan no se borra: se desactiva. Desactivarlo lo oculta al crear rubros nuevos; los rubros existentes siguen funcionando. |
