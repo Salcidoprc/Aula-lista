@@ -1,17 +1,255 @@
 {
   "app": {
     "nombre": "Aula Lista",
-    "saltar": "Ir al contenido"
+    "saltar": "Ir al contenido",
+    "navegacion": "Principal",
+    "inicio": "Inicio",
+    "ajustes": "Ajustes"
+  },
+  "comun": {
+    "cargando": "Cargando…"
   },
   "inicio": {
-    "titulo": "Tu aula, en orden",
-    "descripcion": "Aquí vas a capturar calificaciones, cerrar periodos y avisar a los tutores. Estamos preparando las primeras pantallas.",
-    "estado": {
-      "titulo": "Estado del servicio",
-      "revisando": "Revisando conexión…",
-      "enLinea": "Servicio en línea",
-      "sinServidor": "No hay conexión con el servicio",
-      "reintentar": "Reintentar"
+    "titulo": "Mis grupos",
+    "saludo": "Hola, {{nombre}}.",
+    "verifica": {
+      "titulo": "Confirma tu correo.",
+      "texto": "Te enviamos un enlace a {{correo}}. Lo necesitas antes de dar de alta a tus alumnos."
+    },
+    "vacio": {
+      "titulo": "Todavía no tienes grupos",
+      "texto": "Muy pronto vas a poder crear tus grupos y dar de alta a tus alumnos desde aquí."
     }
+  },
+  "cuenta": {
+    "google": "Continuar con Google",
+    "oCorreo": "o con tu correo",
+    "ayudaContrasena": "Mínimo {{minimo}} caracteres. Una frase que recuerdes funciona bien.",
+    "campos": {
+      "correo": "Correo",
+      "contrasena": "Contraseña",
+      "contrasenaNueva": "Contraseña nueva"
+    },
+    "validacion": {
+      "correo": "Escribe un correo válido, por ejemplo maestra@gmail.com.",
+      "requerida": "Este dato es obligatorio.",
+      "contrasena": "La contraseña necesita al menos {{minimo}} caracteres.",
+      "elige": "Elige una opción."
+    },
+    "entrar": {
+      "titulo": "Entra a tu aula",
+      "entrada": "Tus grupos y calificaciones te esperan donde los dejaste.",
+      "accion": "Entrar",
+      "enviando": "Entrando…",
+      "olvide": "Olvidé mi contraseña",
+      "sinCuenta": "¿Primera vez aquí?",
+      "crear": "Crea tu cuenta"
+    },
+    "registro": {
+      "titulo": "Crea tu cuenta",
+      "entrada": "Es gratis y te toma un par de minutos.",
+      "acepto": "Acepto los",
+      "y": "y el",
+      "accion": "Crear mi cuenta",
+      "enviando": "Creando tu cuenta…",
+      "conCuenta": "¿Ya tienes cuenta?",
+      "entrar": "Entra",
+      "irAEntrar": "Entrar con ese correo"
+    },
+    "verificar": {
+      "verificando": "Confirmando tu correo…",
+      "listo": "Correo confirmado",
+      "listoTexto": "Ya puedes dar de alta a tus alumnos.",
+      "continuar": "Ir a mis grupos",
+      "fallo": "No pudimos confirmar tu correo",
+      "motivo": {
+        "token_vencido": "El enlace venció; dura 24 horas. Pide uno nuevo.",
+        "token_invalido": "El enlace no es válido o ya se usó.",
+        "error": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento."
+      },
+      "entraParaReenviar": "Entra a tu cuenta para pedir un enlace nuevo.",
+      "entrar": "Entrar"
+    },
+    "reenviar": {
+      "accion": "Reenviar el correo",
+      "enviado": "Listo, te enviamos un enlace nuevo. Revisa también la carpeta de spam."
+    },
+    "recuperar": {
+      "titulo": "Recupera tu contraseña",
+      "entrada": "Escribe el correo de tu cuenta y te enviamos un enlace para elegir una contraseña nueva.",
+      "accion": "Enviar enlace",
+      "enviado": "Si {{correo}} tiene una cuenta, ya te llegó un enlace. Vale por 1 hora.",
+      "revisaSpam": "Si no lo ves, revisa la carpeta de spam.",
+      "volver": "Volver a entrar"
+    },
+    "restablecer": {
+      "titulo": "Elige tu contraseña nueva",
+      "accion": "Guardar contraseña",
+      "listo": "Contraseña actualizada",
+      "listoTexto": "Por seguridad cerramos tu sesión en todos los dispositivos. Entra con tu contraseña nueva.",
+      "entrar": "Entrar",
+      "pedirOtro": "Pedir un enlace nuevo"
+    },
+    "bienvenida": {
+      "titulo": "Te damos la bienvenida",
+      "entrada": "Cuéntanos de ti y de tu escuela. Lo usamos en tus boletas y avisos.",
+      "tituloLegal": "Actualizamos nuestros documentos",
+      "entradaLegal": "Para seguir usando Aula Lista, revisa y acepta la nueva versión.",
+      "acepto": "Acepto",
+      "version": "versión {{version}}",
+      "aceptar": "Aceptar y continuar",
+      "accion": "Empezar"
+    },
+    "perfil": {
+      "nombre": "Tu nombre",
+      "nivel": "Nivel en el que das clase",
+      "primaria": "Primaria",
+      "secundaria": "Secundaria",
+      "escuela": "Nombre de la escuela",
+      "cct": "Clave de centro de trabajo (opcional)",
+      "cctAyuda": "Son 10 caracteres, por ejemplo 25DPR0123X. Viene en tus documentos de la escuela.",
+      "entidad": "Estado",
+      "eligeEntidad": "Elige tu estado"
+    },
+    "eliminada": {
+      "titulo": "Tu cuenta quedó desactivada",
+      "texto": "Ya no puedes entrar y los enlaces de los tutores de tus grupos dejaron de funcionar.",
+      "nota": "En 30 días borramos todos tus datos. Si fue un error, escríbenos antes de esa fecha."
+    }
+  },
+  "ajustes": {
+    "titulo": "Ajustes",
+    "cargando": "Cargando tus datos…",
+    "cancelar": "Cancelar",
+    "perfil": {
+      "titulo": "Tu perfil",
+      "guardar": "Guardar cambios",
+      "guardado": "Perfil guardado"
+    },
+    "correo": {
+      "titulo": "Correo",
+      "verificado": "Correo confirmado.",
+      "pendiente": "Falta confirmar tu correo. Lo necesitas para dar de alta a tus alumnos."
+    },
+    "contrasena": {
+      "titulo": "Cambiar contraseña",
+      "definir": "Define una contraseña",
+      "soloGoogle": "Entras con Google. Si defines una contraseña, también podrás entrar con tu correo.",
+      "actual": "Contraseña actual",
+      "nueva": "Contraseña nueva",
+      "ayuda": "Mínimo {{minimo}} caracteres.",
+      "corta": "La contraseña necesita al menos {{minimo}} caracteres.",
+      "guardar": "Guardar contraseña",
+      "guardada": "Contraseña guardada"
+    },
+    "sesiones": {
+      "titulo": "Sesiones",
+      "nota": "Tu sesión sigue abierta mientras uses la app al menos una vez cada 30 días.",
+      "cerrar": "Cerrar sesión",
+      "cerrarTodas": "Cerrar sesión en todos los dispositivos",
+      "confirmarTitulo": "¿Cerrar sesión en todos lados?",
+      "confirmarTexto": "Vas a tener que volver a entrar en este y en cualquier otro celular o computadora donde uses Aula Lista."
+    },
+    "datos": {
+      "titulo": "Tus datos",
+      "nota": "Descarga todo lo que guardas en Aula Lista en Excel y PDF. También te enviamos el enlace por correo.",
+      "exportar": "Exportar mis datos"
+    },
+    "eliminar": {
+      "titulo": "Eliminar cuenta",
+      "nota": "Se desactiva de inmediato y borramos tus datos a los 30 días.",
+      "accion": "Eliminar mi cuenta",
+      "confirmarTitulo": "¿Eliminar tu cuenta?",
+      "consecuencia1": "Ya no vas a poder entrar.",
+      "consecuencia2": "Los enlaces de los tutores de tus grupos dejan de funcionar.",
+      "consecuencia3": "A los 30 días borramos tus grupos, alumnos y calificaciones. Si los quieres, exporta tus datos antes.",
+      "contrasena": "Escribe tu contraseña para confirmar",
+      "google": "Por seguridad, vuelve a entrar con Google para confirmar.",
+      "googleAccion": "Confirmar con Google",
+      "confirmar": "Eliminar cuenta"
+    },
+    "exportacion": {
+      "titulo": "Exportación de tus datos",
+      "generando": "Estamos preparando tus archivos…",
+      "generandoNota": "Puedes salir de esta pantalla; te avisamos por correo cuando estén listos.",
+      "lista": "Tus archivos están listos. Puedes descargarlos hasta el",
+      "excel": "Descargar Excel",
+      "pdf": "Descargar PDF",
+      "errorDescarga": "No se pudo descargar el archivo. Inténtalo de nuevo.",
+      "fallida": "No pudimos generar tus archivos. Vuelve a Ajustes y pide la exportación otra vez.",
+      "noDisponible": "Esta exportación ya no está disponible; los archivos duran 24 horas. Pide una nueva desde Ajustes.",
+      "volver": "Volver a Ajustes"
+    }
+  },
+  "legal": {
+    "enRevision": "El texto completo está en revisión legal y se publica antes de abrir el piloto.",
+    "terminos": {
+      "titulo": "Términos de uso",
+      "resumen": "Las reglas para usar Aula Lista como docente."
+    },
+    "privacidad": {
+      "titulo": "Aviso de privacidad",
+      "resumen": "Qué datos guardamos, para qué y cómo puedes pedir que los borremos."
+    },
+    "declaracion_datos": {
+      "titulo": "Declaración de autorización de datos",
+      "resumen": "Tu confirmación de que puedes registrar los datos de tus alumnos para fines escolares."
+    }
+  },
+  "errores": {
+    "correo_registrado": "Ya existe una cuenta con este correo.",
+    "contrasena_comun": "Esa contraseña es muy común y fácil de adivinar. Elige otra.",
+    "aceptacion_requerida": "Para continuar, acepta los términos y el aviso de privacidad.",
+    "credenciales_invalidas": "El correo o la contraseña no coinciden.",
+    "demasiados_intentos": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+    "sesion_invalida": "Tu sesión terminó. Entra de nuevo.",
+    "token_invalido": "El enlace no es válido o ya se usó.",
+    "token_vencido": "El enlace venció. Pide uno nuevo.",
+    "nivel_invalido": "Elige primaria o secundaria.",
+    "entidad_federativa_invalida": "Elige tu estado.",
+    "cct_invalida": "La clave tiene 10 caracteres, por ejemplo 25DPR0123X.",
+    "version_no_vigente": "Esa versión del documento ya cambió. Recarga la página.",
+    "reautenticacion_requerida": "No pudimos confirmar que eres tú. Revisa tu contraseña.",
+    "exportacion_no_disponible": "La exportación no está lista o ya venció.",
+    "google": "No pudimos entrar con Google. Inténtalo de nuevo.",
+    "google_no_disponible": "Entrar con Google todavía no está disponible. Usa tu correo.",
+    "google_sin_correo_verificado": "Tu cuenta de Google no tiene el correo verificado.",
+    "validacion_fallida": "Hay datos que corregir.",
+    "sin_conexion": "No hay conexión. Revisa tu internet e inténtalo de nuevo.",
+    "desconocido": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento."
+  },
+  "entidades": {
+    "aguascalientes": "Aguascalientes",
+    "baja_california": "Baja California",
+    "baja_california_sur": "Baja California Sur",
+    "campeche": "Campeche",
+    "chiapas": "Chiapas",
+    "chihuahua": "Chihuahua",
+    "ciudad_de_mexico": "Ciudad de México",
+    "coahuila": "Coahuila",
+    "colima": "Colima",
+    "durango": "Durango",
+    "estado_de_mexico": "Estado de México",
+    "guanajuato": "Guanajuato",
+    "guerrero": "Guerrero",
+    "hidalgo": "Hidalgo",
+    "jalisco": "Jalisco",
+    "michoacan": "Michoacán",
+    "morelos": "Morelos",
+    "nayarit": "Nayarit",
+    "nuevo_leon": "Nuevo León",
+    "oaxaca": "Oaxaca",
+    "puebla": "Puebla",
+    "queretaro": "Querétaro",
+    "quintana_roo": "Quintana Roo",
+    "san_luis_potosi": "San Luis Potosí",
+    "sinaloa": "Sinaloa",
+    "sonora": "Sonora",
+    "tabasco": "Tabasco",
+    "tamaulipas": "Tamaulipas",
+    "tlaxcala": "Tlaxcala",
+    "veracruz": "Veracruz",
+    "yucatan": "Yucatán",
+    "zacatecas": "Zacatecas"
   }
 }

@@ -429,6 +429,19 @@
           }
         }
       }
+    },
+    "/api/v1/cuentas/google/inicio": {
+      "get": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "IniciarConGoogle",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

@@ -2,11 +2,9 @@ using AulaLista.Domain.Comun;
 
 namespace AulaLista.Domain.Cuentas;
 
-/// <summary>Exportación de los datos del docente (RF-008). Los archivos valen 24 horas.</summary>
+/// <summary>Exportación de los datos del docente (RF-007). Los archivos valen lo que diga la configuración (24 horas).</summary>
 public sealed class Exportacion : Entidad
 {
-    public static readonly TimeSpan Vigencia = TimeSpan.FromHours(24);
-
     public Exportacion(Guid docenteId, DateTimeOffset ahora)
         : base(ahora)
     {
@@ -31,12 +29,12 @@ public sealed class Exportacion : Entidad
     public bool EstaDisponible(DateTimeOffset ahora) =>
         Estado == EstadoExportacion.Lista && ExpiraEn is { } expira && ahora < expira;
 
-    public void MarcarLista(string rutaExcel, string rutaPdf, DateTimeOffset ahora)
+    public void MarcarLista(string rutaExcel, string rutaPdf, DateTimeOffset ahora, TimeSpan vigencia)
     {
         RutaExcel = rutaExcel;
         RutaPdf = rutaPdf;
         Estado = EstadoExportacion.Lista;
-        ExpiraEn = ahora + Vigencia;
+        ExpiraEn = ahora + vigencia;
         MarcarActualizada(ahora);
     }
 

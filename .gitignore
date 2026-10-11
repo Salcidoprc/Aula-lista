@@ -26,3 +26,4 @@ infra/.env
 # Playwright
 test-results/
 playwright-report/
+apps/api/.archivos-locales/

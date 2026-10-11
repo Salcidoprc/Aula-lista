@@ -149,6 +149,10 @@ if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationS
 {
     api.MapGoogle();
 }
+else
+{
+    api.MapGoogleNoDisponible();
+}
 
 api.MapDesarrollo(app.Environment, app.Services);
 

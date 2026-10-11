@@ -1,5 +1,6 @@
 @import '@fontsource-variable/lexend/wght.css';
 @import './styles/tokens.css';
+@import './styles/formularios.css';
 
 /*
  * Lexend no trae cifras tabulares. Las cifras (y el punto y la coma decimales) de calificaciones,

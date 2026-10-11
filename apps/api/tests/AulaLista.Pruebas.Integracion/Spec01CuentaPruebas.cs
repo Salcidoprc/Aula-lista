@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using AulaLista.Application.Cuentas;
+using Microsoft.AspNetCore.Mvc.Testing.Handlers;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
@@ -59,6 +61,21 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     public async Task SPEC01_ReenviarVerificacion_MaximoTresPorHora()
     {
         var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+
+        var estados = new List<HttpStatusCode>();
+        for (var i = 0; i < 4; i++)
+        {
+            estados.Add((await cliente.PostAsync("/api/v1/cuentas/verificar-correo/reenviar", null)).StatusCode);
+        }
+
+        Assert.Equal([HttpStatusCode.Accepted, HttpStatusCode.Accepted, HttpStatusCode.Accepted, HttpStatusCode.TooManyRequests], estados);
+    }
+
+    [Fact]
+    public async Task SPEC01_ReenviarVerificacion_CuentaDeHaceMasDeUnaHora_TambienSonTres()
+    {
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        _fabrica.Reloj.Advance(TimeSpan.FromHours(2));
 
         var estados = new List<HttpStatusCode>();
         for (var i = 0; i < 4; i++)
@@ -300,6 +317,33 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     }
 
     [Fact]
+    public async Task SPEC01_ExportacionQueFallaTodosLosReintentos_QuedaFallida()
+    {
+        await using var fabrica = _fabrica.WithWebHostBuilder(b => b.ConfigureTestServices(
+            s => s.AddScoped<IGeneradorExportacion, GeneradorQueFalla>()));
+        using var cliente = fabrica.CreateDefaultClient(new Uri("https://localhost"), new CookieContainerHandler());
+        var registro = await cliente.PostAsJsonAsync(
+            "/api/v1/cuentas/registro",
+            new { correo = $"docente-{Guid.NewGuid():N}@prueba.mx", contrasena = FabricaApi.ContrasenaValida, aceptaTerminos = true, aceptaPrivacidad = true });
+        var sesion = await registro.Content.ReadFromJsonAsync<SesionDto>();
+        cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sesion!.TokenAcceso);
+
+        try
+        {
+            // En pruebas el trabajo corre al confirmar la solicitud, así que su falla puede llegar hasta aquí.
+            await cliente.PostAsync("/api/v1/docente/exportacion", null);
+        }
+        catch (HttpRequestException)
+        {
+        }
+
+        var id = await IdUltimaExportacionAsync(sesion.DocenteId);
+        var estado = await cliente.GetFromJsonAsync<JsonElement>($"/api/v1/docente/exportaciones/{id}");
+
+        Assert.Equal("fallida", estado.GetProperty("estado").GetString());
+    }
+
+    [Fact]
     public async Task SPEC01_EliminarCuenta_NoPuedeEntrarYA30DiasNoQuedanSusDatos()
     {
         var (cliente, docenteId, correo) = await _fabrica.RegistrarDocenteAsync();
@@ -370,6 +414,17 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     }
 
     [Fact]
+    public async Task SPEC01_GoogleSinCredenciales_RegresaAEntrarConAviso()
+    {
+        using var cliente = _fabrica.Cliente();
+
+        var respuesta = await cliente.GetAsync("/api/v1/cuentas/google/inicio?volver=/ajustes");
+
+        Assert.Equal(HttpStatusCode.Redirect, respuesta.StatusCode);
+        Assert.Equal("https://aula-lista.test/cuenta/entrar?error=google_no_disponible", respuesta.Headers.Location?.ToString());
+    }
+
+    [Fact]
     public async Task SPEC01_GoogleSinCorreoVerificado_SeRechaza()
     {
         await using var alcance = _fabrica.Services.CreateAsyncScope();
@@ -392,6 +447,22 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     {
         await using var alcance = _fabrica.Services.CreateAsyncScope();
         return await alcance.ServiceProvider.GetRequiredService<RetencionCuentasTrabajo>().EjecutarAsync(CancellationToken.None);
+    }
+
+    private async Task<Guid> IdUltimaExportacionAsync(Guid docenteId)
+    {
+        await using var conexion = new NpgsqlConnection(baseDeDatos.ConexionAdmin);
+        await conexion.OpenAsync();
+        await using var comando = new NpgsqlCommand(
+            "SELECT id FROM exportacion WHERE docente_id = @id ORDER BY created_at DESC LIMIT 1", conexion);
+        comando.Parameters.AddWithValue("id", docenteId);
+        return (Guid)(await comando.ExecuteScalarAsync())!;
+    }
+
+    private sealed class GeneradorQueFalla : IGeneradorExportacion
+    {
+        public Task<(string RutaExcel, string RutaPdf)> GenerarAsync(DatosExportacion datos, CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Falla simulada del generador.");
     }
 
     private async Task<long> ContarAsync(string consulta, Guid id)

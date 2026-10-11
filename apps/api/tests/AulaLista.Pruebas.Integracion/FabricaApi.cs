@@ -135,7 +135,7 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         {
             foreach (var (docente, exportacion) in _pendientes)
             {
-                ejecutor.GenerarExportacionAsync(docente, exportacion, CancellationToken.None).GetAwaiter().GetResult();
+                ejecutor.GenerarExportacionAsync(docente, exportacion, null, CancellationToken.None).GetAwaiter().GetResult();
             }
 
             _pendientes.Clear();

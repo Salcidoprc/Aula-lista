@@ -66,7 +66,8 @@ public sealed class RegistrarCuentaCasoUso(
         docentes.AgregarAceptacion(new AceptacionLegal(cuenta.Id, DocumentoLegal.Privacidad, versiones.Privacidad, ahora));
 
         var (token, hash) = TokensSeguros.Generar();
-        cuentas.AgregarToken(new TokenCuenta(cuenta.Id, PropositoToken.VerificarCorreo, hash, ahora.AddHours(24), ahora));
+        cuentas.AgregarToken(new TokenCuenta(
+            cuenta.Id, PropositoToken.VerificarCorreo, hash, ahora.AddHours(opciones.Value.HorasTokenVerificacion), ahora));
         var sesion = emisor.Nueva(cuenta, MetodoAutenticacion.Contrasena);
         await unidad.GuardarAsync(ct);
 

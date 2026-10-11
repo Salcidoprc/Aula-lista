@@ -53,7 +53,7 @@ public sealed class GenerarExportacionTrabajo(
         var aceptaciones = await docentes.AceptacionesAsync(docenteId, ct);
         var (excel, pdf) = await generador.GenerarAsync(
             new DatosExportacion(exportacion.Id, cuenta.Correo, docente, aceptaciones, ahora), ct);
-        exportacion.MarcarLista(excel, pdf, ahora);
+        exportacion.MarcarLista(excel, pdf, ahora, TimeSpan.FromHours(opciones.Value.HorasExportacion));
         await unidad.GuardarAsync(ct);
         await correo.EnviarAsync(CorreosCuentas.ExportacionLista(cuenta.Correo, opciones.Value.UrlWeb, exportacion.Id), ct);
     }
@@ -141,15 +141,18 @@ public sealed class SolicitarEliminacionCasoUso(
 
 /// <summary>Trabajo diario de retención (RNF-009): borra las cuentas con eliminación pedida hace 30 días.</summary>
 /// También borra los archivos de exportaciones vencidas.
-public sealed class RetencionCuentasTrabajo(IRetencionCuentas retencion, IAlmacenArchivos almacen, TimeProvider reloj)
+public sealed class RetencionCuentasTrabajo(
+    IRetencionCuentas retencion,
+    IAlmacenArchivos almacen,
+    IOptions<OpcionesCuentas> opciones,
+    TimeProvider reloj)
 {
     public const string CarpetaExportaciones = "exportaciones";
-    public static readonly TimeSpan PlazoBorrado = TimeSpan.FromDays(30);
 
     public async Task<int> EjecutarAsync(CancellationToken ct)
     {
         var ahora = reloj.GetUtcNow();
-        await almacen.BorrarAnterioresAsync(CarpetaExportaciones, ahora - Exportacion.Vigencia, ct);
-        return await retencion.EliminarVencidasAsync(ahora - PlazoBorrado, ct);
+        await almacen.BorrarAnterioresAsync(CarpetaExportaciones, ahora.AddHours(-opciones.Value.HorasExportacion), ct);
+        return await retencion.EliminarVencidasAsync(ahora.AddDays(-opciones.Value.DiasParaBorrarCuenta), ct);
     }
 }

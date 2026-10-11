@@ -1,21 +1,39 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { Portada } from './compartido/portada/portada';
+import { SesionService } from './core/sesion/sesion.service';
+import { Avisos } from './shared/avisos/avisos';
+import { Portada } from './shared/portada/portada';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TranslocoDirective, Portada],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, TranslocoDirective, Avisos, Portada],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container *transloco="let t">
       <a class="saltar" href="#contenido">{{ t('app.saltar') }}</a>
       <header>
-        <app-portada [titulo]="t('app.nombre')" />
+        <app-portada [titulo]="t('app.nombre')">
+          @if (sesion.activa()) {
+            <nav class="navegacion" [attr.aria-label]="t('app.navegacion')">
+              <a
+                routerLink="/"
+                routerLinkActive="activo"
+                [routerLinkActiveOptions]="{ exact: true }"
+                ariaCurrentWhenActive="page"
+                >{{ t('app.inicio') }}</a
+              >
+              <a routerLink="/ajustes" routerLinkActive="activo" ariaCurrentWhenActive="page">{{
+                t('app.ajustes')
+              }}</a>
+            </nav>
+          }
+        </app-portada>
       </header>
       <main id="contenido" tabindex="-1">
         <router-outlet />
       </main>
+      <app-avisos />
     </ng-container>
   `,
   styles: `
@@ -43,6 +61,34 @@ import { Portada } from './compartido/portada/portada';
       transform: translateY(-200%);
     }
 
+    /* Navegación sobre la portada: texto claro sobre la acción, arriba a la derecha, al alcance del pulgar. */
+    .navegacion {
+      position: absolute;
+      inset-block-start: env(safe-area-inset-top);
+      inset-inline-end: max(var(--espacio-2), env(safe-area-inset-right));
+      display: flex;
+      gap: var(--espacio-1);
+    }
+
+    .navegacion a {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--tactil-minimo);
+      padding: 0 var(--espacio-2);
+      border-radius: var(--radio-lg);
+      color: var(--grado-tinte);
+      font-size: var(--texto-sm);
+      font-weight: var(--peso-medio);
+      text-decoration: none;
+    }
+
+    .navegacion a.activo {
+      color: var(--color-sobre-grado);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.3em;
+    }
+
     /* Aparece sobre la portada: superficie clara con sombra para que se lea en cualquier grado. */
     .saltar:focus-visible {
       transform: none;
@@ -50,4 +96,6 @@ import { Portada } from './compartido/portada/portada';
     }
   `,
 })
-export class App {}
+export class App {
+  protected readonly sesion = inject(SesionService);
+}

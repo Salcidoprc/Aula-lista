@@ -26,6 +26,22 @@ public sealed class OpcionesCuentas
     [Range(1, 30)]
     public int MinutosReautenticacionGoogle { get; init; } = 10;
 
+    [Range(1, 168)]
+    public int HorasTokenVerificacion { get; init; } = 24;
+
+    [Range(5, 1440)]
+    public int MinutosTokenRecuperacion { get; init; } = 60;
+
+    [Range(1, 20)]
+    public int RecuperacionesPorHora { get; init; } = 3;
+
+    [Range(1, 168)]
+    public int HorasExportacion { get; init; } = 24;
+
+    /// <summary>RN-006: días entre la solicitud de eliminación y el borrado definitivo.</summary>
+    [Range(1, 90)]
+    public int DiasParaBorrarCuenta { get; init; } = 30;
+
     [Required]
     public VersionesLegales VersionesLegales { get; init; } = new();
 }

@@ -27,25 +27,37 @@ Que un docente cree su cuenta en menos de 2 minutos desde el celular, con la bas
 ## Sesión
 
 - Token de acceso JWT de 15 minutos y token de actualización rotativo de 30 días en cookie `HttpOnly`, `Secure`, `SameSite=Strict`.
-- El token de actualización se invalida al usarse (rotación) y toda la familia se revoca si se detecta reutilización.
+- El token de actualización se invalida al usarse (rotación) y, si se detecta reutilización, se revocan todas las sesiones del docente y queda en auditoría.
 - "Cerrar sesión en todos los dispositivos" revoca todos los tokens de actualización del docente.
 - La sesión no expira mientras el docente use la app al menos una vez cada 30 días. Esto atiende la queja de sesiones que se cierran solas.
 
 ## API
 
+Decisiones de implementación en [ADR-0013](../decisiones/ADR-0013-cuenta-docente.md).
+
 | Método y ruta | Descripción |
 | --- | --- |
-| `POST /api/v1/cuentas/registro` | Crea cuenta con correo y contraseña; envía correo de verificación |
+| `POST /api/v1/cuentas/registro` | Crea cuenta con correo y contraseña; envía correo de verificación e inicia sesión (201) |
 | `POST /api/v1/cuentas/verificar-correo` | Confirma el correo con el token recibido |
+| `POST /api/v1/cuentas/verificar-correo/reenviar` | Reenvía el correo de verificación (autenticado; máximo 3 por hora) |
 | `POST /api/v1/cuentas/sesion` | Inicia sesión con correo y contraseña |
-| `GET /api/v1/cuentas/google/inicio` y `/callback` | Inicio de sesión con Google (OpenID Connect) |
-| `POST /api/v1/cuentas/sesion/renovar` | Rota el token de actualización |
+| `POST /api/v1/cuentas/sesion/renovar` | Rota el token de actualización de la cookie y devuelve un token de acceso nuevo |
+| `DELETE /api/v1/cuentas/sesion` | Cierra la sesión de este dispositivo y borra la cookie |
 | `DELETE /api/v1/cuentas/sesiones` | Cierra todas las sesiones |
-| `POST /api/v1/cuentas/recuperar` y `/restablecer` | Recuperación de contraseña |
+| `POST /api/v1/cuentas/recuperar` | Envía el enlace para restablecer la contraseña; responde 202 exista o no la cuenta |
+| `POST /api/v1/cuentas/restablecer` | Define una contraseña nueva con el token recibido |
+| `PUT /api/v1/cuentas/contrasena` | Cambia la contraseña; una cuenta solo con Google la define sin la actual |
+| `GET /api/v1/cuentas/google/inicio?volver=` | Redirige a Google (OpenID Connect); `volver` es una ruta de la web a la que se regresa al terminar |
+| `GET /api/v1/cuentas/google/callback` | Retorno de Google, lo atiende el middleware de autenticación |
+| `GET /api/v1/cuentas/google/completar` | Crea o vincula la cuenta (RN-005), deja la cookie de sesión y redirige a `volver` en la web; fuera del OpenAPI |
 | `GET` / `PUT /api/v1/docente/perfil` | Lee y actualiza el perfil |
 | `POST /api/v1/docente/aceptaciones` | Registra aceptación de un documento legal |
 | `POST /api/v1/docente/exportacion` | Encola la exportación de datos; se envía por correo un enlace válido 24 h |
+| `GET /api/v1/docente/exportaciones/{id}` | Estado de una exportación propia (`pendiente`, `lista`, `fallida`) y su vencimiento |
+| `GET /api/v1/docente/exportaciones/{id}/{formato}` | Descarga el archivo `excel` o `pdf` de una exportación vigente |
 | `DELETE /api/v1/docente` | Solicita eliminación de la cuenta (pide contraseña o reautenticación con Google) |
+
+Google se activa solo si la API tiene `Google__ClientId` y `Google__ClientSecret`; sin ellos, `/callback` y `/completar` no existen y `/inicio` regresa a `/cuenta/entrar?error=google_no_disponible`. `volver` solo acepta rutas locales de la web. El token de actualización viaja en la cookie `aula_lista_sesion` (`HttpOnly`, `Secure`, `SameSite=Strict`, ruta `/api/v1/cuentas`); vence a los 30 días y cada renovación vuelve a contar 30 días. El token de acceso va en el cuerpo de la respuesta y se manda en `Authorization: Bearer`.
 
 ## Pantallas
 

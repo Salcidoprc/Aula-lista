@@ -41,6 +41,19 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__AulaLista: Host=db;Database=aula_lista;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
       Jwt__ClaveFirma: ${JWT_CLAVE_FIRMA:?Define JWT_CLAVE_FIRMA}
+      Cuentas__UrlWeb: ${URL_WEB:-http://localhost:8080}
+      Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
+      Correo__BrevoApiKey: ${BREVO_API_KEY:-}
+      Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulalista.mx}
+      Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+      Almacen__Ruta: /var/lib/aula-lista/archivos
+      Trabajos__Servidor: ${TRABAJOS_SERVIDOR:-true}
+      # RNF-004: 5 por minuto. Las pruebas end-to-end lo suben porque todas entran desde la misma IP.
+      Cuentas__IntentosInicioSesionPorMinuto: ${INTENTOS_INICIO_SESION:-5}
+    volumes:
+      # Exportaciones de datos (24 h). En Azure se cambia por almacenamiento de objetos (ADR-0013).
+      - archivos:/var/lib/aula-lista/archivos
     depends_on:
       migraciones:
         condition: service_completed_successfully
@@ -58,3 +71,4 @@ services:
 
 volumes:
   datos:
+  archivos:

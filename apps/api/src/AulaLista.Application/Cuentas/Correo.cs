@@ -56,15 +56,18 @@ public sealed class ReenviarVerificacionCasoUso(
         }
 
         var ahora = reloj.GetUtcNow();
-        // El primer correo, enviado al registrarse, no cuenta como reenvío.
-        var enviados = await cuentas.ContarTokensDesdeAsync(cuenta.Id, PropositoToken.VerificarCorreo, ahora.AddHours(-1), ct);
-        if (enviados > opciones.Value.ReenviosVerificacionPorHora)
+        // El correo enviado al registrarse no cuenta como reenvío.
+        var desde = ahora.AddHours(-1);
+        var enviados = await cuentas.ContarTokensDesdeAsync(cuenta.Id, PropositoToken.VerificarCorreo, desde, ct);
+        var reenvios = cuenta.CreatedAt >= desde ? enviados - 1 : enviados;
+        if (reenvios >= opciones.Value.ReenviosVerificacionPorHora)
         {
             return Resultado.Fallo(ErroresCuentas.DemasiadosIntentos);
         }
 
         var (token, hash) = TokensSeguros.Generar();
-        cuentas.AgregarToken(new TokenCuenta(cuenta.Id, PropositoToken.VerificarCorreo, hash, ahora.AddHours(24), ahora));
+        cuentas.AgregarToken(new TokenCuenta(
+            cuenta.Id, PropositoToken.VerificarCorreo, hash, ahora.AddHours(opciones.Value.HorasTokenVerificacion), ahora));
         await unidad.GuardarAsync(ct);
         await correo.EnviarAsync(CorreosCuentas.Verificacion(cuenta.Correo, opciones.Value.UrlWeb, token), ct);
         return Resultado.Exito();
@@ -79,8 +82,6 @@ public sealed class SolicitarRecuperacionCasoUso(
     IOptions<OpcionesCuentas> opciones,
     TimeProvider reloj)
 {
-    private const int MaximoPorHora = 3;
-
     public async Task EjecutarAsync(string correoSolicitado, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(correoSolicitado))
@@ -95,13 +96,13 @@ public sealed class SolicitarRecuperacionCasoUso(
         }
 
         var ahora = reloj.GetUtcNow();
-        if (await cuentas.ContarTokensDesdeAsync(cuenta.Id, PropositoToken.RestablecerContrasena, ahora.AddHours(-1), ct) >= MaximoPorHora)
+        if (await cuentas.ContarTokensDesdeAsync(cuenta.Id, PropositoToken.RestablecerContrasena, ahora.AddHours(-1), ct) >= opciones.Value.RecuperacionesPorHora)
         {
             return;
         }
 
         var (token, hash) = TokensSeguros.Generar();
-        cuentas.AgregarToken(new TokenCuenta(cuenta.Id, PropositoToken.RestablecerContrasena, hash, ahora.AddHours(1), ahora));
+        cuentas.AgregarToken(new TokenCuenta(cuenta.Id, PropositoToken.RestablecerContrasena, hash, ahora.AddMinutes(opciones.Value.MinutosTokenRecuperacion), ahora));
         await unidad.GuardarAsync(ct);
         await correo.EnviarAsync(CorreosCuentas.Recuperacion(cuenta.Correo, opciones.Value.UrlWeb, token), ct);
     }

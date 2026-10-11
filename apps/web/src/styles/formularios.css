@@ -1,0 +1,383 @@
+/*
+ * Piezas de formulario compartidas: pantalla, campo, botones, avisos en línea y diálogo.
+ * Valores de DESIGN.md ("Botones", "Campo"); ningún color ni duración suelto.
+ */
+
+/* Pantalla de una sola columna, al ancho de lectura, con la acción al alcance del pulgar. */
+.pantalla {
+  display: grid;
+  align-content: start;
+  gap: var(--espacio-5);
+  width: 100%;
+  max-width: calc(var(--ancho-lectura) * 0.66);
+  padding: var(--espacio-6) max(var(--espacio-4), env(safe-area-inset-right))
+    calc(var(--espacio-6) + env(safe-area-inset-bottom))
+    max(var(--espacio-4), env(safe-area-inset-left));
+}
+
+.pantalla--ancha {
+  max-width: var(--ancho-lectura);
+}
+
+.pantalla h1 {
+  font-size: var(--texto-2xl);
+}
+
+.pantalla .entrada {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-lg);
+}
+
+.formulario {
+  display: grid;
+  gap: var(--espacio-4);
+}
+
+/* Campo: etiqueta visible arriba, 48 px, fondo hundido; con foco, hoja y anillo. */
+.campo {
+  display: grid;
+  gap: var(--espacio-1);
+}
+
+.campo > label,
+.campo > .etiqueta {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.campo .ayuda {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 var(--espacio-3);
+  border: 0;
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-hundida);
+  font-size: var(--texto-base);
+  transition: background-color var(--dur-small) var(--ease-out);
+}
+
+.campo select {
+  appearance: none;
+  padding-inline-end: var(--espacio-6);
+}
+
+/* Envoltura del select para dibujar la flecha con el color de la tinta suave. */
+.selector {
+  position: relative;
+  display: grid;
+}
+
+.selector::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: var(--espacio-3);
+  inset-block-start: 50%;
+  width: 1rem;
+  height: 1rem;
+  translate: 0 -50%;
+  background: var(--color-texto-suave);
+  pointer-events: none;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.campo input::placeholder {
+  color: var(--color-texto-suave);
+}
+
+.campo input:focus-visible,
+.campo select:focus-visible {
+  background-color: var(--color-superficie);
+}
+
+.campo input[aria-invalid='true'],
+.campo select[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 2px var(--color-peligro);
+}
+
+.campo input[aria-invalid='true']:focus-visible {
+  box-shadow:
+    inset 0 0 0 2px var(--color-peligro),
+    var(--foco);
+}
+
+.campo .error,
+p.error {
+  color: var(--color-peligro-tinta);
+  font-size: var(--texto-sm);
+}
+
+/* Casilla con su texto: toda la fila es el objetivo táctil. */
+.casilla {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--espacio-3);
+  min-height: var(--tactil-minimo);
+  padding-block: var(--espacio-2);
+  cursor: pointer;
+}
+
+.casilla input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.125rem 0 0;
+}
+
+/* Elección entre pocas opciones (nivel): botones de radio grandes, uno junto al otro. */
+.eleccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.eleccion legend {
+  margin-bottom: var(--espacio-1);
+  padding: 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.eleccion label {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-height: 3rem;
+  padding: 0 var(--espacio-3);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-hundida);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-small) var(--ease-out),
+    color var(--dur-small) var(--ease-out);
+}
+
+.eleccion label:has(input:checked) {
+  background: var(--color-accion-tinte);
+  color: var(--color-accion-tinta);
+  font-weight: var(--peso-medio);
+}
+
+.eleccion label:has(input:focus-visible) {
+  box-shadow: var(--foco);
+}
+
+.eleccion input {
+  margin: 0;
+}
+
+/* Botones: primario azul (uno por pantalla), secundario hundido, peligro solo para borrar. */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  min-height: 3rem;
+  padding: 0 var(--espacio-5);
+  border: 0;
+  border-radius: var(--radio-lg);
+  background: var(--color-accion);
+  color: var(--color-sobre-accion);
+  font-weight: var(--peso-fuerte);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-small) var(--ease-out);
+}
+
+.boton--secundario {
+  min-height: var(--tactil-minimo);
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto);
+  font-weight: var(--peso-medio);
+}
+
+.boton--peligro {
+  background: var(--color-peligro);
+  color: var(--color-sobre-accion);
+}
+
+.boton--ancho {
+  width: 100%;
+}
+
+.boton:active:not(:disabled) {
+  transform: scale(var(--escala-presion));
+}
+
+.boton:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .boton:hover:not(:disabled) {
+    background-color: var(--color-accion-presionada);
+  }
+
+  .boton--secundario:hover:not(:disabled) {
+    background-color: var(--color-divisoria);
+  }
+
+  .boton--peligro:hover:not(:disabled) {
+    background-color: var(--color-peligro-tinta);
+  }
+
+  .enlace:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+.boton svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Enlace de texto: azul de acción, subrayado legible; mínimo táctil cuando va solo. */
+.enlace {
+  color: var(--color-accion);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+button.enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.enlace--solo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tactil-minimo);
+}
+
+/* Aviso en línea: estado que importa leer (error, éxito, pendiente). Sin franja lateral. */
+.aviso {
+  display: grid;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-4);
+  border-radius: var(--radio-lg);
+  background: var(--color-accion-tinte);
+  color: var(--color-accion-tinta);
+}
+
+.aviso--error {
+  background: var(--color-peligro-tinte);
+  color: var(--color-peligro-tinta);
+}
+
+.aviso--exito {
+  background: var(--color-exito-tinte);
+  color: var(--color-exito-tinta);
+}
+
+.aviso--pendiente {
+  background: var(--color-aviso-tinte);
+  color: var(--color-aviso-tinta);
+}
+
+.aviso strong {
+  font-weight: var(--peso-fuerte);
+}
+
+/* Separador "o con tu correo" entre Google y el formulario. */
+.separador {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--espacio-3);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.separador::before,
+.separador::after {
+  content: '';
+  height: 1px;
+  background: var(--color-divisoria);
+}
+
+/* Diálogo de confirmación: entra con scale(0.95) y opacidad, fondo con fundido (catálogo de la regla 07). */
+dialog.dialogo {
+  width: min(100% - 2 * var(--espacio-4), 26rem);
+  padding: var(--espacio-5);
+  border: 0;
+  border-radius: var(--radio-hoja);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: var(--sombra-flotante);
+  opacity: 0;
+  transform: scale(var(--escala-entrada));
+  transition:
+    opacity var(--dur-small) var(--ease-out),
+    transform var(--dur-small) var(--ease-out),
+    overlay var(--dur-small) allow-discrete,
+    display var(--dur-small) allow-discrete;
+}
+
+dialog.dialogo[open] {
+  opacity: 1;
+  transform: none;
+  transition-duration: var(--dur-large);
+}
+
+@starting-style {
+  dialog.dialogo[open] {
+    opacity: 0;
+    transform: scale(var(--escala-entrada));
+  }
+}
+
+dialog.dialogo::backdrop {
+  background: oklch(0.25 0.03 260 / 0);
+  transition:
+    background-color var(--dur-small) var(--ease-out),
+    overlay var(--dur-small) allow-discrete,
+    display var(--dur-small) allow-discrete;
+}
+
+dialog.dialogo[open]::backdrop {
+  background: oklch(0.25 0.03 260 / 0.4);
+}
+
+@starting-style {
+  dialog.dialogo[open]::backdrop {
+    background: oklch(0.25 0.03 260 / 0);
+  }
+}
+
+.dialogo h2 {
+  font-size: var(--texto-lg);
+}
+
+.dialogo .contenido {
+  display: grid;
+  gap: var(--espacio-4);
+}
+
+.dialogo .acciones {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+}
+
+/* En celular los dos botones ocupan el ancho y la acción queda abajo, al alcance del pulgar. */
+.dialogo .acciones > .boton {
+  flex: 1 1 10rem;
+}

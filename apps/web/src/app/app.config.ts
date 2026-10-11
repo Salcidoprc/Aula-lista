@@ -1,5 +1,5 @@
 import { registerLocaleData } from '@angular/common';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsMx from '@angular/common/locales/es-MX';
 import {
   ApplicationConfig,
@@ -12,6 +12,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideTransloco } from '@jsverse/transloco';
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
+import { autenticacionInterceptor } from './core/sesion/autenticacion.interceptor';
 
 registerLocaleData(localeEsMx);
 
@@ -19,7 +20,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([autenticacionInterceptor])),
     { provide: LOCALE_ID, useValue: 'es-MX' },
     provideTransloco({
       config: {
