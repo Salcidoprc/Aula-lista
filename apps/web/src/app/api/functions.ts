@@ -21,6 +21,8 @@ export type { RestablecerContrasena$Params as RestablecerContrasena$Params } fro
 export { restablecerContrasena as restablecerContrasena } from './fn/cuentas/restablecer-contrasena';
 export type { CambiarContrasena$Params as CambiarContrasena$Params } from './fn/cuentas/cambiar-contrasena';
 export { cambiarContrasena as cambiarContrasena } from './fn/cuentas/cambiar-contrasena';
+export type { IniciarConGoogle$Params as IniciarConGoogle$Params } from './fn/cuentas/iniciar-con-google';
+export { iniciarConGoogle as iniciarConGoogle } from './fn/cuentas/iniciar-con-google';
 export type { ObtenerPerfil$Params as ObtenerPerfil$Params } from './fn/docente/obtener-perfil';
 export { obtenerPerfil as obtenerPerfil } from './fn/docente/obtener-perfil';
 export type { ActualizarPerfil$Params as ActualizarPerfil$Params } from './fn/docente/actualizar-perfil';
