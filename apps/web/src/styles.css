@@ -1,0 +1,101 @@
+@import '@fontsource-variable/overpass/wght.css';
+@import './styles/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-normal);
+  line-height: var(--interlineado);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: var(--interlineado-ajustado);
+  font-weight: var(--peso-fuerte);
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--foco);
+}
+
+/* Cifras tabulares para calificaciones, promedios y conteos. */
+.cifras {
+  font-variant-numeric: tabular-nums;
+}
+
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Cambio de pantalla: fundido con desplazamiento de 8 px en 220 ms (catálogo de la regla 07). */
+::view-transition-old(root) {
+  animation: var(--dur-small) var(--ease-out) both salida-pantalla;
+}
+
+::view-transition-new(root) {
+  animation: var(--dur-medium) var(--ease-out) both entrada-pantalla;
+}
+
+@keyframes salida-pantalla {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes entrada-pantalla {
+  from {
+    opacity: 0;
+    transform: translateY(var(--desplazamiento-pantalla));
+  }
+}

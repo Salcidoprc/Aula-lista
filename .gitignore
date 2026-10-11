@@ -1,0 +1,28 @@
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Entorno y secretos
+.env
+infra/.env
+*.local.json
+
+# Impeccable
+.impeccable/config.local.json
+.impeccable/questions/
+
+# Editor y sistema
+.vs/
+.idea/
+.DS_Store
+
+# Playwright
+test-results/
+playwright-report/

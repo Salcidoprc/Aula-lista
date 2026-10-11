@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_size = 4
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace
+dotnet_sort_system_directives_first = true
+# Los nombres de pruebas usan guion bajo para citar la spec (SPEC03_...).
+dotnet_diagnostic.CA1707.severity = none
+# Las clases internas instanciadas por DI o EF no se marcan como sin uso.
+dotnet_diagnostic.CA1812.severity = none
+# Mensajes y códigos en español, no se localizan con recursos.
+dotnet_diagnostic.CA1303.severity = none
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA2007.severity = none
+
+[*.{csproj,props,json,xml}]
+indent_size = 2
+
+[**/Migraciones/*.cs]
+generated_code = true

@@ -1,0 +1,106 @@
+/*
+ * Tokens de Aula Lista. Única fuente de color, tipografía, espacio, radios, sombras y movimiento.
+ * Ningún componente escribe colores ni duraciones sueltos (docs/reglas/07-diseno-y-movimiento.md).
+ * Mundo visual: señalética de transporte público. Cada grupo es una "línea" con su color;
+ * el periodo se recorre como estaciones. Ver DESIGN.md.
+ */
+:root {
+  color-scheme: light;
+
+  /* Neutros entintados (nunca negro ni blanco puros). Tono cálido de concreto. */
+  --color-fondo: oklch(0.972 0.006 75);
+  --color-superficie: oklch(0.992 0.003 75);
+  --color-superficie-hundida: oklch(0.945 0.008 75);
+  --color-linea-divisoria: oklch(0.885 0.01 75);
+  --color-texto: oklch(0.255 0.018 60);
+  --color-texto-suave: oklch(0.46 0.016 60);
+  --color-texto-tenue: oklch(0.58 0.012 60);
+
+  /* Acción principal: rosa de línea, con su tinta oscura para texto sobre tinte. */
+  --color-accion: oklch(0.53 0.185 358);
+  --color-accion-presionada: oklch(0.47 0.17 358);
+  --color-accion-tinte: oklch(0.95 0.03 358);
+  --color-accion-tinta: oklch(0.38 0.13 358);
+  --color-sobre-accion: oklch(0.99 0.004 358);
+
+  /* Estados: solo donde cargan significado. */
+  --color-exito: oklch(0.55 0.13 150);
+  --color-exito-tinte: oklch(0.95 0.035 150);
+  --color-exito-tinta: oklch(0.36 0.09 150);
+  --color-aviso: oklch(0.74 0.15 75);
+  --color-aviso-tinte: oklch(0.96 0.045 85);
+  --color-aviso-tinta: oklch(0.42 0.09 65);
+  --color-peligro: oklch(0.55 0.19 27);
+  --color-peligro-tinte: oklch(0.95 0.03 27);
+  --color-peligro-tinta: oklch(0.4 0.14 27);
+
+  /* Líneas: un color por grupo, con luminosidad pareja para que ninguno grite más que otro. */
+  --linea-1: oklch(0.6 0.17 358); /* rosa */
+  --linea-2: oklch(0.52 0.15 255); /* azul */
+  --linea-3: oklch(0.6 0.12 125); /* olivo */
+  --linea-4: oklch(0.62 0.11 210); /* cian */
+  --linea-5: oklch(0.78 0.15 90); /* amarillo */
+  --linea-6: oklch(0.56 0.18 30); /* rojo */
+  --linea-7: oklch(0.68 0.16 55); /* naranja */
+  --linea-8: oklch(0.55 0.13 160); /* verde */
+
+  /* Tipografía: Overpass, heredera de la señalética de carreteras. Cifras tabulares en datos. */
+  --fuente: 'Overpass Variable', 'Overpass', ui-sans-serif, sans-serif;
+  --texto-xs: 0.8125rem; /* 13 */
+  --texto-sm: 0.9375rem; /* 15 */
+  --texto-base: 1rem; /* 16: mínimo en campos para que iOS no haga zoom */
+  --texto-lg: 1.1875rem; /* 19 */
+  --texto-xl: 1.5rem; /* 24 */
+  --texto-2xl: 2rem; /* 32 */
+  --peso-normal: 420;
+  --peso-medio: 560;
+  --peso-fuerte: 720;
+  --interlineado-ajustado: 1.15;
+  --interlineado: 1.5;
+
+  /* Espacio en múltiplos de 4 px. */
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-4: 1rem;
+  --espacio-5: 1.5rem;
+  --espacio-6: 2rem;
+  --espacio-7: 3rem;
+  --tactil-minimo: 2.75rem; /* 44 px */
+  --ancho-lectura: 40rem;
+
+  /* Formas: rectángulos con esquinas de letrero; círculos solo para estaciones. */
+  --radio-sm: 0.25rem;
+  --radio-md: 0.375rem;
+  --radio-lg: 0.625rem;
+  --radio-hoja: 1rem;
+  --radio-estacion: 999px;
+  --grosor-linea: 0.375rem;
+
+  /* Profundidad: solo lo que flota lleva sombra, semitransparente y entintada. */
+  --sombra-flotante: 0 1px 2px oklch(0.25 0.02 60 / 0.08), 0 8px 24px oklch(0.25 0.02 60 / 0.12);
+  --sombra-hoja: 0 -4px 32px oklch(0.25 0.02 60 / 0.16);
+  --foco: 0 0 0 3px oklch(0.53 0.185 358 / 0.35);
+
+  /* Movimiento (regla 07). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 120ms;
+  --dur-small: 160ms;
+  --dur-medium: 220ms;
+  --dur-large: 300ms;
+  --dur-hoja: 400ms;
+  --desplazamiento-pantalla: 8px;
+  --escala-presion: 0.97;
+  --escala-entrada: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /* Se quitan desplazamientos y escalas; se conservan fundidos y cambios de color. */
+    --desplazamiento-pantalla: 0px;
+    --escala-presion: 1;
+    --escala-entrada: 1;
+  }
+}

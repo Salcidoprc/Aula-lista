@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.angular
+**/TestResults
+.git
+.claude
+docs
+infra/.env
