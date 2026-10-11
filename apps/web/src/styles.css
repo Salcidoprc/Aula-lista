@@ -1,5 +1,20 @@
-@import '@fontsource-variable/overpass/wght.css';
+@import '@fontsource-variable/lexend/wght.css';
 @import './styles/tokens.css';
+
+/*
+ * Lexend no trae cifras tabulares. Las cifras (y el punto y la coma decimales) de calificaciones,
+ * promedios y conteos usan los dígitos tabulares de Figtree, de la misma altura que los de Lexend.
+ * El archivo solo se descarga cuando una pantalla muestra texto con la clase .cifras.
+ */
+@font-face {
+  font-family: 'Aula Cifras';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 900;
+  src: url('../node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+002C, U+002E, U+0030-0039;
+}
 
 *,
 *::before,
@@ -31,6 +46,7 @@ h3 {
   margin: 0;
   line-height: var(--interlineado-ajustado);
   font-weight: var(--peso-fuerte);
+  letter-spacing: var(--tracking-titulo);
   text-wrap: balance;
 }
 
@@ -61,8 +77,20 @@ textarea,
   box-shadow: var(--foco);
 }
 
-/* Cifras tabulares para calificaciones, promedios y conteos. */
+/* Superficies del navegador con la paleta: selección, cursor y casillas. */
+::selection {
+  background: var(--color-accion-tinte);
+  color: var(--color-accion-tinta);
+}
+
+:root {
+  caret-color: var(--color-accion);
+  accent-color: var(--color-accion);
+}
+
+/* Cifras tabulares para calificaciones, promedios y conteos: las columnas no bailan al capturar. */
 .cifras {
+  font-family: var(--fuente-cifras);
   font-variant-numeric: tabular-nums;
 }
 
