@@ -1,0 +1,17 @@
+{
+  "app": {
+    "nombre": "Aula Lista",
+    "saltar": "Ir al contenido"
+  },
+  "inicio": {
+    "titulo": "Tu aula, en orden",
+    "descripcion": "Aquí vas a capturar calificaciones, cerrar periodos y avisar a los tutores. Estamos preparando las primeras pantallas.",
+    "estado": {
+      "titulo": "Estado del servicio",
+      "revisando": "Revisando conexión…",
+      "enLinea": "Servicio en línea",
+      "sinServidor": "No hay conexión con el servicio",
+      "reintentar": "Reintentar"
+    }
+  }
+}
