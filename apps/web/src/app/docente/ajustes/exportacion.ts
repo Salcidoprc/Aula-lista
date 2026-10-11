@@ -16,6 +16,7 @@ import { Api } from '../../api/api';
 import { obtenerExportacion } from '../../api/fn/docente/obtener-exportacion';
 import { RespuestaExportacion } from '../../api/models/respuesta-exportacion';
 import { codigoDeError } from '../../core/errores/problema';
+import { Ocupado } from '../../shared/ocupado';
 
 const ESPERA_MS = 3000;
 const MAXIMO_CONSULTAS = 40;
@@ -28,7 +29,7 @@ type Formato = 'excel' | 'pdf';
  */
 @Component({
   selector: 'app-exportacion',
-  imports: [DatePipe, RouterLink, TranslocoDirective],
+  imports: [DatePipe, RouterLink, TranslocoDirective, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t; prefix: 'ajustes.exportacion'">
@@ -48,7 +49,7 @@ type Formato = 'excel' | 'pdf';
             <button
               class="boton"
               type="button"
-              [disabled]="descargando() !== null"
+              [appOcupado]="descargando() !== null"
               (click)="descargar('excel')"
             >
               {{ t('excel') }}
@@ -56,7 +57,7 @@ type Formato = 'excel' | 'pdf';
             <button
               class="boton boton--secundario"
               type="button"
-              [disabled]="descargando() !== null"
+              [appOcupado]="descargando() !== null"
               (click)="descargar('pdf')"
             >
               {{ t('pdf') }}

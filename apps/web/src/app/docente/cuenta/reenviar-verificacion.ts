@@ -3,6 +3,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { reenviarVerificacion } from '../../api/fn/cuentas/reenviar-verificacion';
 import { codigoDeError } from '../../core/errores/problema';
+import { Ocupado } from '../../shared/ocupado';
 
 const MENSAJES: Partial<Record<string, string>> = {
   enviado: 'cuenta.reenviar.enviado',
@@ -13,7 +14,7 @@ const MENSAJES: Partial<Record<string, string>> = {
 /** Botón para reenviar el correo de verificación (máximo 3 por hora, lo cuida la API). */
 @Component({
   selector: 'app-reenviar-verificacion',
-  imports: [TranslocoDirective],
+  imports: [TranslocoDirective, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="reenviar" *transloco="let t">
@@ -24,7 +25,7 @@ const MENSAJES: Partial<Record<string, string>> = {
         <button
           class="boton boton--secundario"
           type="button"
-          [disabled]="estado() === 'enviando'"
+          [appOcupado]="estado() === 'enviando'"
           (click)="reenviar()"
         >
           {{ t('cuenta.reenviar.accion') }}

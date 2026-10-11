@@ -6,6 +6,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { solicitarRecuperacion } from '../../api/fn/cuentas/solicitar-recuperacion';
 import { codigoDeError } from '../../core/errores/problema';
+import { Ocupado } from '../../shared/ocupado';
 
 /**
  * Recuperar contraseña (RF-003). La respuesta es la misma exista o no la cuenta, para no revelar qué
@@ -13,7 +14,7 @@ import { codigoDeError } from '../../core/errores/problema';
  */
 @Component({
   selector: 'app-recuperar',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
@@ -47,7 +48,7 @@ import { codigoDeError } from '../../core/errores/problema';
               <p id="correo-error" class="error">{{ t('cuenta.validacion.correo') }}</p>
             }
           </div>
-          <button class="boton boton--ancho" type="submit" [disabled]="enviando()">
+          <button class="boton boton--ancho" type="submit" [appOcupado]="enviando()">
             {{ t('cuenta.recuperar.accion') }}
           </button>
         </form>

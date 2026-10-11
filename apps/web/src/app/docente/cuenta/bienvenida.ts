@@ -14,6 +14,7 @@ import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
 import { camposConError, codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { FormularioPerfil } from './formulario-perfil';
+import { Ocupado } from '../../shared/ocupado';
 
 /**
  * SPEC-01, pantalla 2: perfil y aceptación legal en un solo paso (RF-004, RN-003). Si el perfil ya
@@ -21,7 +22,7 @@ import { FormularioPerfil } from './formulario-perfil';
  */
 @Component({
   selector: 'app-bienvenida',
-  imports: [NgTemplateOutlet, RouterLink, TranslocoDirective, FormularioPerfil],
+  imports: [NgTemplateOutlet, RouterLink, TranslocoDirective, FormularioPerfil, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
@@ -82,7 +83,7 @@ import { FormularioPerfil } from './formulario-perfil';
             <button
               class="boton boton--ancho"
               type="button"
-              [disabled]="enviando()"
+              [appOcupado]="enviando()"
               (click)="continuar(null)"
             >
               {{ t('cuenta.bienvenida.aceptar') }}

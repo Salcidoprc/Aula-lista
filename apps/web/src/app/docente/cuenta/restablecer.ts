@@ -7,13 +7,14 @@ import { Api } from '../../api/api';
 import { restablecerContrasena } from '../../api/fn/cuentas/restablecer-contrasena';
 import { codigoDeError } from '../../core/errores/problema';
 import { SesionService } from '../../core/sesion/sesion.service';
+import { Ocupado } from '../../shared/ocupado';
 
 const LONGITUD_MINIMA = 10;
 
 /** Elegir contraseña nueva desde el enlace del correo (RF-003). Cierra las demás sesiones. */
 @Component({
   selector: 'app-restablecer',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
@@ -57,7 +58,7 @@ const LONGITUD_MINIMA = 10;
               </p>
             }
           </div>
-          <button class="boton boton--ancho" type="submit" [disabled]="enviando()">
+          <button class="boton boton--ancho" type="submit" [appOcupado]="enviando()">
             {{ t('cuenta.restablecer.accion') }}
           </button>
         </form>

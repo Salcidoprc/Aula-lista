@@ -25,6 +25,7 @@ import { AvisosService } from '../../shared/avisos/avisos.service';
 import { BotonGoogle } from '../../shared/boton-google';
 import { FormularioPerfil } from '../cuenta/formulario-perfil';
 import { ReenviarVerificacion } from '../cuenta/reenviar-verificacion';
+import { Ocupado } from '../../shared/ocupado';
 
 const LONGITUD_MINIMA = 10;
 
@@ -37,6 +38,7 @@ const LONGITUD_MINIMA = 10;
     BotonGoogle,
     FormularioPerfil,
     ReenviarVerificacion,
+    Ocupado,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -120,7 +122,7 @@ const LONGITUD_MINIMA = 10;
             <button
               class="boton boton--secundario"
               type="submit"
-              [disabled]="guardandoContrasena()"
+              [appOcupado]="guardandoContrasena()"
             >
               {{ t('contrasena.guardar') }}
             </button>
@@ -150,7 +152,7 @@ const LONGITUD_MINIMA = 10;
           <button
             class="boton boton--secundario"
             type="button"
-            [disabled]="exportando()"
+            [appOcupado]="exportando()"
             (click)="exportar()"
           >
             {{ t('datos.exportar') }}
@@ -227,7 +229,7 @@ const LONGITUD_MINIMA = 10;
               {{ t('cancelar') }}
             </button>
             @if (perfil()?.tieneContrasena || confirmadoConGoogle()) {
-              <button class="boton boton--peligro" type="submit" [disabled]="eliminando()">
+              <button class="boton boton--peligro" type="submit" [appOcupado]="eliminando()">
                 {{ t('eliminar.confirmar') }}
               </button>
             }

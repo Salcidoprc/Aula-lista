@@ -79,6 +79,14 @@ import { Portada } from './shared/portada/portada';
       gap: var(--espacio-1);
     }
 
+    /* En pantalla ancha, la esquina queda lejos de la columna: va bajo el título, alineada con el texto. */
+    @media (min-width: 48rem) {
+      .navegacion {
+        position: static;
+        margin-inline-start: calc(-1 * var(--espacio-2));
+      }
+    }
+
     .navegacion a {
       display: inline-flex;
       align-items: center;

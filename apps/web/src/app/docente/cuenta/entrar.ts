@@ -9,13 +9,14 @@ import { codigoDeError } from '../../core/errores/problema';
 import { SesionService } from '../../core/sesion/sesion.service';
 import { BotonGoogle } from '../../shared/boton-google';
 import { rutaLocal } from '../../shared/rutas';
+import { Ocupado } from '../../shared/ocupado';
 
 const ERRORES_GOOGLE = ['google', 'google_no_disponible', 'google_sin_correo_verificado'];
 
 /** SPEC-01, pantalla 1: entrar con correo y contraseña o con Google. */
 @Component({
   selector: 'app-entrar',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, BotonGoogle],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, BotonGoogle, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
@@ -61,7 +62,7 @@ const ERRORES_GOOGLE = ['google', 'google_no_disponible', 'google_sin_correo_ver
             <p id="contrasena-error" class="error">{{ t('cuenta.validacion.requerida') }}</p>
           }
         </div>
-        <button class="boton boton--ancho" type="submit" [disabled]="enviando()">
+        <button class="boton boton--ancho" type="submit" [appOcupado]="enviando()">
           {{ enviando() ? t('cuenta.entrar.enviando') : t('cuenta.entrar.accion') }}
         </button>
       </form>

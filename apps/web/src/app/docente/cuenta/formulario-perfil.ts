@@ -12,6 +12,7 @@ import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
 import { PerfilDocente } from '../../api/models/perfil-docente';
+import { Ocupado } from '../../shared/ocupado';
 
 /** Claves que acepta la API (EntidadesFederativas del dominio); el nombre visible viene de i18n. */
 export const ENTIDADES = [
@@ -57,7 +58,7 @@ type Campo = 'nombre' | 'nivel' | 'escuelaNombre' | 'escuelaCct' | 'entidadFeder
 /** Datos del perfil (RF-004), compartido por la bienvenida y los ajustes. */
 @Component({
   selector: 'app-formulario-perfil',
-  imports: [ReactiveFormsModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form
@@ -155,7 +156,7 @@ type Campo = 'nombre' | 'nivel' | 'escuelaNombre' | 'escuelaCct' | 'entidadFeder
 
       <ng-content />
 
-      <button class="boton boton--ancho" type="submit" [disabled]="enviando()">
+      <button class="boton boton--ancho" type="submit" [appOcupado]="enviando()">
         {{ accion() }}
       </button>
     </form>

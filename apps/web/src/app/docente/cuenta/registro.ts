@@ -9,6 +9,7 @@ import { codigoDeError } from '../../core/errores/problema';
 import { SesionService } from '../../core/sesion/sesion.service';
 import { BotonGoogle } from '../../shared/boton-google';
 import { rutaLocal } from '../../shared/rutas';
+import { Ocupado } from '../../shared/ocupado';
 
 /** Mínimo de RN-002; la lista de contraseñas comunes la revisa la API. */
 const LONGITUD_MINIMA = 10;
@@ -16,7 +17,7 @@ const LONGITUD_MINIMA = 10;
 /** SPEC-01, pantalla 1: crear cuenta con correo (RF-001) o con Google (RF-002), aceptando lo legal (RN-003). */
 @Component({
   selector: 'app-registro',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, BotonGoogle],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoDirective, BotonGoogle, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
@@ -97,7 +98,7 @@ const LONGITUD_MINIMA = 10;
           <p id="legal-error" class="error">{{ t('errores.aceptacion_requerida') }}</p>
         }
 
-        <button class="boton boton--ancho" type="submit" [disabled]="enviando()">
+        <button class="boton boton--ancho" type="submit" [appOcupado]="enviando()">
           {{ enviando() ? t('cuenta.registro.enviando') : t('cuenta.registro.accion') }}
         </button>
       </form>
