@@ -6,12 +6,21 @@
 | Tutor | Madre, padre o responsable de un alumno. Accede por enlace personal. | `Tutor` |
 | Alumno | Estudiante de un grupo. No tiene cuenta. | `Alumno` |
 | Grupo | Conjunto de hasta 50 alumnos de un docente en un ciclo (en secundaria, un grupo por materia). Unidad de cobro. | `Grupo` |
-| Ciclo escolar | Año escolar, por ejemplo 2026-2027. | `CicloEscolar` |
-| Periodo | Tramo de evaluación del ciclo (por defecto trimestre). Estados: abierto, en cierre, cerrado. | `Periodo` |
-| Rubro | Criterio de evaluación con peso porcentual dentro de un periodo (tareas, proyecto, examen). | `Rubro` |
+| Ciclo escolar | Año escolar del docente, por ejemplo 2026-2027, con fecha de inicio y de fin que él define. | `CicloEscolar` |
+| Unidad | Tramo del ciclo con nombre y fechas (trimestre, bimestre, mes o personalizado). Se configura una vez por ciclo y la heredan todos sus grupos. Es el término que ve el docente. | `Unidad` |
+| Periodo | La unidad vista desde un grupo: ahí viven los rubros, el cierre y las boletas. Estados: abierto, en cierre, cerrado. En la interfaz se dice "unidad". | `Periodo` |
+| Rubro | Criterio de evaluación con peso porcentual dentro de un periodo (tareas, proyecto, examen). Tipo: actividades (promedia sus actividades) o asistencia. | `Rubro` |
+| Tipo de rubro | Entrada del catálogo que gestiona el administrador (por ejemplo Participaciones). Define el comportamiento y los nombres sugeridos. | `TipoRubro` |
+| Comportamiento | Forma de calcular y capturar un rubro, implementada en código: `actividades` o `asistencia` en el MVP. | `ComportamientoRubro` |
+| Panel de administración | Área `/admin` del equipo de Aula Lista para operar el producto. | — |
+| Forma de calificar | Cómo se captura un rubro o criterio: con número (de la mínima a 10) o por cumplimiento (✅ vale 10, ❌ vale la mínima). | `FormaCalificar` |
+| Calificación mínima del rubro | Lo menos que un alumno puede obtener en un rubro o criterio; también es lo que vale "No entregó". | `CalificacionMinima` |
+| Criterio | Subrubro con peso dentro de un rubro (por ejemplo Información 40% en Exposición). | `Criterio` |
+| Equipo | Grupo de alumnos dentro de un grupo para calificar una actividad en conjunto. | `Equipo` |
 | Actividad | Evaluación concreta dentro de un rubro (tarea del 12/09). | `Actividad` |
 | Calificación | Valor de 0 a 10 de un alumno en una actividad, o marca "No entregó" o "Exento". | `Calificacion` |
 | Calificación del periodo | Promedio ponderado de los rubros (RN-033). | `CalificacionPeriodo` |
+| Toma de asistencia | La lista de un grupo en una fecha, con el estado de cada alumno (presente, retardo, falta, justificada). | `TomaAsistencia` |
 | Nota | Apunte privado del docente sobre un alumno. Nunca lo ve el tutor. | `Nota` |
 | Observación | Texto por alumno y periodo para la boleta; la IA propone y el docente aprueba. | `Observacion` |
 | Borrador | Observación generada o editada sin aprobar. | estado `borrador` |

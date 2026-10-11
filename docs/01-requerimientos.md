@@ -25,7 +25,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
 | RF-010 | El docente crea un grupo con nombre, nivel, grado, materia (opcional, para secundaria) y ciclo escolar. | M |
-| RF-011 | Cada grupo tiene periodos de evaluación con nombre y fechas; por defecto se proponen 3 trimestres editables. | M |
+| RF-011 | Cada grupo se evalúa por las unidades de su ciclo escolar (un periodo por unidad, con estado propio por grupo). | M |
 | RF-012 | El docente agrega, edita y da de baja alumnos manualmente. La baja es lógica y conserva el historial. | M |
 | RF-013 | El docente importa alumnos y tutores desde Excel (.xlsx) o CSV, con vista previa y corrección antes de guardar. | M |
 | RF-014 | El docente importa alumnos pegando una lista de texto. | M |
@@ -35,19 +35,32 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-018 | Un grupo tiene como máximo 50 alumnos activos. | M |
 | RF-019 | El docente archiva un grupo al terminar el ciclo; queda de solo lectura. | M |
 | RF-020 | El docente crea varios grupos a la vez (por ejemplo 1°A a 1°F de la misma materia) con datos comunes y periodos iguales. | M |
+| RF-021 | El docente define su ciclo escolar con nombre, fecha de inicio y fecha de fin. | M |
+| RF-022 | El docente divide el ciclo en unidades (bimestre, trimestre, cuatrimestre, semestre, mensual o personalizada) con nombre y fechas editables; la configuración aplica a todos los grupos del ciclo. | M |
 
 ### Evaluación y captura (SPEC-03)
 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
-| RF-030 | El docente define rubros por periodo con su peso en porcentaje; los pesos deben sumar 100. | M |
+| RF-030 | El docente crea los rubros que decida por periodo (unidad), con nombre libre y peso en porcentaje; los pesos deben sumar 100. Cada rubro tiene un tipo del catálogo que gestiona el administrador. | M |
 | RF-031 | El docente copia los rubros de otro periodo o de otro grupo. | M |
-| RF-032 | El docente crea actividades dentro de un rubro (nombre y fecha). | M |
+| RF-032 | El docente crea las actividades que quiera dentro de un rubro (nombre y fecha dentro de la unidad); el rubro promedia sus actividades. | M |
 | RF-033 | El docente captura calificaciones en una tabla alumnos por actividades, usable en celular y en computadora. | M |
-| RF-034 | Una celda puede marcarse como "No entregó" (cuenta como la calificación mínima) o "Exento" (no cuenta). | M |
+| RF-034 | Al agregar un rubro o un criterio, el docente elige si se califica con número o por cumplimiento (✅ cumplió / ❌ no cumplió) y cuál es su calificación mínima. Una celda puede marcarse como "No entregó" (cuenta como la mínima) o "Exento" (no cuenta). | M |
 | RF-035 | El sistema calcula el promedio de cada rubro y la calificación del periodo en tiempo real. Las calificaciones admiten hasta 2 decimales; cada grupo elige cuántos decimales muestra la calificación final (0, 1 o 2) y el sentido del redondeo (arriba, abajo o al más cercano). | M |
 | RF-036 | El docente registra notas por alumno (texto o dictado del teclado del sistema) con etiqueta opcional: fortaleza, área de mejora o conducta. | M |
 | RF-037 | La captura de calificaciones y notas funciona sin conexión y se sincroniza sola al recuperar la señal. | M |
+| RF-038 | Un rubro puede tener criterios (subrubros) con nombre y peso que suman 100; cada actividad del rubro se califica por criterio. | M |
+| RF-039 | El docente arma equipos en el grupo y califica una actividad por equipo, con la opción de ajustar a cada integrante por separado. | M |
+
+### Asistencia (SPEC-10)
+
+| ID | Requerimiento | Prioridad |
+| --- | --- | --- |
+| RF-100 | El docente pasa lista por grupo y fecha con un toque por alumno (presente, falta, retardo, justificada) y "Todos presentes". | M |
+| RF-101 | El docente consulta y corrige el historial de asistencia de una unidad con el porcentaje de cada alumno. | M |
+| RF-102 | Un rubro de tipo asistencia calcula su promedio con las tomas de lista de las fechas de la unidad. | M |
+| RF-103 | Pasar lista funciona sin conexión y se sincroniza igual que la captura. | M |
 
 ### Cierre de periodo y observaciones con IA (SPEC-04)
 
@@ -110,7 +123,9 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
 | RF-090 | El sistema registra eventos de producto para medir las métricas del piloto. | M |
-| RF-091 | Existe un panel interno de solo lectura con docentes, grupos, suscripciones y consumo de IA y WhatsApp. | M |
+| RF-091 | Existe un panel de administración con métricas del piloto, docentes, costos y consumo de IA y WhatsApp, y errores de jobs. | M |
+| RF-092 | El administrador gestiona el catálogo de tipos de rubro: crea tipos con un comportamiento existente, los edita y los desactiva. | M |
+| RF-093 | Las acciones de los administradores quedan en auditoría. | M |
 
 ## Requerimientos no funcionales
 
@@ -129,7 +144,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RNF-011 | Rendimiento | El bundle inicial del frontend pesa máximo 250 KB comprimido. | Presupuesto de Angular en el build |
 | RNF-012 | Rendimiento | Las lecturas de la API responden en menos de 300 ms en el percentil 95, sin contar la IA. | Métricas de OpenTelemetry |
 | RNF-013 | Rendimiento | La generación de observaciones de un grupo de 50 alumnos termina en menos de 3 minutos. | Prueba de carga |
-| RNF-014 | Disponibilidad | Captura sin conexión durante al menos 7 días sin pérdida de datos. | Prueba end-to-end |
+| RNF-014 | Disponibilidad | Captura de calificaciones, notas y asistencia sin conexión durante al menos 7 días sin pérdida de datos. | Prueba end-to-end |
 | RNF-015 | Disponibilidad | Disponibilidad mensual de 99% en el piloto y 99.5% en producción. | Monitoreo externo |
 | RNF-016 | Disponibilidad | Respaldo diario cifrado fuera del servidor, retención 30 días. RPO 24 h, RTO 4 h. Prueba de restauración mensual. | Registro de restauraciones |
 | RNF-017 | Escalabilidad | Un servidor soporta 1,000 docentes y 50,000 alumnos sin cambiar la arquitectura. | Prueba de carga |
@@ -137,7 +152,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RNF-019 | Usabilidad | Compatibilidad: Chrome Android y Safari iOS 16.4 o superior (últimas 2 versiones), Chrome y Edge de escritorio. | Pruebas end-to-end en navegadores |
 | RNF-020 | Usabilidad | Español de México, fechas dd/mm/aaaa, zona horaria America/Mexico_City por defecto. Todos los textos en archivos de traducción. | Revisión de código |
 | RNF-021 | Operación | Logs estructurados sin datos personales, trazas y métricas con OpenTelemetry, alertas de errores. | Revisión de logs |
-| RNF-022 | Costos | El costo variable por grupo Pro no supera 8 MXN al mes. Consumo de IA y WhatsApp medido por grupo. | Panel interno |
+| RNF-022 | Costos | El costo variable por grupo Pro no supera 8 MXN al mes. Consumo de IA y WhatsApp medido por grupo. | Panel de administración |
 | RNF-023 | Mantenibilidad | Cobertura de pruebas de al menos 80% en dominio y aplicación; CI obligatorio en cada PR. | Reporte de cobertura |
 | RNF-024 | Mantenibilidad | Toda decisión técnica que cambie el stack o la arquitectura queda en un ADR en `docs/decisiones/`. | Revisión de PR |
 | RNF-025 | Usabilidad | Cada pantalla se diseña y revisa con el skill Impeccable y sigue el sistema de diseño de `DESIGN.md` (reglas/07-diseno-y-movimiento.md). | `/impeccable audit` y `/impeccable critique` anotados en el PR |

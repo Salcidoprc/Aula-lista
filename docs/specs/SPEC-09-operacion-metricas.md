@@ -1,6 +1,6 @@
 # SPEC-09: Operación y métricas
 
-**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-090, RF-091, RNF-005, RNF-009, RNF-015, RNF-016, RNF-021, RNF-022
+**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-090 a RF-093, RNF-005, RNF-009, RNF-015, RNF-016, RNF-021, RNF-022
 
 ## Objetivo
 
@@ -21,16 +21,41 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | `enlace_tutor_abierto` | primera_vez | Apertura de tutores |
 | `suscripcion_activada` | grupos_pro | Conversión |
 
-## Panel interno (RF-091)
+## Panel de administración (RF-091 a RF-093)
 
-Ruta separada, solo para usuarios con rol `admin`, de solo lectura:
+Área separada de la app del docente (`/admin`), solo para usuarios con rol `admin`. El rol se asigna por configuración o por un comando de la API, nunca desde la interfaz.
 
-- Métricas del piloto de `00-prd.md` sección 4, por semana.
-- Lista de docentes con grupos, plan, último acceso y consumo del mes.
-- Costo estimado del mes por grupo: tokens de IA × precio y mensajes de WhatsApp × tarifa, contra ingreso.
-- Errores recientes de jobs (IA, WhatsApp, correo, pagos).
+### Secciones
 
-El panel no muestra nombres de alumnos ni teléfonos.
+| Sección | Qué hace | Puede editar |
+| --- | --- | --- |
+| Métricas | Las 6 métricas del piloto de `00-prd.md` sección 4, por semana | No |
+| Docentes | Lista con grupos, plan, último acceso y consumo del mes | No |
+| Costos | Costo estimado del mes por grupo (tokens de IA × precio y mensajes de WhatsApp × tarifa) contra ingreso | No |
+| Errores | Errores recientes de jobs (IA, WhatsApp, correo, pagos) | No |
+| Tipos de rubro | Catálogo de tipos de rubro que ven los docentes (RF-092) | Sí |
+| Auditoría | Acciones de los administradores (RF-093) | No |
+
+### Reglas
+
+| ID | Regla |
+| --- | --- |
+| RN-090 | El panel no muestra nombres de alumnos, teléfonos, correos de tutores, notas ni observaciones. Los docentes se muestran con su correo y nombre. |
+| RN-091 | Un tipo de rubro tiene nombre, descripción, icono, comportamiento, forma de calificar sugerida (numérica o por cumplimiento), nombres de rubro sugeridos, orden y estado (activo o inactivo). El comportamiento se elige de los que existen en el código desplegado (en el MVP: `actividades` y `asistencia`, ADR-0012). |
+| RN-092 | El administrador crea un tipo nuevo con un comportamiento existente y queda disponible para los docentes al instante (por ejemplo "Participaciones" o "Laboratorio" con comportamiento `actividades`). |
+| RN-093 | Un comportamiento nuevo (otra forma de calcular o de capturar, con su propia pantalla) se desarrolla: primero se documenta en la spec que corresponda, luego se implementa con su cálculo, su pantalla de captura y sus vectores de prueba, y al desplegarse aparece como opción en el panel. |
+| RN-094 | Un tipo con rubros que lo usan no se borra: se desactiva. Desactivarlo lo oculta al crear rubros nuevos; los rubros existentes siguen funcionando. |
+| RN-095 | Toda acción de edición en el panel queda en la auditoría con administrador, fecha, acción y valores antes y después (RNF-005). |
+
+### API
+
+| Método y ruta | Descripción |
+| --- | --- |
+| `GET /api/v1/tipos-rubro` | Tipos activos para los docentes (se guarda sin conexión) |
+| `GET` / `POST /api/v1/admin/tipos-rubro` | Lista todos y crea (solo `admin`) |
+| `PUT /api/v1/admin/tipos-rubro/{id}` | Edita o desactiva (solo `admin`) |
+| `GET /api/v1/admin/comportamientos` | Comportamientos disponibles en el código desplegado |
+| `GET /api/v1/admin/metricas`, `/docentes`, `/costos`, `/errores`, `/auditoria` | Lecturas del panel |
 
 ## Observabilidad
 
@@ -47,6 +72,11 @@ El panel no muestra nombres de alumnos ni teléfonos.
 
 ## Criterios de aceptación
 
-- Dado el panel interno, entonces muestra las 6 métricas del piloto calculadas desde los eventos.
+- Dado un administrador, cuando crea el tipo "Participaciones" con comportamiento `actividades`, entonces los docentes lo ven al crear un rubro sin desplegar nada.
+- Dado un tipo usado por algún rubro, cuando el administrador intenta borrarlo, entonces solo se permite desactivarlo y los rubros existentes siguen calculándose.
+- Dado un docente sin rol `admin`, cuando llama a `/api/v1/admin/...`, entonces recibe 404.
+- Dado cualquier cambio en tipos de rubro, entonces aparece en la auditoría con valores antes y después.
+
+- Dado el panel de administración, entonces muestra las 6 métricas del piloto calculadas desde los eventos.
 - Dado cualquier log de la API, entonces no contiene nombres ni teléfonos (prueba automática con datos marcados).
 - Dado un respaldo del día anterior, cuando se restaura en staging, entonces la app arranca y los conteos coinciden.
