@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { registrar } from '../../api/fn/cuentas/registrar';
@@ -119,6 +120,7 @@ const LONGITUD_MINIMA = 10;
   `,
 })
 export class Registro {
+  private readonly enfocar = crearEnfoque();
   private readonly api = inject(Api);
   private readonly sesion = inject(SesionService);
   private readonly router = inject(Router);
@@ -146,6 +148,7 @@ export class Registro {
   protected async crear(): Promise<void> {
     this.enviado.set(true);
     if (this.formulario.invalid) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     const { correo, contrasena, aceptaLegal } = this.formulario.getRawValue();

@@ -128,3 +128,7 @@ textarea,
     transform: translateY(var(--desplazamiento-pantalla));
   }
 }
+
+[hidden] {
+  display: none !important;
+}

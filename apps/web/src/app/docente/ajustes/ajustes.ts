@@ -11,13 +11,14 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { cambiarContrasena } from '../../api/fn/cuentas/cambiar-contrasena';
 import { solicitarEliminacion } from '../../api/fn/docente/solicitar-eliminacion';
 import { solicitarExportacion } from '../../api/fn/docente/solicitar-exportacion';
 import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
-import { codigoDeError } from '../../core/errores/problema';
+import { camposConError, codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { SesionService } from '../../core/sesion/sesion.service';
 import { AvisosService } from '../../shared/avisos/avisos.service';
@@ -53,6 +54,9 @@ const LONGITUD_MINIMA = 10;
             [enviando]="guardandoPerfil()"
             (guardar)="guardarPerfil($event)"
           />
+          @if (errorPerfil(); as codigo) {
+            <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+          }
         </section>
 
         <section aria-labelledby="ajustes-correo">
@@ -162,7 +166,12 @@ const LONGITUD_MINIMA = 10;
         </section>
       }
 
-      <dialog #dialogoSesiones class="dialogo" aria-labelledby="dialogo-sesiones-titulo">
+      <dialog
+        #dialogoSesiones
+        class="dialogo"
+        closedby="any"
+        aria-labelledby="dialogo-sesiones-titulo"
+      >
         <div class="contenido">
           <h2 id="dialogo-sesiones-titulo">{{ t('sesiones.confirmarTitulo') }}</h2>
           <p>{{ t('sesiones.confirmarTexto') }}</p>
@@ -177,7 +186,12 @@ const LONGITUD_MINIMA = 10;
         </div>
       </dialog>
 
-      <dialog #dialogoEliminar class="dialogo" aria-labelledby="dialogo-eliminar-titulo">
+      <dialog
+        #dialogoEliminar
+        class="dialogo"
+        closedby="any"
+        aria-labelledby="dialogo-eliminar-titulo"
+      >
         <form
           class="contenido"
           [formGroup]="eliminacion"
@@ -201,7 +215,7 @@ const LONGITUD_MINIMA = 10;
                 [attr.aria-invalid]="errorEliminar() === 'reautenticacion_requerida'"
               />
             </div>
-          } @else if (!reautenticado()) {
+          } @else if (!confirmadoConGoogle()) {
             <p>{{ t('eliminar.google') }}</p>
             <app-boton-google [texto]="t('eliminar.googleAccion')" volver="/ajustes?eliminar=1" />
           }
@@ -212,7 +226,7 @@ const LONGITUD_MINIMA = 10;
             <button class="boton boton--secundario" type="button" (click)="dialogoEliminar.close()">
               {{ t('cancelar') }}
             </button>
-            @if (perfil()?.tieneContrasena || reautenticado()) {
+            @if (perfil()?.tieneContrasena || confirmadoConGoogle()) {
               <button class="boton boton--peligro" type="submit" [disabled]="eliminando()">
                 {{ t('eliminar.confirmar') }}
               </button>
@@ -235,6 +249,10 @@ const LONGITUD_MINIMA = 10;
     section > .formulario,
     section > .aviso {
       justify-self: stretch;
+    }
+
+    section > .formulario > .boton--secundario {
+      justify-self: start;
     }
 
     h2 {
@@ -270,6 +288,7 @@ const LONGITUD_MINIMA = 10;
   `,
 })
 export class Ajustes implements OnInit {
+  private readonly enfocar = crearEnfoque();
   private readonly api = inject(Api);
   private readonly servicio = inject(PerfilService);
   private readonly sesion = inject(SesionService);
@@ -299,6 +318,10 @@ export class Ajustes implements OnInit {
   protected readonly eliminacion = this.fb.group({ contrasena: [''] });
 
   protected readonly guardandoPerfil = signal(false);
+  protected readonly errorPerfil = signal<string | null>(null);
+  /** Regresó de confirmar con Google; se guarda porque el parámetro se quita de la URL. */
+  protected readonly confirmadoConGoogle = signal(false);
+  private readonly formularioPerfil = viewChild(FormularioPerfil);
   protected readonly guardandoContrasena = signal(false);
   protected readonly intentoContrasena = signal(false);
   protected readonly errorContrasena = signal<string | null>(null);
@@ -309,7 +332,10 @@ export class Ajustes implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.servicio.cargar(true);
     if (this.reautenticado()) {
+      this.confirmadoConGoogle.set(true);
       this.abrirEliminar();
+      // Que recargar la página no vuelva a abrir el diálogo.
+      void this.router.navigate([], { queryParams: { eliminar: null }, replaceUrl: true });
     }
   }
 
@@ -323,11 +349,13 @@ export class Ajustes implements OnInit {
 
   protected async guardarPerfil(cambios: ActualizarPerfil): Promise<void> {
     this.guardandoPerfil.set(true);
+    this.errorPerfil.set(null);
     try {
       await this.servicio.guardar(cambios);
       this.avisos.mostrar(this.texto('ajustes.perfil.guardado'));
     } catch (e) {
-      this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
+      this.errorPerfil.set(codigoDeError(e));
+      this.formularioPerfil()?.marcarErroresDelServidor(camposConError(e));
     } finally {
       this.guardandoPerfil.set(false);
     }
@@ -336,6 +364,7 @@ export class Ajustes implements OnInit {
   protected async guardarContrasena(): Promise<void> {
     this.intentoContrasena.set(true);
     if (this.contrasena.invalid) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     const { actual, nueva } = this.contrasena.getRawValue();

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { solicitarRecuperacion } from '../../api/fn/cuentas/solicitar-recuperacion';
@@ -18,7 +19,7 @@ import { codigoDeError } from '../../core/errores/problema';
     <section class="pantalla" *transloco="let t">
       <h1>{{ t('cuenta.recuperar.titulo') }}</h1>
       @if (enviadoA(); as correo) {
-        <div class="aviso aviso--exito" role="status">
+        <div class="aviso aviso--exito confirmacion" role="status" tabindex="-1">
           <p>{{ t('cuenta.recuperar.enviado', { correo }) }}</p>
           <p>{{ t('cuenta.recuperar.revisaSpam') }}</p>
         </div>
@@ -58,6 +59,7 @@ import { codigoDeError } from '../../core/errores/problema';
   `,
 })
 export class Recuperar {
+  private readonly enfocar = crearEnfoque();
   private readonly api = inject(Api);
 
   protected readonly formulario = inject(FormBuilder).nonNullable.group({
@@ -75,6 +77,7 @@ export class Recuperar {
   protected async enviar(): Promise<void> {
     this.intentado.set(true);
     if (this.formulario.invalid) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     this.enviando.set(true);
@@ -83,6 +86,7 @@ export class Recuperar {
       const { correo } = this.formulario.getRawValue();
       await this.api.invoke(solicitarRecuperacion, { body: { correo } });
       this.enviadoA.set(correo);
+      this.enfocar('.confirmacion');
     } catch (e) {
       this.error.set(codigoDeError(e));
     } finally {

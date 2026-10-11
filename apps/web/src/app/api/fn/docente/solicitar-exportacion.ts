@@ -9,21 +9,23 @@ import { RequestBuilder } from '../../request-builder';
 
 import { RespuestaExportacion } from '../../models/respuesta-exportacion';
 
-export interface SolicitarExportacion$Params {
-}
+export interface SolicitarExportacion$Params {}
 
-export function solicitarExportacion(http: HttpClient, rootUrl: string, params?: SolicitarExportacion$Params, context?: HttpContext): Observable<StrictHttpResponse<RespuestaExportacion>> {
+export function solicitarExportacion(
+  http: HttpClient,
+  rootUrl: string,
+  params?: SolicitarExportacion$Params,
+  context?: HttpContext,
+): Observable<StrictHttpResponse<RespuestaExportacion>> {
   const rb = new RequestBuilder(rootUrl, solicitarExportacion.PATH, 'post');
   if (params) {
   }
 
-  return http.request(
-    rb.build({ responseType: 'json', accept: 'application/json', context })
-  ).pipe(
+  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
       return r as StrictHttpResponse<RespuestaExportacion>;
-    })
+    }),
   );
 }
 

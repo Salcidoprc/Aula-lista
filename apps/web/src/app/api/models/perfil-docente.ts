@@ -8,11 +8,11 @@ export interface PerfilDocente {
   correo: string;
   correoVerificado: boolean;
   declaracionDatosAceptada: boolean;
-  entidadFederativa: (string | null);
-  escuelaCct: (string | null);
-  escuelaNombre: (string | null);
-  nivel: (string | null);
-  nombre: (string | null);
+  entidadFederativa: string | null;
+  escuelaCct: string | null;
+  escuelaNombre: string | null;
+  nivel: string | null;
+  nombre: string | null;
   perfilCompleto: boolean;
   tieneContrasena: boolean;
   zonaHoraria: string;

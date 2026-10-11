@@ -12,6 +12,7 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
   test('RF-001: se registra, completa su perfil y verifica su correo', async ({ page, request }) => {
     const correo = correoNuevo();
     await page.goto('/cuenta/registro');
+    await expect(page).toHaveTitle('Crea tu cuenta · Aula Lista');
     await sinFallasDeAccesibilidad(page);
 
     await page.getByLabel('Correo').fill(correo);
@@ -78,6 +79,8 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByLabel('Correo').fill(correo);
     await page.getByRole('button', { name: 'Enviar enlace' }).click();
     await expect(page.getByText(correo)).toBeVisible();
+    // El botón desapareció: el foco pasa a la confirmación, no se pierde en el body.
+    await expect(page.getByText(correo).locator('xpath=ancestor::div[1]')).toBeFocused();
 
     await page.goto(await enlaceDelCorreo(request, correo, /Restablece/));
     await page.getByLabel('Contraseña nueva').fill('otra-frase-para-entrar-2026');

@@ -253,6 +253,10 @@ p.error {
   text-underline-offset: 0.2em;
 }
 
+.enlace:active {
+  color: var(--color-accion-presionada);
+}
+
 button.enlace {
   padding: 0;
   border: 0;
@@ -344,7 +348,7 @@ dialog.dialogo[open] {
 }
 
 dialog.dialogo::backdrop {
-  background: oklch(0.25 0.03 260 / 0);
+  background: var(--color-velo-transparente);
   transition:
     background-color var(--dur-small) var(--ease-out),
     overlay var(--dur-small) allow-discrete,
@@ -352,12 +356,12 @@ dialog.dialogo::backdrop {
 }
 
 dialog.dialogo[open]::backdrop {
-  background: oklch(0.25 0.03 260 / 0.4);
+  background: var(--color-velo);
 }
 
 @starting-style {
   dialog.dialogo[open]::backdrop {
-    background: oklch(0.25 0.03 260 / 0);
+    background: var(--color-velo-transparente);
   }
 }
 
@@ -380,4 +384,9 @@ dialog.dialogo[open]::backdrop {
 /* En celular los dos botones ocupan el ancho y la acción queda abajo, al alcance del pulgar. */
 .dialogo .acciones > .boton {
   flex: 1 1 10rem;
+}
+
+/* El error de una elección ocupa toda la fila, debajo de las opciones. */
+.eleccion .error--eleccion {
+  grid-column: 1 / -1;
 }

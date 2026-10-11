@@ -4,10 +4,12 @@
     "saltar": "Ir al contenido",
     "navegacion": "Principal",
     "inicio": "Inicio",
-    "ajustes": "Ajustes"
+    "ajustes": "Ajustes",
+    "cerrarAviso": "Cerrar aviso"
   },
   "comun": {
-    "cargando": "Cargando…"
+    "cargando": "Cargando…",
+    "reintentar": "Reintentar"
   },
   "inicio": {
     "titulo": "Mis grupos",
@@ -178,7 +180,8 @@
       "errorDescarga": "No se pudo descargar el archivo. Inténtalo de nuevo.",
       "fallida": "No pudimos generar tus archivos. Vuelve a Ajustes y pide la exportación otra vez.",
       "noDisponible": "Esta exportación ya no está disponible; los archivos duran 24 horas. Pide una nueva desde Ajustes.",
-      "volver": "Volver a Ajustes"
+      "volver": "Volver a Ajustes",
+      "lenta": "Sigue en proceso. Te avisamos por correo cuando tus archivos estén listos."
     }
   },
   "legal": {
@@ -216,7 +219,10 @@
     "google_sin_correo_verificado": "Tu cuenta de Google no tiene el correo verificado.",
     "validacion_fallida": "Hay datos que corregir.",
     "sin_conexion": "No hay conexión. Revisa tu internet e inténtalo de nuevo.",
-    "desconocido": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento."
+    "desconocido": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento.",
+    "error_interno": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento.",
+    "no_encontrado": "No encontramos lo que buscas.",
+    "no_autenticado": "Tu sesión terminó. Entra de nuevo."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -251,5 +257,18 @@
     "veracruz": "Veracruz",
     "yucatan": "Yucatán",
     "zacatecas": "Zacatecas"
+  },
+  "titulos": {
+    "inicio": "Mis grupos",
+    "bienvenida": "Bienvenida",
+    "ajustes": "Ajustes",
+    "exportacion": "Exportación de tus datos",
+    "entrar": "Entrar",
+    "registro": "Crea tu cuenta",
+    "verificar": "Confirmar correo",
+    "recuperar": "Recupera tu contraseña",
+    "restablecer": "Contraseña nueva",
+    "eliminada": "Cuenta desactivada",
+    "legal": "Documentos legales"
   }
 }

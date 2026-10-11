@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
 import { PerfilDocente } from '../../api/models/perfil-docente';
@@ -81,26 +82,23 @@ type Campo = 'nombre' | 'nivel' | 'escuelaNombre' | 'escuelaCct' | 'entidadFeder
         }
       </div>
 
-      <fieldset
-        class="eleccion"
-        [attr.aria-invalid]="invalido('nivel')"
-        [attr.aria-describedby]="invalido('nivel') ? 'nivel-error' : null"
-      >
+      <fieldset class="eleccion">
         <legend>{{ t('cuenta.perfil.nivel') }}</legend>
-        <label
-          ><input type="radio" formControlName="nivel" value="primaria" />{{
-            t('cuenta.perfil.primaria')
-          }}</label
-        >
-        <label
-          ><input type="radio" formControlName="nivel" value="secundaria" />{{
-            t('cuenta.perfil.secundaria')
-          }}</label
-        >
+        @for (nivel of niveles; track nivel) {
+          <label
+            ><input
+              type="radio"
+              formControlName="nivel"
+              [value]="nivel"
+              [attr.aria-invalid]="invalido('nivel')"
+              [attr.aria-describedby]="invalido('nivel') ? 'nivel-error' : null"
+            />{{ t('cuenta.perfil.' + nivel) }}</label
+          >
+        }
+        @if (invalido('nivel')) {
+          <p id="nivel-error" class="error error--eleccion">{{ t('cuenta.validacion.elige') }}</p>
+        }
       </fieldset>
-      @if (invalido('nivel')) {
-        <p id="nivel-error" class="error">{{ t('cuenta.validacion.elige') }}</p>
-      }
 
       <div class="campo">
         <label for="escuela">{{ t('cuenta.perfil.escuela') }}</label>
@@ -164,14 +162,18 @@ type Campo = 'nombre' | 'nivel' | 'escuelaNombre' | 'escuelaCct' | 'entidadFeder
   `,
 })
 export class FormularioPerfil {
+  private readonly enfocar = crearEnfoque();
   readonly perfil = input<PerfilDocente | null>(null);
   readonly accion = input.required<string>();
   readonly enviando = input(false);
   /** Validación adicional del contenedor (por ejemplo, la casilla legal de la bienvenida). */
   readonly valido = input(true);
   readonly guardar = output<ActualizarPerfil>();
+  /** Cada intento de enviar, válido o no, para que el contenedor muestre sus propios errores. */
+  readonly intento = output<void>();
 
   protected readonly entidades = ENTIDADES;
+  protected readonly niveles = ['primaria', 'secundaria'] as const;
   protected readonly formulario = inject(FormBuilder).nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     nivel: ['', Validators.required],
@@ -184,7 +186,8 @@ export class FormularioPerfil {
   constructor() {
     effect(() => {
       const p = this.perfil();
-      if (p) {
+      // No borra lo que el docente está escribiendo cuando el perfil se recarga por otra razón.
+      if (p && this.formulario.pristine) {
         this.formulario.reset({
           nombre: p.nombre ?? '',
           nivel: p.nivel ?? '',
@@ -196,13 +199,26 @@ export class FormularioPerfil {
     });
   }
 
+  /** Marca los campos que la API rechazó (nombres de `camposConError`). */
+  marcarErroresDelServidor(campos: readonly string[]): void {
+    for (const campo of campos) {
+      if (campo in this.formulario.controls) {
+        this.formulario.controls[campo as Campo].setErrors({ servidor: true });
+      }
+    }
+    this.intentado.set(true);
+    this.enfocar(PRIMER_ERROR);
+  }
+
   protected invalido(campo: Campo): boolean {
     return this.intentado() && this.formulario.controls[campo].invalid;
   }
 
   protected enviar(): void {
+    this.intento.emit();
     this.intentado.set(true);
     if (this.formulario.invalid || !this.valido()) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     const v = this.formulario.getRawValue();

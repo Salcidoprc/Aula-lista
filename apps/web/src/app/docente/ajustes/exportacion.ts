@@ -66,6 +66,9 @@ type Formato = 'excel' | 'pdf';
             <p class="aviso aviso--error" role="alert">{{ t('errorDescarga') }}</p>
           }
         }
+        @case ('lenta') {
+          <p class="aviso aviso--pendiente" role="status">{{ t('lenta') }}</p>
+        }
         @case ('fallida') {
           <p class="aviso aviso--error" role="alert">{{ t('fallida') }}</p>
         }
@@ -117,6 +120,9 @@ export class Exportacion implements OnInit {
       }
       await new Promise((r) => setTimeout(r, ESPERA_MS));
     }
+    if (this.estado() === 'pendiente' && !this.destruida()) {
+      this.estado.set('lenta');
+    }
   }
 
   protected async descargar(formato: Formato): Promise<void> {
@@ -139,7 +145,8 @@ export class Exportacion implements OnInit {
         ? decodeURIComponent(nombre)
         : `aula-lista-mis-datos.${formato === 'excel' ? 'xlsx' : 'pdf'}`;
       enlace.click();
-      setTimeout(() => URL.revokeObjectURL(url), 0);
+      // Algunos navegadores (Safari en iOS) leen el archivo después del clic.
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch {
       this.errorDescarga.set(true);
     } finally {

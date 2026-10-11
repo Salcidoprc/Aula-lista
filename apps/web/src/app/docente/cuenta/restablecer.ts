@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { restablecerContrasena } from '../../api/fn/cuentas/restablecer-contrasena';
@@ -17,7 +18,7 @@ const LONGITUD_MINIMA = 10;
   template: `
     <section class="pantalla" *transloco="let t">
       @if (listo()) {
-        <h1>{{ t('cuenta.restablecer.listo') }}</h1>
+        <h1 tabindex="-1">{{ t('cuenta.restablecer.listo') }}</h1>
         <p class="entrada">{{ t('cuenta.restablecer.listoTexto') }}</p>
         <a class="boton boton--ancho" routerLink="/cuenta/entrar">{{
           t('cuenta.restablecer.entrar')
@@ -65,6 +66,7 @@ const LONGITUD_MINIMA = 10;
   `,
 })
 export class Restablecer {
+  private readonly enfocar = crearEnfoque();
   private readonly api = inject(Api);
   private readonly sesion = inject(SesionService);
 
@@ -91,6 +93,7 @@ export class Restablecer {
       return;
     }
     if (this.formulario.invalid) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     this.enviando.set(true);
@@ -102,6 +105,7 @@ export class Restablecer {
       // La API cerró todas las sesiones de la cuenta, también la de este dispositivo.
       this.sesion.olvidar();
       this.listo.set(true);
+      this.enfocar('h1');
     } catch (e) {
       this.error.set(codigoDeError(e));
     } finally {

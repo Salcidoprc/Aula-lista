@@ -115,7 +115,11 @@
   --sombra-lomo: inset 0.3125rem 0 0 oklch(0.2 0.03 260 / 0.16);
   --sombra-flotante: 0 1px 2px oklch(0.25 0.03 260 / 0.08), 0 8px 24px oklch(0.25 0.03 260 / 0.12);
   --sombra-hoja: 0 -4px 32px oklch(0.25 0.03 260 / 0.16);
-  --foco: 0 0 0 3px oklch(0.5 0.15 265 / 0.4);
+  /* Anillo doble: hoja por dentro y acción por fuera, visible sobre papel y sobre cualquier color (WCAG 1.4.11). */
+  --foco: 0 0 0 2px var(--color-superficie), 0 0 0 4px var(--color-accion);
+  /* Velo detrás de los diálogos. */
+  --color-velo: oklch(0.25 0.03 260 / 0.4);
+  --color-velo-transparente: oklch(0.25 0.03 260 / 0);
 
   /* Movimiento (regla 07). */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -127,6 +131,7 @@
   --dur-large: 300ms;
   --dur-hoja: 400ms;
   --desplazamiento-pantalla: 8px;
+  --desplazamiento-aviso: 1rem;
   --escala-presion: 0.97;
   --escala-entrada: 0.95;
 }
@@ -193,6 +198,7 @@
   :root {
     /* Se quitan desplazamientos y escalas; se conservan fundidos y cambios de color. */
     --desplazamiento-pantalla: 0px;
+    --desplazamiento-aviso: 0px;
     --escala-presion: 1;
     --escala-entrada: 1;
   }

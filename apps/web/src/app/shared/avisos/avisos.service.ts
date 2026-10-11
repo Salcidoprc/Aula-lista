@@ -21,7 +21,10 @@ export class AvisosService {
   mostrar(texto: string, tipo: TipoAviso = 'exito'): void {
     const aviso: Aviso = { id: this.siguiente++, texto, tipo };
     this.lista.update((l) => [...l.slice(-2), aviso]);
-    setTimeout(() => this.cerrar(aviso.id), DURACION_MS);
+    // Los errores se quedan hasta que el docente los cierra (WCAG 2.2.1); los demás se van solos.
+    if (tipo !== 'error') {
+      setTimeout(() => this.cerrar(aviso.id), DURACION_MS);
+    }
   }
 
   cerrar(id: number): void {

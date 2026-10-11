@@ -1,5 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, skip } from 'rxjs';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
 import { Avisos } from './shared/avisos/avisos';
@@ -82,6 +91,14 @@ import { Portada } from './shared/portada/portada';
       text-decoration: none;
     }
 
+    .navegacion a:focus-visible {
+      box-shadow: 0 0 0 2px var(--color-sobre-grado);
+    }
+
+    .navegacion a:active {
+      color: var(--color-sobre-grado);
+    }
+
     .navegacion a.activo {
       color: var(--color-sobre-grado);
       text-decoration: underline;
@@ -98,4 +115,26 @@ import { Portada } from './shared/portada/portada';
 })
 export class App {
   protected readonly sesion = inject(SesionService);
+
+  constructor() {
+    const injector = inject(Injector);
+    const host = inject<ElementRef<HTMLElement>>(ElementRef);
+    // Al cambiar de pantalla, el foco va al contenido nuevo para que teclado y lector de pantalla no
+    // se queden en un elemento que ya no existe (WCAG 2.4.3). La primera carga no se toca.
+    inject(Router)
+      .events.pipe(
+        filter((e) => e instanceof NavigationEnd),
+        skip(1),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() =>
+        afterNextRender(
+          () =>
+            host.nativeElement
+              .querySelector<HTMLElement>('#contenido')
+              ?.focus({ preventScroll: false }),
+          { injector },
+        ),
+      );
+  }
 }

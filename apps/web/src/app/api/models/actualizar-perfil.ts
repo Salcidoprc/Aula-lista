@@ -3,7 +3,7 @@
 
 export interface ActualizarPerfil {
   entidadFederativa: string;
-  escuelaCct: (string | null);
+  escuelaCct: string | null;
   escuelaNombre: string;
   nivel: string;
   nombre: string;

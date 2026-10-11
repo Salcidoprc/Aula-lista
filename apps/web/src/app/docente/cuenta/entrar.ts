@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Api } from '../../api/api';
 import { iniciarSesion } from '../../api/fn/cuentas/iniciar-sesion';
@@ -95,6 +96,7 @@ const ERRORES_GOOGLE = ['google', 'google_no_disponible', 'google_sin_correo_ver
   `,
 })
 export class Entrar {
+  private readonly enfocar = crearEnfoque();
   private readonly api = inject(Api);
   private readonly sesion = inject(SesionService);
   private readonly router = inject(Router);
@@ -131,6 +133,7 @@ export class Entrar {
   protected async entrar(): Promise<void> {
     this.enviado.set(true);
     if (this.formulario.invalid) {
+      this.enfocar(PRIMER_ERROR);
       return;
     }
     this.enviando.set(true);

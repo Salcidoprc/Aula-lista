@@ -6,11 +6,12 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
-import { codigoDeError } from '../../core/errores/problema';
+import { camposConError, codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { FormularioPerfil } from './formulario-perfil';
 
@@ -24,7 +25,14 @@ import { FormularioPerfil } from './formulario-perfil';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla" *transloco="let t">
-      @if (!perfil()) {
+      @if (!perfil() && error()) {
+        <div class="aviso aviso--error" role="alert">
+          <p>{{ t('errores.' + error()) }}</p>
+          <button class="boton boton--secundario" type="button" (click)="cargar()">
+            {{ t('comun.reintentar') }}
+          </button>
+        </div>
+      } @else if (!perfil()) {
         <p class="aviso" role="status">{{ t('comun.cargando') }}</p>
       } @else {
         <hgroup>
@@ -87,6 +95,7 @@ import { FormularioPerfil } from './formulario-perfil';
             [enviando]="enviando()"
             [valido]="pendientes().length === 0 || acepta()"
             (guardar)="continuar($event)"
+            (intento)="intentado.set(true)"
           >
             <ng-container *ngTemplateOutlet="legal" />
           </app-formulario-perfil>
@@ -105,6 +114,7 @@ export class Bienvenida implements OnInit {
   private readonly servicio = inject(PerfilService);
   private readonly router = inject(Router);
 
+  private readonly formularioPerfil = viewChild(FormularioPerfil);
   protected readonly perfil = this.servicio.perfil;
   protected readonly pendientes = computed(() => this.perfil()?.aceptacionesPendientes ?? []);
   protected readonly soloLegal = computed(() => this.perfil()?.perfilCompleto === true);
@@ -113,7 +123,12 @@ export class Bienvenida implements OnInit {
   protected readonly enviando = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): Promise<void> {
+    return this.cargar();
+  }
+
+  protected async cargar(): Promise<void> {
+    this.error.set(null);
     const perfil = await this.servicio.cargar(true);
     if (perfil === null) {
       this.error.set('sin_conexion');
@@ -137,6 +152,7 @@ export class Bienvenida implements OnInit {
       await this.router.navigateByUrl('/');
     } catch (e) {
       this.error.set(codigoDeError(e));
+      this.formularioPerfil()?.marcarErroresDelServidor(camposConError(e));
     } finally {
       this.enviando.set(false);
     }
