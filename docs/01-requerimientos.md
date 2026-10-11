@@ -25,7 +25,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
 | RF-010 | El docente crea un grupo con nombre, nivel, grado, materia (opcional, para secundaria) y ciclo escolar. | M |
-| RF-011 | Cada grupo tiene periodos de evaluación con nombre y fechas; por defecto se proponen 3 trimestres editables. | M |
+| RF-011 | Cada grupo se evalúa por las unidades de su ciclo escolar (un periodo por unidad, con estado propio por grupo). | M |
 | RF-012 | El docente agrega, edita y da de baja alumnos manualmente. La baja es lógica y conserva el historial. | M |
 | RF-013 | El docente importa alumnos y tutores desde Excel (.xlsx) o CSV, con vista previa y corrección antes de guardar. | M |
 | RF-014 | El docente importa alumnos pegando una lista de texto. | M |
@@ -35,19 +35,30 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-018 | Un grupo tiene como máximo 50 alumnos activos. | M |
 | RF-019 | El docente archiva un grupo al terminar el ciclo; queda de solo lectura. | M |
 | RF-020 | El docente crea varios grupos a la vez (por ejemplo 1°A a 1°F de la misma materia) con datos comunes y periodos iguales. | M |
+| RF-021 | El docente define su ciclo escolar con nombre, fecha de inicio y fecha de fin. | M |
+| RF-022 | El docente divide el ciclo en unidades (bimestre, trimestre, cuatrimestre, semestre, mensual o personalizada) con nombre y fechas editables; la configuración aplica a todos los grupos del ciclo. | M |
 
 ### Evaluación y captura (SPEC-03)
 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
-| RF-030 | El docente define rubros por periodo con su peso en porcentaje; los pesos deben sumar 100. | M |
+| RF-030 | El docente define rubros por periodo (unidad) con su peso en porcentaje; los pesos deben sumar 100. Un rubro puede ser de actividades o de asistencia. | M |
 | RF-031 | El docente copia los rubros de otro periodo o de otro grupo. | M |
-| RF-032 | El docente crea actividades dentro de un rubro (nombre y fecha). | M |
+| RF-032 | El docente crea las actividades que quiera dentro de un rubro (nombre y fecha dentro de la unidad); el rubro promedia sus actividades. | M |
 | RF-033 | El docente captura calificaciones en una tabla alumnos por actividades, usable en celular y en computadora. | M |
 | RF-034 | Una celda puede marcarse como "No entregó" (cuenta como la calificación mínima) o "Exento" (no cuenta). | M |
 | RF-035 | El sistema calcula el promedio de cada rubro y la calificación del periodo en tiempo real. Las calificaciones admiten hasta 2 decimales; cada grupo elige cuántos decimales muestra la calificación final (0, 1 o 2) y el sentido del redondeo (arriba, abajo o al más cercano). | M |
 | RF-036 | El docente registra notas por alumno (texto o dictado del teclado del sistema) con etiqueta opcional: fortaleza, área de mejora o conducta. | M |
 | RF-037 | La captura de calificaciones y notas funciona sin conexión y se sincroniza sola al recuperar la señal. | M |
+
+### Asistencia (SPEC-10)
+
+| ID | Requerimiento | Prioridad |
+| --- | --- | --- |
+| RF-100 | El docente pasa lista por grupo y fecha con un toque por alumno (presente, falta, retardo, justificada) y "Todos presentes". | M |
+| RF-101 | El docente consulta y corrige el historial de asistencia de una unidad con el porcentaje de cada alumno. | M |
+| RF-102 | Un rubro de tipo asistencia calcula su promedio con las tomas de lista de las fechas de la unidad. | M |
+| RF-103 | Pasar lista funciona sin conexión y se sincroniza igual que la captura. | M |
 
 ### Cierre de periodo y observaciones con IA (SPEC-04)
 
@@ -129,7 +140,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RNF-011 | Rendimiento | El bundle inicial del frontend pesa máximo 250 KB comprimido. | Presupuesto de Angular en el build |
 | RNF-012 | Rendimiento | Las lecturas de la API responden en menos de 300 ms en el percentil 95, sin contar la IA. | Métricas de OpenTelemetry |
 | RNF-013 | Rendimiento | La generación de observaciones de un grupo de 50 alumnos termina en menos de 3 minutos. | Prueba de carga |
-| RNF-014 | Disponibilidad | Captura sin conexión durante al menos 7 días sin pérdida de datos. | Prueba end-to-end |
+| RNF-014 | Disponibilidad | Captura de calificaciones, notas y asistencia sin conexión durante al menos 7 días sin pérdida de datos. | Prueba end-to-end |
 | RNF-015 | Disponibilidad | Disponibilidad mensual de 99% en el piloto y 99.5% en producción. | Monitoreo externo |
 | RNF-016 | Disponibilidad | Respaldo diario cifrado fuera del servidor, retención 30 días. RPO 24 h, RTO 4 h. Prueba de restauración mensual. | Registro de restauraciones |
 | RNF-017 | Escalabilidad | Un servidor soporta 1,000 docentes y 50,000 alumnos sin cambiar la arquitectura. | Prueba de carga |

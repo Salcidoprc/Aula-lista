@@ -17,7 +17,7 @@ Esta carpeta es la **fuente de verdad** del producto: qué se construye, cómo d
 | Spec | Módulo | Requerimientos |
 | --- | --- | --- |
 | [SPEC-01](specs/SPEC-01-cuenta-docente.md) | Cuenta y acceso del docente | RF-001 a RF-008 |
-| [SPEC-02](specs/SPEC-02-grupos-alumnos-tutores.md) | Grupos, alumnos y tutores | RF-010 a RF-020 |
+| [SPEC-02](specs/SPEC-02-grupos-alumnos-tutores.md) | Grupos, alumnos, tutores, ciclo y unidades | RF-010 a RF-022 |
 | [SPEC-03](specs/SPEC-03-evaluacion-captura.md) | Evaluación y captura | RF-030 a RF-037 |
 | [SPEC-04](specs/SPEC-04-cierre-observaciones-ia.md) | Cierre de periodo y observaciones con IA | RF-040 a RF-046 |
 | [SPEC-05](specs/SPEC-05-boletas.md) | Boletas | RF-050 a RF-055 |
@@ -25,6 +25,7 @@ Esta carpeta es la **fuente de verdad** del producto: qué se construye, cómo d
 | [SPEC-07](specs/SPEC-07-avisos-notificaciones.md) | Avisos y notificaciones | RF-070 a RF-073 |
 | [SPEC-08](specs/SPEC-08-planes-pagos.md) | Planes y pagos | RF-080 a RF-087 |
 | [SPEC-09](specs/SPEC-09-operacion-metricas.md) | Operación y métricas | RF-090, RF-091 |
+| [SPEC-10](specs/SPEC-10-asistencia.md) | Asistencia | RF-100 a RF-103 |
 
 ## Reglas
 

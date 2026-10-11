@@ -61,8 +61,14 @@ Todas las tablas tienen `id` (UUID v7 generado en la aplicación), `created_at` 
 
 ```mermaid
 erDiagram
+  DOCENTE ||--o{ CICLO_ESCOLAR : define
+  CICLO_ESCOLAR ||--o{ UNIDAD : "se divide en"
+  CICLO_ESCOLAR ||--o{ GRUPO : agrupa
   DOCENTE ||--o{ GRUPO : "es dueño de"
-  GRUPO ||--o{ PERIODO : tiene
+  GRUPO ||--o{ PERIODO : "uno por unidad"
+  UNIDAD ||--o{ PERIODO : "se evalúa en"
+  GRUPO ||--o{ TOMA_ASISTENCIA : registra
+  TOMA_ASISTENCIA ||--o{ ASISTENCIA : "por alumno"
   GRUPO ||--o{ ALUMNO : "inscribe"
   PERIODO ||--o{ RUBRO : define
   RUBRO ||--o{ ACTIVIDAD : agrupa
@@ -83,11 +89,14 @@ erDiagram
 | --- | --- | --- |
 | `docente` | usuario de Identity, nombre, nivel, escuela_nombre, escuela_cct, estado, zona_horaria, prueba_pro_usada | Una fila por usuario docente |
 | `aceptacion_legal` | docente_id, documento (terminos, privacidad, declaracion_datos), version, fecha | Inmutable |
-| `ciclo_escolar` | nombre (ej. 2026-2027), inicio, fin | Catálogo global |
-| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), archivado_en | Máximo 50 alumnos activos |
-| `periodo` | grupo_id, nombre, orden, inicio, fin, estado (abierto, en_cierre, cerrado) | |
-| `rubro` | periodo_id, nombre, peso (decimal 5,2), orden | Pesos suman 100 por periodo |
+| `ciclo_escolar` | docente_id, nombre (ej. 2026-2027), inicio, fin, tipo_unidad (bimestre, trimestre, cuatrimestre, semestre, mensual, personalizada) | Del docente (RN-022); máximo 13 meses |
+| `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
+| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
+| `periodo` | grupo_id, unidad_id, estado (abierto, en_cierre, cerrado) | Uno por grupo y unidad (RN-025); nombre y fechas vienen de la unidad |
+| `rubro` | periodo_id, nombre, tipo (actividades, asistencia), peso (decimal 5,2), orden | Pesos suman 100 por periodo |
 | `actividad` | rubro_id, nombre, fecha, orden | |
+| `toma_asistencia` | grupo_id, docente_id, fecha | Única por grupo y fecha (RN-100); la unidad se deduce de la fecha |
+| `asistencia` | toma_asistencia_id, alumno_id, estado (presente, retardo, falta, justificada), version | Única por toma y alumno |
 | `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, no_entrego, exento), version | Única por actividad y alumno |
 | `alumno` | grupo_id, nombres, apellidos, numero_lista, trato (neutro, el, ella), seudonimo, baja_en | Sin CURP ni fecha de nacimiento |
 | `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061 |
@@ -123,7 +132,7 @@ erDiagram
 
 ## Sincronización sin conexión (RF-037, RNF-014)
 
-1. Al abrir un grupo, la PWA descarga a IndexedDB el grupo, alumnos, periodo abierto, rubros, actividades, calificaciones y notas.
+1. Al abrir un grupo, la PWA descarga a IndexedDB el grupo, alumnos, unidades del ciclo, periodo abierto, rubros, actividades, calificaciones, tomas de asistencia de la unidad y notas.
 2. Cada cambio local se guarda en IndexedDB y en una cola de salida con un UUID de idempotencia y la `version` conocida del registro.
 3. Al haber conexión, la cola se envía en orden a `POST /api/v1/sincronizacion` en lotes de hasta 100 cambios.
 4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; las notas nunca chocan porque cada nota es un registro nuevo. El cliente recibe la versión vigente y actualiza su copia.

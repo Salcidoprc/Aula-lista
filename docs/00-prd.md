@@ -4,7 +4,7 @@
 
 ## 1. Resumen
 
-Aula Lista es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de periodo: capturan calificaciones y notas en el celular durante el periodo, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
+Aula Lista es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de unidad: definen su ciclo y sus unidades (trimestres, bimestres, meses), capturan calificaciones, asistencia y notas en el celular durante la unidad, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
 
 - **Cliente inicial:** el docente de escuela pública, que lo adopta y lo paga por su cuenta.
 - **Fase 2:** la escuela, que paga por un panel del director y avisos generales.
@@ -41,9 +41,9 @@ El alumno no tiene cuenta en el MVP.
 
 ## 5. Alcance del MVP
 
-Incluido: cuenta del docente, grupos y alumnos con importación, rubros y captura de calificaciones sin conexión, notas por alumno, cierre de periodo con observaciones de IA, boletas PDF, portal de tutores, avisos y planes de pago. El detalle está en `01-requerimientos.md` y en las specs.
+Incluido: cuenta del docente, ciclo escolar con sus unidades definidas por el docente, grupos y alumnos con importación, rubros que promedian sus actividades, captura de calificaciones y pase de lista sin conexión (la asistencia puede valer un porcentaje de la unidad), notas por alumno, cierre de periodo con observaciones de IA, boletas PDF, portal de tutores, avisos y planes de pago. El detalle está en `01-requerimientos.md` y en las specs.
 
-Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de alumno, planeación con IA, asistencia, panel del director, cobros de colegiaturas, app nativa, formato oficial de boleta de la SEP (se cubre con exportación a Excel) y facturación CFDI.
+Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de alumno, planeación con IA, asistencia visible para tutores, panel del director, cobros de colegiaturas, app nativa, formato oficial de boleta de la SEP (se cubre con exportación a Excel) y facturación CFDI.
 
 ## 6. Diseño y movimiento
 
@@ -53,7 +53,8 @@ La app debe sentirse como una app nativa y cuidada, no como una plantilla. El di
 
 ```mermaid
 flowchart LR
-  A[Crea grupo e importa lista] --> B[Captura notas y calificaciones]
+  Z[Define ciclo y unidades] --> A
+  A[Crea grupo e importa lista] --> B[Captura notas, calificaciones y asistencia]
   B --> C[IA redacta observaciones]
   C --> D[Docente revisa y aprueba]
   D -- editar o regenerar --> C

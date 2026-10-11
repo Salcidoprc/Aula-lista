@@ -118,6 +118,7 @@ Toda animación responde "¿para qué?": consistencia espacial, indicar un cambi
 | Momento | Movimiento | Spec |
 | --- | --- | --- |
 | Capturar calificación y pasar al siguiente alumno | Sin animación del foco. La celda guardada cambia de color de fondo en 160 ms | SPEC-03 |
+| Pasar lista (cambiar el estado de un alumno) | Sin animación. La fila cambia de color de fondo en 160 ms | SPEC-10 |
 | Botones rápidos 10, 9, 8… y "No entregó" | `scale(0.97)` al presionar | SPEC-03 |
 | Indicador de sincronización | Cambio de ícono con fundido y desenfoque breve (blur de 2 px) en 200 ms; el ícono de "sincronizando" gira de forma continua | SPEC-03 |
 | Promedio del alumno al recalcular | El número cambia con fundido corto; sin contadores animados | SPEC-03 |
