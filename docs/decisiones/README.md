@@ -17,3 +17,4 @@ Formato: contexto, decisión, alternativas consideradas, consecuencias.
 | [ADR-0009](ADR-0009-pagos-stripe-oxxo.md) | Stripe: tarjeta como suscripción y OXXO como prepago | Aceptada | 11/10/2026 |
 | [ADR-0010](ADR-0010-diseno-y-movimiento.md) | Diseño con Impeccable mejorado con los skills de animación y diseño | Aceptada | 11/10/2026 |
 | [ADR-0011](ADR-0011-cimientos-h0.md) | Herramientas y decisiones de los cimientos (H0) | Aceptada | 11/10/2026 |
+| [ADR-0012](ADR-0012-tipos-de-rubro-extensibles.md) | Tipos de rubro como catálogo administrable con comportamientos en código | Aceptada | 11/10/2026 |

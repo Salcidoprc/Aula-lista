@@ -4,7 +4,7 @@
 
 ## 1. Resumen
 
-Aula Lista es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de periodo: capturan calificaciones y notas en el celular durante el periodo, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
+Aula Lista es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de unidad: definen su ciclo y sus unidades (trimestres, bimestres, meses), capturan calificaciones, asistencia y notas en el celular durante la unidad, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
 
 - **Cliente inicial:** el docente de escuela pública, que lo adopta y lo paga por su cuenta.
 - **Fase 2:** la escuela, que paga por un panel del director y avisos generales.
@@ -24,7 +24,7 @@ El docente pierde noches en cada cierre de periodo: junta calificaciones dispers
 | Tutor | Ver avance, boletas y avisos de todos sus hijos sin instalar nada | Enlace personal | MVP |
 | Director | Ver todos los grupos y enviar avisos generales | Cuenta de escuela | F2 |
 | Escuela privada | Libros digitales, cobros y marca propia | Cuenta de escuela con módulos | F3 |
-| Administrador interno | Operar y medir el piloto | Panel interno | MVP |
+| Administrador interno | Operar y medir el piloto, gestionar el catálogo de tipos de rubro | Panel de administración | MVP |
 
 El alumno no tiene cuenta en el MVP.
 
@@ -41,9 +41,13 @@ El alumno no tiene cuenta en el MVP.
 
 ## 5. Alcance del MVP
 
-Incluido: cuenta del docente, grupos y alumnos con importación, rubros y captura de calificaciones sin conexión, notas por alumno, cierre de periodo con observaciones de IA, boletas PDF, portal de tutores, avisos y planes de pago. El detalle está en `01-requerimientos.md` y en las specs.
+Incluido: cuenta del docente, ciclo escolar con sus unidades definidas por el docente, grupos y alumnos con importación, rubros que promedian sus actividades, captura de calificaciones y pase de lista sin conexión (la asistencia puede valer un porcentaje de la unidad), notas por alumno, cierre de periodo con observaciones de IA, boletas PDF, portal de tutores, avisos y planes de pago. El detalle está en `01-requerimientos.md` y en las specs.
 
-Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de alumno, planeación con IA, asistencia, panel del director, cobros de colegiaturas, app nativa, formato oficial de boleta de la SEP (se cubre con exportación a Excel) y facturación CFDI.
+Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de alumno, planeación con IA, asistencia visible para tutores, panel del director, cobros de colegiaturas, app nativa, formato oficial de boleta de la SEP (se cubre con exportación a Excel) y facturación CFDI.
+
+## 5.1 Panel de administración
+
+El equipo de Aula Lista opera el producto desde un panel de administración separado de la app del docente (SPEC-09). En el MVP tiene: métricas del piloto, docentes con su plan y consumo, costos de IA y WhatsApp contra ingreso, errores de procesos en segundo plano, auditoría y el catálogo de tipos de rubro. Desde el catálogo el administrador agrega tipos de rubro nuevos que usan una forma de cálculo existente, al instante; un tipo con otra forma de calcular o de capturar se desarrolla con su propia pantalla y después se activa en el panel (ADR-0012). El panel nunca muestra datos de alumnos ni de tutores.
 
 ## 6. Diseño y movimiento
 
@@ -53,7 +57,8 @@ La app debe sentirse como una app nativa y cuidada, no como una plantilla. El di
 
 ```mermaid
 flowchart LR
-  A[Crea grupo e importa lista] --> B[Captura notas y calificaciones]
+  Z[Define ciclo y unidades] --> A
+  A[Crea grupo e importa lista] --> B[Captura notas, calificaciones y asistencia]
   B --> C[IA redacta observaciones]
   C --> D[Docente revisa y aprueba]
   D -- editar o regenerar --> C
