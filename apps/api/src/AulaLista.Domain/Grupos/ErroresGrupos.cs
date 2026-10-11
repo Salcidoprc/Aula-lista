@@ -23,6 +23,7 @@ public static class ErroresGrupos
     public static readonly ErrorNegocio ConfiguracionCalificacionInvalida = new("configuracion_calificacion_invalida", "La mínima va de 0 a 10 y la aprobatoria no puede ser menor que la mínima.");
     public static readonly ErrorNegocio GrupoArchivado = new("grupo_archivado", "El grupo está archivado: se puede consultar, pero no editar.");
 
+    public static readonly ErrorNegocio CorreoNoVerificado = new("correo_no_verificado", "Confirma tu correo antes de dar de alta a tus alumnos.");
     public static readonly ErrorNegocio LimiteAlumnosGrupo = new("limite_alumnos_grupo", "El grupo ya tiene 50 alumnos activos.");
     public static readonly ErrorNegocio NumeroListaInvalido = new("numero_lista_invalido", "El número de lista va de 1 a 99.");
     public static readonly ErrorNegocio TratoInvalido = new("trato_invalido", "El trato es neutro, él o ella.");
@@ -39,7 +40,7 @@ public static class ErroresGrupos
         CicloFechasInvalidas, CicloMuyLargo, CicloDuplicado, TipoUnidadInvalido, CantidadUnidadesInvalida,
         UnidadFechasInvalidas, UnidadFueraDeCiclo, UnidadesTraslapadas, UnidadCerrada, UnidadInexistente,
         CicloInexistente, GradoInvalido, GrupoDuplicado, LoteInvalido, ConfiguracionCalificacionInvalida,
-        GrupoArchivado, LimiteAlumnosGrupo, NumeroListaInvalido, TratoInvalido,
+        GrupoArchivado, CorreoNoVerificado, LimiteAlumnosGrupo, NumeroListaInvalido, TratoInvalido,
         AlumnoDadoDeBaja, TelefonoInvalido, LimiteTutoresAlumno, TutorYaVinculado, ArchivoInvalido,
         ArchivoIlegible, ImportacionConfirmada,
     ];

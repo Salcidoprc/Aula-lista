@@ -71,7 +71,15 @@ internal sealed class AgregarAlumnoValidador : AbstractValidator<AgregarAlumno>
 }
 
 /// <summary>RF-012: alta manual, al final de la lista (RN-013) y con el límite de 50 activos (RN-011).</summary>
-public sealed class AgregarAlumnoCasoUso(IRepositorioGrupos repositorio, IUnidadDeTrabajo unidad, TimeProvider reloj)
+/// <summary>RN-001: el correo se verifica antes de crear el primer alumno; grupos y ciclos no lo piden.</summary>
+public sealed class VerificacionCorreo(Cuentas.IRepositorioCuentas cuentas, IContextoUsuario contexto)
+{
+    public async Task<bool> VerificadoAsync(CancellationToken ct) =>
+        contexto.DocenteId is { } id && await cuentas.PorIdAsync(id, ct) is { CorreoVerificado: true };
+}
+
+public sealed class AgregarAlumnoCasoUso(
+    IRepositorioGrupos repositorio, VerificacionCorreo verificacion, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<AlumnoDto>?> EjecutarAsync(Guid grupoId, AgregarAlumno comando, CancellationToken ct)
     {
@@ -83,6 +91,11 @@ public sealed class AgregarAlumnoCasoUso(IRepositorioGrupos repositorio, IUnidad
         if (grupo.EstaArchivado)
         {
             return Resultado.Fallo<AlumnoDto>(ErroresGrupos.GrupoArchivado);
+        }
+
+        if (!await verificacion.VerificadoAsync(ct))
+        {
+            return Resultado.Fallo<AlumnoDto>(ErroresGrupos.CorreoNoVerificado);
         }
 
         var existentes = await repositorio.AlumnosAsync(grupoId, ct);

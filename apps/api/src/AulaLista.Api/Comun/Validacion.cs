@@ -32,7 +32,8 @@ internal static class Validacion
                 => StatusCodes.Status401Unauthorized,
             _ when error == ErroresCuentas.DemasiadosIntentos => StatusCodes.Status429TooManyRequests,
             _ when error == ErroresCuentas.CorreoRegistrado => StatusCodes.Status409Conflict,
-            _ when error == ErroresCuentas.ReautenticacionRequerida => StatusCodes.Status403Forbidden,
+            _ when error == ErroresCuentas.ReautenticacionRequerida || error == ErroresGrupos.CorreoNoVerificado
+                => StatusCodes.Status403Forbidden,
             _ when error == ErroresCuentas.ExportacionNoDisponible => StatusCodes.Status404NotFound,
             _ when error == ErroresGrupos.CicloDuplicado || error == ErroresGrupos.GrupoDuplicado
                 || error == ErroresGrupos.TutorYaVinculado || error == ErroresGrupos.ImportacionConfirmada

@@ -20,7 +20,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_CicloDeAgostoAJulioPorTrimestre_ProponeTresUnidadesEditables()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
 
         var respuesta = await cliente.PostAsJsonAsync("/api/v1/ciclos", new { nombre = "2026-2027", inicio = "2026-08-25", fin = "2027-07-16", tipoUnidad = "trimestre" });
 
@@ -51,7 +51,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_CambiarFinDeUnidadUno_SeReflejaEnLosCuatroGrupos()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(cliente);
         var lote = await cliente.PostAsJsonAsync("/api/v1/grupos/lote", new { nivel = "secundaria", grado = 1, materia = "Matemáticas", cicloId = ciclo.Id, nombres = CuatroGrupos });
         Assert.Equal(HttpStatusCode.Created, lote.StatusCode);
@@ -76,7 +76,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_UnidadesQueSeTraslapan_SeRechazanConUnidadesTraslapadas()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(cliente);
         var unidades = ciclo.Unidades.ToList();
         unidades[0] = unidades[0] with { Fin = unidades[1].Inicio.AddDays(3) };
@@ -89,7 +89,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_UnidadCerradaEnUnGrupo_NoCambiaDeFechas()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(cliente);
         var grupo = await CrearGrupoAsync(cliente, ciclo.Id);
         await EjecutarSqlAsync($"UPDATE periodo SET estado = 'cerrado' WHERE grupo_id = '{grupo}' AND unidad_id = '{ciclo.Unidades[0].Id}'");
@@ -105,7 +105,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN027_AgregarUnidadAlFinal_CreaSuPeriodoEnCadaGrupo()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(cliente);
         var grupo = await CrearGrupoAsync(cliente, ciclo.Id);
         var unidades = ciclo.Unidades.Select(u => (object)u).ToList();
@@ -123,7 +123,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_ExcelCon35AlumnosYSusTutores_QuedanConTelefonosE164()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var excel = ExcelDeAlumnos(35);
 
@@ -162,7 +162,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RF013_ConfirmarConFilasInvalidas_GuardaSoloLasValidasEInformaLasOmitidas()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var vista = await PegarAsync(cliente, grupo, "Uno\nDos\nTres");
         var filas = new object[]
@@ -186,7 +186,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RF014_TextoPegado_DevuelveUnaColumnaPorAlumnoSinLaNumeracion()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
 
         var vista = await PegarAsync(cliente, grupo, "1. García López Ana\r\n2) Pérez Soto Luis\n\n- Ruiz Paz, Eva María\n");
@@ -202,7 +202,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     public async Task RF013_CsvDeExcelEnWindows1252ConPuntoYComa_SeLeeConAcentos()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var csv = Encoding.GetEncoding(1252).GetBytes("Nombre;Apellido paterno;Apellido materno;Teléfono\r\nJosé;Núñez;\"Peña; Sr.\";667 123 4567\r\n");
 
@@ -215,7 +215,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RF013_ArchivoQueNoEsExcelNiCsv_SeRechaza()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
 
         var pdf = await SubirSinLeerAsync(cliente, grupo, "%PDF-1.7"u8.ToArray(), "lista.pdf");
@@ -228,7 +228,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_GrupoConCincuentaActivos_RechazaOtroConLimiteAlumnosGrupo()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var vista = await PegarAsync(cliente, grupo, "x");
         var filas = Enumerable.Range(1, 52).Select(i => new { nombres = $"Nombre{i}", apellidos = $"Apellido{i:00}" });
@@ -245,8 +245,8 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_TelefonoRegistradoPorOtroDocente_SeVinculaSinVerSusDatos()
     {
-        var (clienteA, _, _) = await _fabrica.RegistrarDocenteAsync();
-        var (clienteB, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (clienteA, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+        var (clienteB, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var alumnoA = await CrearAlumnoAsync(clienteA);
         var alumnoB = await CrearAlumnoAsync(clienteB);
         var telefono = $"667{Random.Shared.Next(1_000_000, 9_999_999)}";
@@ -273,7 +273,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task SPEC02_HermanosConElMismoTelefono_UnSoloTutorYSinAviso()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var uno = await AgregarAlumnoAsync(cliente, grupo, "Ana", "Ruiz");
         var dos = await AgregarAlumnoAsync(cliente, grupo, "Luis", "Ruiz");
@@ -289,7 +289,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN016_CuartoTutor_SeRechaza()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var alumno = await CrearAlumnoAsync(cliente);
         for (var i = 0; i < 3; i++)
         {
@@ -305,7 +305,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN017_AlumnoDadoDeBaja_ConservaSuHistorialYLiberaLugar()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var alumno = await AgregarAlumnoAsync(cliente, grupo, "Ana", "Ruiz");
 
@@ -323,7 +323,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN013_CambiarNumeroDeLista_IntercambiaConQuienLoTenia()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
         var ana = await AgregarAlumnoAsync(cliente, grupo, "Ana", "Álvarez");
         var luis = await AgregarAlumnoAsync(cliente, grupo, "Luis", "Beltrán");
@@ -339,7 +339,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN021_LoteConUnNombreRepetido_NoCreaNinguno()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(cliente);
         await CrearGrupoAsync(cliente, ciclo.Id, "C");
 
@@ -352,7 +352,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN018_GrupoArchivado_SeConsultaPeroNoSeEdita()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
 
         Assert.Equal(HttpStatusCode.NoContent, (await cliente.PostAsync($"/api/v1/grupos/{grupo}/archivar", null)).StatusCode);
@@ -368,7 +368,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN035_ConfiguracionDeCalificacion_SeGuardaYSeValida()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
 
         var valida = await cliente.PutAsJsonAsync($"/api/v1/grupos/{grupo}", new { nombre = "A", grado = 2, materia = "Matemáticas", califMinima = 6, califAprobatoria = 7, decimalesFinal = 1, redondeo = "abajo" });
@@ -383,8 +383,8 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RNF001_RecursosDeOtroDocente_Responden404()
     {
-        var (clienteA, _, _) = await _fabrica.RegistrarDocenteAsync();
-        var (intruso, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (clienteA, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+        var (intruso, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var ciclo = await CrearCicloAsync(clienteA);
         var grupo = await CrearGrupoAsync(clienteA, ciclo.Id);
         var alumno = await AgregarAlumnoAsync(clienteA, grupo, "Ana", "Ruiz");
@@ -416,7 +416,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RNF001_RolRuntime_NoEscribeTutoresNiLeeLosDeOtroDocente()
     {
-        var (cliente, docenteId, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, docenteId, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var alumno = await CrearAlumnoAsync(cliente);
         await cliente.PostAsJsonAsync($"/api/v1/alumnos/{alumno}/tutores", new { nombre = "María", telefono = $"667{Random.Shared.Next(1_000_000, 9_999_999)}" });
 
@@ -439,8 +439,8 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RN006_BorradoDeCuenta_EliminaGruposYTutoresSinOtroVinculo()
     {
-        var (clienteA, docenteA, _) = await _fabrica.RegistrarDocenteAsync();
-        var (clienteB, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (clienteA, docenteA, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+        var (clienteB, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var alumnoA = await CrearAlumnoAsync(clienteA);
         var alumnoB = await CrearAlumnoAsync(clienteB);
         var compartido = $"667{Random.Shared.Next(1_000_000, 9_999_999)}";
@@ -462,7 +462,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RF013_Plantilla_TraeLasColumnasQueSeDetectan()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
 
         var bytes = await cliente.GetByteArrayAsync("/api/v1/importaciones/plantilla");
 
@@ -474,7 +474,7 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     [Fact]
     public async Task RF007_Exportacion_IncluyeGruposAlumnosYTutores()
     {
-        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
         var alumno = await CrearAlumnoAsync(cliente);
         await cliente.PostAsJsonAsync($"/api/v1/alumnos/{alumno}/tutores", new { nombre = "Rosa Ruiz", telefono = $"667{Random.Shared.Next(1_000_000, 9_999_999)}" });
 
@@ -488,6 +488,23 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
         Assert.Contains("Matemáticas", Celdas("Grupos"), StringComparison.Ordinal);
         Assert.Contains("Ruiz", Celdas("Alumnos"), StringComparison.Ordinal);
         Assert.Contains("Rosa Ruiz", Celdas("Tutores"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RN001_SinCorreoConfirmado_NoDaDeAltaAlumnosPeroSiCreaGrupos()
+    {
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var grupo = await CrearGrupoAsync(cliente, (await CrearCicloAsync(cliente)).Id);
+
+        var alta = await cliente.PostAsJsonAsync($"/api/v1/grupos/{grupo}/alumnos", new { nombres = "Ana", apellidos = "Ruiz" });
+        var vista = await PegarAsync(cliente, grupo, "Ruiz Ana");
+        var confirmar = await cliente.PostAsJsonAsync(
+            $"/api/v1/importaciones/{vista.GetProperty("id").GetGuid()}/confirmar",
+            new { filas = new[] { new { nombres = "Ana", apellidos = "Ruiz" } } });
+
+        Assert.Equal(HttpStatusCode.Forbidden, alta.StatusCode);
+        Assert.Equal("correo_no_verificado", await CodigoAsync(alta));
+        Assert.Equal("correo_no_verificado", await CodigoAsync(confirmar));
     }
 
     private sealed record Unidad(Guid Id, string Nombre, DateOnly Inicio, DateOnly Fin);

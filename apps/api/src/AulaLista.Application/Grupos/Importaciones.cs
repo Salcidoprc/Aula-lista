@@ -265,7 +265,7 @@ public sealed record ResultadoImportacion(int Guardados, int OmitidosPorError, i
 /// (RN-011) con sus tutores, y dice cuántas omitió.
 /// </summary>
 public sealed class ConfirmarImportacionCasoUso(
-    IRepositorioGrupos repositorio, ITutores tutores, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos repositorio, ITutores tutores, VerificacionCorreo verificacion, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<ResultadoImportacion>?> EjecutarAsync(Guid importacionId, ConfirmarImportacion comando, CancellationToken ct)
     {
@@ -278,6 +278,11 @@ public sealed class ConfirmarImportacionCasoUso(
         if (grupo.EstaArchivado)
         {
             return Resultado.Fallo<ResultadoImportacion>(ErroresGrupos.GrupoArchivado);
+        }
+
+        if (!await verificacion.VerificadoAsync(ct))
+        {
+            return Resultado.Fallo<ResultadoImportacion>(ErroresGrupos.CorreoNoVerificado);
         }
 
         var ahora = reloj.GetUtcNow();
