@@ -10,6 +10,8 @@
 | Unidad | Tramo del ciclo con nombre y fechas (trimestre, bimestre, mes o personalizado). Se configura una vez por ciclo y la heredan todos sus grupos. Es el término que ve el docente. | `Unidad` |
 | Periodo | La unidad vista desde un grupo: ahí viven los rubros, el cierre y las boletas. Estados: abierto, en cierre, cerrado. En la interfaz se dice "unidad". | `Periodo` |
 | Rubro | Criterio de evaluación con peso porcentual dentro de un periodo (tareas, proyecto, examen). Tipo: actividades (promedia sus actividades) o asistencia. | `Rubro` |
+| Criterio | Subrubro con peso dentro de un rubro (por ejemplo Información 40% en Exposición). | `Criterio` |
+| Equipo | Grupo de alumnos dentro de un grupo para calificar una actividad en conjunto. | `Equipo` |
 | Actividad | Evaluación concreta dentro de un rubro (tarea del 12/09). | `Actividad` |
 | Calificación | Valor de 0 a 10 de un alumno en una actividad, o marca "No entregó" o "Exento". | `Calificacion` |
 | Calificación del periodo | Promedio ponderado de los rubros (RN-033). | `CalificacionPeriodo` |

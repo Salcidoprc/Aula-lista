@@ -1,6 +1,6 @@
 # SPEC-03: Evaluación y captura
 
-**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-030 a RF-037, RNF-010, RNF-014
+**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-030 a RF-039, RNF-010, RNF-014
 
 ## Objetivo
 
@@ -11,6 +11,9 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 - Como docente, quiero definir mis rubros (tareas 30%, proyecto 40%, examen 30%) una vez y copiarlos a otros grupos.
 - Como docente, quiero aplicar las actividades que necesite en cada rubro (por ejemplo 5 actividades en la unidad) y que se promedien solas para dar el porcentaje del rubro.
 - Como docente, quiero capturar las calificaciones de una tarea para todo el grupo en un minuto desde el celular.
+- Como docente, quiero crear los rubros que yo decida (asistencia, prácticas, participaciones, tareas, actividades, exámenes, exposición) y elegir su tipo.
+- Como docente, quiero que un rubro como Exposición tenga criterios propios (información, presentación, dominio del tema) con su porcentaje.
+- Como docente, quiero armar equipos en mi grupo y calificar una actividad por equipo, o a cada integrante por separado si así lo decido.
 - Como docente, quiero anotar en el momento que un alumno participó o se distrajo, para usarlo al cerrar el periodo.
 
 ## Escala y cálculo
@@ -28,6 +31,19 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 | RN-038 | Un periodo `cerrado` es de solo lectura. Reabrirlo requiere confirmación y queda en auditoría. |
 | RN-039 | Cada rubro tiene un tipo: `actividades` (por defecto; se promedia con RN-032) o `asistencia` (se calcula con las tomas de asistencia de las fechas de la unidad, SPEC-10 RN-103 y RN-104). Ambos entran igual al cálculo de RN-033. Una actividad solo puede tener fecha dentro de la unidad del periodo. |
 
+## Rubros, criterios y equipos
+
+| ID | Regla |
+| --- | --- |
+| RN-110 | Los rubros son libres: el docente crea los que quiera, con el nombre que quiera, hasta 20 por periodo. Al crearlos se sugieren nombres comunes (Tareas, Actividades, Prácticas, Participaciones, Exámenes, Proyecto, Exposición, Asistencia) y el tipo que les corresponde. |
+| RN-111 | Un rubro de tipo `actividades` puede tener criterios (subrubros): de 2 a 10, cada uno con nombre y peso; los pesos de los criterios suman 100. Todas las actividades de ese rubro se califican por criterio, de 0 a 10. Un rubro de tipo `asistencia` no tiene criterios. |
+| RN-112 | Calificación de una actividad con criterios = suma de (calificación del criterio × peso) / 100. Si falta algún criterio, se calcula con los calificados y sus pesos se reparten proporcionalmente (como RN-033); si no hay ninguno, la celda está vacía. "No entregó" y "Exento" se marcan para la actividad completa. Ejemplo: Exposición con Información 40%, Presentación 30% y Dominio del tema 30%; un alumno con 9, 8 y 10 obtiene 3.6 + 2.4 + 3.0 = 9.0 en esa exposición. Esa calificación entra al promedio del rubro con RN-032. |
+| RN-113 | Los criterios se editan como los rubros: libres hasta iniciar el cierre (RN-037). Cambiar pesos recalcula las actividades; borrar un criterio con calificaciones pide confirmación. Copiar rubros (RF-031) copia también sus criterios. |
+| RN-114 | El docente arma equipos dentro del grupo, con nombre e integrantes. Un alumno está como máximo en un equipo a la vez. Puede reorganizarlos cuando quiera. |
+| RN-115 | Cada actividad se califica de forma `individual` (por defecto) o `por_equipo`. Por equipo, el docente captura una calificación (o sus criterios) por equipo y se copia a cada integrante. Después puede ajustar a un integrante por separado; esa celda queda marcada como ajustada y ya no cambia al recalificar al equipo. Un alumno sin equipo se califica individualmente. |
+| RN-116 | Una actividad por equipo guarda la composición de los equipos con la que se calificó. Reorganizar los equipos después no cambia las calificaciones ya capturadas. |
+| RN-117 | El cálculo de promedios no cambia: cada alumno siempre tiene su propia calificación por actividad, venga de captura individual, de su equipo o de un ajuste. |
+
 ## Notas por alumno
 
 - Texto libre de hasta 1,000 caracteres, con fecha y etiqueta opcional (fortaleza, área de mejora, conducta).
@@ -38,7 +54,9 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 
 Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable como base, mejorado con los skills de animación y diseño); los movimientos de este módulo están en su catálogo.
 
-- **Vista por actividad (celular):** lista de alumnos con un campo numérico grande por alumno; al escribir y confirmar pasa al siguiente. Botones rápidos 10, 9, 8, 7, 6, 5, "No entregó" y "Exento".
+- **Vista por actividad (celular):** lista de alumnos con un campo numérico grande por alumno; al escribir y confirmar pasa al siguiente. Botones rápidos 10, 9, 8, 7, 6, 5, "No entregó" y "Exento". Si el rubro tiene criterios, cada alumno muestra un campo por criterio y su resultado calculado. Si la actividad es por equipo, la lista muestra equipos con sus integrantes; al tocar un integrante se ajusta solo a él.
+- **Rubros del periodo:** lista de rubros con tipo, peso y criterios; suma de pesos visible en todo momento.
+- **Equipos del grupo:** crear equipos, mover alumnos entre equipos y ver quién no tiene equipo.
 - **Vista de tabla (computadora):** alumnos por actividades con navegación por teclado (flechas, Enter, Tab) y pegado desde Excel.
 - **Vista por alumno:** desde la ficha, sus calificaciones por rubro, promedio actual y notas.
 - Cada celda guarda al salir del campo, en IndexedDB primero y luego en el servidor. No hay botón "Guardar".
@@ -53,7 +71,8 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 | `GET` / `POST /api/v1/rubros/{id}/actividades` | Lista y crea actividades |
 | `PUT` / `DELETE /api/v1/actividades/{id}` | Edita o borra (borrar pide confirmación si tiene calificaciones) |
 | `GET /api/v1/periodos/{id}/calificaciones` | Matriz completa del periodo con promedios calculados |
-| `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId, valor, marca, version}` con `Idempotency-Key` |
+| `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId o equipoId, valor o criterios[], marca, version}` con `Idempotency-Key`; por equipo escribe a cada integrante no ajustado (RN-115) |
+| `GET` / `PUT /api/v1/grupos/{id}/equipos` | Lee y reemplaza los equipos del grupo (RN-114) |
 | `GET` / `POST /api/v1/alumnos/{id}/notas` | Lista y crea notas |
 | `POST /api/v1/sincronizacion` | Recibe la cola sin conexión (ver arquitectura) |
 
@@ -65,6 +84,11 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - El docente sin conexión por más de 7 días: la cola se conserva; se muestra una advertencia a partir del día 3.
 
 ## Criterios de aceptación
+
+- Dado un rubro Exposición con criterios 40/30/30, cuando un alumno obtiene 9, 8 y 10, entonces su calificación en la actividad es 9.00.
+- Dados criterios que suman 90, cuando el docente guarda el rubro, entonces se rechaza con `pesos_criterios_no_suman_100`.
+- Dada una actividad por equipo y un equipo de 4 integrantes, cuando el docente captura 9 al equipo, entonces los 4 tienen 9; si luego ajusta a uno con 7 y recalifica al equipo con 8, entonces 3 tienen 8 y el ajustado conserva 7.
+- Dada una actividad por equipo ya calificada, cuando el docente reorganiza los equipos, entonces las calificaciones de esa actividad no cambian.
 
 - Dados rubros 30/40/30 y calificaciones conocidas, cuando se calcula el periodo, entonces el resultado coincide con todos los casos del archivo de vectores de prueba, en backend y frontend.
 - Dado un rubro Actividades de 30% con 5 actividades calificadas 8, 9, 10, 7 y 6, cuando se calcula, entonces el promedio del rubro es 8.00 y aporta 2.40 a la unidad.

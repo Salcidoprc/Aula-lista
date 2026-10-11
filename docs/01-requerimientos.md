@@ -42,7 +42,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
-| RF-030 | El docente define rubros por periodo (unidad) con su peso en porcentaje; los pesos deben sumar 100. Un rubro puede ser de actividades o de asistencia. | M |
+| RF-030 | El docente crea los rubros que decida por periodo (unidad), con nombre libre y peso en porcentaje; los pesos deben sumar 100. Cada rubro tiene un tipo: actividades o asistencia. | M |
 | RF-031 | El docente copia los rubros de otro periodo o de otro grupo. | M |
 | RF-032 | El docente crea las actividades que quiera dentro de un rubro (nombre y fecha dentro de la unidad); el rubro promedia sus actividades. | M |
 | RF-033 | El docente captura calificaciones en una tabla alumnos por actividades, usable en celular y en computadora. | M |
@@ -50,6 +50,8 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-035 | El sistema calcula el promedio de cada rubro y la calificación del periodo en tiempo real. Las calificaciones admiten hasta 2 decimales; cada grupo elige cuántos decimales muestra la calificación final (0, 1 o 2) y el sentido del redondeo (arriba, abajo o al más cercano). | M |
 | RF-036 | El docente registra notas por alumno (texto o dictado del teclado del sistema) con etiqueta opcional: fortaleza, área de mejora o conducta. | M |
 | RF-037 | La captura de calificaciones y notas funciona sin conexión y se sincroniza sola al recuperar la señal. | M |
+| RF-038 | Un rubro puede tener criterios (subrubros) con nombre y peso que suman 100; cada actividad del rubro se califica por criterio. | M |
+| RF-039 | El docente arma equipos en el grupo y califica una actividad por equipo, con la opción de ajustar a cada integrante por separado. | M |
 
 ### Asistencia (SPEC-10)
 
