@@ -3,6 +3,6 @@
 
 export interface RespuestaExportacion {
   estado: string;
-  expiraEn: string | null;
+  expiraEn: (string | null);
   id: string;
 }

@@ -1,0 +1,4 @@
+# Generado por ng-openapi-gen; CI compara contra la salida sin formato.
+src/app/api/
+test-results/
+playwright-report/

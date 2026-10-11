@@ -7,28 +7,26 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
+
 export interface DescargarExportacion$Params {
   id: string;
   formato: string;
 }
 
-export function descargarExportacion(
-  http: HttpClient,
-  rootUrl: string,
-  params: DescargarExportacion$Params,
-  context?: HttpContext,
-): Observable<StrictHttpResponse<void>> {
+export function descargarExportacion(http: HttpClient, rootUrl: string, params: DescargarExportacion$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
   const rb = new RequestBuilder(rootUrl, descargarExportacion.PATH, 'get');
   if (params) {
     rb.path('id', params.id, {});
     rb.path('formato', params.formato, {});
   }
 
-  return http.request(rb.build({ responseType: 'text', accept: '*/*', context })).pipe(
+  return http.request(
+    rb.build({ responseType: 'text', accept: '*/*', context })
+  ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
       return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
-    }),
+    })
   );
 }
 

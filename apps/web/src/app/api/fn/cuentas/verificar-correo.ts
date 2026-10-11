@@ -10,25 +10,22 @@ import { RequestBuilder } from '../../request-builder';
 import { SolicitudToken } from '../../models/solicitud-token';
 
 export interface VerificarCorreo$Params {
-  body: SolicitudToken;
+      body: SolicitudToken
 }
 
-export function verificarCorreo(
-  http: HttpClient,
-  rootUrl: string,
-  params: VerificarCorreo$Params,
-  context?: HttpContext,
-): Observable<StrictHttpResponse<void>> {
+export function verificarCorreo(http: HttpClient, rootUrl: string, params: VerificarCorreo$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
   const rb = new RequestBuilder(rootUrl, verificarCorreo.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
   }
 
-  return http.request(rb.build({ responseType: 'text', accept: '*/*', context })).pipe(
+  return http.request(
+    rb.build({ responseType: 'text', accept: '*/*', context })
+  ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
       return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
-    }),
+    })
   );
 }
 

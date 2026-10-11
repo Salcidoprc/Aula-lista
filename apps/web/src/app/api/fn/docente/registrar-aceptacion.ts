@@ -10,25 +10,22 @@ import { RequestBuilder } from '../../request-builder';
 import { RegistrarAceptacion } from '../../models/registrar-aceptacion';
 
 export interface RegistrarAceptacion$Params {
-  body: RegistrarAceptacion;
+      body: RegistrarAceptacion
 }
 
-export function registrarAceptacion(
-  http: HttpClient,
-  rootUrl: string,
-  params: RegistrarAceptacion$Params,
-  context?: HttpContext,
-): Observable<StrictHttpResponse<void>> {
+export function registrarAceptacion(http: HttpClient, rootUrl: string, params: RegistrarAceptacion$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
   const rb = new RequestBuilder(rootUrl, registrarAceptacion.PATH, 'post');
   if (params) {
     rb.body(params.body, 'application/json');
   }
 
-  return http.request(rb.build({ responseType: 'text', accept: '*/*', context })).pipe(
+  return http.request(
+    rb.build({ responseType: 'text', accept: '*/*', context })
+  ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
       return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
-    }),
+    })
   );
 }
 

@@ -9,23 +9,21 @@ import { RequestBuilder } from '../../request-builder';
 
 import { PerfilDocente } from '../../models/perfil-docente';
 
-export interface ObtenerPerfil$Params {}
+export interface ObtenerPerfil$Params {
+}
 
-export function obtenerPerfil(
-  http: HttpClient,
-  rootUrl: string,
-  params?: ObtenerPerfil$Params,
-  context?: HttpContext,
-): Observable<StrictHttpResponse<PerfilDocente>> {
+export function obtenerPerfil(http: HttpClient, rootUrl: string, params?: ObtenerPerfil$Params, context?: HttpContext): Observable<StrictHttpResponse<PerfilDocente>> {
   const rb = new RequestBuilder(rootUrl, obtenerPerfil.PATH, 'get');
   if (params) {
   }
 
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
+  return http.request(
+    rb.build({ responseType: 'json', accept: 'application/json', context })
+  ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
       return r as StrictHttpResponse<PerfilDocente>;
-    }),
+    })
   );
 }
 
