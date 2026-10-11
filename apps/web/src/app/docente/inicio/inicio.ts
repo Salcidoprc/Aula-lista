@@ -1,100 +1,61 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
-import { SaludService } from '../../core/salud/salud.service';
+import { PerfilService } from '../../core/sesion/perfil.service';
+import { ReenviarVerificacion } from '../cuenta/reenviar-verificacion';
 
-/** Pantalla provisional de H0. La reemplaza el inicio del docente de SPEC-01/SPEC-02. */
+/**
+ * Inicio del docente. Por ahora solo recuerda verificar el correo (RN-001); la lista "Mis grupos"
+ * llega con SPEC-02.
+ */
 @Component({
   selector: 'app-inicio',
-  imports: [TranslocoDirective],
+  imports: [TranslocoDirective, ReenviarVerificacion],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="inicio" *transloco="let t; prefix: 'inicio'">
-      <h1>{{ t('titulo') }}</h1>
-      <p class="descripcion">{{ t('descripcion') }}</p>
-
-      <div class="estado" role="status" [attr.data-estado]="salud.estado()">
-        <span class="estacion" aria-hidden="true"></span>
-        <span>{{ t('estado.' + salud.estado()) }}</span>
-        @if (salud.estado() === 'sinServidor') {
-          <button type="button" class="reintentar" (click)="salud.revisar()">
-            {{ t('estado.reintentar') }}
-          </button>
+    <section class="pantalla pantalla--ancha" *transloco="let t; prefix: 'inicio'">
+      <hgroup>
+        <h1>{{ t('titulo') }}</h1>
+        @if (perfil()?.nombre; as nombre) {
+          <p class="entrada">{{ t('saludo', { nombre }) }}</p>
         }
+      </hgroup>
+
+      @if (perfil() && !perfil()!.correoVerificado) {
+        <div class="aviso aviso--pendiente">
+          <p>
+            <strong>{{ t('verifica.titulo') }}</strong>
+            {{ t('verifica.texto', { correo: perfil()!.correo }) }}
+          </p>
+          <app-reenviar-verificacion />
+        </div>
+      }
+
+      <div class="vacio">
+        <p class="vacio-titulo">{{ t('vacio.titulo') }}</p>
+        <p>{{ t('vacio.texto') }}</p>
       </div>
     </section>
   `,
   styles: `
-    .inicio {
+    hgroup {
       display: grid;
-      gap: var(--espacio-4);
-      max-width: var(--ancho-lectura);
-      padding: var(--espacio-6) max(var(--espacio-4), env(safe-area-inset-left));
+      gap: var(--espacio-2);
     }
 
-    h1 {
-      font-size: var(--texto-2xl);
-    }
-
-    .descripcion {
+    .vacio {
+      display: grid;
+      gap: var(--espacio-2);
+      padding-block: var(--espacio-6);
       color: var(--color-texto-suave);
+    }
+
+    .vacio-titulo {
+      color: var(--color-texto);
       font-size: var(--texto-lg);
-    }
-
-    .estado {
-      --color-estacion: var(--color-texto-tenue);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--espacio-3);
-      margin-top: var(--espacio-4);
-      color: var(--color-texto-suave);
-    }
-
-    .estado[data-estado='enLinea'] {
-      --color-estacion: var(--color-exito);
-    }
-
-    .estado[data-estado='sinServidor'] {
-      --color-estacion: var(--color-peligro);
-      color: var(--color-peligro-tinta);
-    }
-
-    .estacion {
-      width: 0.875rem;
-      height: 0.875rem;
-      border-radius: var(--radio-estacion);
-      border: 3px solid var(--color-estacion);
-      background: var(--color-superficie);
-      transition: border-color var(--dur-small) var(--ease-out);
-    }
-
-    .reintentar {
-      min-height: var(--tactil-minimo);
-      padding: 0 var(--espacio-4);
-      border: 0;
-      border-radius: var(--radio-md);
-      background: var(--color-accion);
-      color: var(--color-sobre-accion);
-      font-weight: var(--peso-medio);
-      cursor: pointer;
-      transition: transform var(--dur-press) var(--ease-out);
-    }
-
-    .reintentar:active {
-      transform: scale(var(--escala-presion));
-    }
-
-    @media (hover: hover) and (pointer: fine) {
-      .reintentar:hover {
-        background: var(--color-accion-presionada);
-      }
+      font-weight: var(--peso-fuerte);
     }
   `,
 })
-export class Inicio implements OnInit {
-  protected readonly salud = inject(SaludService);
-
-  ngOnInit(): void {
-    void this.salud.revisar();
-  }
+export class Inicio {
+  protected readonly perfil = inject(PerfilService).perfil;
 }

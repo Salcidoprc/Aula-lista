@@ -46,6 +46,7 @@ Se le vende al docente, no a la dirección: lo adopta solo, sin esperar a la esc
 - Nombre definitivo: **Aula Lista**.
 - Tono: cálido y claro, de herramienta escolar confiable. No es una app de tecnología ni de juegos.
 - Debe sentirse como una app nativa y cuidada, no como una plantilla.
+- Estilo visual elegido por el dueño del producto el 11/10/2026: **"Libros de texto"** (cada grupo con el color de su grado, como las portadas de los libros de texto gratuitos). Familiar para el docente, pero sin verse infantil ni parecer un documento oficial de la SEP.
 - Movimiento: solo transiciones 2D, rápidas y con propósito; nada de 3D; nada animado en acciones repetidas como capturar calificaciones (ADR-0010, `docs/reglas/07-diseno-y-movimiento.md`).
 - Restricciones visuales ya fijadas en la regla 07: fuente principal distinta de Inter, Roboto, Arial o la del sistema, con cifras tabulares y español completo; colores en OKLCH; neutros entintados, nunca negro ni blanco puros; sin degradados morado a azul ni neón sobre fondo oscuro; no todo en tarjetas y nunca tarjetas dentro de tarjetas; texto alineado a la izquierda.
 

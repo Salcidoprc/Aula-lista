@@ -1,62 +1,96 @@
 /*
  * Tokens de Aula Lista. Única fuente de color, tipografía, espacio, radios, sombras y movimiento.
  * Ningún componente escribe colores ni duraciones sueltos (docs/reglas/07-diseno-y-movimiento.md).
- * Mundo visual: señalética de transporte público. Cada grupo es una "línea" con su color;
- * el periodo se recorre como estaciones. Ver DESIGN.md.
+ * Mundo visual: libros de texto. Cada grupo lleva el color de su grado, como las portadas de los
+ * libros de texto gratuitos, y la cabecera es una portada con el número del grado. Ver DESIGN.md.
+ * Contrastes calculados (WCAG 2.1 AA) en DESIGN.md, sección Colors.
  */
 :root {
   color-scheme: light;
 
-  /* Neutros entintados (nunca negro ni blanco puros). Tono cálido de concreto. */
-  --color-fondo: oklch(0.972 0.006 75);
-  --color-superficie: oklch(0.992 0.003 75);
-  --color-superficie-hundida: oklch(0.945 0.008 75);
-  --color-linea-divisoria: oklch(0.885 0.01 75);
-  --color-texto: oklch(0.255 0.018 60);
-  --color-texto-suave: oklch(0.46 0.016 60);
-  --color-texto-tenue: oklch(0.58 0.012 60);
+  /* Neutros entintados (nunca negro ni blanco puros): papel cálido y tinta azul pizarra. */
+  --color-fondo: oklch(0.985 0.004 95);
+  --color-superficie: oklch(0.995 0.002 95);
+  --color-superficie-hundida: oklch(0.95 0.01 260);
+  --color-divisoria: oklch(0.9 0.01 260);
+  --color-texto: oklch(0.25 0.03 260);
+  --color-texto-suave: oklch(0.48 0.025 260);
+  /* Solo para íconos y bordes de controles (3:1); nunca para texto. */
+  --color-texto-tenue: oklch(0.6 0.02 260);
 
-  /* Acción principal: rosa de línea, con su tinta oscura para texto sobre tinte. */
-  --color-accion: oklch(0.53 0.185 358);
-  --color-accion-presionada: oklch(0.47 0.17 358);
-  --color-accion-tinte: oklch(0.95 0.03 358);
-  --color-accion-tinta: oklch(0.38 0.13 358);
-  --color-sobre-accion: oklch(0.99 0.004 358);
+  /* Acción principal: azul de cuaderno, distinto de todos los colores de grado. */
+  --color-accion: oklch(0.5 0.15 265);
+  --color-accion-presionada: oklch(0.44 0.14 265);
+  --color-accion-tinte: oklch(0.95 0.02 265);
+  --color-accion-tinta: oklch(0.38 0.12 265);
+  --color-sobre-accion: oklch(0.99 0.004 265);
 
-  /* Estados: solo donde cargan significado. */
+  /* Estados: solo donde cargan significado, cada uno con tinte (fondo) y tinta (texto). */
   --color-exito: oklch(0.55 0.13 150);
   --color-exito-tinte: oklch(0.95 0.035 150);
   --color-exito-tinta: oklch(0.36 0.09 150);
-  --color-aviso: oklch(0.74 0.15 75);
-  --color-aviso-tinte: oklch(0.96 0.045 85);
+  --color-aviso: oklch(0.64 0.13 70);
+  --color-aviso-tinte: oklch(0.96 0.04 85);
   --color-aviso-tinta: oklch(0.42 0.09 65);
   --color-peligro: oklch(0.55 0.19 27);
-  --color-peligro-tinte: oklch(0.95 0.03 27);
+  --color-peligro-tinte: oklch(0.95 0.025 27);
   --color-peligro-tinta: oklch(0.4 0.14 27);
 
-  /* Líneas: un color por grupo, con luminosidad pareja para que ninguno grite más que otro. */
-  --linea-1: oklch(0.6 0.17 358); /* rosa */
-  --linea-2: oklch(0.52 0.15 255); /* azul */
-  --linea-3: oklch(0.6 0.12 125); /* olivo */
-  --linea-4: oklch(0.62 0.11 210); /* cian */
-  --linea-5: oklch(0.78 0.15 90); /* amarillo */
-  --linea-6: oklch(0.56 0.18 30); /* rojo */
-  --linea-7: oklch(0.68 0.16 55); /* naranja */
-  --linea-8: oklch(0.55 0.13 160); /* verde */
+  /*
+   * Grados: el color de portada de cada grado (base), su tinta oscura para texto sobre el tinte
+   * o el fondo, y su tinte claro para fondos suaves. p = primaria, s = secundaria.
+   * Sobre la base el texto va en --color-sobre-grado o en el tinte del mismo grado.
+   */
+  --color-sobre-grado: oklch(0.99 0.005 95);
+  --grado-p1: oklch(0.53 0.18 27); /* rojo */
+  --grado-p1-tinta: oklch(0.37 0.12 27);
+  --grado-p1-tinte: oklch(0.94 0.03 27);
+  --grado-p2: oklch(0.53 0.14 50); /* naranja */
+  --grado-p2-tinta: oklch(0.37 0.09 50);
+  --grado-p2-tinte: oklch(0.94 0.035 60);
+  --grado-p3: oklch(0.5 0.125 150); /* verde */
+  --grado-p3-tinta: oklch(0.35 0.08 150);
+  --grado-p3-tinte: oklch(0.94 0.04 150);
+  --grado-p4: oklch(0.5 0.085 200); /* turquesa */
+  --grado-p4-tinta: oklch(0.34 0.06 200);
+  --grado-p4-tinte: oklch(0.94 0.03 195);
+  --grado-p5: oklch(0.52 0.16 300); /* morado */
+  --grado-p5-tinta: oklch(0.37 0.12 300);
+  --grado-p5-tinte: oklch(0.94 0.03 300);
+  --grado-p6: oklch(0.53 0.18 350); /* magenta */
+  --grado-p6-tinta: oklch(0.37 0.13 350);
+  --grado-p6-tinte: oklch(0.94 0.035 350);
+  --grado-s1: oklch(0.52 0.11 120); /* olivo */
+  --grado-s1-tinta: oklch(0.35 0.07 120);
+  --grado-s1-tinte: oklch(0.94 0.05 115);
+  --grado-s2: oklch(0.5 0.1 235); /* azul petróleo */
+  --grado-s2-tinta: oklch(0.35 0.07 235);
+  --grado-s2-tinte: oklch(0.94 0.025 235);
+  --grado-s3: oklch(0.48 0.04 260); /* pizarra */
+  --grado-s3-tinta: oklch(0.33 0.03 260);
+  --grado-s3-tinte: oklch(0.94 0.012 260);
 
-  /* Tipografía: Overpass, heredera de la señalética de carreteras. Cifras tabulares en datos. */
-  --fuente: 'Overpass Variable', 'Overpass', ui-sans-serif, sans-serif;
+  /* Grado activo. Sin grupo, la portada usa el color de la marca (la acción). */
+  --grado: var(--color-accion);
+  --grado-tinta: var(--color-accion-tinta);
+  --grado-tinte: var(--color-accion-tinte);
+
+  /* Tipografía: Lexend, hecha para leer fácil. Las cifras usan "Aula Cifras" (styles.css). */
+  --fuente: 'Lexend Variable', 'Lexend', ui-sans-serif, sans-serif;
+  --fuente-cifras: 'Aula Cifras', var(--fuente);
   --texto-xs: 0.8125rem; /* 13 */
   --texto-sm: 0.9375rem; /* 15 */
   --texto-base: 1rem; /* 16: mínimo en campos para que iOS no haga zoom */
   --texto-lg: 1.1875rem; /* 19 */
   --texto-xl: 1.5rem; /* 24 */
   --texto-2xl: 2rem; /* 32 */
-  --peso-normal: 420;
-  --peso-medio: 560;
-  --peso-fuerte: 720;
-  --interlineado-ajustado: 1.15;
+  --texto-grado: 7.5rem; /* 120: número del grado en la portada, recortado */
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 700;
+  --interlineado-ajustado: 1.2;
   --interlineado: 1.5;
+  --tracking-titulo: -0.01em;
 
   /* Espacio en múltiplos de 4 px. */
   --espacio-1: 0.25rem;
@@ -69,18 +103,23 @@
   --tactil-minimo: 2.75rem; /* 44 px */
   --ancho-lectura: 40rem;
 
-  /* Formas: rectángulos con esquinas de letrero; círculos solo para estaciones. */
-  --radio-sm: 0.25rem;
-  --radio-md: 0.375rem;
-  --radio-lg: 0.625rem;
-  --radio-hoja: 1rem;
-  --radio-estacion: 999px;
-  --grosor-linea: 0.375rem;
+  /* Formas: controles redondeados y amables; la tapa de libro tiene el lomo más recto. */
+  --radio-sm: 0.25rem; /* 4: chips, barra de avance */
+  --radio-md: 0.625rem; /* 10: campos y celdas de captura */
+  --radio-lg: 0.75rem; /* 12: botones, avisos, paneles */
+  --radio-hoja: 1rem; /* 16: arriba en hojas inferiores y diálogos */
+  --radio-pleno: 999px; /* indicadores de estado */
+  --radio-tapa: 0.25rem 0.5rem 0.5rem 0.25rem; /* lomo a la izquierda */
 
-  /* Profundidad: solo lo que flota lleva sombra, semitransparente y entintada. */
-  --sombra-flotante: 0 1px 2px oklch(0.25 0.02 60 / 0.08), 0 8px 24px oklch(0.25 0.02 60 / 0.12);
-  --sombra-hoja: 0 -4px 32px oklch(0.25 0.02 60 / 0.16);
-  --foco: 0 0 0 3px oklch(0.53 0.185 358 / 0.35);
+  /* Profundidad: plano por defecto. Lo que flota lleva sombra entintada; la tapa, su lomo. */
+  --sombra-lomo: inset 0.3125rem 0 0 oklch(0.2 0.03 260 / 0.16);
+  --sombra-flotante: 0 1px 2px oklch(0.25 0.03 260 / 0.08), 0 8px 24px oklch(0.25 0.03 260 / 0.12);
+  --sombra-hoja: 0 -4px 32px oklch(0.25 0.03 260 / 0.16);
+  /* Anillo doble: hoja por dentro y acción por fuera, visible sobre papel y sobre cualquier color (WCAG 1.4.11). */
+  --foco: 0 0 0 2px var(--color-superficie), 0 0 0 4px var(--color-accion);
+  /* Velo detrás de los diálogos. */
+  --color-velo: oklch(0.25 0.03 260 / 0.4);
+  --color-velo-transparente: oklch(0.25 0.03 260 / 0);
 
   /* Movimiento (regla 07). */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -92,14 +131,74 @@
   --dur-large: 300ms;
   --dur-hoja: 400ms;
   --desplazamiento-pantalla: 8px;
+  --desplazamiento-aviso: 1rem;
   --escala-presion: 0.97;
   --escala-entrada: 0.95;
+}
+
+/*
+ * Grado activo por atributo: data-grado="p1" … "p6" (primaria) o "s1" … "s3" (secundaria).
+ * Se pone en la portada, la tapa o el contenedor de la pantalla del grupo.
+ */
+[data-grado='p1'] {
+  --grado: var(--grado-p1);
+  --grado-tinta: var(--grado-p1-tinta);
+  --grado-tinte: var(--grado-p1-tinte);
+}
+
+[data-grado='p2'] {
+  --grado: var(--grado-p2);
+  --grado-tinta: var(--grado-p2-tinta);
+  --grado-tinte: var(--grado-p2-tinte);
+}
+
+[data-grado='p3'] {
+  --grado: var(--grado-p3);
+  --grado-tinta: var(--grado-p3-tinta);
+  --grado-tinte: var(--grado-p3-tinte);
+}
+
+[data-grado='p4'] {
+  --grado: var(--grado-p4);
+  --grado-tinta: var(--grado-p4-tinta);
+  --grado-tinte: var(--grado-p4-tinte);
+}
+
+[data-grado='p5'] {
+  --grado: var(--grado-p5);
+  --grado-tinta: var(--grado-p5-tinta);
+  --grado-tinte: var(--grado-p5-tinte);
+}
+
+[data-grado='p6'] {
+  --grado: var(--grado-p6);
+  --grado-tinta: var(--grado-p6-tinta);
+  --grado-tinte: var(--grado-p6-tinte);
+}
+
+[data-grado='s1'] {
+  --grado: var(--grado-s1);
+  --grado-tinta: var(--grado-s1-tinta);
+  --grado-tinte: var(--grado-s1-tinte);
+}
+
+[data-grado='s2'] {
+  --grado: var(--grado-s2);
+  --grado-tinta: var(--grado-s2-tinta);
+  --grado-tinte: var(--grado-s2-tinte);
+}
+
+[data-grado='s3'] {
+  --grado: var(--grado-s3);
+  --grado-tinta: var(--grado-s3-tinta);
+  --grado-tinte: var(--grado-s3-tinte);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     /* Se quitan desplazamientos y escalas; se conservan fundidos y cambios de color. */
     --desplazamiento-pantalla: 0px;
+    --desplazamiento-aviso: 0px;
     --escala-presion: 1;
     --escala-entrada: 1;
   }

@@ -60,9 +60,15 @@ El PR anota qué skills se corrieron y qué hallazgos quedaron pendientes.
 
 ## Identidad visual
 
-- **Fuente de verdad:** `PRODUCT.md` y `DESIGN.md` en la raíz del repo, generados con Impeccable en H0. Los tokens (color, tipografía, espaciado, radios, sombras, curvas y duraciones) viven en variables CSS en `src/styles/tokens.css`; ningún componente escribe colores ni duraciones sueltos.
+- **Fuente de verdad:** `PRODUCT.md` y `DESIGN.md` en la raíz del repo, generados con Impeccable en H0 y actualizados con el estilo elegido el 11/10/2026. Los tokens (color, tipografía, espaciado, radios, sombras, curvas y duraciones) viven en variables CSS en `src/styles/tokens.css`; ningún componente escribe colores ni duraciones sueltos.
 - **Tono:** cálido y claro, de herramienta escolar confiable. No es una app de tecnología ni de juegos.
-- **Tipografía:** no usar Inter, Roboto, Arial ni la fuente del sistema como fuente principal (regla de Impeccable). La familia se elige en H0 entre fuentes con buena lectura de números (cifras tabulares para calificaciones) y soporte completo de español.
+- **Estilo: "Libros de texto"** (ADR-0010, elegido por el dueño del producto el 11/10/2026). Cada grupo lleva el color de su grado, como las portadas de los libros de texto gratuitos:
+  - La cabecera es una **portada** en el color del grado con el número del grado muy grande y recortado (componente `app-portada`). Sin grupo, usa el azul de la marca y no lleva número.
+  - Los grupos se muestran como **tapas de libro** del color de su grado, con lomo.
+  - Nueve colores de grado (`--grado-p1` a `--grado-p6` y `--grado-s1` a `--grado-s3`), cada uno con base, tinta y tinte. El grado activo se fija con el atributo `data-grado` y los componentes usan `--grado`, `--grado-tinta` y `--grado-tinte`.
+  - El color del grado identifica; la acción principal siempre es el azul de acción, nunca el color del grado.
+  - No se usan logotipos, escudos, ilustraciones ni textos de la SEP o de los libros reales: solo se toma la idea del color por grado y la portada.
+- **Tipografía:** no usar Inter, Roboto, Arial ni la fuente del sistema como fuente principal (regla de Impeccable). La familia es **Lexend**, hecha para leer fácil y con español completo. Lexend no trae cifras tabulares, así que toda calificación, promedio o conteo lleva la clase `.cifras`, que usa los dígitos tabulares de Figtree (familia "Aula Cifras", solo dígitos, punto y coma).
 - **Color:**
   - Neutros entintados, nunca negro ni blanco puros.
   - Nada de degradados morado a azul ni de neón sobre fondo oscuro.

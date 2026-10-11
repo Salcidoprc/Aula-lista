@@ -73,6 +73,8 @@ jobs:
       CLAVE_APP_MIGRACIONES: ci-migraciones
       CLAVE_APP_RUNTIME: ci-runtime
       JWT_CLAVE_FIRMA: clave-de-ci-con-al-menos-32-caracteres
+      # Todas las pruebas entran desde la misma IP; el límite por IP se prueba en integración.
+      INTENTOS_INICIO_SESION: 100
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

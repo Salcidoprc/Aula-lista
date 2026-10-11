@@ -27,3 +27,13 @@ El dueño del producto quiere que las pantallas tengan un diseño cuidado y tran
 - H0 incluye instalar los skills, crear `PRODUCT.md`, `DESIGN.md` y los tokens antes de la primera pantalla.
 - Cada PR con interfaz anota los comandos de revisión que corrió (definición de terminado).
 - Hacer componentes propios cuesta más al inicio; se compensa con CDK para foco, overlays y accesibilidad.
+
+## Actualización del 11/10/2026: estilo visual "Libros de texto"
+
+El 11/10/2026 el dueño del producto eligió el estilo **"Libros de texto"** entre tres propuestas (líneas y estaciones, libros de texto y estándar de apps). Reemplaza el mundo de señalética de transporte ("líneas y estaciones") con el que se cerró H0.
+
+- Cada grupo lleva el color de su grado (1° a 6° de primaria y 1° a 3° de secundaria), como las portadas de los libros de texto gratuitos. La cabecera es una **portada** en ese color con el número del grado muy grande y recortado; los grupos se muestran como **tapas de libro** con lomo.
+- Letra **Lexend** (autoalojada con Fontsource). Como Lexend no trae cifras tabulares, las cifras de datos usan los dígitos tabulares de Figtree con la familia "Aula Cifras", limitada por `unicode-range` a dígitos, punto y coma.
+- Acción principal en azul, controles con esquinas de 10 a 12 px y fondo de papel cálido.
+- Riesgos aceptados: puede sentirse infantil o confundirse con algo oficial de la SEP (no se usan logotipos, escudos ni textos de la SEP), y dos grupos del mismo grado comparten color (se distinguen por la letra del grupo y la materia).
+- Las reglas de movimiento de la regla 07 no cambian. `DESIGN.md`, `apps/web/src/styles/tokens.css` y la regla 07 se actualizaron con el estilo.

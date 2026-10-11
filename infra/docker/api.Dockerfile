@@ -16,6 +16,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app .
 ENV ASPNETCORE_HTTP_PORTS=8080
+# Almacén local de archivos (Almacen__Ruta). El volumen hereda este dueño al montarse por primera vez.
+RUN mkdir -p /var/lib/aula-lista/archivos && chown $APP_UID /var/lib/aula-lista/archivos
 EXPOSE 8080
 USER $APP_UID
 ENTRYPOINT ["dotnet", "AulaLista.Api.dll"]

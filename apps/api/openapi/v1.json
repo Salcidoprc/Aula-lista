@@ -5,22 +5,440 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/v1/hola": {
-      "get": {
+    "/api/v1/cuentas/registro": {
+      "post": {
         "tags": [
           "Cuentas"
         ],
-        "operationId": "ObtenerHola",
+        "operationId": "Registrar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrarCuenta"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaSesion"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/verificar-correo": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "VerificarCorreo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudToken"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/verificar-correo/reenviar": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "ReenviarVerificacion",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/sesion": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "IniciarSesion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IniciarSesion"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RespuestaHola"
+                  "$ref": "#/components/schemas/RespuestaSesion"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "CerrarSesion",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/sesion/renovar": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "RenovarSesion",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaSesion"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/sesiones": {
+      "delete": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "CerrarTodasLasSesiones",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/recuperar": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "SolicitarRecuperacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudCorreo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/restablecer": {
+      "post": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "RestablecerContrasena",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestablecerContrasena"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/contrasena": {
+      "put": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "CambiarContrasena",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CambiarContrasena"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/docente/perfil": {
+      "get": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "ObtenerPerfil",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerfilDocente"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "ActualizarPerfil",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarPerfil"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/docente/aceptaciones": {
+      "post": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "RegistrarAceptacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrarAceptacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/docente/exportacion": {
+      "post": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "SolicitarExportacion",
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaExportacion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/docente/exportaciones/{id}": {
+      "get": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "ObtenerExportacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaExportacion"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/docente/exportaciones/{id}/{formato}": {
+      "get": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "DescargarExportacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "formato",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/docente": {
+      "delete": {
+        "tags": [
+          "Docente"
+        ],
+        "operationId": "SolicitarEliminacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitarEliminacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/cuentas/google/inicio": {
+      "get": {
+        "tags": [
+          "Cuentas"
+        ],
+        "operationId": "IniciarConGoogle",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -28,22 +446,330 @@
   },
   "components": {
     "schemas": {
-      "RespuestaHola": {
+      "ActualizarPerfil": {
         "required": [
-          "mensaje",
-          "docenteId"
+          "nombre",
+          "nivel",
+          "escuelaNombre",
+          "escuelaCct",
+          "entidadFederativa"
         ],
         "type": "object",
         "properties": {
-          "mensaje": {
+          "nombre": {
             "type": "string"
           },
-          "docenteId": {
+          "nivel": {
+            "type": "string"
+          },
+          "escuelaNombre": {
+            "type": "string"
+          },
+          "escuelaCct": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entidadFederativa": {
+            "type": "string"
+          }
+        }
+      },
+      "CambiarContrasena": {
+        "required": [
+          "actual",
+          "nueva"
+        ],
+        "type": "object",
+        "properties": {
+          "actual": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nueva": {
+            "type": "string"
+          }
+        }
+      },
+      "DocumentoPendiente": {
+        "required": [
+          "documento",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "documento": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "IniciarSesion": {
+        "required": [
+          "correo",
+          "contrasena"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string"
+          },
+          "contrasena": {
+            "type": "string"
+          }
+        }
+      },
+      "PerfilDocente": {
+        "required": [
+          "correo",
+          "correoVerificado",
+          "nombre",
+          "nivel",
+          "escuelaNombre",
+          "escuelaCct",
+          "entidadFederativa",
+          "zonaHoraria",
+          "perfilCompleto",
+          "tieneContrasena",
+          "conGoogle",
+          "aceptacionesPendientes",
+          "declaracionDatosAceptada"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string"
+          },
+          "correoVerificado": {
+            "type": "boolean"
+          },
+          "nombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nivel": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "escuelaNombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "escuelaCct": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entidadFederativa": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "zonaHoraria": {
+            "type": "string"
+          },
+          "perfilCompleto": {
+            "type": "boolean"
+          },
+          "tieneContrasena": {
+            "type": "boolean"
+          },
+          "conGoogle": {
+            "type": "boolean"
+          },
+          "aceptacionesPendientes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentoPendiente"
+            }
+          },
+          "declaracionDatosAceptada": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "RegistrarAceptacion": {
+        "required": [
+          "documento",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "documento": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "RegistrarCuenta": {
+        "required": [
+          "correo",
+          "contrasena",
+          "aceptaTerminos",
+          "aceptaPrivacidad"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string"
+          },
+          "contrasena": {
+            "type": "string"
+          },
+          "aceptaTerminos": {
+            "type": "boolean"
+          },
+          "aceptaPrivacidad": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RespuestaExportacion": {
+        "required": [
+          "id",
+          "estado",
+          "expiraEn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "expiraEn": {
             "type": [
               "null",
               "string"
             ],
+            "format": "date-time"
+          }
+        }
+      },
+      "RespuestaSesion": {
+        "required": [
+          "docenteId",
+          "tokenAcceso",
+          "expiraEn"
+        ],
+        "type": "object",
+        "properties": {
+          "docenteId": {
+            "type": "string",
             "format": "uuid"
+          },
+          "tokenAcceso": {
+            "type": "string"
+          },
+          "expiraEn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RestablecerContrasena": {
+        "required": [
+          "token",
+          "contrasena"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "contrasena": {
+            "type": "string"
+          }
+        }
+      },
+      "SolicitarEliminacion": {
+        "required": [
+          "contrasena"
+        ],
+        "type": "object",
+        "properties": {
+          "contrasena": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SolicitudCorreo": {
+        "required": [
+          "correo"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string"
+          }
+        }
+      },
+      "SolicitudToken": {
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
           }
         }
       }
@@ -52,6 +778,9 @@
   "tags": [
     {
       "name": "Cuentas"
+    },
+    {
+      "name": "Docente"
     }
   ]
 }

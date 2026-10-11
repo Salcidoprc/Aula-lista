@@ -61,6 +61,9 @@ Todas las tablas tienen `id` (UUID v7 generado en la aplicación), `created_at` 
 
 ```mermaid
 erDiagram
+  CUENTA ||--|| DOCENTE : "mismo id"
+  CUENTA ||--o{ SESION : abre
+  DOCENTE ||--o{ ACEPTACION_LEGAL : acepta
   DOCENTE ||--o{ CICLO_ESCOLAR : define
   CICLO_ESCOLAR ||--o{ UNIDAD : "se divide en"
   CICLO_ESCOLAR ||--o{ GRUPO : agrupa
@@ -87,8 +90,12 @@ erDiagram
 
 | Tabla | Campos principales | Notas |
 | --- | --- | --- |
-| `docente` | usuario de Identity, nombre, nivel, escuela_nombre, escuela_cct, estado, zona_horaria, prueba_pro_usada | Una fila por usuario docente |
-| `aceptacion_legal` | docente_id, documento (terminos, privacidad, declaracion_datos), version, fecha | Inmutable |
+| `cuenta` | correo (normalizado, único), hash_contrasena (nulo si solo Google), correo_verificado_en, google_sub (único), estado (activa, eliminacion_solicitada), eliminacion_solicitada_en | Sin RLS; se busca por correo o por hash de token (ADR-0013) |
+| `token_cuenta` | cuenta_id, proposito (verificar_correo, restablecer_contrasena), hash (SHA-256, único), expira_en, usado_en | Sin RLS; de un solo uso |
+| `sesion` | cuenta_id, familia_id, hash (SHA-256, único), metodo (contrasena, google), autenticada_en, expira_en, usada_en, revocada_en | Sin RLS; una fila por token de actualización rotado |
+| `docente` | id (el de `cuenta`), nombre, nivel (primaria, secundaria), escuela_nombre, escuela_cct, entidad_federativa, zona_horaria, prueba_pro_usada | Una fila por cuenta; RLS sobre `id` |
+| `aceptacion_legal` | docente_id, documento (terminos, privacidad, declaracion_datos), version, fecha | Inmutable: `app_runtime` solo inserta y lee; única por docente, documento y versión |
+| `exportacion` | docente_id, estado (pendiente, lista, fallida), ruta_excel, ruta_pdf, expira_en | Archivos en `IAlmacenArchivos` durante 24 h (RF-008) |
 | `ciclo_escolar` | docente_id, nombre (ej. 2026-2027), inicio, fin, tipo_unidad (bimestre, trimestre, cuatrimestre, semestre, mensual, personalizada) | Del docente (RN-022); máximo 13 meses |
 | `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
 | `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
@@ -117,7 +124,7 @@ erDiagram
 | `mensaje_whatsapp` | grupo_id, tutor_id, plantilla, categoria, id_meta, estado, costo_estimado | Base del límite mensual |
 | `consumo_mensual` | grupo_id, mes, mensajes_whatsapp, tokens_ia_entrada, tokens_ia_salida | |
 | `suscripcion` | docente_id, proveedor, modalidad (tarjeta, prepago_oxxo), id_externo, estado, grupos_pro, periodo_actual_fin, pagado_hasta, gracia_hasta | |
-| `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, fecha, ip | Inmutable |
+| `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
 | `evento_producto` | docente_id, nombre, propiedades (jsonb), fecha | Para métricas; sin datos personales |
 
 ## Aislamiento de datos (RNF-001)
@@ -127,6 +134,8 @@ erDiagram
 3. Además, cada consulta de EF Core filtra explícitamente por dueño (filtros globales de consulta).
 4. La app se conecta con un rol de base de datos sin `BYPASSRLS`. Las migraciones usan otro rol.
 5. Las pruebas de integración intentan leer datos de otro docente y de otro tutor en cada endpoint y deben fallar.
+
+Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen antes de conocer al docente (inicio de sesión, tokens). Solo las usan los casos de uso de `Cuentas` y se buscan por hash del token o correo normalizado (ADR-0013).
 
 ## API
 
@@ -155,7 +164,7 @@ erDiagram
 
 ## Jobs en segundo plano
 
-Hangfire con almacenamiento en PostgreSQL, dentro del proceso de la API.
+Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el migrador), dentro del proceso de la API. Los trabajos pedidos en una solicitud se encolan solo después de confirmar su transacción (ADR-0013).
 
 | Job | Disparador | Reintentos |
 | --- | --- | --- |
@@ -163,7 +172,8 @@ Hangfire con almacenamiento en PostgreSQL, dentro del proceso de la API.
 | Generar boletas PDF | Al publicar | 3 |
 | Enviar notificaciones (push, correo, WhatsApp) | Al publicar boletas o avisos | 5 |
 | Procesar webhooks de pagos y de WhatsApp | Webhook recibido | 5 |
-| Limpieza por retención (RNF-009) | Diario | 3 |
+| Generar exportación de datos (RF-008) | El docente la pide | 3 |
+| Limpieza por retención (RNF-009) | Diario a las 03:00, hora del centro de México | 3 |
 | Respaldo de la base | Diario, desde el contenedor de respaldos | Alerta si falla |
 
 ## Integraciones
@@ -176,7 +186,7 @@ Hangfire con almacenamiento en PostgreSQL, dentro del proceso de la API.
 | Web Push (VAPID) | Avisos y boletas | `INotificacionPush` |
 | Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009) | `IPasarelaPagos` |
 | QuestPDF | Boletas | `IGeneradorBoletas` |
-| Almacenamiento de objetos | PDFs y respaldos | `IAlmacenArchivos` |
+| Almacenamiento de objetos | PDFs, exportaciones y respaldos; en el piloto, disco del servidor en un volumen (ADR-0013) | `IAlmacenArchivos` |
 
 ## Entornos
 

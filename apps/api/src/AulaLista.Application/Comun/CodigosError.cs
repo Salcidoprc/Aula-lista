@@ -1,3 +1,5 @@
+using AulaLista.Domain.Cuentas;
+
 namespace AulaLista.Application.Comun;
 
 /// <summary>
@@ -17,5 +19,6 @@ public static class CodigosError
         NoAutenticado,
         ValidacionFallida,
         ErrorInterno,
+        .. ErroresCuentas.Todos.Select(e => e.Codigo),
     ];
 }
