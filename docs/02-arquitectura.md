@@ -93,7 +93,9 @@ erDiagram
 | `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
 | `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
 | `periodo` | grupo_id, unidad_id, estado (abierto, en_cierre, cerrado) | Uno por grupo y unidad (RN-025); nombre y fechas vienen de la unidad |
-| `rubro` | periodo_id, nombre, tipo (actividades, asistencia), peso (decimal 5,2), orden | Pesos suman 100 por periodo |
+| `tipo_rubro` | nombre, descripcion, icono, comportamiento (actividades, asistencia), nombres_sugeridos (text[]), orden, activo | Catálogo global sin `docente_id`; lo edita solo `admin` (ADR-0012) |
+| `auditoria_admin` | admin_id, accion, entidad, entidad_id, antes (jsonb), despues (jsonb), fecha | Inmutable |
+| `rubro` | periodo_id, nombre, tipo_rubro_id, peso (decimal 5,2), orden | Pesos suman 100 por periodo |
 | `criterio` | rubro_id, nombre, peso (decimal 5,2), orden | Subrubro; pesos suman 100 por rubro (RN-111) |
 | `actividad` | rubro_id, nombre, fecha, modo (individual, por_equipo), orden | |
 | `equipo` | grupo_id, docente_id, nombre | |
@@ -134,6 +136,13 @@ erDiagram
 - Fechas en ISO 8601 UTC; el cliente las muestra en la zona horaria del docente.
 - Paginación por cursor en listas que pueden crecer (avisos, auditoría).
 - Contrato documentado con OpenAPI generado por la API; el cliente Angular se genera de ese contrato.
+- Las rutas `/api/v1/admin/...` exigen la política `admin`; para cualquier otro usuario responden 404.
+
+## Tipos de rubro extensibles (ADR-0012)
+
+- Cada comportamiento implementa `ICalculoRubro` en el dominio (promedio del rubro de un alumno a partir de sus datos) y tiene su gemelo en el frontend, probados con los mismos vectores de `vectores-calculo.json`.
+- La PWA registra un componente de captura por clave de comportamiento. Si recibe una clave que no conoce, muestra "Actualiza la app".
+- `GET /api/v1/admin/comportamientos` lista las claves registradas en el código desplegado; el panel solo permite elegir esas.
 
 ## Sincronización sin conexión (RF-037, RNF-014)
 

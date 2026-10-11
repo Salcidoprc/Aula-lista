@@ -10,6 +10,9 @@
 | Unidad | Tramo del ciclo con nombre y fechas (trimestre, bimestre, mes o personalizado). Se configura una vez por ciclo y la heredan todos sus grupos. Es el término que ve el docente. | `Unidad` |
 | Periodo | La unidad vista desde un grupo: ahí viven los rubros, el cierre y las boletas. Estados: abierto, en cierre, cerrado. En la interfaz se dice "unidad". | `Periodo` |
 | Rubro | Criterio de evaluación con peso porcentual dentro de un periodo (tareas, proyecto, examen). Tipo: actividades (promedia sus actividades) o asistencia. | `Rubro` |
+| Tipo de rubro | Entrada del catálogo que gestiona el administrador (por ejemplo Participaciones). Define el comportamiento y los nombres sugeridos. | `TipoRubro` |
+| Comportamiento | Forma de calcular y capturar un rubro, implementada en código: `actividades` o `asistencia` en el MVP. | `ComportamientoRubro` |
+| Panel de administración | Área `/admin` del equipo de Aula Lista para operar el producto. | — |
 | Criterio | Subrubro con peso dentro de un rubro (por ejemplo Información 40% en Exposición). | `Criterio` |
 | Equipo | Grupo de alumnos dentro de un grupo para calificar una actividad en conjunto. | `Equipo` |
 | Actividad | Evaluación concreta dentro de un rubro (tarea del 12/09). | `Actividad` |

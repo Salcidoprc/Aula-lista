@@ -42,7 +42,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
-| RF-030 | El docente crea los rubros que decida por periodo (unidad), con nombre libre y peso en porcentaje; los pesos deben sumar 100. Cada rubro tiene un tipo: actividades o asistencia. | M |
+| RF-030 | El docente crea los rubros que decida por periodo (unidad), con nombre libre y peso en porcentaje; los pesos deben sumar 100. Cada rubro tiene un tipo del catálogo que gestiona el administrador. | M |
 | RF-031 | El docente copia los rubros de otro periodo o de otro grupo. | M |
 | RF-032 | El docente crea las actividades que quiera dentro de un rubro (nombre y fecha dentro de la unidad); el rubro promedia sus actividades. | M |
 | RF-033 | El docente captura calificaciones en una tabla alumnos por actividades, usable en celular y en computadora. | M |
@@ -123,7 +123,9 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
 | RF-090 | El sistema registra eventos de producto para medir las métricas del piloto. | M |
-| RF-091 | Existe un panel interno de solo lectura con docentes, grupos, suscripciones y consumo de IA y WhatsApp. | M |
+| RF-091 | Existe un panel de administración con métricas del piloto, docentes, costos y consumo de IA y WhatsApp, y errores de jobs. | M |
+| RF-092 | El administrador gestiona el catálogo de tipos de rubro: crea tipos con un comportamiento existente, los edita y los desactiva. | M |
+| RF-093 | Las acciones de los administradores quedan en auditoría. | M |
 
 ## Requerimientos no funcionales
 
@@ -150,7 +152,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RNF-019 | Usabilidad | Compatibilidad: Chrome Android y Safari iOS 16.4 o superior (últimas 2 versiones), Chrome y Edge de escritorio. | Pruebas end-to-end en navegadores |
 | RNF-020 | Usabilidad | Español de México, fechas dd/mm/aaaa, zona horaria America/Mexico_City por defecto. Todos los textos en archivos de traducción. | Revisión de código |
 | RNF-021 | Operación | Logs estructurados sin datos personales, trazas y métricas con OpenTelemetry, alertas de errores. | Revisión de logs |
-| RNF-022 | Costos | El costo variable por grupo Pro no supera 8 MXN al mes. Consumo de IA y WhatsApp medido por grupo. | Panel interno |
+| RNF-022 | Costos | El costo variable por grupo Pro no supera 8 MXN al mes. Consumo de IA y WhatsApp medido por grupo. | Panel de administración |
 | RNF-023 | Mantenibilidad | Cobertura de pruebas de al menos 80% en dominio y aplicación; CI obligatorio en cada PR. | Reporte de cobertura |
 | RNF-024 | Mantenibilidad | Toda decisión técnica que cambie el stack o la arquitectura queda en un ADR en `docs/decisiones/`. | Revisión de PR |
 | RNF-025 | Usabilidad | Cada pantalla se diseña y revisa con el skill Impeccable y sigue el sistema de diseño de `DESIGN.md` (reglas/07-diseno-y-movimiento.md). | `/impeccable audit` y `/impeccable critique` anotados en el PR |
