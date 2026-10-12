@@ -90,6 +90,14 @@ summary,
   box-shadow: var(--foco);
 }
 
+/*
+ * Un título que recibe el foco por código (al cambiar de pantalla o de paso) no es un control: el lector
+ * de pantalla lo anuncia y no lleva anillo, que se leería como un campo.
+ */
+[tabindex='-1']:not([role='tab'], a, button, input, select, textarea):focus-visible {
+  box-shadow: none;
+}
+
 /* Superficies del navegador con la paleta: selección, cursor y casillas. */
 ::selection {
   background: var(--color-accion-tinte);

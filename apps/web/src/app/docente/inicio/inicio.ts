@@ -294,12 +294,21 @@ interface CicloConGrupos {
       }
 
       .ciclo .filas {
-        grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
         gap: var(--espacio-4);
       }
 
       .ciclo .detalle {
         flex-wrap: nowrap;
+      }
+
+      /* La tarjeta entera es el enlace: la flecha sobra y su lugar es para el texto. */
+      .ciclo .flecha {
+        display: none;
+      }
+
+      .ciclo .fila-grupo {
+        grid-template-columns: auto minmax(0, 1fr);
       }
 
       .ciclo .filas > li + li {
