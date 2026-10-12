@@ -4,8 +4,10 @@
  */
 
 /* Pantalla de una sola columna, al ancho de lectura, con la acción al alcance del pulgar. */
+/* Una columna que puede encogerse: una palabra larga con letra grande no ensancha la pantalla. */
 .pantalla {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--espacio-5);
   width: 100%;
@@ -23,6 +25,12 @@
   font-size: var(--texto-2xl);
 }
 
+.pantalla h1,
+.pantalla h2 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
 .pantalla .entrada {
   color: var(--color-texto-suave);
   font-size: var(--texto-lg);
@@ -30,6 +38,7 @@
 
 .formulario {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--espacio-4);
 }
 
@@ -37,6 +46,7 @@
 .campo {
   display: grid;
   align-content: start;
+  min-width: 0;
   gap: var(--espacio-1);
 }
 
@@ -55,6 +65,7 @@
 .campo input,
 .campo select {
   width: 100%;
+  min-width: 0;
   min-height: 3rem;
   padding: 0 var(--espacio-3);
   border: 0;
@@ -137,7 +148,7 @@ p.error {
 /* Elección entre pocas opciones (nivel): botones de radio grandes, uno junto al otro. */
 .eleccion {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
   gap: var(--espacio-2);
   margin: 0;
   padding: 0;
@@ -597,4 +608,9 @@ details[open] > summary::before {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
+}
+
+/* Un teléfono nunca se parte en dos renglones ("667 123 / 4567"). */
+.telefono {
+  white-space: nowrap;
 }

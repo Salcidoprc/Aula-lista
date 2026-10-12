@@ -26,12 +26,13 @@ public static class CampoImportacion
 public static class ErrorFilaImportacion
 {
     public const string NombreVacio = "nombre_vacio";
+    public const string NombreLargo = "nombre_largo";
     public const string TelefonoInvalido = "telefono_invalido";
     public const string TutorIncompleto = "tutor_incompleto";
     public const string CorreoInvalido = "correo_invalido";
     public const string DemasiadosTutores = "demasiados_tutores";
 
-    public static readonly IReadOnlyList<string> Todos = [NombreVacio, TelefonoInvalido, TutorIncompleto, CorreoInvalido, DemasiadosTutores];
+    public static readonly IReadOnlyList<string> Todos = [NombreVacio, NombreLargo, TelefonoInvalido, TutorIncompleto, CorreoInvalido, DemasiadosTutores];
 }
 
 public sealed record VistaPreviaImportacion(
@@ -328,11 +329,14 @@ public sealed class ConfirmarImportacionCasoUso(
     private static string? Validar(FilaImportacion fila, out IReadOnlyList<(string Telefono, TutorImportado Datos)> tutoresValidos)
     {
         tutoresValidos = [];
-        if (string.IsNullOrWhiteSpace(fila.Nombres)
-            || fila.Nombres.Trim().Length > Alumno.LongitudNombres
-            || (fila.Apellidos?.Trim().Length ?? 0) > Alumno.LongitudApellidos)
+        if (string.IsNullOrWhiteSpace(fila.Nombres))
         {
             return ErrorFilaImportacion.NombreVacio;
+        }
+
+        if (fila.Nombres.Trim().Length > Alumno.LongitudNombres || (fila.Apellidos?.Trim().Length ?? 0) > Alumno.LongitudApellidos)
+        {
+            return ErrorFilaImportacion.NombreLargo;
         }
 
         var capturados = (fila.Tutores ?? [])

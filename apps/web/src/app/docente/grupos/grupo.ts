@@ -208,16 +208,17 @@ const MAXIMO_ALUMNOS = 50;
         }
 
         @if (puedeAgregar() && activos().length > 0 && !agregando()) {
-          <div class="pie-accion">
-            @if (lleno()) {
-              <p class="dato-suave">{{ t('lleno') }}</p>
-            } @else {
+          <!-- Lleno, no hay acción que fijar abajo: la nota va en línea y no tapa la lista. -->
+          @if (lleno()) {
+            <p class="dato-suave">{{ t('lleno') }}</p>
+          } @else {
+            <div class="pie-accion">
               <button id="agregar-alumnos" class="boton" type="button" (click)="hoja().abrir()">
                 <app-icono nombre="mas" />
                 {{ t('agregarAlumnos') }}
               </button>
-            }
-          </div>
+            </div>
+          }
         }
       }
 
@@ -285,6 +286,12 @@ const MAXIMO_ALUMNOS = 50;
       gap: var(--espacio-3);
     }
 
+    /* Con letra muy grande el botón no se sale de la pantalla: su texto se acomoda dentro. */
+    .cabeza .boton {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-1);
@@ -294,11 +301,17 @@ const MAXIMO_ALUMNOS = 50;
       font-size: var(--texto-lg);
     }
 
+    /*
+     * Número, nombre y tutores en una fila alineados a la primera línea; con letra grande o pantalla angosta,
+     * los tutores bajan a su propia línea en lugar de empujar la pantalla de lado.
+     */
     .fila-alumno {
-      display: grid;
-      grid-template-columns: 2rem 1fr auto;
-      align-items: center;
-      gap: var(--espacio-3);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      align-content: center;
+      column-gap: var(--espacio-3);
+      row-gap: var(--espacio-1);
       min-height: 3.5rem;
       padding-block: var(--espacio-2);
       border-radius: var(--radio-md);
@@ -317,6 +330,11 @@ const MAXIMO_ALUMNOS = 50;
       }
     }
 
+    .fila-alumno .numero {
+      flex: none;
+      width: 2rem;
+    }
+
     .numero {
       color: var(--color-texto-suave);
       font-weight: var(--peso-medio);
@@ -324,6 +342,7 @@ const MAXIMO_ALUMNOS = 50;
     }
 
     .nombre {
+      flex: 1 1 8rem;
       min-width: 0;
       overflow-wrap: anywhere;
     }
@@ -333,7 +352,9 @@ const MAXIMO_ALUMNOS = 50;
     }
 
     .tutores {
+      margin-inline-start: auto;
       text-align: end;
+      white-space: nowrap;
     }
 
     .sin-tutor {
@@ -347,7 +368,9 @@ const MAXIMO_ALUMNOS = 50;
     }
 
     .numero-esqueleto {
+      flex: none;
       width: 1.5rem;
+      margin-inline-start: 0.5rem;
       height: 1.25rem;
       justify-self: end;
     }
@@ -391,11 +414,13 @@ const MAXIMO_ALUMNOS = 50;
 
     .vacio {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--espacio-3);
     }
 
     .opciones {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--espacio-2);
       margin: 0;
       padding: 0;
@@ -404,7 +429,7 @@ const MAXIMO_ALUMNOS = 50;
 
     .opcion {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: start;
       gap: var(--espacio-3);
       width: 100%;

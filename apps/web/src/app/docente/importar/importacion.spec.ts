@@ -83,6 +83,7 @@ describe('Importación de alumnos (RF-013, RF-014)', () => {
 
   it('marca nombre vacío, teléfono inválido y tutor incompleto como la API', () => {
     expect(validarFila(fila({ nombres: ' ' }))).toBe('nombre_vacio');
+    expect(validarFila(fila({ nombres: 'a'.repeat(81) }))).toBe('nombre_largo');
     const tutor = { nombre: 'María', telefono: '123', correo: '', parentesco: '' };
     expect(validarFila(fila({ tutores: [tutor] }))).toBe('telefono_invalido');
     expect(validarFila(fila({ tutores: [{ ...tutor, nombre: '', telefono: '6671234567' }] }))).toBe(

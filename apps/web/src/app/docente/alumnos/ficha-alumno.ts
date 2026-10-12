@@ -65,7 +65,9 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
           {{ grupo() ? t('volverA', { grupo: nombreDelGrupo() }) : t('volver') }}
         </a>
         <hgroup>
-          <h1>{{ a.nombres }} {{ a.apellidos }}</h1>
+          <h1 [class.largo]="a.nombres.length + a.apellidos.length > 40">
+            {{ a.nombres }} {{ a.apellidos }}
+          </h1>
           <p class="dato-suave cifras">{{ t('numero', { numero: a.numeroLista }) }}</p>
         </hgroup>
 
@@ -84,6 +86,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                   name="apellidos"
                   maxlength="80"
                   autocomplete="off"
+                  autocapitalize="words"
                   [readonly]="soloLectura()"
                   [value]="apellidos()"
                   (input)="apellidos.set(valor($event))"
@@ -96,6 +99,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                   name="nombres"
                   maxlength="80"
                   autocomplete="off"
+                  autocapitalize="words"
                   [readonly]="soloLectura()"
                   [value]="nombres()"
                   (input)="nombres.set(valor($event))"
@@ -206,7 +210,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                         @if (tutor.parentesco) {
                           {{ tutor.parentesco }} ·
                         }
-                        <span class="cifras">{{ telefono(tutor.telefono) }}</span>
+                        <span class="cifras telefono">{{ telefono(tutor.telefono) }}</span>
                       </span>
                       @if (tutor.correo) {
                         <span class="dato-suave correo">{{ tutor.correo }}</span>
@@ -290,6 +294,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
               name="tutor-nombre"
               maxlength="120"
               autocomplete="off"
+              autocapitalize="words"
               [value]="tutor().nombre"
               (input)="cambiarTutor({ nombre: valor($event) })"
               [attr.aria-invalid]="intentoTutor() && !tutor().nombre.trim()"
@@ -426,6 +431,11 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
     </div>
   `,
   styles: `
+    /* Un nombre muy largo baja de tamaño para que los datos queden a la vista. */
+    h1.largo {
+      font-size: var(--texto-xl);
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-1);

@@ -248,7 +248,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                       <span class="dato-suave tutor">
                         {{ tutor.nombre || t('vista.tutorSinNombre') }}
                         @if (tutor.telefono) {
-                          · <span class="cifras">{{ telefono(tutor.telefono) }}</span>
+                          · <span class="cifras telefono">{{ telefono(tutor.telefono) }}</span>
                         }
                       </span>
                     }

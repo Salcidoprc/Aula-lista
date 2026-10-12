@@ -652,6 +652,7 @@
     },
     "problemas": {
       "nombre_vacio": "Falta el nombre",
+      "nombre_largo": "Nombre muy largo (máximo 80 letras)",
       "telefono_invalido": "WhatsApp inválido",
       "tutor_incompleto": "Al tutor le falta nombre o WhatsApp",
       "correo_invalido": "Correo del tutor inválido",

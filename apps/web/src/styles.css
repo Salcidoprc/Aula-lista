@@ -74,6 +74,15 @@ textarea,
   touch-action: manipulation;
 }
 
+/* Un toque largo en un control no selecciona su texto (iOS); el texto de lectura sí se puede copiar. */
+button,
+summary,
+.boton,
+.eleccion label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 :focus-visible {
   /* Contorno transparente: invisible normalmente, pero en alto contraste el sistema lo pinta. */
   outline: 2px solid transparent;

@@ -179,17 +179,15 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
               [placeholder]="varios() ? t('nombresEjemplo') : t('nombreEjemplo')"
               [value]="texto()"
               (input)="texto.set(valor($event))"
-              [attr.aria-invalid]="intento() && !!errorNombres()"
+              [attr.aria-invalid]="!!errorVisible()"
               [attr.aria-describedby]="
-                intento() && errorNombres()
-                  ? 'grupo-nombre-error grupo-nombre-ayuda'
-                  : 'grupo-nombre-ayuda'
+                errorVisible() ? 'grupo-nombre-error grupo-nombre-ayuda' : 'grupo-nombre-ayuda'
               "
             />
             <p id="grupo-nombre-ayuda" class="ayuda">
               {{ varios() ? t('nombresAyuda') : t('nombreAyuda') }}
             </p>
-            @if (intento() && errorNombres(); as codigo) {
+            @if (errorVisible(); as codigo) {
               <p id="grupo-nombre-error" class="error">{{ t('errores.' + codigo) }}</p>
             }
           </div>
@@ -199,14 +197,14 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
               <h2 id="vista-titulo" class="dato-suave">
                 {{ t('vista.' + forma(nombres().length), { cantidad: nombres().length }) }}
               </h2>
+              @if (materia().trim() && nivel() === 'secundaria') {
+                <p class="dato-suave materia-vista">{{ materia().trim() }}</p>
+              }
               <ul class="tapas">
                 @for (n of nombres(); track $index) {
                   <li>
                     <app-tapa [nivel]="nivel()" [grado]="grado()" />
                     <span class="nombre-tapa">{{ nombreCompleto(n) }}</span>
-                    @if (materia().trim() && nivel() === 'secundaria') {
-                      <span class="dato-suave">{{ materia().trim() }}</span>
-                    }
                   </li>
                 }
               </ul>
@@ -327,6 +325,11 @@ export class CrearGrupo implements OnInit {
     this.varios() ? separarNombres(this.texto()) : this.texto().trim() ? [this.texto().trim()] : [],
   );
   protected readonly errorNombres = computed(() => errorDeNombres(this.nombres()));
+  /** "Falta el nombre" espera al envío; pasar de 15, repetir o alargar un nombre se avisa al escribir. */
+  protected readonly errorVisible = computed(() => {
+    const codigo = this.errorNombres();
+    return this.intento() || codigo !== 'nombreRequerido' ? codigo : null;
+  });
   protected readonly materias = computed(
     () => (this.i18n.translateObject('crearGrupo.materias') as string[] | undefined) ?? [],
   );

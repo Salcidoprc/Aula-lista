@@ -119,9 +119,11 @@ interface CicloConGrupos {
                         <app-tapa [nivel]="grupo.nivel" [grado]="grupo.grado" />
                         <span class="texto">
                           <span class="nombre">{{ nombre(grupo) }}</span>
-                          <span class="dato-suave">
-                            {{ grupo.materia ?? t('nivel.' + grupo.nivel) }} ·
-                            <span class="cifras">{{
+                          <span class="dato-suave detalle">
+                            <span class="materia">{{
+                              grupo.materia ?? t('nivel.' + grupo.nivel)
+                            }}</span>
+                            <span class="cifras cuenta">{{
                               t('alumnos.' + forma(grupo.alumnosActivos), {
                                 cantidad: +grupo.alumnosActivos,
                               })
@@ -206,7 +208,7 @@ interface CicloConGrupos {
 
     .fila-grupo {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
       gap: var(--espacio-4);
       min-height: 5rem;
@@ -241,6 +243,29 @@ interface CicloConGrupos {
       font-weight: var(--peso-fuerte);
       line-height: var(--interlineado-ajustado);
       overflow-wrap: anywhere;
+    }
+
+    /* Una materia larga se corta en una línea; la cantidad de alumnos nunca se parte. */
+    .detalle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35em;
+      min-width: 0;
+    }
+
+    .materia {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .materia::after {
+      content: ' ·';
+    }
+
+    .cuenta {
+      flex: none;
+      white-space: nowrap;
     }
 
     .flecha {
@@ -331,15 +356,19 @@ export class Inicio implements OnInit {
     if (grupos === null) {
       return 'cargando';
     }
-    return grupos.length === 0 ? 'vacio' : 'listo';
+    return grupos.length === 0 && !this.archivados()?.length ? 'vacio' : 'listo';
   });
 
   /** Ciclos con sus grupos, el más reciente primero; los grupos ya vienen ordenados por grado y nombre. */
   protected readonly porCiclo = computed<CicloConGrupos[]>(() => {
     const grupos = this.grupos() ?? [];
-    return [...this.ciclos()]
-      .sort((a, b) => b.inicio.localeCompare(a.inicio))
-      .map((ciclo) => ({ ciclo, grupos: grupos.filter((g) => g.cicloId === ciclo.id) }));
+    return (
+      [...this.ciclos()]
+        .sort((a, b) => b.inicio.localeCompare(a.inicio))
+        .map((ciclo) => ({ ciclo, grupos: grupos.filter((g) => g.cicloId === ciclo.id) }))
+        // Los ciclos viejos sin grupos activos solo hacen ruido; el más reciente se queda aunque esté vacío.
+        .filter((bloque, i) => i === 0 || bloque.grupos.length > 0)
+    );
   });
 
   async ngOnInit(): Promise<void> {
@@ -350,6 +379,13 @@ export class Inicio implements OnInit {
     this.error.set(null);
     try {
       const [grupos] = await Promise.all([this.servicio.listar(), this.servicio.cargarCiclos()]);
+      // Sin grupos activos puede haber archivados: se muestran en lugar del primer uso.
+      if (grupos.length === 0) {
+        const archivados = (await this.servicio.listar(true)).filter((g) => g.archivadoEn);
+        if (archivados.length) {
+          this.archivados.set(archivados);
+        }
+      }
       this.grupos.set(grupos);
     } catch (e) {
       this.error.set(codigoDeError(e));

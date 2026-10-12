@@ -44,6 +44,7 @@ export interface FilaVista {
 /** Mismos códigos que `ErrorFilaImportacion` de la API, más el aviso de repetido (que no impide importar). */
 export type ProblemaFila =
   | 'nombre_vacio'
+  | 'nombre_largo'
   | 'telefono_invalido'
   | 'tutor_incompleto'
   | 'correo_invalido'
@@ -151,12 +152,11 @@ function tieneDatos(t: TutorFila): boolean {
 
 /** Misma validación que la API al confirmar (`ConfirmarImportacionCasoUso.Validar`). */
 export function validarFila(fila: FilaVista): ProblemaFila | null {
-  if (
-    !fila.nombres.trim() ||
-    fila.nombres.trim().length > 80 ||
-    fila.apellidos.trim().length > 80
-  ) {
+  if (!fila.nombres.trim()) {
     return 'nombre_vacio';
+  }
+  if (fila.nombres.trim().length > 80 || fila.apellidos.trim().length > 80) {
+    return 'nombre_largo';
   }
   const telefonos = new Set<string>();
   for (const tutor of fila.tutores.filter(tieneDatos)) {
