@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "lint": "ng lint",
-    "api:generar": "ng-openapi-gen --input ../api/openapi/v1.json --output src/app/api",
+    "api:generar": "ng-openapi-gen --input ../api/openapi/v1.json --output src/app/api --ignoreUnusedModels false",
     "e2e": "playwright test",
     "bundle:verificar": "node scripts/verificar-bundle.mjs"
   },

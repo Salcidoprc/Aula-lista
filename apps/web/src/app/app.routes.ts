@@ -9,6 +9,55 @@ export const routes: Routes = [
     loadComponent: () => import('./docente/inicio/inicio').then((m) => m.Inicio),
   },
   {
+    path: 'ciclos',
+    canActivate: [requiereSesion, requierePerfilCompleto],
+    children: [
+      {
+        path: 'nuevo',
+        title: 'titulos.cicloNuevo',
+        loadComponent: () => import('./docente/ciclos/ciclo').then((m) => m.Ciclo),
+      },
+      {
+        path: ':id',
+        title: 'titulos.ciclo',
+        loadComponent: () => import('./docente/ciclos/ciclo').then((m) => m.Ciclo),
+      },
+    ],
+  },
+  {
+    path: 'grupos',
+    canActivate: [requiereSesion, requierePerfilCompleto],
+    children: [
+      {
+        path: 'nuevo',
+        title: 'titulos.grupoNuevo',
+        loadComponent: () => import('./docente/grupos/crear-grupo').then((m) => m.CrearGrupo),
+      },
+      {
+        path: ':id',
+        title: 'titulos.grupo',
+        loadComponent: () => import('./docente/grupos/grupo').then((m) => m.Grupo),
+      },
+      {
+        path: ':id/ajustes',
+        title: 'titulos.configuracionGrupo',
+        loadComponent: () =>
+          import('./docente/grupos/configuracion-grupo').then((m) => m.ConfiguracionGrupo),
+      },
+      {
+        path: ':id/importar',
+        title: 'titulos.importar',
+        loadComponent: () => import('./docente/importar/importar').then((m) => m.Importar),
+      },
+    ],
+  },
+  {
+    path: 'alumnos/:id',
+    canActivate: [requiereSesion, requierePerfilCompleto],
+    title: 'titulos.alumno',
+    loadComponent: () => import('./docente/alumnos/ficha-alumno').then((m) => m.FichaAlumno),
+  },
+  {
     path: 'bienvenida',
     canActivate: [requiereSesion],
     title: 'titulos.bienvenida',

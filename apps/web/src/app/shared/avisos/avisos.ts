@@ -11,35 +11,38 @@ import { AvisosService } from './avisos.service';
   imports: [TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ol role="status" aria-live="polite" *transloco="let t">
-      @for (aviso of servicio.avisos(); track aviso.id) {
-        <li [attr.data-tipo]="aviso.tipo" animate.enter="entra" animate.leave="sale">
-          <span>{{ aviso.texto }}</span>
-          @if (aviso.tipo === 'error') {
-            <button
-              type="button"
-              [attr.aria-label]="t('app.cerrarAviso')"
-              (click)="servicio.cerrar(aviso.id)"
-            >
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path
-                  d="m4 4 8 8M12 4l-8 8"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </button>
-          }
-        </li>
-      }
-    </ol>
+    <div role="status" aria-live="polite" *transloco="let t">
+      <ol>
+        @for (aviso of servicio.avisos(); track aviso.id) {
+          <li [attr.data-tipo]="aviso.tipo" animate.enter="entra" animate.leave="sale">
+            <span>{{ aviso.texto }}</span>
+            @if (aviso.tipo === 'error') {
+              <button
+                type="button"
+                [attr.aria-label]="t('app.cerrarAviso')"
+                (click)="servicio.cerrar(aviso.id)"
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="m4 4 8 8M12 4l-8 8"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+            }
+          </li>
+        }
+      </ol>
+    </div>
   `,
   styles: `
     ol {
       position: fixed;
       inset-inline: 0;
-      bottom: calc(var(--espacio-4) + env(safe-area-inset-bottom));
+      /* Sobre la barra de acción fija del celular, si la pantalla tiene una (--alto-pie-accion). */
+      bottom: calc(var(--espacio-4) + var(--alto-pie-accion, 0px) + env(safe-area-inset-bottom));
       z-index: 20;
       display: grid;
       justify-items: center;

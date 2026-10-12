@@ -13,6 +13,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
 import { Avisos } from './shared/avisos/avisos';
 import { Portada } from './shared/portada/portada';
+import { PortadaService } from './shared/portada/portada.service';
 
 @Component({
   selector: 'app-root',
@@ -22,9 +23,18 @@ import { Portada } from './shared/portada/portada';
     <ng-container *transloco="let t">
       <a class="saltar" href="#contenido">{{ t('app.saltar') }}</a>
       <header>
-        <app-portada [titulo]="t('app.nombre')">
+        <app-portada
+          [titulo]="portada()?.titulo ?? t('app.nombre')"
+          [subtitulo]="portada()?.subtitulo"
+          [numero]="portada()?.numero"
+          [grado]="portada()?.grado"
+        >
           @if (sesion.activa()) {
-            <nav class="navegacion" [attr.aria-label]="t('app.navegacion')">
+            <nav
+              class="navegacion"
+              [class.bajo-titulo]="!!portada()?.numero"
+              [attr.aria-label]="t('app.navegacion')"
+            >
               <a
                 routerLink="/"
                 routerLinkActive="activo"
@@ -79,6 +89,12 @@ import { Portada } from './shared/portada/portada';
       gap: var(--espacio-1);
     }
 
+    /* La esquina es del número del grado: con número, la navegación va bajo el título para no pisarlo. */
+    .navegacion.bajo-titulo {
+      position: static;
+      margin-inline-start: calc(-1 * var(--espacio-2));
+    }
+
     /* En pantalla ancha, la esquina queda lejos de la columna: va bajo el título, alineada con el texto. */
     @media (min-width: 48rem) {
       .navegacion {
@@ -123,6 +139,7 @@ import { Portada } from './shared/portada/portada';
 })
 export class App {
   protected readonly sesion = inject(SesionService);
+  protected readonly portada = inject(PortadaService).datos;
 
   constructor() {
     const injector = inject(Injector);

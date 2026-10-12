@@ -1,0 +1,117 @@
+/* Hoja inferior (app-hoja): sube desde abajo en el celular, diálogo centrado en pantalla ancha (regla 07). */
+.hoja {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 85dvh;
+  margin: 0;
+  padding: 0 0 env(safe-area-inset-bottom);
+  border: 0;
+  border-radius: var(--radio-hoja) var(--radio-hoja) 0 0;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: var(--sombra-hoja);
+  overflow: auto;
+  overscroll-behavior: contain;
+  transform: translateY(100%);
+  transition:
+    transform var(--dur-large) var(--ease-drawer),
+    overlay var(--dur-large) allow-discrete,
+    display var(--dur-large) allow-discrete;
+}
+
+.hoja[open] {
+  transform: none;
+  transition-duration: var(--dur-hoja);
+}
+
+@starting-style {
+  .hoja[open] {
+    transform: translateY(100%);
+  }
+}
+
+.hoja::backdrop {
+  background: var(--color-velo-transparente);
+  transition:
+    background-color var(--dur-large) var(--ease-out),
+    overlay var(--dur-large) allow-discrete,
+    display var(--dur-large) allow-discrete;
+}
+
+.hoja[open]::backdrop {
+  background: var(--color-velo);
+}
+
+@starting-style {
+  .hoja[open]::backdrop {
+    background: var(--color-velo-transparente);
+  }
+}
+
+.hoja .asa {
+  display: grid;
+  place-items: center;
+  height: var(--espacio-6);
+  cursor: grab;
+  touch-action: none;
+}
+
+.hoja .asa span {
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: var(--radio-pleno);
+  background: var(--color-texto-tenue);
+}
+
+.hoja .cuerpo {
+  display: grid;
+  gap: var(--espacio-4);
+  padding: 0 max(var(--espacio-4), env(safe-area-inset-right)) var(--espacio-5)
+    max(var(--espacio-4), env(safe-area-inset-left));
+}
+
+/* En pantalla ancha no hay pulgar que arrastre: diálogo centrado que entra con escala. */
+@media (min-width: 48rem) {
+  .hoja {
+    inset: 0;
+    width: min(100% - 2 * var(--espacio-4), 28rem);
+    height: fit-content;
+    margin: auto;
+    padding-top: var(--espacio-5);
+    border-radius: var(--radio-hoja);
+    box-shadow: var(--sombra-flotante);
+    opacity: 0;
+    transform: scale(var(--escala-entrada));
+    transition:
+      opacity var(--dur-small) var(--ease-out),
+      transform var(--dur-small) var(--ease-out),
+      overlay var(--dur-small) allow-discrete,
+      display var(--dur-small) allow-discrete;
+  }
+
+  .hoja[open] {
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--dur-large);
+  }
+
+  @starting-style {
+    .hoja[open] {
+      opacity: 0;
+      transform: scale(var(--escala-entrada));
+    }
+  }
+
+  .hoja .asa {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoja,
+  .hoja::backdrop {
+    transition: none;
+  }
+}
