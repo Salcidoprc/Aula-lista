@@ -350,6 +350,21 @@ public sealed class Spec02GruposPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     }
 
     [Fact]
+    public async Task RN021_MismoNombreEnOtroGrado_SePermiteYEnElMismoGradoNo()
+    {
+        var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+        var ciclo = await CrearCicloAsync(cliente);
+        await CrearGrupoAsync(cliente, ciclo.Id, "A");
+
+        var otroGrado = await cliente.PostAsJsonAsync("/api/v1/grupos", new { nombre = "A", nivel = "secundaria", grado = 3, materia = "Matemáticas", cicloId = ciclo.Id });
+        var mismoGrado = await cliente.PostAsJsonAsync("/api/v1/grupos", new { nombre = "a", nivel = "secundaria", grado = 2, materia = "matemáticas", cicloId = ciclo.Id });
+
+        Assert.Equal(HttpStatusCode.Created, otroGrado.StatusCode);
+        Assert.Equal("grupo_duplicado", await CodigoAsync(mismoGrado));
+        Assert.Equal(2, (await cliente.GetFromJsonAsync<JsonElement>("/api/v1/grupos")).GetArrayLength());
+    }
+
+    [Fact]
     public async Task RN018_GrupoArchivado_SeConsultaPeroNoSeEdita()
     {
         var (cliente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();

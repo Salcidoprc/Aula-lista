@@ -59,13 +59,13 @@ internal sealed class RepositorioGrupos(AulaListaDbContext db) : IRepositorioGru
     public async Task<IReadOnlyList<Grupo>> GruposDelCicloAsync(Guid cicloId, CancellationToken cancellationToken) =>
         await db.Grupos.Where(g => g.CicloEscolarId == cicloId).ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<(string Nombre, string? Materia)>> NombresDeGruposAsync(
+    public async Task<IReadOnlyList<(int Grado, string Nombre, string? Materia)>> NombresDeGruposAsync(
         Guid cicloId, Guid? excepto, CancellationToken cancellationToken) =>
         (await db.Grupos
             .Where(g => g.CicloEscolarId == cicloId && g.Id != excepto)
-            .Select(g => new { g.Nombre, g.Materia })
+            .Select(g => new { g.Grado, g.Nombre, g.Materia })
             .ToListAsync(cancellationToken))
-        .Select(g => (g.Nombre, g.Materia))
+        .Select(g => (g.Grado, g.Nombre, g.Materia))
         .ToList();
 
     public void Agregar(Grupo grupo) => db.Grupos.Add(grupo);

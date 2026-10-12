@@ -345,8 +345,8 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                 ALTER TABLE alumno ADD CONSTRAINT ex_alumno_numero_lista
                     EXCLUDE USING btree (grupo_id WITH =, numero_lista WITH =) WHERE (baja_en IS NULL)
                     DEFERRABLE INITIALLY DEFERRED;
-                CREATE UNIQUE INDEX ux_grupo_ciclo_nombre_materia
-                    ON grupo (ciclo_escolar_id, lower(nombre), lower(coalesce(materia, '')));
+                CREATE UNIQUE INDEX ux_grupo_ciclo_grado_nombre_materia
+                    ON grupo (ciclo_escolar_id, grado, lower(nombre), lower(coalesce(materia, '')));
                 """);
 
             // RNF-001: todo lo del docente con RLS forzada.

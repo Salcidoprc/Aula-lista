@@ -107,7 +107,7 @@ public sealed class CrearGruposCasoUso(IRepositorioGrupos repositorio, IUnidadDe
             }
 
             var grupo = creado.Valor;
-            if (EsDuplicado(existentes, grupo.Nombre, grupo.Materia))
+            if (EsDuplicado(existentes, grupo.Grado, grupo.Nombre, grupo.Materia))
             {
                 return Resultado.Fallo<IReadOnlyList<GrupoDto>>(ErroresGrupos.GrupoDuplicado);
             }
@@ -121,8 +121,11 @@ public sealed class CrearGruposCasoUso(IRepositorioGrupos repositorio, IUnidadDe
         return Resultado.Exito<IReadOnlyList<GrupoDto>>(creados);
     }
 
-    internal static bool EsDuplicado(IEnumerable<(string Nombre, string? Materia)> existentes, string nombre, string? materia) =>
-        existentes.Any(e => string.Equals(e.Nombre, nombre, StringComparison.OrdinalIgnoreCase)
+    /// <summary>"4° A" y "1° A" conviven: un grupo se repite solo con el mismo grado, nombre y materia.</summary>
+    internal static bool EsDuplicado(
+        IEnumerable<(int Grado, string Nombre, string? Materia)> existentes, int grado, string nombre, string? materia) =>
+        existentes.Any(e => e.Grado == grado
+            && string.Equals(e.Nombre, nombre, StringComparison.OrdinalIgnoreCase)
             && string.Equals(e.Materia ?? string.Empty, materia ?? string.Empty, StringComparison.OrdinalIgnoreCase));
 }
 
@@ -151,7 +154,7 @@ public sealed class EditarGrupoCasoUso(IRepositorioGrupos repositorio, IUnidadDe
 
         var existentes = await repositorio.NombresDeGruposAsync(grupo.CicloEscolarId, id, ct);
         var materia = grupo.Nivel == Domain.Cuentas.NivelEducativo.Secundaria ? comando.Materia?.Trim() : null;
-        if (CrearGruposCasoUso.EsDuplicado(existentes, comando.Nombre.Trim(), string.IsNullOrEmpty(materia) ? null : materia))
+        if (CrearGruposCasoUso.EsDuplicado(existentes, comando.Grado, comando.Nombre.Trim(), string.IsNullOrEmpty(materia) ? null : materia))
         {
             return Resultado.Fallo(ErroresGrupos.GrupoDuplicado);
         }

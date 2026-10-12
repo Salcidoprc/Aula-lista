@@ -103,6 +103,7 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - El mismo teléfono aparece como tutor de dos alumnos del grupo (hermanos): un solo tutor vinculado a ambos.
 - El docente escribe un teléfono que ya pertenece a un tutor con otro nombre: se vincula y se avisa "Este número ya está registrado como tutor"; no se muestra el otro nombre.
 - Importación que excede 50 alumnos: se importan los primeros hasta el límite y se informa el resto.
+- Dos grupos con el mismo nombre en el ciclo: se permiten si difieren en grado o materia ("1° A" y "4° A"); con el mismo grado, nombre y materia (sin distinguir mayúsculas) se rechaza con `grupo_duplicado`.
 
 ## Criterios de aceptación
 

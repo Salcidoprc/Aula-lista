@@ -26,7 +26,7 @@ public interface IRepositorioGrupos
     Task<IReadOnlyList<Grupo>> GruposDelCicloAsync(Guid cicloId, CancellationToken cancellationToken);
 
     /// <summary>Nombres (en minúsculas) con su materia de los grupos del ciclo, para evitar duplicados.</summary>
-    Task<IReadOnlyList<(string Nombre, string? Materia)>> NombresDeGruposAsync(Guid cicloId, Guid? excepto, CancellationToken cancellationToken);
+    Task<IReadOnlyList<(int Grado, string Nombre, string? Materia)>> NombresDeGruposAsync(Guid cicloId, Guid? excepto, CancellationToken cancellationToken);
 
     void Agregar(Grupo grupo);
 
