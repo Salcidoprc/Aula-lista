@@ -75,7 +75,9 @@ textarea,
 }
 
 :focus-visible {
-  outline: none;
+  /* Contorno transparente: invisible normalmente, pero en alto contraste el sistema lo pinta. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--foco);
 }
 
@@ -108,12 +110,28 @@ textarea,
   border: 0;
 }
 
-/* Cambio de pantalla: fundido con desplazamiento de 8 px en 220 ms (catálogo de la regla 07). */
-::view-transition-old(root) {
+/*
+ * Cambio de pantalla: el contenido funde con desplazamiento de 8 px en 220 ms (catálogo de la regla 07). La
+ * portada no se desliza: cambia de tamaño y de color en su lugar.
+ */
+app-root > header {
+  view-transition-name: portada;
+}
+
+main {
+  view-transition-name: contenido;
+}
+
+::view-transition-group(portada) {
+  animation-duration: var(--dur-medium);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(contenido) {
   animation: var(--dur-small) var(--ease-out) both salida-pantalla;
 }
 
-::view-transition-new(root) {
+::view-transition-new(contenido) {
   animation: var(--dur-medium) var(--ease-out) both entrada-pantalla;
 }
 

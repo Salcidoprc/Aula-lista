@@ -79,9 +79,10 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
               [value]="nombre()"
               (input)="nombre.set(valor($event))"
               [attr.aria-invalid]="intento() && !nombre().trim()"
+              [attr.aria-describedby]="intento() && !nombre().trim() ? 'ciclo-nombre-error' : null"
             />
             @if (intento() && !nombre().trim()) {
-              <p class="error">{{ t('nombreRequerido') }}</p>
+              <p id="ciclo-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
             }
           </div>
 
@@ -174,6 +175,9 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
                         [value]="unidad.nombre"
                         (input)="editar(i, { nombre: valor($event) })"
                         [attr.aria-invalid]="intento() && !unidad.nombre.trim()"
+                        [attr.aria-describedby]="
+                          intento() && !unidad.nombre.trim() ? 'unidad-error-' + i : null
+                        "
                       />
                     </div>
                     <div class="campos-en-fila">
@@ -220,6 +224,7 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
                     <button
                       class="quitar"
                       type="button"
+                      [id]="'unidad-quitar-' + i"
                       [attr.aria-label]="
                         t('quitar', { nombre: unidad.nombre || t('unidadN', { n: i + 1 }) })
                       "
@@ -233,6 +238,7 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
             </ol>
             @if (unidades().length < maximo) {
               <button
+                id="unidad-agregar"
                 class="boton boton--secundario agregar"
                 type="button"
                 (click)="agregarAlFinal()"
@@ -433,8 +439,13 @@ export class Ciclo implements OnInit {
     this.unidades.update((lista) => lista.map((u, i) => (i === indice ? { ...u, ...cambios } : u)));
   }
 
+  /** Quita la unidad y deja el foco en el "Quitar" anterior, o en "Agregar" si ya no queda ninguno. */
   protected quitar(indice: number): void {
     this.unidades.update((lista) => lista.filter((_, i) => i !== indice));
+    const restantes = this.unidades().length;
+    this.enfocar(
+      restantes > 1 ? `#unidad-quitar-${Math.min(indice, restantes - 1)}` : '#unidad-agregar',
+    );
   }
 
   /** RN-027: la nueva empieza el día después de la última y llega al fin del ciclo. */

@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { forma } from '../../shared/plural';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Api } from '../../api/api';
+import { CicloDto } from '../../api/models/ciclo-dto';
 import { crearGrupo } from '../../api/fn/grupos/crear-grupo';
 import { crearGruposLote } from '../../api/fn/grupos/crear-grupos-lote';
 import { codigoDeError } from '../../core/errores/problema';
@@ -66,7 +67,14 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
       </a>
       <h1>{{ varios() ? t('tituloVarios') : t('titulo') }}</h1>
 
-      @if (ciclos().length === 0) {
+      @if (errorCarga(); as codigo) {
+        <div class="aviso aviso--error" role="alert">
+          <p>{{ errorTexto(codigo) }}</p>
+          <button class="boton boton--secundario" type="button" (click)="ngOnInit()">
+            {{ t('reintentar') }}
+          </button>
+        </div>
+      } @else if (ciclos().length === 0) {
         <p class="aviso" role="status">{{ t('cargando') }}</p>
       } @else {
         <form class="formulario" (submit)="$event.preventDefault(); crear()" novalidate>
@@ -308,6 +316,8 @@ export class CrearGrupo implements OnInit {
   protected readonly intento = signal(false);
   protected readonly guardando = signal(false);
   protected readonly error = signal<string | null>(null);
+  /** Sin red no se sabe si hay ciclos: se ofrece reintentar en lugar de mandar a crear otro. */
+  protected readonly errorCarga = signal<string | null>(null);
 
   protected readonly ciclos = computed(() =>
     [...(this.servicio.ciclos() ?? [])].sort((a, b) => b.inicio.localeCompare(a.inicio)),
@@ -322,10 +332,15 @@ export class CrearGrupo implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
-    const [ciclos, perfil] = await Promise.all([
-      this.servicio.cargarCiclos().catch(() => []),
-      this.perfil.cargar(),
-    ]);
+    this.errorCarga.set(null);
+    let ciclos: readonly CicloDto[];
+    let perfil;
+    try {
+      [ciclos, perfil] = await Promise.all([this.servicio.cargarCiclos(), this.perfil.cargar()]);
+    } catch (e) {
+      this.errorCarga.set(codigoDeError(e));
+      return;
+    }
     if (ciclos.length === 0) {
       await this.router.navigate(['/ciclos/nuevo'], {
         queryParams: { volver: '/grupos/nuevo' },

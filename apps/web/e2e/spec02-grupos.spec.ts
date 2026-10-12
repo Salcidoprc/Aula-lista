@@ -118,7 +118,7 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
 
     await expect(page.getByText('Se importaron 3 alumnos.')).toBeVisible();
     await page.getByRole('link', { name: /García López Ana/ }).click();
-    await expect(page.getByText('María López')).toBeVisible();
+    await expect(page.getByText('María López').first()).toBeVisible();
     await expect(page.getByText('667 123 4567')).toBeVisible();
   });
 

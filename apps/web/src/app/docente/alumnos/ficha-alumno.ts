@@ -100,9 +100,12 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                   [value]="nombres()"
                   (input)="nombres.set(valor($event))"
                   [attr.aria-invalid]="intentoDatos() && !nombres().trim()"
+                  [attr.aria-describedby]="
+                    intentoDatos() && !nombres().trim() ? 'alumno-nombres-error' : null
+                  "
                 />
                 @if (intentoDatos() && !nombres().trim()) {
-                  <p class="error">{{ t('datos.nombresRequerido') }}</p>
+                  <p id="alumno-nombres-error" class="error">{{ t('datos.nombresRequerido') }}</p>
                 }
               </div>
             </div>
@@ -120,8 +123,15 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                 [value]="numero()"
                 (input)="numero.set(+valor($event))"
                 [attr.aria-invalid]="intentoDatos() && !numeroValido()"
-                aria-describedby="alumno-numero-ayuda"
+                [attr.aria-describedby]="
+                  intentoDatos() && !numeroValido()
+                    ? 'alumno-numero-error alumno-numero-ayuda'
+                    : 'alumno-numero-ayuda'
+                "
               />
+              @if (intentoDatos() && !numeroValido()) {
+                <p id="alumno-numero-error" class="error">{{ t('datos.numeroInvalido') }}</p>
+              }
               <p id="alumno-numero-ayuda" class="ayuda">{{ t('datos.numeroAyuda') }}</p>
             </div>
             <fieldset class="eleccion" [disabled]="soloLectura()">
@@ -153,7 +163,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
 
         <section aria-labelledby="tutores-titulo">
           <div>
-            <h2 id="tutores-titulo">{{ t('tutores.titulo') }}</h2>
+            <h2 id="tutores-titulo" tabindex="-1">{{ t('tutores.titulo') }}</h2>
             <p class="dato-suave">{{ t('tutores.nota') }}</p>
           </div>
           @if (a.tutores.length) {
@@ -207,9 +217,11 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                         <button
                           class="boton boton--secundario"
                           type="button"
+                          [id]="'editar-' + tutor.id"
                           (click)="editar(tutor)"
                         >
                           {{ t('tutores.editar') }}
+                          <span class="solo-lector">{{ tutor.nombre }}</span>
                         </button>
                         <button
                           class="boton boton--secundario peligro"
@@ -217,6 +229,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                           (click)="pedirQuitar(tutor)"
                         >
                           {{ t('tutores.quitar') }}
+                          <span class="solo-lector">{{ tutor.nombre }}</span>
                         </button>
                       </div>
                     }
@@ -228,9 +241,12 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
             <p class="aviso aviso--pendiente">{{ t('tutores.ninguno') }}</p>
           }
 
-          @if (avisoRegistrado()) {
-            <p class="aviso" role="status">{{ t('tutores.yaRegistrado') }}</p>
-          }
+          <!-- Región siempre montada: el lector anuncia el aviso cuando aparece su texto. -->
+          <div role="status">
+            @if (avisoRegistrado()) {
+              <p class="aviso">{{ t('tutores.yaRegistrado') }}</p>
+            }
+          </div>
 
           @if (!soloLectura() && !editandoTutor() && a.tutores.length < maximoTutores) {
             <form
@@ -277,9 +293,14 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
               [value]="tutor().nombre"
               (input)="cambiarTutor({ nombre: valor($event) })"
               [attr.aria-invalid]="intentoTutor() && !tutor().nombre.trim()"
+              [attr.aria-describedby]="
+                intentoTutor() && !tutor().nombre.trim() ? prefijo + '-tutor-nombre-error' : null
+              "
             />
             @if (intentoTutor() && !tutor().nombre.trim()) {
-              <p class="error">{{ t('tutores.nombreRequerido') }}</p>
+              <p [id]="prefijo + '-tutor-nombre-error'" class="error">
+                {{ t('tutores.nombreRequerido') }}
+              </p>
             }
           </div>
           @if (conTelefono) {
@@ -295,14 +316,20 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                 [value]="tutor().telefono"
                 (input)="cambiarTutor({ telefono: valor($event) })"
                 [attr.aria-invalid]="intentoTutor() && !telefonoValido()"
-                [attr.aria-describedby]="prefijo + '-tutor-telefono-ayuda'"
+                [attr.aria-describedby]="
+                  intentoTutor() && !telefonoValido()
+                    ? prefijo + '-tutor-telefono-error ' + prefijo + '-tutor-telefono-ayuda'
+                    : prefijo + '-tutor-telefono-ayuda'
+                "
               />
+              @if (intentoTutor() && !telefonoValido()) {
+                <p [id]="prefijo + '-tutor-telefono-error'" class="error">
+                  {{ texto('errores.telefono_invalido') }}
+                </p>
+              }
               <p [id]="prefijo + '-tutor-telefono-ayuda'" class="ayuda">
                 {{ t('tutores.telefonoAyuda') }}
               </p>
-              @if (intentoTutor() && !telefonoValido()) {
-                <p class="error">{{ texto('errores.telefono_invalido') }}</p>
-              }
             </div>
           }
           <div class="campos-en-fila">
@@ -330,9 +357,14 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                 [value]="tutor().correo"
                 (input)="cambiarTutor({ correo: valor($event) })"
                 [attr.aria-invalid]="intentoTutor() && !correoOk()"
+                [attr.aria-describedby]="
+                  intentoTutor() && !correoOk() ? prefijo + '-tutor-correo-error' : null
+                "
               />
               @if (intentoTutor() && !correoOk()) {
-                <p class="error">{{ t('tutores.correoInvalido') }}</p>
+                <p [id]="prefijo + '-tutor-correo-error'" class="error">
+                  {{ t('tutores.correoInvalido') }}
+                </p>
               }
             </div>
           </div>
@@ -631,6 +663,7 @@ export class FichaAlumno implements OnInit {
       this.reemplazarTutores((lista) => lista.map((t) => (t.id === original.id ? actualizado : t)));
       this.editandoTutor.set(null);
       this.reiniciarTutor();
+      this.enfocar(`#editar-${original.id}`);
     } catch (e) {
       this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
     } finally {
@@ -687,7 +720,11 @@ export class FichaAlumno implements OnInit {
       await this.api.invoke(desvincularTutor, { id: this.id(), tutorId: tutor.id });
       this.reemplazarTutores((lista) => lista.filter((t) => t.id !== tutor.id));
       this.dialogoQuitar().nativeElement.close();
+      // El botón que abrió el diálogo ya no existe: el foco va al título de la sección.
+      this.enfocar('#tutores-titulo');
     } catch (e) {
+      // Fuera del diálogo modal el aviso queda inerte: se cierra antes de mostrarlo.
+      this.dialogoQuitar().nativeElement.close();
       this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
     } finally {
       this.guardandoTutor.set(false);
@@ -713,8 +750,10 @@ export class FichaAlumno implements OnInit {
   }
 
   protected cancelarEdicion(): void {
+    const id = this.editandoTutor();
     this.editandoTutor.set(null);
     this.reiniciarTutor();
+    this.enfocar(`#editar-${id}`);
   }
 
   private reemplazarTutores(cambio: (lista: TutorDto[]) => TutorDto[]): void {

@@ -36,6 +36,7 @@
 /* Campo: etiqueta visible arriba, 48 px, fondo hundido; con foco, hoja y anillo. */
 .campo {
   display: grid;
+  align-content: start;
   gap: var(--espacio-1);
 }
 
@@ -50,6 +51,7 @@
   font-size: var(--texto-xs);
 }
 
+/* El renglón de abajo, como el de un cuaderno, marca el campo con contraste de 3:1 (WCAG 1.4.11). */
 .campo input,
 .campo select {
   width: 100%;
@@ -58,6 +60,7 @@
   border: 0;
   border-radius: var(--radio-md);
   background: var(--color-superficie-hundida);
+  box-shadow: inset 0 -1px 0 var(--color-texto-tenue);
   font-size: var(--texto-base);
   transition: background-color var(--dur-small) var(--ease-out);
 }
@@ -94,6 +97,7 @@
 .campo input:focus-visible,
 .campo select:focus-visible {
   background-color: var(--color-superficie);
+  box-shadow: var(--foco);
 }
 
 .campo input[aria-invalid='true'],
@@ -161,14 +165,22 @@ p.error {
     color var(--dur-small) var(--ease-out);
 }
 
+/* Elegida: tinte y borde de la acción; el borde no depende solo del color de fondo (WCAG 1.4.11). */
 .eleccion label:has(input:checked) {
   background: var(--color-accion-tinte);
+  box-shadow: inset 0 0 0 2px var(--color-accion);
   color: var(--color-accion-tinta);
   font-weight: var(--peso-medio);
 }
 
 .eleccion label:has(input:focus-visible) {
   box-shadow: var(--foco);
+}
+
+.eleccion label:has(input:checked:focus-visible) {
+  box-shadow:
+    inset 0 0 0 2px var(--color-accion),
+    var(--foco);
 }
 
 .eleccion input {
@@ -514,6 +526,7 @@ dialog.dialogo[open]::backdrop {
   border: 0;
   border-radius: var(--radio-md);
   background: var(--color-superficie-hundida);
+  box-shadow: inset 0 -1px 0 var(--color-texto-tenue);
   font-size: var(--texto-base);
   line-height: var(--interlineado);
   resize: vertical;
@@ -521,6 +534,7 @@ dialog.dialogo[open]::backdrop {
 
 .campo textarea:focus-visible {
   background-color: var(--color-superficie);
+  box-shadow: var(--foco);
 }
 
 .campo textarea::placeholder {
@@ -539,4 +553,48 @@ dialog.dialogo[open]::backdrop {
   color: var(--color-texto-suave);
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
+}
+
+/* Desplegables: flecha que gira al abrir, para que no parezcan un título. */
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline: 0.25rem var(--espacio-3);
+  border-block-start: 2px solid currentColor;
+  border-inline-end: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--dur-small) var(--ease-out);
+}
+
+details[open] > summary::before {
+  transform: rotate(135deg);
+}
+
+/* Alto contraste: las sombras desaparecen, así que elegido, pestaña activa e inválido usan contorno. */
+@media (forced-colors: active) {
+  .campo input,
+  .campo select,
+  .campo textarea {
+    border: 1px solid CanvasText;
+  }
+
+  .campo [aria-invalid='true'] {
+    outline: 2px dashed CanvasText;
+  }
+
+  .eleccion label:has(input:checked),
+  .pestanas [role='tab'][aria-selected='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }

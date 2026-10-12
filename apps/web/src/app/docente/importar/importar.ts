@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   OnInit,
   computed,
   inject,
   input,
   linkedSignal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { forma } from '../../shared/plural';
@@ -54,7 +56,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="pantalla pantalla--ancha" *transloco="let t; prefix: 'importar'">
-      <a class="volver" [routerLink]="['/grupos', id()]">
+      <a class="volver" [routerLink]="['/grupos', id()]" (click)="salir($event)">
         <app-icono nombre="volver" />
         {{ t('volver') }}
       </a>
@@ -66,7 +68,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
             id="pestana-excel"
             role="tab"
             type="button"
-            aria-controls="panel-excel"
+            [attr.aria-controls]="pestana() === 'excel' ? 'panel-excel' : null"
             [attr.aria-selected]="pestana() === 'excel'"
             [attr.tabindex]="pestana() === 'excel' ? 0 : -1"
             (click)="pestana.set('excel')"
@@ -78,7 +80,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
             id="pestana-texto"
             role="tab"
             type="button"
-            aria-controls="panel-texto"
+            [attr.aria-controls]="pestana() === 'texto' ? 'panel-texto' : null"
             [attr.aria-selected]="pestana() === 'texto'"
             [attr.tabindex]="pestana() === 'texto' ? 0 : -1"
             (click)="pestana.set('texto')"
@@ -156,6 +158,9 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
             <p class="dato-suave">
               {{ t('vista.nota', { disponibles: disponibles() }) }}
             </p>
+            <button class="enlace enlace--solo" type="button" (click)="pedirEmpezarDeNuevo()">
+              {{ t('vista.otra') }}
+            </button>
           </div>
 
           @if (vista()!.origen !== 'texto') {
@@ -249,7 +254,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                     }
                     @switch (estado()[i]) {
                       @case ('error') {
-                        <span class="motivo motivo--error">{{
+                        <span class="motivo motivo--error" [id]="'motivo-' + f.renglon">{{
                           t('problemas.' + problema(f))
                         }}</span>
                       }
@@ -268,8 +273,13 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                   </div>
                   <div class="renglon-acciones">
                     @if (!f.excluida) {
+                      <!-- Solo los renglones con problema llevan botón; los demás, un enlace discreto. -->
                       <button
-                        class="boton boton--secundario"
+                        [class]="
+                          estado()[i] === 'error'
+                            ? 'boton boton--secundario'
+                            : 'enlace enlace--solo corregir-enlace'
+                        "
                         type="button"
                         [attr.aria-expanded]="abierta() === f.renglon"
                         [attr.aria-controls]="'corregir-' + f.renglon"
@@ -278,11 +288,18 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                         {{ t('vista.corregir') }}
                         <span class="solo-lector">{{ t('vista.renglon', { n: f.renglon }) }}</span>
                       </button>
+                      <button class="quitar" type="button" (click)="excluir(i)">
+                        <app-icono nombre="cerrar" />
+                        <span class="solo-lector"
+                          >{{ t('vista.quitar') }} {{ t('vista.renglon', { n: f.renglon }) }}</span
+                        >
+                      </button>
+                    } @else {
+                      <button class="enlace enlace--solo" type="button" (click)="excluir(i)">
+                        {{ t('vista.incluir') }}
+                        <span class="solo-lector">{{ t('vista.renglon', { n: f.renglon }) }}</span>
+                      </button>
                     }
-                    <button class="boton boton--secundario" type="button" (click)="excluir(i)">
-                      {{ f.excluida ? t('vista.incluir') : t('vista.quitar') }}
-                      <span class="solo-lector">{{ t('vista.renglon', { n: f.renglon }) }}</span>
-                    </button>
                   </div>
                 </div>
                 @if (abierta() === f.renglon && !f.excluida) {
@@ -309,6 +326,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                           [value]="f.nombres"
                           (input)="editar(i, { nombres: valor($event) })"
                           [attr.aria-invalid]="!f.nombres.trim()"
+                          [attr.aria-describedby]="!f.nombres.trim() ? 'motivo-' + f.renglon : null"
                         />
                       </div>
                     </div>
@@ -341,6 +359,11 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
                             [attr.aria-invalid]="
                               !!tutor.telefono.trim() && !telefonoValido(tutor.telefono)
                             "
+                            [attr.aria-describedby]="
+                              tutor.telefono.trim() && !telefonoValido(tutor.telefono)
+                                ? 'motivo-' + f.renglon
+                                : null
+                            "
                           />
                         </div>
                       </div>
@@ -365,12 +388,37 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
             >
               {{ t('vista.importar.' + forma(cuenta().lista), { cantidad: cuenta().lista }) }}
             </button>
-            <button class="boton boton--secundario" type="button" (click)="empezarDeNuevo()">
-              {{ t('vista.otra') }}
-            </button>
           </div>
         </section>
       }
+
+      <dialog
+        #dialogoDescartar
+        class="dialogo"
+        closedby="any"
+        aria-labelledby="dialogo-descartar-titulo"
+      >
+        <div class="contenido">
+          <h2 id="dialogo-descartar-titulo">{{ t('descartar.titulo') }}</h2>
+          <p>{{ t('descartar.texto') }}</p>
+          <div class="acciones">
+            <button
+              class="boton boton--secundario"
+              type="button"
+              (click)="dialogoDescartar.close()"
+            >
+              {{ t('descartar.seguir') }}
+            </button>
+            <button
+              class="boton boton--peligro"
+              type="button"
+              (click)="dialogoDescartar.close(); descartar()"
+            >
+              {{ t('descartar.accion') }}
+            </button>
+          </div>
+        </div>
+      </dialog>
     </div>
   `,
   styles: `
@@ -512,10 +560,35 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
       }
     }
 
+    .renglon-acciones {
+      align-items: center;
+    }
+
     .renglon-acciones .boton {
-      min-height: 2.75rem;
+      min-height: var(--tactil-minimo);
       padding-inline: var(--espacio-3);
       font-size: var(--texto-sm);
+    }
+
+    .corregir-enlace {
+      padding-inline: var(--espacio-1);
+      font-size: var(--texto-sm);
+    }
+
+    .quitar {
+      display: inline-grid;
+      place-items: center;
+      width: var(--tactil-minimo);
+      height: var(--tactil-minimo);
+      border: 0;
+      border-radius: var(--radio-md);
+      background: none;
+      color: var(--color-texto-suave);
+      cursor: pointer;
+    }
+
+    .quitar:active {
+      background: var(--color-superficie-hundida);
     }
 
     .numero {
@@ -609,6 +682,11 @@ export class Importar implements OnInit {
   protected readonly orden = signal<Orden>('apellidos');
   protected readonly filas = signal<readonly FilaVista[]>([]);
   protected readonly abierta = signal<number | null>(null);
+  /** Hubo correcciones o renglones quitados: salir o empezar de nuevo los pierde, así que se pregunta. */
+  private readonly editado = signal(false);
+  private readonly dialogoDescartar =
+    viewChild.required<ElementRef<HTMLDialogElement>>('dialogoDescartar');
+  private destinoAlDescartar: 'grupo' | 'otra' = 'otra';
   protected readonly confirmando = signal(false);
   protected readonly errorConfirmar = signal<string | null>(null);
 
@@ -675,11 +753,18 @@ export class Importar implements OnInit {
 
   /** Flechas izquierda y derecha entre pestañas (patrón de pestañas de WAI-ARIA). */
   protected moverPestana(evento: KeyboardEvent): void {
-    if (evento.key !== 'ArrowLeft' && evento.key !== 'ArrowRight') {
+    const otra: Origen = this.pestana() === 'excel' ? 'texto' : 'excel';
+    const destinos: Record<string, Origen> = {
+      ArrowLeft: otra,
+      ArrowRight: otra,
+      Home: 'excel',
+      End: 'texto',
+    };
+    const siguiente = destinos[evento.key];
+    if (!siguiente) {
       return;
     }
     evento.preventDefault();
-    const siguiente: Origen = this.pestana() === 'excel' ? 'texto' : 'excel';
     this.pestana.set(siguiente);
     this.enfocar(`#pestana-${siguiente}`);
   }
@@ -737,12 +822,14 @@ export class Importar implements OnInit {
   }
 
   protected excluir(indice: number): void {
+    this.editado.set(true);
     this.filas.update((lista) =>
       lista.map((f, i) => (i === indice ? { ...f, excluida: !f.excluida } : f)),
     );
   }
 
   protected editar(indice: number, cambios: Partial<FilaVista>): void {
+    this.editado.set(true);
     this.filas.update((lista) => lista.map((f, i) => (i === indice ? { ...f, ...cambios } : f)));
   }
 
@@ -754,6 +841,7 @@ export class Importar implements OnInit {
   }
 
   protected editarTutor(indice: number, tutor: number, cambios: Partial<TutorFila>): void {
+    this.editado.set(true);
     this.filas.update((lista) =>
       lista.map((f, i) => {
         if (i !== indice) {
@@ -766,11 +854,39 @@ export class Importar implements OnInit {
     );
   }
 
+  protected pedirEmpezarDeNuevo(): void {
+    if (this.editado()) {
+      this.destinoAlDescartar = 'otra';
+      this.dialogoDescartar().nativeElement.showModal();
+    } else {
+      this.empezarDeNuevo();
+    }
+  }
+
+  protected salir(evento: MouseEvent): void {
+    if (this.vista() && this.editado()) {
+      evento.preventDefault();
+      this.destinoAlDescartar = 'grupo';
+      this.dialogoDescartar().nativeElement.showModal();
+    }
+  }
+
+  protected async descartar(): Promise<void> {
+    if (this.destinoAlDescartar === 'grupo') {
+      this.editado.set(false);
+      await this.router.navigate(['/grupos', this.id()]);
+    } else {
+      this.empezarDeNuevo();
+    }
+  }
+
   protected empezarDeNuevo(): void {
+    this.editado.set(false);
     this.vista.set(null);
     this.filas.set([]);
     this.abierta.set(null);
     this.errorConfirmar.set(null);
+    this.enfocar(`#pestana-${this.pestana()}`);
   }
 
   protected async confirmar(): Promise<void> {
@@ -828,6 +944,7 @@ export class Importar implements OnInit {
     if (vista) {
       this.filas.set(filasDesdeTabla(vista.filas, this.mapeo(), this.orden()));
       this.abierta.set(null);
+      this.editado.set(false);
     }
   }
 }

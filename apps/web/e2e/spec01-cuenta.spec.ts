@@ -56,7 +56,7 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByLabel('Contraseña').fill('no-es-la-contrasena');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
-    await expect(page.getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
   });
 
   test('sin sesión, una pantalla del docente lleva a entrar y luego regresa', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.goto('/cuenta/entrar');
     await page.getByRole('link', { name: 'Continuar con Google' }).click();
 
-    await expect(page.getByRole('alert')).toHaveText(
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
       'Entrar con Google todavía no está disponible. Usa tu correo.',
     );
   });
@@ -141,6 +141,6 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByLabel('Correo').fill(correo);
     await page.getByLabel('Contraseña').fill(CONTRASENA);
     await page.getByRole('button', { name: 'Entrar' }).click();
-    await expect(page.getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
   });
 });

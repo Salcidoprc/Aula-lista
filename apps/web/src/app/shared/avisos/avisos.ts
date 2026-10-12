@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { AvisosService } from './avisos.service';
 
 /**
  * Pila de avisos al pie, al alcance del pulgar. Entran y salen por abajo (catálogo de la regla 07);
- * la región es `status` para que el lector de pantalla los anuncie sin interrumpir.
+ * la región es `status` para que el lector de pantalla los anuncie sin interrumpir. Los errores sí interrumpen:
+ * se anuncian en una región `alert` que siempre está montada.
  */
 @Component({
   selector: 'app-avisos',
@@ -15,7 +16,10 @@ import { AvisosService } from './avisos.service';
       <ol>
         @for (aviso of servicio.avisos(); track aviso.id) {
           <li [attr.data-tipo]="aviso.tipo" animate.enter="entra" animate.leave="sale">
-            <span>{{ aviso.texto }}</span>
+            <!-- Los errores se anuncian por la región "alert" de abajo; aquí no se repiten. -->
+            <span [attr.aria-hidden]="aviso.tipo === 'error' ? 'true' : null">{{
+              aviso.texto
+            }}</span>
             @if (aviso.tipo === 'error') {
               <button
                 type="button"
@@ -36,6 +40,7 @@ import { AvisosService } from './avisos.service';
         }
       </ol>
     </div>
+    <div class="solo-lector" role="alert">{{ ultimoError() }}</div>
   `,
   styles: `
     ol {
@@ -85,6 +90,11 @@ import { AvisosService } from './avisos.service';
       color: inherit;
       cursor: pointer;
       pointer-events: auto;
+      transition: transform var(--dur-press) var(--ease-out);
+    }
+
+    button:active {
+      transform: scale(var(--escala-presion));
     }
 
     button svg {
@@ -112,4 +122,7 @@ import { AvisosService } from './avisos.service';
 })
 export class Avisos {
   protected readonly servicio = inject(AvisosService);
+  protected readonly ultimoError = computed(
+    () => [...this.servicio.avisos()].reverse().find((a) => a.tipo === 'error')?.texto ?? '',
+  );
 }

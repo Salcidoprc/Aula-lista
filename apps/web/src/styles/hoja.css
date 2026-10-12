@@ -50,10 +50,15 @@
   }
 }
 
+/* El asa mide lo que un dedo y se queda arriba aunque el contenido se desplace. */
 .hoja .asa {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
-  height: var(--espacio-6);
+  height: var(--tactil-minimo);
+  background: var(--color-superficie);
   cursor: grab;
   touch-action: none;
 }
@@ -63,6 +68,26 @@
   height: 0.25rem;
   border-radius: var(--radio-pleno);
   background: var(--color-texto-tenue);
+}
+
+.hoja .cerrar-hoja {
+  position: absolute;
+  inset-block-start: var(--espacio-1);
+  inset-inline-end: max(var(--espacio-2), env(safe-area-inset-right));
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tactil-minimo);
+  height: var(--tactil-minimo);
+  border: 0;
+  border-radius: var(--radio-pleno);
+  background: none;
+  color: var(--color-texto-suave);
+  cursor: pointer;
+}
+
+.hoja .cerrar-hoja:active {
+  background: var(--color-superficie-hundida);
 }
 
 .hoja .cuerpo {
@@ -104,14 +129,39 @@
     }
   }
 
+  /* El velo se va al ritmo del diálogo, que cierra en --dur-small. */
+  .hoja::backdrop {
+    transition-duration: var(--dur-small);
+  }
+
+  .hoja[open]::backdrop {
+    transition-duration: var(--dur-large);
+  }
+
   .hoja .asa {
     display: none;
   }
 }
 
+/* Movimiento reducido: la hoja no sube, aparece con fundido; el velo conserva el suyo. */
 @media (prefers-reduced-motion: reduce) {
-  .hoja,
-  .hoja::backdrop {
-    transition: none;
+  .hoja {
+    opacity: 0;
+    transform: none;
+    transition:
+      opacity var(--dur-medium) var(--ease-out),
+      overlay var(--dur-medium) allow-discrete,
+      display var(--dur-medium) allow-discrete;
+  }
+
+  .hoja[open] {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .hoja[open] {
+      opacity: 0;
+      transform: none;
+    }
   }
 }

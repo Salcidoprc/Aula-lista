@@ -18,6 +18,7 @@ import { agregarAlumno } from '../../api/fn/grupos/agregar-alumno';
 import { listarAlumnos } from '../../api/fn/grupos/listar-alumnos';
 import { AlumnoDto } from '../../api/models/alumno-dto';
 import { GrupoDto } from '../../api/models/grupo-dto';
+import { AvisosService } from '../../shared/avisos/avisos.service';
 import { codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { descargarArchivo } from '../../shared/descarga';
@@ -56,7 +57,7 @@ const MAXIMO_ALUMNOS = 50;
 
       <div class="cabeza">
         <hgroup>
-          <h1>{{ t('titulo') }}</h1>
+          <h1 tabindex="-1">{{ t('titulo') }}</h1>
           @if (grupo()) {
             <p class="dato-suave cifras">
               {{ t('conteo', { activos: activos().length, maximo: maximo }) }}
@@ -211,7 +212,7 @@ const MAXIMO_ALUMNOS = 50;
             @if (lleno()) {
               <p class="dato-suave">{{ t('lleno') }}</p>
             } @else {
-              <button class="boton" type="button" (click)="hoja().abrir()">
+              <button id="agregar-alumnos" class="boton" type="button" (click)="hoja().abrir()">
                 <app-icono nombre="mas" />
                 {{ t('agregarAlumnos') }}
               </button>
@@ -451,18 +452,13 @@ const MAXIMO_ALUMNOS = 50;
       width: 1rem;
       height: 1rem;
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      .opcion {
-        transition: none;
-      }
-    }
   `,
 })
 export class Grupo implements OnInit {
   protected readonly forma = forma;
   private readonly api = inject(Api);
   private readonly http = inject(HttpClient);
+  private readonly avisos = inject(AvisosService);
   private readonly i18n = inject(TranslocoService);
   private readonly servicio = inject(GruposService);
   private readonly perfil = inject(PerfilService).perfil;
@@ -542,6 +538,8 @@ export class Grupo implements OnInit {
     this.errorNuevo.set(null);
     this.nombres.set('');
     this.apellidos.set('');
+    // El formulario desaparece: el foco va a la acción que lo reemplaza o al título.
+    this.enfocar(this.lleno() ? 'h1' : '#agregar-alumnos');
   }
 
   /** Captura repetida: sin animación; se limpia y el foco vuelve a apellidos para el siguiente. */
@@ -589,7 +587,8 @@ export class Grupo implements OnInit {
         'plantilla-alumnos.xlsx',
       );
     } catch (e) {
-      this.error.set(codigoDeError(e));
+      // Un aviso y no el error de la pantalla: la lista del grupo sigue a la vista.
+      this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
     } finally {
       this.descargando.set(false);
     }

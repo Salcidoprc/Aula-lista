@@ -5,7 +5,8 @@
     "navegacion": "Principal",
     "inicio": "Inicio",
     "ajustes": "Ajustes",
-    "cerrarAviso": "Cerrar aviso"
+    "cerrarAviso": "Cerrar aviso",
+    "cerrar": "Cerrar"
   },
   "comun": {
     "cargando": "Cargando…",
@@ -276,7 +277,8 @@
     "tutor_ya_vinculado": "Ese tutor ya está vinculado a este alumno.",
     "archivo_invalido": "Sube un archivo .xlsx o .csv de hasta 2 MB.",
     "archivo_ilegible": "No pudimos leer el archivo. Revisa que sea un Excel o CSV con encabezados.",
-    "importacion_confirmada": "Esa importación ya se guardó."
+    "importacion_confirmada": "Esa importación ya se guardó.",
+    "unidad_nombre_requerido": "Escribe el nombre de la unidad."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -417,7 +419,8 @@
       "demasiados": "Son 15 grupos como máximo por vez.",
       "nombreLargo": "Cada nombre lleva 40 caracteres o menos.",
       "repetidos": "Hay nombres repetidos."
-    }
+    },
+    "reintentar": "Intentar de nuevo"
   },
   "grupo": {
     "misGrupos": "Mis grupos",
@@ -532,7 +535,8 @@
       "trato": "Trato",
       "tratoAyuda": "Solo sirve para que las observaciones digan «el alumno» o «la alumna».",
       "guardar": "Guardar datos",
-      "guardados": "Datos guardados."
+      "guardados": "Datos guardados.",
+      "numeroInvalido": "Escribe un número del 1 al 99."
     },
     "tratos": {
       "neutro": "Neutro",
@@ -660,6 +664,12 @@
     "hechoConOmitidos": {
       "uno": "Se importó {{guardados}} alumno; {{omitidos}} quedaron fuera.",
       "otros": "Se importaron {{guardados}} alumnos; {{omitidos}} quedaron fuera."
+    },
+    "descartar": {
+      "titulo": "¿Descartar tus correcciones?",
+      "texto": "Se pierden los cambios que hiciste en la vista previa y los renglones que quitaste.",
+      "seguir": "Seguir revisando",
+      "accion": "Descartar"
     }
   }
 }

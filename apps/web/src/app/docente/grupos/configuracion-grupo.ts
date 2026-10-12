@@ -100,9 +100,12 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                 [value]="nombre()"
                 (input)="nombre.set(valor($event))"
                 [attr.aria-invalid]="intento() && !nombre().trim()"
+                [attr.aria-describedby]="
+                  intento() && !nombre().trim() ? 'config-nombre-error' : null
+                "
               />
               @if (intento() && !nombre().trim()) {
-                <p class="error">{{ t('nombreRequerido') }}</p>
+                <p id="config-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
               }
             </div>
             <fieldset class="eleccion grados" [disabled]="!!g.archivadoEn">
@@ -155,7 +158,11 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                   [value]="minima()"
                   (input)="minima.set(valor($event))"
                   [attr.aria-invalid]="intento() && !!errorCalificacion()"
-                  aria-describedby="config-minima-ayuda"
+                  [attr.aria-describedby]="
+                    intento() && errorCalificacion()
+                      ? 'config-calificacion-error config-minima-ayuda'
+                      : 'config-minima-ayuda'
+                  "
                 />
                 <p id="config-minima-ayuda" class="ayuda">{{ t('minimaAyuda') }}</p>
               </div>
@@ -171,13 +178,16 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                   [value]="aprobatoria()"
                   (input)="aprobatoria.set(valor($event))"
                   [attr.aria-invalid]="intento() && !!errorCalificacion()"
+                  [attr.aria-describedby]="
+                    intento() && errorCalificacion() ? 'config-calificacion-error' : null
+                  "
                 />
               </div>
             </div>
             @if (intento() && errorCalificacion(); as codigo) {
-              <p class="error">{{ t('errores.' + codigo) }}</p>
+              <p id="config-calificacion-error" class="error">{{ t('errores.' + codigo) }}</p>
             }
-            <fieldset class="eleccion" [disabled]="!!g.archivadoEn">
+            <fieldset class="eleccion en-tres" [disabled]="!!g.archivadoEn">
               <legend>{{ t('decimales') }}</legend>
               @for (d of decimalesOpciones; track d) {
                 <label>
@@ -192,7 +202,7 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                 </label>
               }
             </fieldset>
-            <fieldset class="eleccion" [disabled]="!!g.archivadoEn">
+            <fieldset class="eleccion en-columna" [disabled]="!!g.archivadoEn">
               <legend>{{ t('redondeo') }}</legend>
               @for (r of redondeos; track r) {
                 <label>
@@ -300,6 +310,15 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
     </div>
   `,
   styles: `
+    /* Tres opciones cortas caben en una fila; las del redondeo, largas, van una bajo otra. */
+    .en-tres {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .en-columna {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .formulario {
       gap: var(--espacio-5);
     }

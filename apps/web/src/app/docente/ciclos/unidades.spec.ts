@@ -40,5 +40,10 @@ describe('Unidades del ciclo (RN-022 a RN-024)', () => {
       { id: null, nombre: 'C', inicio: '2027-03-02', fin: '2027-08-01' },
     ]);
     expect(errores).toEqual([null, 'unidades_traslapadas', 'unidad_fuera_de_ciclo']);
+    expect(
+      validarUnidades('2026-08-25', '2027-07-16', [
+        { id: null, nombre: ' ', inicio: '2026-08-25', fin: '2027-07-16' },
+      ]),
+    ).toEqual(['unidad_nombre_requerido']);
   });
 });

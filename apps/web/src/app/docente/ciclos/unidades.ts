@@ -33,6 +33,7 @@ export interface UnidadEnEdicion {
 export type ErrorCiclo =
   | 'ciclo_fechas_invalidas'
   | 'ciclo_muy_largo'
+  | 'unidad_nombre_requerido'
   | 'unidad_fechas_invalidas'
   | 'unidad_fuera_de_ciclo'
   | 'unidades_traslapadas'
@@ -121,7 +122,11 @@ export function validarUnidades(
   unidades: readonly UnidadEnEdicion[],
 ): (ErrorCiclo | null)[] {
   return unidades.map((u, i) => {
-    if (!u.nombre.trim() || !esFecha(u.inicio) || !esFecha(u.fin) || u.fin < u.inicio) {
+    // Solo en la web: la API responde validación genérica; aquí el mensaje dice qué falta.
+    if (!u.nombre.trim()) {
+      return 'unidad_nombre_requerido';
+    }
+    if (!esFecha(u.inicio) || !esFecha(u.fin) || u.fin < u.inicio) {
       return 'unidad_fechas_invalidas';
     }
     if (u.inicio < inicio || u.fin > fin) {

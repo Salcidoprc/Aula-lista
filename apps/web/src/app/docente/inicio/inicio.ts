@@ -11,7 +11,9 @@ import { forma } from '../../shared/plural';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { CicloDto } from '../../api/models/ciclo-dto';
 import { GrupoDto } from '../../api/models/grupo-dto';
+import { AvisosService } from '../../shared/avisos/avisos.service';
 import { codigoDeError } from '../../core/errores/problema';
+import { crearEnfoque } from '../../shared/foco';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { nombreGrupo } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
@@ -37,7 +39,7 @@ interface CicloConGrupos {
       <hgroup>
         <h1>{{ t('titulo') }}</h1>
         @if (perfil()?.nombre; as nombre) {
-          <p class="entrada">{{ t('saludo', { nombre }) }}</p>
+          <p class="entrada">{{ t('saludo', { nombre: primerNombre(nombre) }) }}</p>
         }
       </hgroup>
 
@@ -139,7 +141,7 @@ interface CicloConGrupos {
 
           @if (archivados(); as lista) {
             <section class="ciclo" aria-labelledby="archivados">
-              <h2 id="archivados">{{ t('archivados') }}</h2>
+              <h2 id="archivados" tabindex="-1">{{ t('archivados') }}</h2>
               @if (lista.length) {
                 <ul class="filas">
                   @for (grupo of lista; track grupo.id) {
@@ -312,6 +314,8 @@ export class Inicio implements OnInit {
   protected readonly forma = forma;
   private readonly servicio = inject(GruposService);
   private readonly i18n = inject(TranslocoService);
+  private readonly avisos = inject(AvisosService);
+  private readonly enfocar = crearEnfoque();
   protected readonly perfil = inject(PerfilService).perfil;
 
   protected readonly grupos = signal<readonly GrupoDto[] | null>(null);
@@ -356,9 +360,17 @@ export class Inicio implements OnInit {
     try {
       const todos = await this.servicio.listar(true);
       this.archivados.set(todos.filter((g) => g.archivadoEn));
+      // El enlace que tenía el foco se reemplaza por la sección.
+      this.enfocar('#archivados');
     } catch (e) {
-      this.error.set(codigoDeError(e));
+      // Un aviso y no el error de la pantalla: los grupos activos siguen a la vista.
+      this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
     }
+  }
+
+  /** El saludo usa solo el primer nombre: "Hola, Rosa." y no el nombre completo. */
+  protected primerNombre(nombre: string): string {
+    return nombre.trim().split(/\s+/)[0];
   }
 
   protected texto(clave: string): string {

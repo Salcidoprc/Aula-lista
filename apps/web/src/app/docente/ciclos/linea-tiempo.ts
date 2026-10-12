@@ -22,7 +22,7 @@ interface Marca {
   selector: 'app-linea-tiempo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="pista">
+    <div class="pista" aria-hidden="true">
       @for (tramo of tramos(); track tramo.orden) {
         <span
           class="tramo cifras"
@@ -86,12 +86,6 @@ interface Marca {
       padding-inline-start: 2px;
       border-inline-start: 1px solid var(--color-divisoria);
       line-height: 1.25rem;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .tramo {
-        transition: none;
-      }
     }
   `,
 })
