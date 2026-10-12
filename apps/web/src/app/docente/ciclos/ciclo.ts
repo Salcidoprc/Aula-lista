@@ -68,85 +68,89 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
       @if (cargando()) {
         <p class="aviso" role="status">{{ t('cargando') }}</p>
       } @else {
-        <form class="formulario" (submit)="$event.preventDefault(); guardar()" novalidate>
-          <div class="campo">
-            <label for="ciclo-nombre">{{ t('nombre') }}</label>
-            <input
-              id="ciclo-nombre"
-              name="nombre"
-              maxlength="20"
-              autocomplete="off"
-              [value]="nombre()"
-              (input)="nombre.set(valor($event))"
-              [attr.aria-invalid]="intento() && !nombre().trim()"
-              [attr.aria-describedby]="intento() && !nombre().trim() ? 'ciclo-nombre-error' : null"
-            />
-            @if (intento() && !nombre().trim()) {
-              <p id="ciclo-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
-            }
-          </div>
-
-          <div class="campos-en-fila">
+        <form class="formulario ciclo" (submit)="$event.preventDefault(); guardar()" novalidate>
+          <div class="formulario datos-ciclo">
             <div class="campo">
-              <label for="ciclo-inicio">{{ t('inicio') }}</label>
+              <label for="ciclo-nombre">{{ t('nombre') }}</label>
               <input
-                id="ciclo-inicio"
-                type="date"
-                name="inicio"
-                [value]="inicio()"
-                (change)="cambiarFechas(valor($event), fin())"
-                [attr.aria-invalid]="intento() && !!errorCiclo()"
-                [attr.aria-describedby]="intento() && errorCiclo() ? 'ciclo-error' : null"
+                id="ciclo-nombre"
+                name="nombre"
+                maxlength="20"
+                autocomplete="off"
+                [value]="nombre()"
+                (input)="nombre.set(valor($event))"
+                [attr.aria-invalid]="intento() && !nombre().trim()"
+                [attr.aria-describedby]="
+                  intento() && !nombre().trim() ? 'ciclo-nombre-error' : null
+                "
               />
+              @if (intento() && !nombre().trim()) {
+                <p id="ciclo-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
+              }
             </div>
-            <div class="campo">
-              <label for="ciclo-fin">{{ t('fin') }}</label>
-              <input
-                id="ciclo-fin"
-                type="date"
-                name="fin"
-                [value]="fin()"
-                (change)="cambiarFechas(inicio(), valor($event))"
-                [attr.aria-invalid]="intento() && !!errorCiclo()"
-                [attr.aria-describedby]="intento() && errorCiclo() ? 'ciclo-error' : null"
-              />
-            </div>
-          </div>
-          @if (intento() && errorCiclo(); as codigo) {
-            <p id="ciclo-error" class="error">{{ texto('errores.' + codigo) }}</p>
-          }
 
-          @if (!id()) {
             <div class="campos-en-fila">
               <div class="campo">
-                <label for="ciclo-tipo">{{ t('tipo') }}</label>
-                <div class="selector">
-                  <select id="ciclo-tipo" name="tipo" (change)="cambiarTipo(valor($event))">
-                    @for (opcion of tipos; track opcion) {
-                      <option [value]="opcion" [selected]="opcion === tipo()">
-                        {{ t('tipos.' + opcion) }}
-                      </option>
-                    }
-                  </select>
-                </div>
+                <label for="ciclo-inicio">{{ t('inicio') }}</label>
+                <input
+                  id="ciclo-inicio"
+                  type="date"
+                  name="inicio"
+                  [value]="inicio()"
+                  (change)="cambiarFechas(valor($event), fin())"
+                  [attr.aria-invalid]="intento() && !!errorCiclo()"
+                  [attr.aria-describedby]="intento() && errorCiclo() ? 'ciclo-error' : null"
+                />
               </div>
               <div class="campo">
-                <label for="ciclo-cantidad">{{ t('cantidad') }}</label>
-                <div class="selector">
-                  <select
-                    id="ciclo-cantidad"
-                    name="cantidad"
-                    class="cifras"
-                    (change)="cambiarCantidad(+valor($event))"
-                  >
-                    @for (n of cantidades; track n) {
-                      <option [value]="n" [selected]="n === unidades().length">{{ n }}</option>
-                    }
-                  </select>
-                </div>
+                <label for="ciclo-fin">{{ t('fin') }}</label>
+                <input
+                  id="ciclo-fin"
+                  type="date"
+                  name="fin"
+                  [value]="fin()"
+                  (change)="cambiarFechas(inicio(), valor($event))"
+                  [attr.aria-invalid]="intento() && !!errorCiclo()"
+                  [attr.aria-describedby]="intento() && errorCiclo() ? 'ciclo-error' : null"
+                />
               </div>
             </div>
-          }
+            @if (intento() && errorCiclo(); as codigo) {
+              <p id="ciclo-error" class="error">{{ texto('errores.' + codigo) }}</p>
+            }
+
+            @if (!id()) {
+              <div class="campos-en-fila">
+                <div class="campo">
+                  <label for="ciclo-tipo">{{ t('tipo') }}</label>
+                  <div class="selector">
+                    <select id="ciclo-tipo" name="tipo" (change)="cambiarTipo(valor($event))">
+                      @for (opcion of tipos; track opcion) {
+                        <option [value]="opcion" [selected]="opcion === tipo()">
+                          {{ t('tipos.' + opcion) }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+                <div class="campo">
+                  <label for="ciclo-cantidad">{{ t('cantidad') }}</label>
+                  <div class="selector">
+                    <select
+                      id="ciclo-cantidad"
+                      name="cantidad"
+                      class="cifras"
+                      (change)="cambiarCantidad(+valor($event))"
+                    >
+                      @for (n of cantidades; track n) {
+                        <option [value]="n" [selected]="n === unidades().length">{{ n }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
 
           <section class="unidades" aria-labelledby="unidades-titulo">
             <div>
@@ -263,6 +267,26 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
     </div>
   `,
   styles: `
+    /* Escritorio: el ciclo a la izquierda, fijo al desplazar; sus unidades a la derecha. */
+    @media (min-width: 64rem) {
+      .ciclo {
+        grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+        column-gap: var(--espacio-7);
+        align-items: start;
+      }
+
+      .ciclo > :not(.datos-ciclo) {
+        grid-column: 2;
+      }
+
+      .ciclo > .datos-ciclo {
+        grid-column: 1;
+        grid-row: 1;
+        position: sticky;
+        top: var(--espacio-5);
+      }
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-2);

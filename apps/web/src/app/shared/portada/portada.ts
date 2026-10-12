@@ -73,6 +73,27 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
       color: var(--grado-tinte);
       overflow-wrap: anywhere;
     }
+
+    /* Escritorio: el texto y el número se alinean con el contenedor de la app, no con la orilla. */
+    @media (min-width: 48rem) {
+      :host {
+        --orilla: max(var(--margen-app), (100% - var(--ancho-app)) / 2);
+        min-height: 6rem;
+        padding-inline: var(--orilla);
+      }
+
+      :host(.con-numero) {
+        padding-inline-end: calc(var(--orilla) + 6rem);
+      }
+
+      .numero {
+        inset-inline-end: calc(var(--orilla) - 0.06em);
+      }
+
+      .titulo {
+        font-size: var(--texto-xl);
+      }
+    }
   `,
 })
 export class Portada {

@@ -86,178 +86,182 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
         @if (g.archivadoEn) {
           <p class="aviso aviso--pendiente">{{ t('archivado') }}</p>
         }
-        <form class="formulario" (submit)="$event.preventDefault(); guardar()" novalidate>
-          <section aria-labelledby="datos-titulo">
-            <h2 id="datos-titulo">{{ t('datos') }}</h2>
-            <div class="campo">
-              <label for="config-nombre">{{ t('nombre') }}</label>
-              <input
-                id="config-nombre"
-                name="nombre"
-                maxlength="40"
-                autocomplete="off"
-                [readonly]="!!g.archivadoEn"
-                [value]="nombre()"
-                (input)="nombre.set(valor($event))"
-                [attr.aria-invalid]="intento() && !nombre().trim()"
-                [attr.aria-describedby]="
-                  intento() && !nombre().trim() ? 'config-nombre-error' : null
-                "
-              />
-              @if (intento() && !nombre().trim()) {
-                <p id="config-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
-              }
-            </div>
-            <fieldset class="eleccion grados" [disabled]="!!g.archivadoEn">
-              <legend>{{ t('grado', { nivel: t('niveles.' + g.nivel) }) }}</legend>
-              @for (n of grados(); track n) {
-                <label>
-                  <input
-                    type="radio"
-                    name="grado"
-                    [value]="n"
-                    [checked]="grado() === n"
-                    (change)="grado.set(n)"
-                  />
-                  <app-tapa [nivel]="g.nivel" [grado]="n" tamano="chica" />
-                  <span class="cifras">{{ n }}°</span>
-                </label>
-              }
-            </fieldset>
-            @if (g.nivel === 'secundaria') {
+        <div class="columnas">
+          <form class="formulario columna" (submit)="$event.preventDefault(); guardar()" novalidate>
+            <section aria-labelledby="datos-titulo">
+              <h2 id="datos-titulo">{{ t('datos') }}</h2>
               <div class="campo">
-                <label for="config-materia">{{ t('materia') }}</label>
+                <label for="config-nombre">{{ t('nombre') }}</label>
                 <input
-                  id="config-materia"
-                  name="materia"
-                  maxlength="60"
+                  id="config-nombre"
+                  name="nombre"
+                  maxlength="40"
                   autocomplete="off"
                   [readonly]="!!g.archivadoEn"
-                  [value]="materia()"
-                  (input)="materia.set(valor($event))"
-                />
-              </div>
-            }
-          </section>
-
-          <section aria-labelledby="calificacion-titulo">
-            <div>
-              <h2 id="calificacion-titulo">{{ t('calificacion') }}</h2>
-              <p class="dato-suave">{{ t('calificacionNota') }}</p>
-            </div>
-            <div class="campos-en-fila">
-              <div class="campo">
-                <label for="config-minima">{{ t('minima') }}</label>
-                <input
-                  id="config-minima"
-                  name="minima"
-                  class="cifras"
-                  inputmode="decimal"
-                  autocomplete="off"
-                  [readonly]="!!g.archivadoEn"
-                  [value]="minima()"
-                  (input)="minima.set(valor($event))"
-                  [attr.aria-invalid]="intento() && !!errorCalificacion()"
+                  [value]="nombre()"
+                  (input)="nombre.set(valor($event))"
+                  [attr.aria-invalid]="intento() && !nombre().trim()"
                   [attr.aria-describedby]="
-                    intento() && errorCalificacion()
-                      ? 'config-calificacion-error config-minima-ayuda'
-                      : 'config-minima-ayuda'
+                    intento() && !nombre().trim() ? 'config-nombre-error' : null
                   "
                 />
-                <p id="config-minima-ayuda" class="ayuda">{{ t('minimaAyuda') }}</p>
+                @if (intento() && !nombre().trim()) {
+                  <p id="config-nombre-error" class="error">{{ t('nombreRequerido') }}</p>
+                }
               </div>
-              <div class="campo">
-                <label for="config-aprobatoria">{{ t('aprobatoria') }}</label>
-                <input
-                  id="config-aprobatoria"
-                  name="aprobatoria"
-                  class="cifras"
-                  inputmode="decimal"
-                  autocomplete="off"
-                  [readonly]="!!g.archivadoEn"
-                  [value]="aprobatoria()"
-                  (input)="aprobatoria.set(valor($event))"
-                  [attr.aria-invalid]="intento() && !!errorCalificacion()"
-                  [attr.aria-describedby]="
-                    intento() && errorCalificacion() ? 'config-calificacion-error' : null
-                  "
-                />
+              <fieldset class="eleccion grados" [disabled]="!!g.archivadoEn">
+                <legend>{{ t('grado', { nivel: t('niveles.' + g.nivel) }) }}</legend>
+                @for (n of grados(); track n) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="grado"
+                      [value]="n"
+                      [checked]="grado() === n"
+                      (change)="grado.set(n)"
+                    />
+                    <app-tapa [nivel]="g.nivel" [grado]="n" tamano="chica" />
+                    <span class="cifras">{{ n }}°</span>
+                  </label>
+                }
+              </fieldset>
+              @if (g.nivel === 'secundaria') {
+                <div class="campo">
+                  <label for="config-materia">{{ t('materia') }}</label>
+                  <input
+                    id="config-materia"
+                    name="materia"
+                    maxlength="60"
+                    autocomplete="off"
+                    [readonly]="!!g.archivadoEn"
+                    [value]="materia()"
+                    (input)="materia.set(valor($event))"
+                  />
+                </div>
+              }
+            </section>
+
+            <section aria-labelledby="calificacion-titulo">
+              <div>
+                <h2 id="calificacion-titulo">{{ t('calificacion') }}</h2>
+                <p class="dato-suave">{{ t('calificacionNota') }}</p>
               </div>
-            </div>
-            @if (intento() && errorCalificacion(); as codigo) {
-              <p id="config-calificacion-error" class="error">{{ t('errores.' + codigo) }}</p>
+              <div class="campos-en-fila">
+                <div class="campo">
+                  <label for="config-minima">{{ t('minima') }}</label>
+                  <input
+                    id="config-minima"
+                    name="minima"
+                    class="cifras"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    [readonly]="!!g.archivadoEn"
+                    [value]="minima()"
+                    (input)="minima.set(valor($event))"
+                    [attr.aria-invalid]="intento() && !!errorCalificacion()"
+                    [attr.aria-describedby]="
+                      intento() && errorCalificacion()
+                        ? 'config-calificacion-error config-minima-ayuda'
+                        : 'config-minima-ayuda'
+                    "
+                  />
+                  <p id="config-minima-ayuda" class="ayuda">{{ t('minimaAyuda') }}</p>
+                </div>
+                <div class="campo">
+                  <label for="config-aprobatoria">{{ t('aprobatoria') }}</label>
+                  <input
+                    id="config-aprobatoria"
+                    name="aprobatoria"
+                    class="cifras"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    [readonly]="!!g.archivadoEn"
+                    [value]="aprobatoria()"
+                    (input)="aprobatoria.set(valor($event))"
+                    [attr.aria-invalid]="intento() && !!errorCalificacion()"
+                    [attr.aria-describedby]="
+                      intento() && errorCalificacion() ? 'config-calificacion-error' : null
+                    "
+                  />
+                </div>
+              </div>
+              @if (intento() && errorCalificacion(); as codigo) {
+                <p id="config-calificacion-error" class="error">{{ t('errores.' + codigo) }}</p>
+              }
+              <fieldset class="eleccion en-tres" [disabled]="!!g.archivadoEn">
+                <legend>{{ t('decimales') }}</legend>
+                @for (d of decimalesOpciones; track d) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="decimales"
+                      [value]="d"
+                      [checked]="decimales() === d"
+                      (change)="decimales.set(d)"
+                    />
+                    {{ t('decimalesN', { cantidad: d }) }}
+                  </label>
+                }
+              </fieldset>
+              <fieldset class="eleccion en-columna" [disabled]="!!g.archivadoEn">
+                <legend>{{ t('redondeo') }}</legend>
+                @for (r of redondeos; track r) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="redondeo"
+                      [value]="r"
+                      [checked]="redondeo() === r"
+                      (change)="redondeo.set(r)"
+                    />
+                    {{ t('redondeos.' + r) }}
+                  </label>
+                }
+              </fieldset>
+              <p class="ejemplo" aria-live="polite">
+                {{ t('ejemplo') }}
+                <span class="cifras">7.456 → {{ ejemplo() }}</span>
+              </p>
+            </section>
+
+            @if (error(); as codigo) {
+              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
             }
-            <fieldset class="eleccion en-tres" [disabled]="!!g.archivadoEn">
-              <legend>{{ t('decimales') }}</legend>
-              @for (d of decimalesOpciones; track d) {
-                <label>
-                  <input
-                    type="radio"
-                    name="decimales"
-                    [value]="d"
-                    [checked]="decimales() === d"
-                    (change)="decimales.set(d)"
-                  />
-                  {{ t('decimalesN', { cantidad: d }) }}
-                </label>
-              }
-            </fieldset>
-            <fieldset class="eleccion en-columna" [disabled]="!!g.archivadoEn">
-              <legend>{{ t('redondeo') }}</legend>
-              @for (r of redondeos; track r) {
-                <label>
-                  <input
-                    type="radio"
-                    name="redondeo"
-                    [value]="r"
-                    [checked]="redondeo() === r"
-                    (change)="redondeo.set(r)"
-                  />
-                  {{ t('redondeos.' + r) }}
-                </label>
-              }
-            </fieldset>
-            <p class="ejemplo" aria-live="polite">
-              {{ t('ejemplo') }}
-              <span class="cifras">7.456 → {{ ejemplo() }}</span>
-            </p>
-          </section>
+            @if (!g.archivadoEn) {
+              <button class="boton" type="submit" [appOcupado]="guardando()">
+                {{ t('guardar') }}
+              </button>
+            }
+          </form>
 
-          @if (error(); as codigo) {
-            <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-          }
-          @if (!g.archivadoEn) {
-            <button class="boton" type="submit" [appOcupado]="guardando()">
-              {{ t('guardar') }}
-            </button>
-          }
-        </form>
+          <div class="columna lateral">
+            @if (!g.archivadoEn) {
+              <section aria-labelledby="archivar-titulo">
+                <h2 id="archivar-titulo">{{ t('archivar.titulo') }}</h2>
+                <p class="nota">{{ t('archivar.nota') }}</p>
+                <button
+                  class="boton boton--secundario"
+                  type="button"
+                  (click)="dialogoArchivar.showModal()"
+                >
+                  {{ t('archivar.accion') }}
+                </button>
+              </section>
+            }
 
-        @if (!g.archivadoEn) {
-          <section aria-labelledby="archivar-titulo">
-            <h2 id="archivar-titulo">{{ t('archivar.titulo') }}</h2>
-            <p class="nota">{{ t('archivar.nota') }}</p>
-            <button
-              class="boton boton--secundario"
-              type="button"
-              (click)="dialogoArchivar.showModal()"
-            >
-              {{ t('archivar.accion') }}
-            </button>
-          </section>
-        }
-
-        <section aria-labelledby="borrar-titulo">
-          <h2 id="borrar-titulo">{{ t('borrar.titulo') }}</h2>
-          <p class="nota">{{ t('borrar.nota') }}</p>
-          <button
-            class="boton boton--secundario peligro"
-            type="button"
-            (click)="dialogoBorrar.showModal()"
-          >
-            {{ t('borrar.accion') }}
-          </button>
-        </section>
+            <section aria-labelledby="borrar-titulo">
+              <h2 id="borrar-titulo">{{ t('borrar.titulo') }}</h2>
+              <p class="nota">{{ t('borrar.nota') }}</p>
+              <button
+                class="boton boton--secundario peligro"
+                type="button"
+                (click)="dialogoBorrar.showModal()"
+              >
+                {{ t('borrar.accion') }}
+              </button>
+            </section>
+          </div>
+        </div>
       } @else if (error(); as codigo) {
         <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
       } @else {

@@ -36,12 +36,20 @@ interface CicloConGrupos {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla pantalla--ancha" *transloco="let t; prefix: 'inicio'">
-      <hgroup>
-        <h1>{{ t('titulo') }}</h1>
-        @if (perfil()?.nombre; as nombre) {
-          <p class="entrada">{{ t('saludo', { nombre: primerNombre(nombre) }) }}</p>
+      <div class="cabeza-pantalla">
+        <hgroup>
+          <h1>{{ t('titulo') }}</h1>
+          @if (perfil()?.nombre; as nombre) {
+            <p class="entrada">{{ t('saludo', { nombre: primerNombre(nombre) }) }}</p>
+          }
+        </hgroup>
+        @if (estado() === 'listo') {
+          <a class="boton solo-escritorio" routerLink="/grupos/nuevo">
+            <app-icono nombre="mas" />
+            {{ t('crearGrupo') }}
+          </a>
         }
-      </hgroup>
+      </div>
 
       @if (perfil() && !perfil()!.correoVerificado) {
         <div class="aviso aviso--pendiente">
@@ -173,7 +181,7 @@ interface CicloConGrupos {
             </button>
           }
 
-          <div class="pie-accion">
+          <div class="pie-accion solo-celular">
             <a class="boton" routerLink="/grupos/nuevo">
               <app-icono nombre="mas" />
               {{ t('crearGrupo') }}
@@ -270,6 +278,64 @@ interface CicloConGrupos {
 
     .flecha {
       color: var(--color-texto-tenue);
+    }
+
+    /*
+     * Escritorio: los grupos de cada ciclo son un estante de tarjetas, varias por fila, en lugar de una
+     * lista angosta. La tarjeta es la misma fila con superficie y borde.
+     */
+    @media (min-width: 48rem) {
+      .ciclo {
+        gap: var(--espacio-3);
+      }
+
+      .ciclo-cabeza {
+        justify-content: start;
+      }
+
+      .ciclo .filas {
+        grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+        gap: var(--espacio-4);
+      }
+
+      .ciclo .detalle {
+        flex-wrap: nowrap;
+      }
+
+      .ciclo .filas > li + li {
+        border-top: 0;
+      }
+
+      .ciclo a.fila-grupo {
+        height: 100%;
+        min-height: 6rem;
+        padding: var(--espacio-4);
+        border: 1px solid var(--color-divisoria);
+        background: var(--color-superficie);
+        transition:
+          border-color var(--dur-small) var(--ease-out),
+          box-shadow var(--dur-small) var(--ease-out);
+      }
+
+      .ciclo .fila-grupo[aria-hidden] {
+        padding: var(--espacio-4);
+      }
+
+      .pasos {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--espacio-5);
+      }
+
+      .aviso {
+        max-width: var(--ancho-lectura);
+      }
+    }
+
+    @media (min-width: 48rem) and (hover: hover) and (pointer: fine) {
+      .ciclo a.fila-grupo:hover {
+        border-color: var(--color-texto-tenue);
+        box-shadow: var(--sombra-flotante);
+      }
     }
 
     .archivado app-tapa {

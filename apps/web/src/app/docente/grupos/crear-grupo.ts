@@ -77,119 +77,126 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
       } @else if (ciclos().length === 0) {
         <p class="aviso" role="status">{{ t('cargando') }}</p>
       } @else {
-        <form class="formulario" (submit)="$event.preventDefault(); crear()" novalidate>
-          <fieldset class="eleccion">
-            <legend>{{ t('nivel') }}</legend>
-            @for (opcion of niveles; track opcion) {
-              <label>
+        <form class="formulario crear" (submit)="$event.preventDefault(); crear()" novalidate>
+          <div class="formulario campos">
+            <fieldset class="eleccion">
+              <legend>{{ t('nivel') }}</legend>
+              @for (opcion of niveles; track opcion) {
+                <label>
+                  <input
+                    type="radio"
+                    name="nivel"
+                    [value]="opcion"
+                    [checked]="nivel() === opcion"
+                    (change)="cambiarNivel(opcion)"
+                  />
+                  {{ t('niveles.' + opcion) }}
+                </label>
+              }
+            </fieldset>
+
+            <fieldset class="eleccion grados">
+              <legend>{{ t('grado') }}</legend>
+              @for (g of grados(); track g) {
+                <label>
+                  <input
+                    type="radio"
+                    name="grado"
+                    [value]="g"
+                    [checked]="grado() === g"
+                    (change)="grado.set(g)"
+                  />
+                  <app-tapa [nivel]="nivel()" [grado]="g" tamano="chica" />
+                  <span class="cifras">{{ g }}°</span>
+                </label>
+              }
+            </fieldset>
+
+            @if (nivel() === 'secundaria') {
+              <div class="campo">
+                <label for="grupo-materia">{{ t('materia') }}</label>
                 <input
-                  type="radio"
-                  name="nivel"
-                  [value]="opcion"
-                  [checked]="nivel() === opcion"
-                  (change)="cambiarNivel(opcion)"
+                  id="grupo-materia"
+                  name="materia"
+                  list="materias"
+                  maxlength="60"
+                  autocomplete="off"
+                  [value]="materia()"
+                  (input)="materia.set(valor($event))"
+                  aria-describedby="grupo-materia-ayuda"
                 />
-                {{ t('niveles.' + opcion) }}
-              </label>
-            }
-          </fieldset>
-
-          <fieldset class="eleccion grados">
-            <legend>{{ t('grado') }}</legend>
-            @for (g of grados(); track g) {
-              <label>
-                <input
-                  type="radio"
-                  name="grado"
-                  [value]="g"
-                  [checked]="grado() === g"
-                  (change)="grado.set(g)"
-                />
-                <app-tapa [nivel]="nivel()" [grado]="g" tamano="chica" />
-                <span class="cifras">{{ g }}°</span>
-              </label>
-            }
-          </fieldset>
-
-          @if (nivel() === 'secundaria') {
-            <div class="campo">
-              <label for="grupo-materia">{{ t('materia') }}</label>
-              <input
-                id="grupo-materia"
-                name="materia"
-                list="materias"
-                maxlength="60"
-                autocomplete="off"
-                [value]="materia()"
-                (input)="materia.set(valor($event))"
-                aria-describedby="grupo-materia-ayuda"
-              />
-              <datalist id="materias">
-                @for (m of materias(); track m) {
-                  <option [value]="m"></option>
-                }
-              </datalist>
-              <p id="grupo-materia-ayuda" class="ayuda">{{ t('materiaAyuda') }}</p>
-            </div>
-          }
-
-          @if (ciclos().length > 1) {
-            <div class="campo">
-              <label for="grupo-ciclo">{{ t('ciclo') }}</label>
-              <div class="selector">
-                <select id="grupo-ciclo" name="ciclo" (change)="cicloId.set(valor($event))">
-                  @for (c of ciclos(); track c.id) {
-                    <option [value]="c.id" [selected]="c.id === cicloId()">{{ c.nombre }}</option>
+                <datalist id="materias">
+                  @for (m of materias(); track m) {
+                    <option [value]="m"></option>
                   }
-                </select>
+                </datalist>
+                <p id="grupo-materia-ayuda" class="ayuda">{{ t('materiaAyuda') }}</p>
               </div>
-            </div>
-          } @else {
-            <p class="dato-ciclo">
-              {{
-                t('cicloUnico', {
-                  nombre: ciclos()[0].nombre,
-                  cantidad: ciclos()[0].unidades.length,
-                })
-              }}
-              <a
-                class="enlace"
-                routerLink="/ciclos/nuevo"
-                [queryParams]="{ volver: '/grupos/nuevo' }"
-                >{{ t('otroCiclo') }}</a
-              >
-            </p>
-          }
-
-          <label class="casilla">
-            <input type="checkbox" name="varios" [checked]="varios()" (change)="cambiarVarios()" />
-            <span>
-              <strong>{{ t('varios') }}</strong>
-              <span class="dato-suave">{{ t('variosAyuda') }}</span>
-            </span>
-          </label>
-
-          <div class="campo">
-            <label for="grupo-nombre">{{ varios() ? t('nombres') : t('nombre') }}</label>
-            <input
-              id="grupo-nombre"
-              name="nombre"
-              autocomplete="off"
-              [attr.maxlength]="varios() ? null : 40"
-              [placeholder]="varios() ? t('nombresEjemplo') : t('nombreEjemplo')"
-              [value]="texto()"
-              (input)="texto.set(valor($event))"
-              [attr.aria-invalid]="!!errorVisible()"
-              [attr.aria-describedby]="
-                errorVisible() ? 'grupo-nombre-error grupo-nombre-ayuda' : 'grupo-nombre-ayuda'
-              "
-            />
-            <p id="grupo-nombre-ayuda" class="ayuda">
-              {{ varios() ? t('nombresAyuda') : t('nombreAyuda') }}
-            </p>
-            @if (errorVisible(); as codigo) {
-              <p id="grupo-nombre-error" class="error">{{ t('errores.' + codigo) }}</p>
             }
+
+            @if (ciclos().length > 1) {
+              <div class="campo">
+                <label for="grupo-ciclo">{{ t('ciclo') }}</label>
+                <div class="selector">
+                  <select id="grupo-ciclo" name="ciclo" (change)="cicloId.set(valor($event))">
+                    @for (c of ciclos(); track c.id) {
+                      <option [value]="c.id" [selected]="c.id === cicloId()">{{ c.nombre }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            } @else {
+              <p class="dato-ciclo">
+                {{
+                  t('cicloUnico', {
+                    nombre: ciclos()[0].nombre,
+                    cantidad: ciclos()[0].unidades.length,
+                  })
+                }}
+                <a
+                  class="enlace"
+                  routerLink="/ciclos/nuevo"
+                  [queryParams]="{ volver: '/grupos/nuevo' }"
+                  >{{ t('otroCiclo') }}</a
+                >
+              </p>
+            }
+
+            <label class="casilla">
+              <input
+                type="checkbox"
+                name="varios"
+                [checked]="varios()"
+                (change)="cambiarVarios()"
+              />
+              <span>
+                <strong>{{ t('varios') }}</strong>
+                <span class="dato-suave">{{ t('variosAyuda') }}</span>
+              </span>
+            </label>
+
+            <div class="campo">
+              <label for="grupo-nombre">{{ varios() ? t('nombres') : t('nombre') }}</label>
+              <input
+                id="grupo-nombre"
+                name="nombre"
+                autocomplete="off"
+                [attr.maxlength]="varios() ? null : 40"
+                [placeholder]="varios() ? t('nombresEjemplo') : t('nombreEjemplo')"
+                [value]="texto()"
+                (input)="texto.set(valor($event))"
+                [attr.aria-invalid]="!!errorVisible()"
+                [attr.aria-describedby]="
+                  errorVisible() ? 'grupo-nombre-error grupo-nombre-ayuda' : 'grupo-nombre-ayuda'
+                "
+              />
+              <p id="grupo-nombre-ayuda" class="ayuda">
+                {{ varios() ? t('nombresAyuda') : t('nombreAyuda') }}
+              </p>
+              @if (errorVisible(); as codigo) {
+                <p id="grupo-nombre-error" class="error">{{ t('errores.' + codigo) }}</p>
+              }
+            </div>
           </div>
 
           @if (nombres().length) {
@@ -208,6 +215,17 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
                   </li>
                 }
               </ul>
+            </section>
+          } @else {
+            <!-- Solo en escritorio: la columna de la vista no se queda vacía antes de escribir. -->
+            <section class="vista vista--vacia" aria-hidden="true">
+              <h2 class="dato-suave">{{ t('vista.uno') }}</h2>
+              <ul class="tapas">
+                <li>
+                  <app-tapa [nivel]="nivel()" [grado]="grado()" />
+                </li>
+              </ul>
+              <p class="dato-suave">{{ t('vista.vacia') }}</p>
             </section>
           }
 
@@ -253,6 +271,38 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
 
     .dato-ciclo {
       color: var(--color-texto-suave);
+    }
+
+    .vista--vacia {
+      display: none;
+    }
+
+    /* Escritorio: los campos a la izquierda y, a la derecha, las tapas de lo que se va a crear. */
+    @media (min-width: 64rem) {
+      .crear {
+        grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
+        column-gap: var(--espacio-7);
+        align-items: start;
+      }
+
+      .crear > :not(.vista) {
+        grid-column: 1;
+      }
+
+      .crear > .vista {
+        grid-column: 2;
+        grid-row: 1;
+        position: sticky;
+        top: var(--espacio-5);
+        padding: var(--espacio-5);
+        border: 1px solid var(--color-divisoria);
+        border-radius: var(--radio-lg);
+        background: var(--color-superficie);
+      }
+
+      .crear > .vista--vacia {
+        display: grid;
+      }
     }
 
     .vista {

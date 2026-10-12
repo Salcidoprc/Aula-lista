@@ -75,216 +75,239 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
           <p class="aviso aviso--pendiente">{{ t('baja.estado', { fecha: fecha(a.bajaEn) }) }}</p>
         }
 
-        <section aria-labelledby="datos-titulo">
-          <h2 id="datos-titulo">{{ t('datos.titulo') }}</h2>
-          <form class="formulario" (submit)="$event.preventDefault(); guardarDatos()" novalidate>
-            <div class="campos-en-fila">
-              <div class="campo">
-                <label for="alumno-apellidos">{{ t('datos.apellidos') }}</label>
-                <input
-                  id="alumno-apellidos"
-                  name="apellidos"
-                  maxlength="80"
-                  autocomplete="off"
-                  autocapitalize="words"
-                  [readonly]="soloLectura()"
-                  [value]="apellidos()"
-                  (input)="apellidos.set(valor($event))"
-                />
+        <div class="columnas columnas--pares">
+          <div class="columna">
+            <section aria-labelledby="datos-titulo">
+              <h2 id="datos-titulo">{{ t('datos.titulo') }}</h2>
+              <form
+                class="formulario"
+                (submit)="$event.preventDefault(); guardarDatos()"
+                novalidate
+              >
+                <div class="campos-en-fila">
+                  <div class="campo">
+                    <label for="alumno-apellidos">{{ t('datos.apellidos') }}</label>
+                    <input
+                      id="alumno-apellidos"
+                      name="apellidos"
+                      maxlength="80"
+                      autocomplete="off"
+                      autocapitalize="words"
+                      [readonly]="soloLectura()"
+                      [value]="apellidos()"
+                      (input)="apellidos.set(valor($event))"
+                    />
+                  </div>
+                  <div class="campo">
+                    <label for="alumno-nombres">{{ t('datos.nombres') }}</label>
+                    <input
+                      id="alumno-nombres"
+                      name="nombres"
+                      maxlength="80"
+                      autocomplete="off"
+                      autocapitalize="words"
+                      [readonly]="soloLectura()"
+                      [value]="nombres()"
+                      (input)="nombres.set(valor($event))"
+                      [attr.aria-invalid]="intentoDatos() && !nombres().trim()"
+                      [attr.aria-describedby]="
+                        intentoDatos() && !nombres().trim() ? 'alumno-nombres-error' : null
+                      "
+                    />
+                    @if (intentoDatos() && !nombres().trim()) {
+                      <p id="alumno-nombres-error" class="error">
+                        {{ t('datos.nombresRequerido') }}
+                      </p>
+                    }
+                  </div>
+                </div>
+                <div class="campo numero-lista">
+                  <label for="alumno-numero">{{ t('datos.numero') }}</label>
+                  <input
+                    id="alumno-numero"
+                    name="numero"
+                    class="cifras"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    max="99"
+                    [readonly]="soloLectura()"
+                    [value]="numero()"
+                    (input)="numero.set(+valor($event))"
+                    [attr.aria-invalid]="intentoDatos() && !numeroValido()"
+                    [attr.aria-describedby]="
+                      intentoDatos() && !numeroValido()
+                        ? 'alumno-numero-error alumno-numero-ayuda'
+                        : 'alumno-numero-ayuda'
+                    "
+                  />
+                  @if (intentoDatos() && !numeroValido()) {
+                    <p id="alumno-numero-error" class="error">{{ t('datos.numeroInvalido') }}</p>
+                  }
+                  <p id="alumno-numero-ayuda" class="ayuda">{{ t('datos.numeroAyuda') }}</p>
+                </div>
+                <fieldset class="eleccion" [disabled]="soloLectura()">
+                  <legend>{{ t('datos.trato') }}</legend>
+                  @for (opcion of tratos; track opcion) {
+                    <label>
+                      <input
+                        type="radio"
+                        name="trato"
+                        [value]="opcion"
+                        [checked]="trato() === opcion"
+                        (change)="trato.set(opcion)"
+                      />
+                      {{ t('tratos.' + opcion) }}
+                    </label>
+                  }
+                  <p class="ayuda ayuda--eleccion">{{ t('datos.tratoAyuda') }}</p>
+                </fieldset>
+                @if (errorDatos(); as codigo) {
+                  <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+                }
+                @if (!soloLectura()) {
+                  <button
+                    class="boton boton--secundario"
+                    type="submit"
+                    [appOcupado]="guardandoDatos()"
+                  >
+                    {{ t('datos.guardar') }}
+                  </button>
+                }
+              </form>
+            </section>
+          </div>
+
+          <div class="columna">
+            <section aria-labelledby="tutores-titulo">
+              <div>
+                <h2 id="tutores-titulo" tabindex="-1">{{ t('tutores.titulo') }}</h2>
+                <p class="dato-suave">{{ t('tutores.nota') }}</p>
               </div>
-              <div class="campo">
-                <label for="alumno-nombres">{{ t('datos.nombres') }}</label>
-                <input
-                  id="alumno-nombres"
-                  name="nombres"
-                  maxlength="80"
-                  autocomplete="off"
-                  autocapitalize="words"
-                  [readonly]="soloLectura()"
-                  [value]="nombres()"
-                  (input)="nombres.set(valor($event))"
-                  [attr.aria-invalid]="intentoDatos() && !nombres().trim()"
-                  [attr.aria-describedby]="
-                    intentoDatos() && !nombres().trim() ? 'alumno-nombres-error' : null
-                  "
-                />
-                @if (intentoDatos() && !nombres().trim()) {
-                  <p id="alumno-nombres-error" class="error">{{ t('datos.nombresRequerido') }}</p>
+              @if (a.tutores.length) {
+                <ul class="filas tutores">
+                  @for (tutor of a.tutores; track tutor.id) {
+                    <li class="tutor">
+                      @if (editandoTutor() === tutor.id) {
+                        <form
+                          class="formulario"
+                          (submit)="$event.preventDefault(); guardarTutor(tutor)"
+                          novalidate
+                        >
+                          <ng-container
+                            *ngTemplateOutlet="
+                              camposTutor;
+                              context: { $implicit: 'editar', conTelefono: false }
+                            "
+                          />
+                          <div class="acciones">
+                            <button
+                              class="boton boton--secundario"
+                              type="submit"
+                              [appOcupado]="guardandoTutor()"
+                            >
+                              {{ t('tutores.guardar') }}
+                            </button>
+                            <button
+                              class="boton boton--secundario"
+                              type="button"
+                              (click)="cancelarEdicion()"
+                            >
+                              {{ t('cancelar') }}
+                            </button>
+                          </div>
+                        </form>
+                      } @else {
+                        <div class="tutor-datos">
+                          <span class="tutor-nombre">{{ tutor.nombre }}</span>
+                          <span class="dato-suave">
+                            @if (tutor.parentesco) {
+                              {{ tutor.parentesco }} ·
+                            }
+                            <span class="cifras telefono">{{ telefono(tutor.telefono) }}</span>
+                          </span>
+                          @if (tutor.correo) {
+                            <span class="dato-suave correo">{{ tutor.correo }}</span>
+                          }
+                        </div>
+                        @if (!soloLectura()) {
+                          <div class="acciones">
+                            <button
+                              class="boton boton--secundario"
+                              type="button"
+                              [id]="'editar-' + tutor.id"
+                              (click)="editar(tutor)"
+                            >
+                              {{ t('tutores.editar') }}
+                              <span class="solo-lector">{{ tutor.nombre }}</span>
+                            </button>
+                            <button
+                              class="boton boton--secundario peligro"
+                              type="button"
+                              (click)="pedirQuitar(tutor)"
+                            >
+                              {{ t('tutores.quitar') }}
+                              <span class="solo-lector">{{ tutor.nombre }}</span>
+                            </button>
+                          </div>
+                        }
+                      }
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="aviso aviso--pendiente">{{ t('tutores.ninguno') }}</p>
+              }
+
+              <!-- Región siempre montada: el lector anuncia el aviso cuando aparece su texto. -->
+              <div role="status">
+                @if (avisoRegistrado()) {
+                  <p class="aviso">{{ t('tutores.yaRegistrado') }}</p>
                 }
               </div>
-            </div>
-            <div class="campo numero-lista">
-              <label for="alumno-numero">{{ t('datos.numero') }}</label>
-              <input
-                id="alumno-numero"
-                name="numero"
-                class="cifras"
-                type="number"
-                inputmode="numeric"
-                min="1"
-                max="99"
-                [readonly]="soloLectura()"
-                [value]="numero()"
-                (input)="numero.set(+valor($event))"
-                [attr.aria-invalid]="intentoDatos() && !numeroValido()"
-                [attr.aria-describedby]="
-                  intentoDatos() && !numeroValido()
-                    ? 'alumno-numero-error alumno-numero-ayuda'
-                    : 'alumno-numero-ayuda'
-                "
-              />
-              @if (intentoDatos() && !numeroValido()) {
-                <p id="alumno-numero-error" class="error">{{ t('datos.numeroInvalido') }}</p>
-              }
-              <p id="alumno-numero-ayuda" class="ayuda">{{ t('datos.numeroAyuda') }}</p>
-            </div>
-            <fieldset class="eleccion" [disabled]="soloLectura()">
-              <legend>{{ t('datos.trato') }}</legend>
-              @for (opcion of tratos; track opcion) {
-                <label>
-                  <input
-                    type="radio"
-                    name="trato"
-                    [value]="opcion"
-                    [checked]="trato() === opcion"
-                    (change)="trato.set(opcion)"
+
+              @if (!soloLectura() && !editandoTutor() && a.tutores.length < maximoTutores) {
+                <form
+                  class="formulario nuevo-tutor"
+                  (submit)="$event.preventDefault(); agregarTutor()"
+                  novalidate
+                >
+                  <h3>{{ t('tutores.agregar') }}</h3>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      camposTutor;
+                      context: { $implicit: 'nuevo', conTelefono: true }
+                    "
                   />
-                  {{ t('tratos.' + opcion) }}
-                </label>
-              }
-              <p class="ayuda ayuda--eleccion">{{ t('datos.tratoAyuda') }}</p>
-            </fieldset>
-            @if (errorDatos(); as codigo) {
-              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-            }
-            @if (!soloLectura()) {
-              <button class="boton boton--secundario" type="submit" [appOcupado]="guardandoDatos()">
-                {{ t('datos.guardar') }}
-              </button>
-            }
-          </form>
-        </section>
-
-        <section aria-labelledby="tutores-titulo">
-          <div>
-            <h2 id="tutores-titulo" tabindex="-1">{{ t('tutores.titulo') }}</h2>
-            <p class="dato-suave">{{ t('tutores.nota') }}</p>
-          </div>
-          @if (a.tutores.length) {
-            <ul class="filas tutores">
-              @for (tutor of a.tutores; track tutor.id) {
-                <li class="tutor">
-                  @if (editandoTutor() === tutor.id) {
-                    <form
-                      class="formulario"
-                      (submit)="$event.preventDefault(); guardarTutor(tutor)"
-                      novalidate
-                    >
-                      <ng-container
-                        *ngTemplateOutlet="
-                          camposTutor;
-                          context: { $implicit: 'editar', conTelefono: false }
-                        "
-                      />
-                      <div class="acciones">
-                        <button
-                          class="boton boton--secundario"
-                          type="submit"
-                          [appOcupado]="guardandoTutor()"
-                        >
-                          {{ t('tutores.guardar') }}
-                        </button>
-                        <button
-                          class="boton boton--secundario"
-                          type="button"
-                          (click)="cancelarEdicion()"
-                        >
-                          {{ t('cancelar') }}
-                        </button>
-                      </div>
-                    </form>
-                  } @else {
-                    <div class="tutor-datos">
-                      <span class="tutor-nombre">{{ tutor.nombre }}</span>
-                      <span class="dato-suave">
-                        @if (tutor.parentesco) {
-                          {{ tutor.parentesco }} ·
-                        }
-                        <span class="cifras telefono">{{ telefono(tutor.telefono) }}</span>
-                      </span>
-                      @if (tutor.correo) {
-                        <span class="dato-suave correo">{{ tutor.correo }}</span>
-                      }
-                    </div>
-                    @if (!soloLectura()) {
-                      <div class="acciones">
-                        <button
-                          class="boton boton--secundario"
-                          type="button"
-                          [id]="'editar-' + tutor.id"
-                          (click)="editar(tutor)"
-                        >
-                          {{ t('tutores.editar') }}
-                          <span class="solo-lector">{{ tutor.nombre }}</span>
-                        </button>
-                        <button
-                          class="boton boton--secundario peligro"
-                          type="button"
-                          (click)="pedirQuitar(tutor)"
-                        >
-                          {{ t('tutores.quitar') }}
-                          <span class="solo-lector">{{ tutor.nombre }}</span>
-                        </button>
-                      </div>
-                    }
+                  @if (errorTutor(); as codigo) {
+                    <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
                   }
-                </li>
+                  <button
+                    class="boton boton--secundario"
+                    type="submit"
+                    [appOcupado]="guardandoTutor()"
+                  >
+                    {{ t('tutores.agregarAccion') }}
+                  </button>
+                </form>
               }
-            </ul>
-          } @else {
-            <p class="aviso aviso--pendiente">{{ t('tutores.ninguno') }}</p>
-          }
+            </section>
 
-          <!-- Región siempre montada: el lector anuncia el aviso cuando aparece su texto. -->
-          <div role="status">
-            @if (avisoRegistrado()) {
-              <p class="aviso">{{ t('tutores.yaRegistrado') }}</p>
+            @if (!a.bajaEn && !soloLectura()) {
+              <section aria-labelledby="baja-titulo">
+                <h2 id="baja-titulo">{{ t('baja.titulo') }}</h2>
+                <p class="nota">{{ t('baja.nota') }}</p>
+                <button
+                  class="boton boton--secundario peligro"
+                  type="button"
+                  (click)="dialogoBaja.showModal()"
+                >
+                  {{ t('baja.accion') }}
+                </button>
+              </section>
             }
           </div>
-
-          @if (!soloLectura() && !editandoTutor() && a.tutores.length < maximoTutores) {
-            <form
-              class="formulario nuevo-tutor"
-              (submit)="$event.preventDefault(); agregarTutor()"
-              novalidate
-            >
-              <h3>{{ t('tutores.agregar') }}</h3>
-              <ng-container
-                *ngTemplateOutlet="camposTutor; context: { $implicit: 'nuevo', conTelefono: true }"
-              />
-              @if (errorTutor(); as codigo) {
-                <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-              }
-              <button class="boton boton--secundario" type="submit" [appOcupado]="guardandoTutor()">
-                {{ t('tutores.agregarAccion') }}
-              </button>
-            </form>
-          }
-        </section>
-
-        @if (!a.bajaEn && !soloLectura()) {
-          <section aria-labelledby="baja-titulo">
-            <h2 id="baja-titulo">{{ t('baja.titulo') }}</h2>
-            <p class="nota">{{ t('baja.nota') }}</p>
-            <button
-              class="boton boton--secundario peligro"
-              type="button"
-              (click)="dialogoBaja.showModal()"
-            >
-              {{ t('baja.accion') }}
-            </button>
-          </section>
-        }
+        </div>
 
         <ng-template #camposTutor let-prefijo let-conTelefono="conTelefono">
           <div class="campo">

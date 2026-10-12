@@ -85,142 +85,160 @@ const MAXIMO_ALUMNOS = 50;
         </div>
       }
 
-      @if (error(); as codigo) {
-        <div class="aviso aviso--error" role="alert">
-          <p>{{ texto('errores.' + codigo) }}</p>
-          <button class="boton boton--secundario" type="button" (click)="cargar()">
-            {{ t('reintentar') }}
-          </button>
-        </div>
-      } @else if (alumnos() === null) {
-        <ul class="filas" role="status" [attr.aria-label]="t('cargando')">
-          @for (i of [1, 2, 3, 4]; track i) {
-            <li class="fila-alumno" aria-hidden="true">
-              <span class="esqueleto numero-esqueleto"></span>
-              <span class="esqueleto linea-esqueleto"></span>
-            </li>
-          }
-        </ul>
-      } @else {
-        @if (activos().length === 0 && !agregando()) {
-          <section class="vacio" aria-labelledby="vacio-titulo">
-            <h2 id="vacio-titulo">{{ t('vacio.titulo') }}</h2>
-            <p class="dato-suave">{{ t('vacio.texto') }}</p>
-            @if (puedeAgregar()) {
-              <ng-container [ngTemplateOutlet]="opciones" />
-            }
-          </section>
-        } @else {
-          <ol class="filas lista" [attr.aria-label]="t('lista')">
-            @for (alumno of activos(); track alumno.id) {
-              <li>
-                <a class="fila-alumno" [routerLink]="['/alumnos', alumno.id]">
-                  <span class="numero cifras">{{ alumno.numeroLista }}</span>
-                  <span class="nombre">
-                    <span class="apellidos">{{ alumno.apellidos }}</span> {{ alumno.nombres }}
-                  </span>
-                  @if (alumno.tutores.length) {
-                    <span class="tutores dato-suave cifras">{{
-                      t('tutores.' + forma(alumno.tutores.length), {
-                        cantidad: alumno.tutores.length,
-                      })
-                    }}</span>
-                  } @else {
-                    <span class="tutores sin-tutor">{{ t('sinTutor') }}</span>
-                  }
-                </a>
-              </li>
-            }
-          </ol>
-        }
-
-        @if (agregando()) {
-          <form
-            class="nuevo"
-            (submit)="$event.preventDefault(); agregar()"
-            novalidate
-            [attr.aria-label]="t('nuevo.titulo')"
-          >
-            <span class="numero cifras" aria-hidden="true">{{ siguienteNumero() }}</span>
-            <div class="campos-en-fila">
-              <div class="campo">
-                <label for="nuevo-apellidos">{{ t('nuevo.apellidos') }}</label>
-                <input
-                  id="nuevo-apellidos"
-                  name="apellidos"
-                  maxlength="80"
-                  autocomplete="off"
-                  autocapitalize="words"
-                  [value]="apellidos()"
-                  (input)="apellidos.set(valor($event))"
-                />
-              </div>
-              <div class="campo">
-                <label for="nuevo-nombres">{{ t('nuevo.nombres') }}</label>
-                <input
-                  id="nuevo-nombres"
-                  name="nombres"
-                  maxlength="80"
-                  autocomplete="off"
-                  autocapitalize="words"
-                  [value]="nombres()"
-                  (input)="nombres.set(valor($event))"
-                  [attr.aria-invalid]="intento() && !nombres().trim()"
-                  [attr.aria-describedby]="intento() && !nombres().trim() ? 'nuevo-error' : null"
-                />
-              </div>
-            </div>
-            @if (intento() && !nombres().trim()) {
-              <p id="nuevo-error" class="error">{{ t('nuevo.requerido') }}</p>
-            }
-            @if (errorNuevo(); as codigo) {
-              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-            }
-            <div class="acciones">
-              <button class="boton" type="submit" [appOcupado]="guardando()">
-                {{ t('nuevo.agregar') }}
-              </button>
-              <button class="boton boton--secundario" type="button" (click)="terminarDeAgregar()">
-                {{ t('nuevo.listo') }}
+      <div class="columnas">
+        <div class="principal">
+          @if (error(); as codigo) {
+            <div class="aviso aviso--error" role="alert">
+              <p>{{ texto('errores.' + codigo) }}</p>
+              <button class="boton boton--secundario" type="button" (click)="cargar()">
+                {{ t('reintentar') }}
               </button>
             </div>
-          </form>
-        }
-        <p class="solo-lector" aria-live="polite">{{ anuncio() }}</p>
-
-        @if (bajas().length) {
-          <details class="bajas">
-            <summary>{{ t('bajas', { cantidad: bajas().length }) }}</summary>
-            <ol class="filas">
-              @for (alumno of bajas(); track alumno.id) {
-                <li>
-                  <a class="fila-alumno baja" [routerLink]="['/alumnos', alumno.id]">
-                    <span class="numero cifras">{{ alumno.numeroLista }}</span>
-                    <span class="nombre">
-                      <span class="apellidos">{{ alumno.apellidos }}</span> {{ alumno.nombres }}
-                    </span>
-                    <span class="tutores dato-suave">{{ t('dadoDeBaja') }}</span>
-                  </a>
+          } @else if (alumnos() === null) {
+            <ul class="filas" role="status" [attr.aria-label]="t('cargando')">
+              @for (i of [1, 2, 3, 4]; track i) {
+                <li class="fila-alumno" aria-hidden="true">
+                  <span class="esqueleto numero-esqueleto"></span>
+                  <span class="esqueleto linea-esqueleto"></span>
                 </li>
               }
-            </ol>
-          </details>
-        }
-
-        @if (puedeAgregar() && activos().length > 0 && !agregando()) {
-          <!-- Lleno, no hay acción que fijar abajo: la nota va en línea y no tapa la lista. -->
-          @if (lleno()) {
-            <p class="dato-suave">{{ t('lleno') }}</p>
+            </ul>
           } @else {
-            <div class="pie-accion">
-              <button id="agregar-alumnos" class="boton" type="button" (click)="hoja().abrir()">
-                <app-icono nombre="mas" />
-                {{ t('agregarAlumnos') }}
-              </button>
-            </div>
+            @if (activos().length === 0 && !agregando()) {
+              <section class="vacio" aria-labelledby="vacio-titulo">
+                <h2 id="vacio-titulo">{{ t('vacio.titulo') }}</h2>
+                <p class="dato-suave">{{ t('vacio.texto') }}</p>
+                @if (puedeAgregar()) {
+                  <ng-container [ngTemplateOutlet]="opciones" />
+                }
+              </section>
+            } @else {
+              <ol class="filas lista" [attr.aria-label]="t('lista')">
+                @for (alumno of activos(); track alumno.id) {
+                  <li>
+                    <a class="fila-alumno" [routerLink]="['/alumnos', alumno.id]">
+                      <span class="numero cifras">{{ alumno.numeroLista }}</span>
+                      <span class="nombre">
+                        <span class="apellidos">{{ alumno.apellidos }}</span> {{ alumno.nombres }}
+                      </span>
+                      @if (alumno.tutores.length) {
+                        <span class="tutores dato-suave cifras">{{
+                          t('tutores.' + forma(alumno.tutores.length), {
+                            cantidad: alumno.tutores.length,
+                          })
+                        }}</span>
+                      } @else {
+                        <span class="tutores sin-tutor">{{ t('sinTutor') }}</span>
+                      }
+                    </a>
+                  </li>
+                }
+              </ol>
+            }
+
+            @if (agregando()) {
+              <form
+                class="nuevo"
+                (submit)="$event.preventDefault(); agregar()"
+                novalidate
+                [attr.aria-label]="t('nuevo.titulo')"
+              >
+                <span class="numero cifras" aria-hidden="true">{{ siguienteNumero() }}</span>
+                <div class="campos-en-fila">
+                  <div class="campo">
+                    <label for="nuevo-apellidos">{{ t('nuevo.apellidos') }}</label>
+                    <input
+                      id="nuevo-apellidos"
+                      name="apellidos"
+                      maxlength="80"
+                      autocomplete="off"
+                      autocapitalize="words"
+                      [value]="apellidos()"
+                      (input)="apellidos.set(valor($event))"
+                    />
+                  </div>
+                  <div class="campo">
+                    <label for="nuevo-nombres">{{ t('nuevo.nombres') }}</label>
+                    <input
+                      id="nuevo-nombres"
+                      name="nombres"
+                      maxlength="80"
+                      autocomplete="off"
+                      autocapitalize="words"
+                      [value]="nombres()"
+                      (input)="nombres.set(valor($event))"
+                      [attr.aria-invalid]="intento() && !nombres().trim()"
+                      [attr.aria-describedby]="
+                        intento() && !nombres().trim() ? 'nuevo-error' : null
+                      "
+                    />
+                  </div>
+                </div>
+                @if (intento() && !nombres().trim()) {
+                  <p id="nuevo-error" class="error">{{ t('nuevo.requerido') }}</p>
+                }
+                @if (errorNuevo(); as codigo) {
+                  <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+                }
+                <div class="acciones">
+                  <button class="boton" type="submit" [appOcupado]="guardando()">
+                    {{ t('nuevo.agregar') }}
+                  </button>
+                  <button
+                    class="boton boton--secundario"
+                    type="button"
+                    (click)="terminarDeAgregar()"
+                  >
+                    {{ t('nuevo.listo') }}
+                  </button>
+                </div>
+              </form>
+            }
+            <p class="solo-lector" aria-live="polite">{{ anuncio() }}</p>
+
+            @if (bajas().length) {
+              <details class="bajas">
+                <summary>{{ t('bajas', { cantidad: bajas().length }) }}</summary>
+                <ol class="filas">
+                  @for (alumno of bajas(); track alumno.id) {
+                    <li>
+                      <a class="fila-alumno baja" [routerLink]="['/alumnos', alumno.id]">
+                        <span class="numero cifras">{{ alumno.numeroLista }}</span>
+                        <span class="nombre">
+                          <span class="apellidos">{{ alumno.apellidos }}</span> {{ alumno.nombres }}
+                        </span>
+                        <span class="tutores dato-suave">{{ t('dadoDeBaja') }}</span>
+                      </a>
+                    </li>
+                  }
+                </ol>
+              </details>
+            }
+
+            @if (puedeAgregar() && activos().length > 0 && !agregando()) {
+              <!-- Lleno, no hay acción que fijar abajo: la nota va en línea y no tapa la lista. -->
+              @if (lleno()) {
+                <p class="dato-suave">{{ t('lleno') }}</p>
+              } @else {
+                <div class="pie-accion solo-celular">
+                  <button id="agregar-alumnos" class="boton" type="button" (click)="hoja().abrir()">
+                    <app-icono nombre="mas" />
+                    {{ t('agregarAlumnos') }}
+                  </button>
+                </div>
+              }
+            }
           }
+        </div>
+
+        <!-- En escritorio no hace falta la hoja: las formas de agregar quedan a la vista junto a la lista. -->
+        @if (puedeAgregar() && activos().length > 0 && !lleno()) {
+          <aside class="lateral solo-escritorio" aria-labelledby="lateral-titulo">
+            <h2 id="lateral-titulo">{{ t('agregarAlumnos') }}</h2>
+            <ng-container [ngTemplateOutlet]="opciones" />
+          </aside>
         }
-      }
+      </div>
 
       <app-hoja etiqueta="hoja-agregar-titulo">
         <h2 id="hoja-agregar-titulo">{{ t('agregarAlumnos') }}</h2>
@@ -412,6 +430,29 @@ const MAXIMO_ALUMNOS = 50;
       cursor: pointer;
     }
 
+    .principal {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      gap: var(--espacio-5);
+    }
+
+    .lateral {
+      display: grid;
+      gap: var(--espacio-3);
+      padding: var(--espacio-5);
+      border-radius: var(--radio-lg);
+      background: var(--color-superficie);
+      border: 1px solid var(--color-divisoria);
+    }
+
+    /* En escritorio, la vista vacía reparte las tres formas de agregar en una fila. */
+    @media (min-width: 64rem) {
+      .vacio .opciones {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
     .vacio {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -564,7 +605,7 @@ export class Grupo implements OnInit {
     this.nombres.set('');
     this.apellidos.set('');
     // El formulario desaparece: el foco va a la acción que lo reemplaza o al título.
-    this.enfocar(this.lleno() ? 'h1' : '#agregar-alumnos');
+    this.enfocar(this.lleno() ? 'h1' : '#agregar-alumnos, .lateral .opcion');
   }
 
   /** Captura repetida: sin animación; se limpia y el foco vuelve a apellidos para el siguiente. */

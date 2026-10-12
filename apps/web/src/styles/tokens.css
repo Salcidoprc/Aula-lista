@@ -102,6 +102,8 @@
   --espacio-7: 3rem;
   --tactil-minimo: 2.75rem; /* 44 px */
   --ancho-lectura: 40rem;
+  --ancho-app: 72rem; /* 1152: contenedor de escritorio, alineado con la portada */
+  --margen-app: var(--espacio-6); /* margen lateral del contenedor en pantalla ancha */
 
   /* Formas: controles redondeados y amables; la tapa de libro tiene el lomo más recto. */
   --radio-sm: 0.25rem; /* 4: chips, barra de avance */

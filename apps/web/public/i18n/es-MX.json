@@ -409,7 +409,8 @@
     "nombresAyuda": "Sepáralos con comas. Hasta 15.",
     "vista": {
       "uno": "Así queda tu grupo",
-      "otros": "Así quedan tus {{cantidad}} grupos"
+      "otros": "Así quedan tus {{cantidad}} grupos",
+      "vacia": "Escribe el nombre del grupo para ver cómo queda."
     },
     "crear": "Crear grupo",
     "crearN": "Crear {{cantidad}} grupos",

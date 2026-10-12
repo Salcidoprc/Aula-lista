@@ -253,6 +253,18 @@ Tamaños disponibles: 13, 15, 16 (mínimo en campos), 19, 24 y 32 px, y 120 px p
 
 Primero celular (360 px), luego escritorio. Márgenes laterales de 16 px más el área segura (`env(safe-area-inset-*)`). Texto de lectura con ancho máximo de 40 rem. Objetivos táctiles de al menos 44 px. Alturas con `dvh`. Espaciado en múltiplos de 4 px (`--espacio-1` a `--espacio-7`): 12 px entre elementos de un grupo, 24 a 32 px entre secciones.
 
+### Pantalla ancha
+
+Desde 48 rem, las pantallas de cuenta (una sola columna corta) se centran y el resto ocupa un contenedor de 72 rem (`--ancho-app`) centrado, con el texto alineado al de la portada. Desde 64 rem cada pantalla reparte el ancho en lugar de estirar la columna del celular:
+
+- Mis grupos: los grupos de cada ciclo son tarjetas en cuadrícula, y "Crear grupo" sube a la cabeza.
+- Grupo: la lista a la izquierda y, a la derecha, un panel con las formas de agregar alumnos, sin abrir la hoja.
+- Crear grupo: campos a la izquierda y la vista de las tapas a la derecha.
+- Ciclo: los datos del ciclo a la izquierda, fijos al desplazar, y las unidades a la derecha.
+- Configuración del grupo, ficha del alumno y ajustes: dos columnas que conservan el orden del celular al leerse de izquierda a derecha.
+
+La acción fija abajo (`.pie-accion`) es solo del celular. Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`.
+
 La portada ocupa todo el ancho arriba, de 72 px más el área segura como mínimo; crece con el título, no con adorno. La acción principal va abajo, al alcance del pulgar.
 
 **La regla de la portada.** Toda pantalla del docente empieza con la portada. Dentro de un grupo, la portada lleva su color y su número; fuera de un grupo, el azul de la marca sin número.
