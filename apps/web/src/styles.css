@@ -25,9 +25,15 @@
   box-sizing: border-box;
 }
 
+/*
+ * Sin destello gris al tocar: cada control ya tiene su estado de presión. Lo que se enfoca o se desplaza
+ * queda por encima de la barra o el teclado fijo de abajo (--alto-pie-accion).
+ */
 html {
+  -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  scroll-padding-block-end: var(--alto-pie-accion, 0px);
 }
 
 body {

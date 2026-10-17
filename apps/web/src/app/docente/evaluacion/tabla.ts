@@ -108,7 +108,7 @@ interface Problema {
           <p class="ayuda-teclado dato-suave">{{ t('ayuda') }}</p>
         }
 
-        <p class="problema" role="status">
+        <p class="problema" id="problema" role="status">
           @if (problema(); as p) {
             {{ t('problema', { alumno: p.alumno, actividad: p.actividad }) }}
             {{ texto('errores.' + p.codigo) }}
@@ -129,7 +129,7 @@ interface Problema {
             <thead>
               <tr class="rubros">
                 <th scope="col" rowspan="2" class="fija">{{ t('alumno') }}</th>
-                @for (r of matriz()!.rubros; track r.rubro.id) {
+                @for (r of rubrosConActividades(); track r.rubro.id) {
                   <th scope="colgroup" [attr.colspan]="r.actividades.length + 1" class="rubro">
                     {{ r.rubro.nombre }}
                     <span class="peso cifras">{{ numero(r.rubro.peso) }} %</span>
@@ -195,6 +195,9 @@ interface Problema {
                             [attr.aria-invalid]="
                               fallas().has(llave(c.actividad.id, a.id)) ? true : null
                             "
+                            [attr.aria-describedby]="
+                              fallas().has(llave(c.actividad.id, a.id)) ? 'problema' : null
+                            "
                             [value]="textoCelda(celda)"
                             (change)="escribir(a, c.actividad, c.rubro, valor($event))"
                           />
@@ -245,7 +248,7 @@ interface Problema {
 
     /* La tabla se desplaza dentro de su marco; el encabezado y la columna de nombres se quedan. */
     .marco {
-      max-block-size: calc(100dvh - 14rem);
+      max-block-size: max(20rem, 100dvh - 14rem);
       overflow: auto;
       border: 1px solid var(--color-divisoria);
       border-radius: var(--radio-lg);
@@ -521,11 +524,14 @@ export class Tabla implements OnInit {
     }
     return lista;
   });
-  /** Columnas que se escriben, en orden, para el teclado y el pegado. */
-  private readonly editables = computed(() =>
+  /** Rubros que tienen columnas; los que aún no tienen actividades no llevan encabezado. */
+  protected readonly rubrosConActividades = computed(
+    () => this.matriz()?.rubros.filter((r) => r.actividades.length > 0) ?? [],
+  );
+  /** Columnas de actividad que se ven, en orden: el pegado cae sobre ellas como en la pantalla. */
+  private readonly visibles = computed(() =>
     this.columnas().filter(
-      (c): c is Extract<Columna, { tipo: 'actividad' }> =>
-        c.tipo === 'actividad' && c.editable !== null,
+      (c): c is Extract<Columna, { tipo: 'actividad' }> => c.tipo === 'actividad',
     ),
   );
   protected readonly resultados = computed(() => {
@@ -754,14 +760,20 @@ export class Tabla implements OnInit {
     const f0 = Number(el.dataset['f']);
     const c0 = Number(el.dataset['c']);
     const alumnos = this.alumnos().filter((a) => !a.dadoDeBaja);
-    const columnas = this.editables();
+    const columnas = this.visibles();
+    const inicio = columnas.findIndex((c) => c.editable === c0);
     const cambios: CambioCelda[] = [];
     let rechazadas = 0;
     leerPegado(texto).forEach((renglon, i) => {
       const alumno = alumnos[f0 + i];
       renglon.forEach((valor, j) => {
-        const col = columnas[c0 + j];
+        const col = columnas[inicio + j];
         if (!alumno || !col) {
+          return;
+        }
+        // Una columna con criterios se calcula: lo pegado ahí no se escribe y cuenta como error.
+        if (col.editable === null) {
+          rechazadas += valor.trim() ? 1 : 0;
           return;
         }
         const antes = this.fallas().size;

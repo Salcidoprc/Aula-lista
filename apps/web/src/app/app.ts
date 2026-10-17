@@ -97,7 +97,9 @@ import { PortadaService } from './shared/portada/portada.service';
       inset-block-start: env(safe-area-inset-top);
       inset-inline-end: max(var(--espacio-2), env(safe-area-inset-right));
       display: flex;
+      flex-wrap: wrap;
       gap: var(--espacio-1);
+      max-inline-size: calc(100% - 2 * var(--espacio-2));
     }
 
     /* La esquina es del número del grado: con número, la navegación va bajo el título para no pisarlo. */

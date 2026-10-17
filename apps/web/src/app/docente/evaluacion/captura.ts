@@ -6,6 +6,7 @@ import {
   ElementRef,
   OnInit,
   computed,
+  effect,
   inject,
   input,
   signal,
@@ -176,7 +177,7 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
             }
 
             @if (!soloLectura() && activos().length) {
-              <div class="pie-accion teclado-celular solo-celular">
+              <div #pieTeclado class="pie-accion teclado-celular solo-celular">
                 <ng-container [ngTemplateOutlet]="teclado" />
               </div>
             }
@@ -218,9 +219,12 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                 @let vc = criterioDe(celda, c.id);
                 @if (c.forma === 'cumplimiento') {
                   <div class="criterio">
-                    <span class="etiqueta-criterio" [id]="'c-' + a.id + '-' + c.id">{{
-                      c.nombre
-                    }}</span>
+                    <span
+                      class="etiqueta-criterio"
+                      [id]="'c-' + a.id + '-' + c.id"
+                      [attr.title]="c.nombre"
+                      >{{ c.nombre }}</span
+                    >
                     <div class="par" role="group" [attr.aria-labelledby]="'c-' + a.id + '-' + c.id">
                       @for (m of marcasCumplimiento; track m) {
                         <button
@@ -240,9 +244,12 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                   </div>
                 } @else {
                   <div class="criterio">
-                    <label class="etiqueta-criterio" [for]="'c-' + a.id + '-' + c.id">{{
-                      c.nombre
-                    }}</label>
+                    <label
+                      class="etiqueta-criterio"
+                      [for]="'c-' + a.id + '-' + c.id"
+                      [attr.title]="c.nombre"
+                      >{{ c.nombre }}</label
+                    >
                     <input
                       class="celda celda--chica cifras"
                       [id]="'c-' + a.id + '-' + c.id"
@@ -593,6 +600,23 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
       gap: var(--espacio-2);
     }
 
+    /* Lista angosta (320 px o texto al 200 %): la celda baja de renglón y el nombre conserva el ancho. */
+    .alumnos {
+      container-type: inline-size;
+    }
+
+    @container (max-width: 22rem) {
+      .fila {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--espacio-2);
+      }
+
+      .fila > .par,
+      .fila > .celda {
+        justify-self: end;
+      }
+    }
+
     .marca-especial {
       grid-column: 1 / -1;
       justify-self: end;
@@ -616,13 +640,17 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
       justify-items: start;
     }
 
+    /* Hasta dos renglones: los criterios suelen empezar igual y se distinguen por el final. */
     .etiqueta-criterio {
-      max-inline-size: 7rem;
+      display: -webkit-box;
+      max-inline-size: 10rem;
       overflow: hidden;
       color: var(--color-texto-suave);
       font-size: var(--texto-xs);
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
     }
 
     .resultado {
@@ -774,7 +802,34 @@ export class Captura implements OnInit {
     return !c || c.forma !== 'numerica';
   });
 
+  private readonly pieTeclado = viewChild<ElementRef<HTMLElement>>('pieTeclado');
+
   constructor() {
+    // El teclado fijo cambia de alto con el texto grande y la rotación: se mide para que la fila activa no
+    // quede debajo (scroll-margin de .fila y scroll-padding de la página leen --alto-pie-accion).
+    const raiz = document.documentElement;
+    let medidor: ResizeObserver | undefined;
+    const soltar = () => {
+      medidor?.disconnect();
+      raiz.style.removeProperty('--alto-pie-accion');
+    };
+    effect(() => {
+      const pie = this.pieTeclado()?.nativeElement;
+      soltar();
+      if (!pie || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      medidor = new ResizeObserver(() => {
+        const alto = pie.getBoundingClientRect().height;
+        if (alto > 0) {
+          raiz.style.setProperty('--alto-pie-accion', `${Math.ceil(alto)}px`);
+        } else {
+          raiz.style.removeProperty('--alto-pie-accion');
+        }
+      });
+      medidor.observe(pie);
+    });
+    inject(DestroyRef).onDestroy(soltar);
     const dejar = this.cola.alConfirmar(({ vigentes, rechazadas }) => {
       const m = this.matriz();
       if (!m) {
@@ -897,7 +952,8 @@ export class Captura implements OnInit {
       this.irA(otro.id, null);
     } else {
       this.activo.set(null);
-      (document.activeElement as HTMLElement | null)?.blur();
+      // Lista completa: el foco va al título para no perderse en la página.
+      this.host.nativeElement.querySelector<HTMLElement>('h1')?.focus();
     }
   }
 
@@ -913,8 +969,11 @@ export class Captura implements OnInit {
   private irA(alumnoId: string, criterioId: string | null): void {
     const enCelda = (document.activeElement as HTMLElement | null)?.matches?.('.celda, .marca');
     this.activar(alumnoId, criterioId);
-    const campo = criterioId ? `${alumnoId}:${criterioId}` : alumnoId;
-    const el = this.host.nativeElement.querySelector<HTMLElement>(`[data-campo="${campo}"]`);
+    // En cumplimiento cada marca es su propio campo (`<alumno>:<marca>`): el foco va a la primera.
+    const selector = criterioId
+      ? `[data-campo="${alumnoId}:${criterioId}"]`
+      : `[data-campo="${alumnoId}"], [data-campo^="${alumnoId}:"]`;
+    const el = this.host.nativeElement.querySelector<HTMLElement>(selector);
     if (enCelda && el) {
       el.focus({ preventScroll: true });
     }

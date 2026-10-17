@@ -165,7 +165,9 @@ test.describe('SPEC-03: evaluación y captura', () => {
     await teclado(page).getByRole('button', { name: '8', exact: true }).click();
     await teclado(page).getByRole('button', { name: '9', exact: true }).click();
     await expect(page.getByText('3 de 3 capturadas')).toBeVisible();
-    await expect(page.getByRole('status').filter({ hasText: 'Guardado' })).toBeVisible();
+    await expect(
+      page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
+    ).toBeVisible();
 
     await page.goto(grupo);
     await page.getByRole('link', { name: 'Ver tabla' }).click();
@@ -210,7 +212,9 @@ test.describe('SPEC-03: evaluación y captura', () => {
       }
       await expect(page.getByText('15 de 15 capturadas')).toBeVisible();
     }
-    await expect(page.getByText('Sin conexión: guardado aquí')).toBeVisible();
+    await expect(page.locator('app-indicador-sincronizacion .texto')).toHaveText(
+      'Sin conexión: guardado aquí',
+    );
     await page.close();
 
     await context.setOffline(false);

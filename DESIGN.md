@@ -265,7 +265,7 @@ Desde 48 rem, las pantallas de cuenta (una sola columna corta) se centran y el r
 - Ciclo: los datos del ciclo a la izquierda, fijos al desplazar, y las unidades a la derecha.
 - Configuración del grupo, ficha del alumno y ajustes: dos columnas que conservan el orden del celular al leerse de izquierda a derecha.
 
-La acción fija abajo (`.pie-accion`) es solo del celular. Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`.
+La acción fija abajo (`.pie-accion`) es del celular y la tableta (menos de 64 rem, donde la página es de una columna). Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`, con el mismo corte de 64 rem que `.columnas`: el panel lateral solo aparece donde hay dos columnas. El alto real del pie se publica en `--alto-pie-accion` para que la fila o el campo con foco no queden debajo.
 
 La portada ocupa todo el ancho arriba, de 72 px más el área segura como mínimo; crece con el título, no con adorno. La acción principal va abajo, al alcance del pulgar.
 
@@ -322,7 +322,7 @@ Chips de unidad (la elegida con fondo `--grado`), la barra "Pesos: n de 100" en 
 Un bloque por rubro separado por divisoria: número en `--grado-tinta`, nombre (con nombres sugeridos del tipo), tipo, peso con "%", mínima, forma (Con número / Cumplió ✓ / ✗) y la casilla de criterios. Los criterios van en un panel `superficie-hundida` con sus campos en `superficie`. La suma de pesos está siempre a la vista: pie fijo en celular, panel lateral en escritorio.
 
 ### Teclado rápido
-Cuatro columnas: 10, 9, 8, 7 / 6, 5, "No entregó", "Exento"; arriba dice para quién ("Para 7 Jiménez Ríos Sebastián"). Fijo abajo en celular, panel lateral en escritorio. Las teclas no roban el foco; con criterios, los números van al criterio con foco. La fila activa lleva fondo `--grado-tinte` y raya izquierda de 3 px `--grado`.
+Cuatro columnas: 10, 9, 8, 7 / 6, 5, "No entregó", "Exento"; arriba dice para quién ("Para 7 Jiménez Ríos Sebastián", hasta dos renglones). En pantalla baja (celular de lado o texto grande) las teclas van en un solo renglón que se desliza. Fijo abajo en celular, panel lateral en escritorio. Las teclas no roban el foco; con criterios, los números van al criterio con foco. La fila activa lleva fondo `--grado-tinte` y raya izquierda de 3 px `--grado`.
 
 ### Cumplimiento
 Dos botones por alumno, ✓ y ✗, de 56 × 44 px. Elegido: tinte y borde interior de 2 px de `exito` o `peligro`, no solo color. Tocar de nuevo el elegido lo limpia.

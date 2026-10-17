@@ -80,6 +80,7 @@
   font-weight: var(--peso-fuerte);
   cursor: pointer;
   touch-action: manipulation;
+  user-select: none;
   transition:
     transform var(--dur-press) var(--ease-out),
     background-color var(--dur-small) var(--ease-out),
@@ -146,11 +147,19 @@
   font-size: var(--texto-sm);
 }
 
+.teclado .para {
+  min-block-size: 1lh;
+}
+
+/* Dos renglones: entre nombres que empiezan igual se ve el final, que es el que distingue. */
 .teclado .nombre-activo {
+  display: -webkit-box;
   overflow: hidden;
   font-weight: var(--peso-medio);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .teclas {
@@ -173,13 +182,14 @@
   font-weight: var(--peso-fuerte);
   cursor: pointer;
   touch-action: manipulation;
+  user-select: none;
   transition: transform var(--dur-press) var(--ease-out);
 }
 
 .tecla--marca {
   font-size: var(--texto-xs);
-  white-space: nowrap;
   font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
 }
 
 .tecla:active:not(:disabled, :focus-visible) {
@@ -206,11 +216,33 @@
  * El teclado rápido fijo mide más que una barra de un botón: los avisos flotan sobre él y la fila activa se
  * desplaza por encima (scroll-margin en captura.ts). Dos renglones de teclas, la línea "Para…" y el relleno.
  */
-@media (max-width: 47.99rem) {
+@media (max-width: 63.99rem) {
   :root:has(.pie-accion.teclado-celular) {
     --alto-pie-accion: calc(
       2 * 3rem + 2 * var(--espacio-2) + 1.5rem + 2 * var(--espacio-3) + 1px +
         env(safe-area-inset-bottom)
     );
+  }
+}
+
+/*
+ * Pantalla baja (celular de lado, o texto al 200 %, que en rem la vuelve baja): las teclas van en un solo
+ * renglón que se desliza, para que la lista siga a la vista.
+ */
+@media (max-height: 30rem) {
+  .teclado-celular .teclas {
+    grid-auto-columns: minmax(3rem, 1fr);
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .teclado-celular .teclas.solo-marcas {
+    grid-auto-columns: minmax(6rem, 1fr);
+  }
+
+  .teclado-celular .tecla {
+    min-block-size: var(--tactil-minimo);
   }
 }

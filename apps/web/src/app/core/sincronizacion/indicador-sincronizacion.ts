@@ -26,7 +26,6 @@ const ESPERA_MS = 400;
   imports: [Icono, TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    role: 'status',
     '[attr.data-estado]': 'estado()',
     '[class.atrasado]': 'atrasado()',
     '[class.listo]': 'listo()',
@@ -55,6 +54,14 @@ const ESPERA_MS = 400;
           {{ t(estado(), { cantidad: cola.pendientes() }) }}
         }
       </span>
+      <!-- Solo se anuncia lo que pide atención: cada captura pasa por pendiente y guardado sin hablar. -->
+      <span class="solo-lector" role="status">
+        @if (atrasado()) {
+          {{ t('atrasado', { dias: cola.diasSinEnviar(), cantidad: cola.pendientes() }) }}
+        } @else if (estado() === 'sin_conexion') {
+          {{ t('sin_conexion', { cantidad: cola.pendientes() }) }}
+        }
+      </span>
     </ng-container>
   `,
   styles: `
@@ -67,7 +74,12 @@ const ESPERA_MS = 400;
       color: var(--grado-tinte);
       font-size: var(--texto-sm);
       font-weight: var(--peso-medio);
-      white-space: nowrap;
+    }
+
+    /* En 320 px con texto grande el aviso puede ocupar dos renglones; no empuja la página de lado. */
+    .texto {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     :host([data-estado='sin_conexion']),
