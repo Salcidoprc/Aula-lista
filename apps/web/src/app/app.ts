@@ -4,6 +4,7 @@ import {
   ElementRef,
   Injector,
   afterNextRender,
+  effect,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,6 +14,7 @@ import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
 import { Avisos } from './shared/avisos/avisos';
 import { Portada } from './shared/portada/portada';
+import { PortadaService } from './shared/portada/portada.service';
 
 @Component({
   selector: 'app-root',
@@ -22,9 +24,18 @@ import { Portada } from './shared/portada/portada';
     <ng-container *transloco="let t">
       <a class="saltar" href="#contenido">{{ t('app.saltar') }}</a>
       <header>
-        <app-portada [titulo]="t('app.nombre')">
+        <app-portada
+          [titulo]="portada()?.titulo ?? t('app.nombre')"
+          [subtitulo]="portada()?.subtitulo"
+          [numero]="portada()?.numero"
+          [grado]="portada()?.grado"
+        >
           @if (sesion.activa()) {
-            <nav class="navegacion" [attr.aria-label]="t('app.navegacion')">
+            <nav
+              class="navegacion"
+              [class.bajo-titulo]="!!portada()?.numero"
+              [attr.aria-label]="t('app.navegacion')"
+            >
               <a
                 routerLink="/"
                 routerLinkActive="activo"
@@ -79,6 +90,12 @@ import { Portada } from './shared/portada/portada';
       gap: var(--espacio-1);
     }
 
+    /* La esquina es del número del grado: con número, la navegación va bajo el título para no pisarlo. */
+    .navegacion.bajo-titulo {
+      position: static;
+      margin-inline-start: calc(-1 * var(--espacio-2));
+    }
+
     /* En pantalla ancha, la esquina queda lejos de la columna: va bajo el título, alineada con el texto. */
     @media (min-width: 48rem) {
       .navegacion {
@@ -123,6 +140,7 @@ import { Portada } from './shared/portada/portada';
 })
 export class App {
   protected readonly sesion = inject(SesionService);
+  protected readonly portada = inject(PortadaService).datos;
 
   constructor() {
     const injector = inject(Injector);
@@ -144,5 +162,34 @@ export class App {
           { injector },
         ),
       );
+
+    // La barra de estado del celular (theme-color) toma el color de la portada: azul fuera de un grupo,
+    // el del grado dentro. El color se lee ya pintado y se pasa a rgb, que todo navegador entiende.
+    effect(() => {
+      this.portada();
+      afterNextRender(
+        () => {
+          const portada = host.nativeElement.querySelector('app-portada');
+          const meta = document.querySelector('meta[name="theme-color"]');
+          const color = portada && aRgb(getComputedStyle(portada).backgroundColor);
+          if (meta && color) {
+            meta.setAttribute('content', color);
+          }
+        },
+        { injector },
+      );
+    });
   }
+}
+
+/** Convierte cualquier color CSS (oklch incluido) a `rgb(...)` pintándolo en un lienzo de 1 px. */
+function aRgb(color: string): string | null {
+  const contexto = document.createElement('canvas').getContext('2d');
+  if (!contexto) {
+    return null;
+  }
+  contexto.fillStyle = color;
+  contexto.fillRect(0, 0, 1, 1);
+  const [r, g, b] = contexto.getImageData(0, 0, 1, 1).data;
+  return `rgb(${r}, ${g}, ${b})`;
 }

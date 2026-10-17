@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using AulaLista.Api.Comun;
 using AulaLista.Api.Cuentas;
+using AulaLista.Api.Grupos;
 using AulaLista.Api.Operacion;
 using AulaLista.Application;
 using AulaLista.Application.Comun;
@@ -144,6 +145,7 @@ app.MapSalud();
 var api = app.MapGroup("/api/v1");
 api.MapCuentas();
 api.MapDocente();
+api.MapGrupos();
 if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is { } esquemas
     && await esquemas.GetSchemeAsync(GoogleEndpoints.EsquemaGoogle) is not null)
 {

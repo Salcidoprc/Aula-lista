@@ -113,8 +113,9 @@ erDiagram
 | `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |
 | `calificacion_criterio` | actividad_id, alumno_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio |
 | `alumno` | grupo_id, nombres, apellidos, numero_lista, trato (neutro, el, ella), seudonimo, baja_en | Sin CURP ni fecha de nacimiento |
-| `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061 |
-| `vinculo_tutor` | alumno_id, tutor_id, parentesco | Máximo 3 tutores por alumno |
+| `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061. RLS sin FORCE: el docente solo lee tutores con los que tiene vínculo y se crea por la función `vincular_tutor` (ADR-0014) |
+| `vinculo_tutor` | alumno_id, tutor_id, docente_id, nombre, correo, telefono_e164, parentesco | Lo que capturó cada docente; máximo 3 tutores por alumno |
+| `importacion` | grupo_id, docente_id, origen (excel, csv, texto), confirmada_en | Solo metadatos; el archivo no se guarda (ADR-0014) |
 | `enlace_tutor` | tutor_id, token_hash, creado_por_docente_id, expira_en, revocado_en, ultimo_uso_en | |
 | `nota` | alumno_id, periodo_id, texto, etiqueta (fortaleza, mejora, conducta, ninguna), fecha | |
 | `observacion` | alumno_id, periodo_id, estado (sin_generar, generando, borrador, aprobada, publicada), borrador_ia, texto_final, instrucciones, modelo, tokens_entrada, tokens_salida, aprobada_en | Una por alumno y periodo |

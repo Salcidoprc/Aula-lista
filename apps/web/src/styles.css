@@ -1,6 +1,7 @@
 @import '@fontsource-variable/lexend/wght.css';
 @import './styles/tokens.css';
 @import './styles/formularios.css';
+@import './styles/hoja.css';
 
 /*
  * Lexend no trae cifras tabulares. Las cifras (y el punto y la coma decimales) de calificaciones,
@@ -73,9 +74,28 @@ textarea,
   touch-action: manipulation;
 }
 
+/* Un toque largo en un control no selecciona su texto (iOS); el texto de lectura sí se puede copiar. */
+button,
+summary,
+.boton,
+.eleccion label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 :focus-visible {
-  outline: none;
+  /* Contorno transparente: invisible normalmente, pero en alto contraste el sistema lo pinta. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--foco);
+}
+
+/*
+ * Un título que recibe el foco por código (al cambiar de pantalla o de paso) no es un control: el lector
+ * de pantalla lo anuncia y no lleva anillo, que se leería como un campo.
+ */
+[tabindex='-1']:not([role='tab'], a, button, input, select, textarea):focus-visible {
+  box-shadow: none;
 }
 
 /* Superficies del navegador con la paleta: selección, cursor y casillas. */
@@ -107,12 +127,28 @@ textarea,
   border: 0;
 }
 
-/* Cambio de pantalla: fundido con desplazamiento de 8 px en 220 ms (catálogo de la regla 07). */
-::view-transition-old(root) {
+/*
+ * Cambio de pantalla: el contenido funde con desplazamiento de 8 px en 220 ms (catálogo de la regla 07). La
+ * portada no se desliza: cambia de tamaño y de color en su lugar.
+ */
+app-root > header {
+  view-transition-name: portada;
+}
+
+main {
+  view-transition-name: contenido;
+}
+
+::view-transition-group(portada) {
+  animation-duration: var(--dur-medium);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(contenido) {
   animation: var(--dur-small) var(--ease-out) both salida-pantalla;
 }
 
-::view-transition-new(root) {
+::view-transition-new(contenido) {
   animation: var(--dur-medium) var(--ease-out) both entrada-pantalla;
 }
 

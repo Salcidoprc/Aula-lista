@@ -48,124 +48,136 @@ const LONGITUD_MINIMA = 10;
       @if (!perfil()) {
         <p class="aviso" role="status">{{ t('cargando') }}</p>
       } @else {
-        <section aria-labelledby="ajustes-perfil">
-          <h2 id="ajustes-perfil">{{ t('perfil.titulo') }}</h2>
-          <app-formulario-perfil
-            [perfil]="perfil()"
-            [accion]="t('perfil.guardar')"
-            [enviando]="guardandoPerfil()"
-            (guardar)="guardarPerfil($event)"
-          />
-          @if (errorPerfil(); as codigo) {
-            <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-          }
-        </section>
-
-        <section aria-labelledby="ajustes-correo">
-          <h2 id="ajustes-correo">{{ t('correo.titulo') }}</h2>
-          <p class="dato">{{ perfil()!.correo }}</p>
-          @if (perfil()!.correoVerificado) {
-            <p class="aviso aviso--exito">{{ t('correo.verificado') }}</p>
-          } @else {
-            <p class="aviso aviso--pendiente">{{ t('correo.pendiente') }}</p>
-            <app-reenviar-verificacion />
-          }
-        </section>
-
-        <section aria-labelledby="ajustes-contrasena">
-          <h2 id="ajustes-contrasena">
-            {{ perfil()!.tieneContrasena ? t('contrasena.titulo') : t('contrasena.definir') }}
-          </h2>
-          @if (!perfil()!.tieneContrasena) {
-            <p class="nota">{{ t('contrasena.soloGoogle') }}</p>
-          }
-          <form
-            class="formulario"
-            [formGroup]="contrasena"
-            (ngSubmit)="guardarContrasena()"
-            novalidate
-          >
-            @if (perfil()!.tieneContrasena) {
-              <div class="campo">
-                <label for="actual">{{ t('contrasena.actual') }}</label>
-                <input
-                  id="actual"
-                  type="password"
-                  formControlName="actual"
-                  autocomplete="current-password"
-                  [attr.aria-invalid]="errorContrasena() === 'credenciales_invalidas'"
-                />
-              </div>
-            }
-            <div class="campo">
-              <label for="nueva">{{ t('contrasena.nueva') }}</label>
-              <input
-                id="nueva"
-                type="password"
-                formControlName="nueva"
-                autocomplete="new-password"
-                [attr.aria-invalid]="contrasenaInvalida()"
-                [attr.aria-describedby]="
-                  contrasenaInvalida() ? 'nueva-error nueva-ayuda' : 'nueva-ayuda'
-                "
+        <div class="columnas columnas--pares">
+          <div class="columna">
+            <section aria-labelledby="ajustes-perfil">
+              <h2 id="ajustes-perfil">{{ t('perfil.titulo') }}</h2>
+              <app-formulario-perfil
+                [perfil]="perfil()"
+                [accion]="t('perfil.guardar')"
+                [enviando]="guardandoPerfil()"
+                (guardar)="guardarPerfil($event)"
               />
-              <p id="nueva-ayuda" class="ayuda">{{ t('contrasena.ayuda', { minimo: minimo }) }}</p>
-              @if (contrasenaInvalida()) {
-                <p id="nueva-error" class="error">
-                  {{ t('contrasena.corta', { minimo: minimo }) }}
-                </p>
+              @if (errorPerfil(); as codigo) {
+                <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
               }
-            </div>
-            @if (errorContrasena(); as codigo) {
-              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-            }
-            <button
-              class="boton boton--secundario"
-              type="submit"
-              [appOcupado]="guardandoContrasena()"
-            >
-              {{ t('contrasena.guardar') }}
-            </button>
-          </form>
-        </section>
+            </section>
 
-        <section aria-labelledby="ajustes-sesiones">
-          <h2 id="ajustes-sesiones">{{ t('sesiones.titulo') }}</h2>
-          <p class="nota">{{ t('sesiones.nota') }}</p>
-          <div class="acciones">
-            <button class="boton boton--secundario" type="button" (click)="cerrarSesion(false)">
-              {{ t('sesiones.cerrar') }}
-            </button>
-            <button
-              class="boton boton--secundario"
-              type="button"
-              (click)="dialogoSesiones.showModal()"
-            >
-              {{ t('sesiones.cerrarTodas') }}
-            </button>
+            <section aria-labelledby="ajustes-correo">
+              <h2 id="ajustes-correo">{{ t('correo.titulo') }}</h2>
+              <p class="dato">{{ perfil()!.correo }}</p>
+              @if (perfil()!.correoVerificado) {
+                <p class="aviso aviso--exito">{{ t('correo.verificado') }}</p>
+              } @else {
+                <p class="aviso aviso--pendiente">{{ t('correo.pendiente') }}</p>
+                <app-reenviar-verificacion />
+              }
+            </section>
           </div>
-        </section>
 
-        <section aria-labelledby="ajustes-datos">
-          <h2 id="ajustes-datos">{{ t('datos.titulo') }}</h2>
-          <p class="nota">{{ t('datos.nota') }}</p>
-          <button
-            class="boton boton--secundario"
-            type="button"
-            [appOcupado]="exportando()"
-            (click)="exportar()"
-          >
-            {{ t('datos.exportar') }}
-          </button>
-        </section>
+          <div class="columna">
+            <section aria-labelledby="ajustes-contrasena">
+              <h2 id="ajustes-contrasena">
+                {{ perfil()!.tieneContrasena ? t('contrasena.titulo') : t('contrasena.definir') }}
+              </h2>
+              @if (!perfil()!.tieneContrasena) {
+                <p class="nota">{{ t('contrasena.soloGoogle') }}</p>
+              }
+              <form
+                class="formulario"
+                [formGroup]="contrasena"
+                (ngSubmit)="guardarContrasena()"
+                novalidate
+              >
+                @if (perfil()!.tieneContrasena) {
+                  <div class="campo">
+                    <label for="actual">{{ t('contrasena.actual') }}</label>
+                    <input
+                      id="actual"
+                      type="password"
+                      formControlName="actual"
+                      autocomplete="current-password"
+                      [attr.aria-invalid]="errorContrasena() === 'credenciales_invalidas'"
+                    />
+                  </div>
+                }
+                <div class="campo">
+                  <label for="nueva">{{ t('contrasena.nueva') }}</label>
+                  <input
+                    id="nueva"
+                    type="password"
+                    formControlName="nueva"
+                    autocomplete="new-password"
+                    [attr.aria-invalid]="contrasenaInvalida()"
+                    [attr.aria-describedby]="
+                      contrasenaInvalida() ? 'nueva-error nueva-ayuda' : 'nueva-ayuda'
+                    "
+                  />
+                  <p id="nueva-ayuda" class="ayuda">
+                    {{ t('contrasena.ayuda', { minimo: minimo }) }}
+                  </p>
+                  @if (contrasenaInvalida()) {
+                    <p id="nueva-error" class="error">
+                      {{ t('contrasena.corta', { minimo: minimo }) }}
+                    </p>
+                  }
+                </div>
+                @if (errorContrasena(); as codigo) {
+                  <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+                }
+                <button
+                  class="boton boton--secundario"
+                  type="submit"
+                  [appOcupado]="guardandoContrasena()"
+                >
+                  {{ t('contrasena.guardar') }}
+                </button>
+              </form>
+            </section>
 
-        <section aria-labelledby="ajustes-eliminar">
-          <h2 id="ajustes-eliminar">{{ t('eliminar.titulo') }}</h2>
-          <p class="nota">{{ t('eliminar.nota') }}</p>
-          <button class="boton boton--secundario peligro" type="button" (click)="abrirEliminar()">
-            {{ t('eliminar.accion') }}
-          </button>
-        </section>
+            <section aria-labelledby="ajustes-sesiones">
+              <h2 id="ajustes-sesiones">{{ t('sesiones.titulo') }}</h2>
+              <p class="nota">{{ t('sesiones.nota') }}</p>
+              <div class="acciones">
+                <button class="boton boton--secundario" type="button" (click)="cerrarSesion(false)">
+                  {{ t('sesiones.cerrar') }}
+                </button>
+                <button
+                  class="boton boton--secundario"
+                  type="button"
+                  (click)="dialogoSesiones.showModal()"
+                >
+                  {{ t('sesiones.cerrarTodas') }}
+                </button>
+              </div>
+            </section>
+
+            <section aria-labelledby="ajustes-datos">
+              <h2 id="ajustes-datos">{{ t('datos.titulo') }}</h2>
+              <p class="nota">{{ t('datos.nota') }}</p>
+              <button
+                class="boton boton--secundario"
+                type="button"
+                [appOcupado]="exportando()"
+                (click)="exportar()"
+              >
+                {{ t('datos.exportar') }}
+              </button>
+            </section>
+
+            <section aria-labelledby="ajustes-eliminar">
+              <h2 id="ajustes-eliminar">{{ t('eliminar.titulo') }}</h2>
+              <p class="nota">{{ t('eliminar.nota') }}</p>
+              <button
+                class="boton boton--secundario peligro"
+                type="button"
+                (click)="abrirEliminar()"
+              >
+                {{ t('eliminar.accion') }}
+              </button>
+            </section>
+          </div>
+        </div>
       }
 
       <dialog

@@ -102,6 +102,8 @@
   --espacio-7: 3rem;
   --tactil-minimo: 2.75rem; /* 44 px */
   --ancho-lectura: 40rem;
+  --ancho-app: 72rem; /* 1152: contenedor de escritorio, alineado con la portada */
+  --margen-app: var(--espacio-6); /* margen lateral del contenedor en pantalla ancha */
 
   /* Formas: controles redondeados y amables; la tapa de libro tiene el lomo más recto. */
   --radio-sm: 0.25rem; /* 4: chips, barra de avance */
@@ -113,6 +115,7 @@
 
   /* Profundidad: plano por defecto. Lo que flota lleva sombra entintada; la tapa, su lomo. */
   --sombra-lomo: inset 0.3125rem 0 0 oklch(0.2 0.03 260 / 0.16);
+  --sombra-lomo-chica: inset 0.1875rem 0 0 oklch(0.2 0.03 260 / 0.16);
   --sombra-flotante: 0 1px 2px oklch(0.25 0.03 260 / 0.08), 0 8px 24px oklch(0.25 0.03 260 / 0.12);
   --sombra-hoja: 0 -4px 32px oklch(0.25 0.03 260 / 0.16);
   /* Anillo doble: hoja por dentro y acción por fuera, visible sobre papel y sobre cualquier color (WCAG 1.4.11). */

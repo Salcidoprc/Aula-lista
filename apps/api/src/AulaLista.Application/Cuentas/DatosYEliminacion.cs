@@ -31,6 +31,7 @@ public sealed class SolicitarExportacionCasoUso(
 public sealed class GenerarExportacionTrabajo(
     IRepositorioCuentas cuentas,
     IRepositorioDocentes docentes,
+    Grupos.IRepositorioGrupos grupos,
     IContextoUsuario contexto,
     IGeneradorExportacion generador,
     IEnvioCorreo correo,
@@ -51,8 +52,18 @@ public sealed class GenerarExportacionTrabajo(
 
         var ahora = reloj.GetUtcNow();
         var aceptaciones = await docentes.AceptacionesAsync(docenteId, ct);
+        var ciclos = (await grupos.CiclosAsync(ct)).Select(Grupos.CicloDto.De).ToList();
+        var deGrupos = await grupos.GruposAsync(archivados: true, ct);
+        var alumnos = new List<Grupos.AlumnoDto>();
+        foreach (var grupo in deGrupos)
+        {
+            var delGrupo = await grupos.AlumnosAsync(grupo.Grupo.Id, ct);
+            var vinculos = await grupos.VinculosAsync(delGrupo.Select(a => a.Id).ToList(), ct);
+            alumnos.AddRange(delGrupo.OrderBy(a => a.NumeroLista).Select(a => Grupos.AlumnoDto.De(a, vinculos)));
+        }
+
         var (excel, pdf) = await generador.GenerarAsync(
-            new DatosExportacion(exportacion.Id, cuenta.Correo, docente, aceptaciones, ahora), ct);
+            new DatosExportacion(exportacion.Id, cuenta.Correo, docente, aceptaciones, ciclos, deGrupos.Select(Grupos.GrupoDto.De).ToList(), alumnos, ahora), ct);
         exportacion.MarcarLista(excel, pdf, ahora, TimeSpan.FromHours(opciones.Value.HorasExportacion));
         await unidad.GuardarAsync(ct);
         await correo.EnviarAsync(CorreosCuentas.ExportacionLista(cuenta.Correo, opciones.Value.UrlWeb, exportacion.Id), ct);

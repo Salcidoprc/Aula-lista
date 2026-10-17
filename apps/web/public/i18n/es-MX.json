@@ -5,7 +5,8 @@
     "navegacion": "Principal",
     "inicio": "Inicio",
     "ajustes": "Ajustes",
-    "cerrarAviso": "Cerrar aviso"
+    "cerrarAviso": "Cerrar aviso",
+    "cerrar": "Cerrar"
   },
   "comun": {
     "cargando": "Cargando…",
@@ -18,10 +19,37 @@
       "titulo": "Confirma tu correo.",
       "texto": "Te enviamos un enlace a {{correo}}. Lo necesitas antes de dar de alta a tus alumnos."
     },
+    "cargando": "Cargando tus grupos",
+    "reintentar": "Intentar de nuevo",
     "vacio": {
-      "titulo": "Todavía no tienes grupos",
-      "texto": "Muy pronto vas a poder crear tus grupos y dar de alta a tus alumnos desde aquí."
-    }
+      "titulo": "Tu grupo listo en tres pasos",
+      "paso1": "Define tu ciclo escolar.",
+      "paso1Texto": "De qué fecha a qué fecha va y en cuántas unidades lo divides. Lo haces una sola vez.",
+      "paso2": "Crea tus grupos.",
+      "paso2Texto": "Uno o varios a la vez, por ejemplo 1° A, 1° B y 1° C.",
+      "paso3": "Agrega a tus alumnos.",
+      "paso3Texto": "Desde el Excel que ya tienes, pegando tu lista o uno por uno, con el WhatsApp de sus tutores."
+    },
+    "empezar": "Definir mi ciclo",
+    "crearPrimerGrupo": "Crear mi primer grupo",
+    "crearGrupo": "Crear grupo",
+    "ciclo": "Ciclo {{nombre}}",
+    "unidades": {
+      "uno": "{{cantidad}} unidad",
+      "otros": "{{cantidad}} unidades"
+    },
+    "alumnos": {
+      "uno": "{{cantidad}} alumno",
+      "otros": "{{cantidad}} alumnos"
+    },
+    "nivel": {
+      "primaria": "Primaria",
+      "secundaria": "Secundaria"
+    },
+    "cicloSinGrupos": "Todavía no hay grupos en este ciclo.",
+    "verArchivados": "Ver grupos archivados",
+    "archivados": "Archivados",
+    "sinArchivados": "No tienes grupos archivados."
   },
   "cuenta": {
     "google": "Continuar con Google",
@@ -222,7 +250,35 @@
     "desconocido": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento.",
     "error_interno": "Algo falló de nuestro lado. Inténtalo de nuevo en un momento.",
     "no_encontrado": "No encontramos lo que buscas.",
-    "no_autenticado": "Tu sesión terminó. Entra de nuevo."
+    "no_autenticado": "Tu sesión terminó. Entra de nuevo.",
+    "ciclo_fechas_invalidas": "La fecha de fin del ciclo debe ser posterior a la de inicio.",
+    "ciclo_muy_largo": "El ciclo dura como máximo 13 meses.",
+    "ciclo_duplicado": "Ya tienes un ciclo con ese nombre.",
+    "tipo_unidad_invalido": "Elige bimestre, trimestre, cuatrimestre, semestre, mensual o personalizada.",
+    "cantidad_unidades_invalida": "El ciclo se divide en 1 a 12 unidades.",
+    "unidad_fechas_invalidas": "La fecha de fin de la unidad no puede ser anterior a la de inicio.",
+    "unidad_fuera_de_ciclo": "Las unidades deben quedar dentro de las fechas del ciclo.",
+    "unidades_traslapadas": "Dos unidades no pueden compartir fechas.",
+    "unidad_cerrada": "Esa unidad ya está cerrada en algún grupo; sus fechas no se pueden cambiar.",
+    "unidad_inexistente": "Esa unidad no es de este ciclo.",
+    "ciclo_inexistente": "Elige uno de tus ciclos escolares.",
+    "grado_invalido": "El grado va de 1 a 6 en primaria y de 1 a 3 en secundaria.",
+    "grupo_duplicado": "Ya tienes un grupo con ese grado, nombre y materia en este ciclo.",
+    "lote_invalido": "Escribe de 1 a 15 nombres de grupo distintos.",
+    "configuracion_calificacion_invalida": "La mínima va de 0 a 10 y la aprobatoria no puede ser menor que la mínima.",
+    "grupo_archivado": "El grupo está archivado: se puede consultar, pero no editar.",
+    "correo_no_verificado": "Confirma tu correo antes de dar de alta a tus alumnos.",
+    "limite_alumnos_grupo": "El grupo ya tiene 50 alumnos activos.",
+    "numero_lista_invalido": "El número de lista va de 1 a 99.",
+    "trato_invalido": "El trato es neutro, él o ella.",
+    "alumno_dado_de_baja": "El alumno está dado de baja.",
+    "telefono_invalido": "Escribe un WhatsApp de 10 dígitos o con clave de país, por ejemplo +1 415 555 0100.",
+    "limite_tutores_alumno": "Un alumno tiene como máximo 3 tutores.",
+    "tutor_ya_vinculado": "Ese tutor ya está vinculado a este alumno.",
+    "archivo_invalido": "Sube un archivo .xlsx o .csv de hasta 2 MB.",
+    "archivo_ilegible": "No pudimos leer el archivo. Revisa que sea un Excel o CSV con encabezados.",
+    "importacion_confirmada": "Esa importación ya se guardó.",
+    "unidad_nombre_requerido": "Escribe el nombre de la unidad."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -269,6 +325,353 @@
     "recuperar": "Recupera tu contraseña",
     "restablecer": "Contraseña nueva",
     "eliminada": "Cuenta desactivada",
-    "legal": "Documentos legales"
+    "legal": "Documentos legales",
+    "cicloNuevo": "Tu ciclo escolar",
+    "ciclo": "Ciclo escolar",
+    "grupoNuevo": "Crear grupo",
+    "grupo": "Alumnos del grupo",
+    "configuracionGrupo": "Configuración del grupo",
+    "importar": "Importar alumnos",
+    "alumno": "Ficha del alumno"
+  },
+  "ciclo": {
+    "volver": "Volver",
+    "misGrupos": "Mis grupos",
+    "titulo": "Tu ciclo escolar",
+    "tituloEditar": "Ciclo y unidades",
+    "entrada": "Lo defines una vez y todos los grupos del ciclo usan las mismas unidades.",
+    "cargando": "Cargando el ciclo",
+    "nombre": "Nombre del ciclo",
+    "nombreRequerido": "Escribe el nombre del ciclo, por ejemplo 2026-2027.",
+    "inicio": "Empieza el",
+    "fin": "Termina el",
+    "tipo": "Divido el ciclo en",
+    "cantidad": "Cuántas",
+    "tipos": {
+      "bimestre": "Bimestres",
+      "trimestre": "Trimestres",
+      "cuatrimestre": "Cuatrimestres",
+      "semestre": "Semestres",
+      "mensual": "Meses",
+      "personalizada": "Unidades a mi medida"
+    },
+    "unidades": "Unidades",
+    "unidadesNota": "Puede haber días que no son de ninguna unidad, como las vacaciones.",
+    "unidadN": "Unidad {{n}}",
+    "nombreUnidad": "Nombre",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "quitar": "Quitar {{nombre}}",
+    "agregar": "Agregar unidad al final",
+    "guardar": "Guardar ciclo",
+    "guardarCambios": "Guardar cambios",
+    "guardado": "Ciclo guardado."
+  },
+  "crearGrupo": {
+    "misGrupos": "Mis grupos",
+    "titulo": "Crear grupo",
+    "tituloVarios": "Crear varios grupos",
+    "cargando": "Cargando tus ciclos",
+    "nivel": "Nivel",
+    "niveles": {
+      "primaria": "Primaria",
+      "secundaria": "Secundaria"
+    },
+    "grado": "Grado",
+    "materia": "Materia",
+    "materiaAyuda": "En secundaria cada materia es un grupo distinto. Puedes dejarla en blanco.",
+    "materias": [
+      "Español",
+      "Matemáticas",
+      "Ciencias",
+      "Biología",
+      "Física",
+      "Química",
+      "Historia",
+      "Geografía",
+      "Formación Cívica y Ética",
+      "Inglés",
+      "Artes",
+      "Educación Física",
+      "Tecnología",
+      "Tutoría"
+    ],
+    "ciclo": "Ciclo escolar",
+    "cicloUnico": "Ciclo {{nombre}}, con {{cantidad}} unidades.",
+    "otroCiclo": "Crear otro ciclo",
+    "varios": "Crear varios grupos a la vez",
+    "variosAyuda": "Con el mismo grado, materia y ciclo.",
+    "nombre": "Grupo",
+    "nombreEjemplo": "B",
+    "nombreAyuda": "La letra o el nombre del grupo; el grado ya va aparte.",
+    "nombres": "Grupos",
+    "nombresEjemplo": "A, B, C",
+    "nombresAyuda": "Sepáralos con comas. Hasta 15.",
+    "vista": {
+      "uno": "Así queda tu grupo",
+      "otros": "Así quedan tus {{cantidad}} grupos",
+      "vacia": "Escribe el nombre del grupo para ver cómo queda."
+    },
+    "crear": "Crear grupo",
+    "crearN": "Crear {{cantidad}} grupos",
+    "creados": "Se crearon {{cantidad}} grupos.",
+    "errores": {
+      "nombreRequerido": "Escribe el nombre del grupo.",
+      "demasiados": "Son 15 grupos como máximo por vez.",
+      "nombreLargo": "Cada nombre lleva 40 caracteres o menos.",
+      "repetidos": "Hay nombres repetidos."
+    },
+    "reintentar": "Intentar de nuevo"
+  },
+  "grupo": {
+    "misGrupos": "Mis grupos",
+    "titulo": "Alumnos",
+    "conteo": "{{activos}} de {{maximo}} alumnos",
+    "configuracion": "Configuración",
+    "archivado": "Este grupo está archivado: puedes consultarlo, pero ya no editarlo.",
+    "verifica": {
+      "titulo": "Confirma tu correo.",
+      "texto": "Lo necesitas antes de dar de alta a tus alumnos."
+    },
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando alumnos",
+    "lista": "Lista del grupo",
+    "vacio": {
+      "titulo": "Agrega a tus alumnos",
+      "texto": "Con su lista y el WhatsApp de sus tutores, tu grupo queda listo para calificar y enviar boletas."
+    },
+    "tutores": {
+      "uno": "{{cantidad}} tutor",
+      "otros": "{{cantidad}} tutores"
+    },
+    "sinTutor": "Sin tutor",
+    "bajas": "Bajas ({{cantidad}})",
+    "dadoDeBaja": "Baja",
+    "lleno": "El grupo ya tiene 50 alumnos activos.",
+    "agregarAlumnos": "Agregar alumnos",
+    "nuevo": {
+      "titulo": "Agregar alumno",
+      "apellidos": "Apellidos",
+      "nombres": "Nombres",
+      "requerido": "Escribe el nombre del alumno.",
+      "agregar": "Agregar",
+      "listo": "Listo",
+      "agregado": "{{nombre}} quedó con el número {{numero}}."
+    },
+    "opciones": {
+      "excel": "Desde Excel o CSV",
+      "excelTexto": "Sube tu lista; reconocemos las columnas de nombre y tutores.",
+      "pegar": "Pegar lista",
+      "pegarTexto": "Un alumno por renglón, copiado de Word, WhatsApp o la lista de la escuela.",
+      "uno": "Uno por uno",
+      "unoTexto": "Escribe apellidos y nombre.",
+      "plantilla": "Descargar plantilla de Excel"
+    }
+  },
+  "configuracion": {
+    "volver": "Alumnos",
+    "titulo": "Configuración del grupo",
+    "cargando": "Cargando el grupo",
+    "archivado": "Este grupo está archivado: puedes consultarlo, pero ya no editarlo.",
+    "datos": "Datos del grupo",
+    "nombre": "Grupo",
+    "nombreRequerido": "Escribe el nombre del grupo.",
+    "grado": "Grado ({{nivel}})",
+    "niveles": {
+      "primaria": "primaria",
+      "secundaria": "secundaria"
+    },
+    "materia": "Materia",
+    "calificacion": "Calificación",
+    "calificacionNota": "De 0 a 10 con hasta dos decimales. La final es la que va en la boleta.",
+    "minima": "Mínima",
+    "minimaAyuda": "Ninguna calificación se reporta por debajo de esta.",
+    "aprobatoria": "Aprobatoria",
+    "decimales": "Decimales de la calificación final",
+    "decimalesN": "{{cantidad}}",
+    "redondeo": "Redondeo de la calificación final",
+    "redondeos": {
+      "cercano": "Al más cercano",
+      "arriba": "Hacia arriba",
+      "abajo": "Hacia abajo"
+    },
+    "ejemplo": "Por ejemplo:",
+    "errores": {
+      "fueraDeEscala": "Escribe calificaciones de 0 a 10 con hasta dos decimales.",
+      "aprobatoriaMenor": "La aprobatoria no puede ser menor que la mínima."
+    },
+    "guardar": "Guardar cambios",
+    "guardado": "Cambios guardados.",
+    "cancelar": "Cancelar",
+    "archivar": {
+      "titulo": "Archivar el grupo",
+      "nota": "Al terminar el ciclo, archívalo: se conserva para consultarlo y exportarlo, pero ya no se edita.",
+      "accion": "Archivar",
+      "confirmarTitulo": "¿Archivar {{grupo}}?",
+      "confirmarTexto": "Ya no podrás editar alumnos, tutores ni calificaciones de este grupo.",
+      "hecho": "{{grupo}} quedó archivado."
+    },
+    "borrar": {
+      "titulo": "Borrar el grupo",
+      "nota": "Se borra con sus alumnos y sus tutores. Solo se puede mientras no tenga calificaciones.",
+      "accion": "Borrar grupo",
+      "confirmarTitulo": "¿Borrar {{grupo}}?",
+      "confirmarTexto": "Se borran el grupo, sus alumnos y los tutores que no estén en otros grupos. No se puede deshacer.",
+      "hecho": "{{grupo}} se borró."
+    }
+  },
+  "alumno": {
+    "volver": "Alumnos",
+    "volverA": "Alumnos de {{grupo}}",
+    "cargando": "Cargando al alumno",
+    "numero": "Número {{numero}} de la lista",
+    "cancelar": "Cancelar",
+    "datos": {
+      "titulo": "Datos",
+      "apellidos": "Apellidos",
+      "nombres": "Nombres",
+      "nombresRequerido": "Escribe el nombre del alumno.",
+      "numero": "Número de lista",
+      "numeroAyuda": "Si otro alumno tiene ese número, intercambian.",
+      "trato": "Trato",
+      "tratoAyuda": "Solo sirve para que las observaciones digan «el alumno» o «la alumna».",
+      "guardar": "Guardar datos",
+      "guardados": "Datos guardados.",
+      "numeroInvalido": "Escribe un número del 1 al 99."
+    },
+    "tratos": {
+      "neutro": "Neutro",
+      "el": "Él",
+      "ella": "Ella"
+    },
+    "parentescos": [
+      "Mamá",
+      "Papá",
+      "Abuela",
+      "Abuelo",
+      "Tía",
+      "Tío",
+      "Hermana",
+      "Hermano",
+      "Tutor legal"
+    ],
+    "tutores": {
+      "titulo": "Tutores",
+      "nota": "Hasta 3. Reciben las boletas y avisos en su WhatsApp.",
+      "ninguno": "Sin tutor: puedes calificarlo, pero su boleta no le llega a nadie.",
+      "nombre": "Nombre del tutor",
+      "nombreRequerido": "Escribe el nombre del tutor.",
+      "telefono": "WhatsApp",
+      "telefonoAyuda": "10 dígitos; si es de otro país, empieza con + y la clave.",
+      "parentesco": "Parentesco",
+      "correo": "Correo (opcional)",
+      "correoInvalido": "Revisa el correo; se ve incompleto.",
+      "agregar": "Agregar tutor",
+      "agregarAccion": "Agregar tutor",
+      "agregado": "{{nombre}} quedó como tutor.",
+      "yaRegistrado": "Este número ya está registrado como tutor.",
+      "editar": "Editar",
+      "guardar": "Guardar",
+      "quitar": "Quitar",
+      "quitarTitulo": "¿Quitar a {{nombre}}?",
+      "quitarTexto": "Dejará de recibir las boletas y avisos de este alumno."
+    },
+    "baja": {
+      "titulo": "Dar de baja",
+      "nota": "Se conservan sus calificaciones y boletas; deja de aparecer en la captura y libera su lugar en el grupo.",
+      "accion": "Dar de baja",
+      "confirmarTitulo": "¿Dar de baja a {{nombre}}?",
+      "confirmarTexto": "Sus tutores podrán ver las boletas ya publicadas, pero no las de periodos nuevos.",
+      "estado": "Baja desde el {{fecha}}. Se conservan sus calificaciones y boletas.",
+      "hecha": "Se dio de baja a {{nombre}}."
+    }
+  },
+  "importar": {
+    "volver": "Alumnos",
+    "titulo": "Importar alumnos",
+    "formas": "Forma de importar",
+    "excel": "Excel o CSV",
+    "pegar": "Pegar lista",
+    "excelNota": "Sube un archivo .xlsx o .csv de hasta 2 MB con los encabezados en la primera fila. Reconocemos columnas como Apellidos, Nombre, Tutor y WhatsApp.",
+    "elegir": "Elegir archivo",
+    "leyendo": "Leyendo el archivo",
+    "plantilla": "Descargar plantilla de Excel",
+    "lista": "Lista de alumnos",
+    "listaEjemplo": "García López Ana Sofía\nHernández Ruiz José Luis",
+    "listaAyuda": "Un alumno por renglón. Si viene numerada, quitamos los números.",
+    "verVista": "Ver cómo queda",
+    "campos": {
+      "ignorar": "No importar",
+      "nombre_completo": "Nombre completo",
+      "apellidos": "Apellidos",
+      "nombres": "Nombres",
+      "apellido_paterno": "Apellido paterno",
+      "apellido_materno": "Apellido materno"
+    },
+    "camposTutor": {
+      "nombre": "Tutor {{n}}: nombre",
+      "telefono": "Tutor {{n}}: WhatsApp",
+      "correo": "Tutor {{n}}: correo",
+      "parentesco": "Tutor {{n}}: parentesco"
+    },
+    "vista": {
+      "titulo": "Revisa antes de importar",
+      "nota": "Al grupo le caben {{disponibles}} alumnos más. Corrige o quita los renglones marcados; los demás se importan.",
+      "columnas": "Columnas del archivo ({{cantidad}})",
+      "sinEncabezado": "Columna {{n}}",
+      "faltaNombre": "Elige qué columna trae el nombre de los alumnos.",
+      "orden": "Cada renglón empieza con",
+      "apellidosPrimero": "Apellidos",
+      "nombresPrimero": "Nombres",
+      "listas": {
+        "uno": "{{cantidad}} listo",
+        "otros": "{{cantidad}} listos"
+      },
+      "conError": "{{cantidad}} por corregir",
+      "noCaben": {
+        "uno": "{{cantidad}} no cabe",
+        "otros": "{{cantidad}} no caben"
+      },
+      "sinNombre": "Sin nombre",
+      "tutorSinNombre": "Tutor sin nombre",
+      "noCabe": "No cabe: el grupo llega a 50",
+      "excluida": "No se importa",
+      "repetido": "Nombre repetido en la lista",
+      "corregir": "Corregir",
+      "quitar": "Quitar",
+      "incluir": "Volver a incluir",
+      "renglon": "renglón {{n}}",
+      "apellidos": "Apellidos",
+      "nombres": "Nombres",
+      "tutor": "Tutor {{n}}",
+      "telefono": "WhatsApp del tutor {{n}}",
+      "importar": {
+        "uno": "Importar {{cantidad}} alumno",
+        "otros": "Importar {{cantidad}} alumnos"
+      },
+      "otra": "Usar otro archivo o lista"
+    },
+    "problemas": {
+      "nombre_vacio": "Falta el nombre",
+      "nombre_largo": "Nombre muy largo (máximo 80 letras)",
+      "telefono_invalido": "WhatsApp inválido",
+      "tutor_incompleto": "Al tutor le falta nombre o WhatsApp",
+      "correo_invalido": "Correo del tutor inválido",
+      "demasiados_tutores": "Más de 3 tutores"
+    },
+    "hecho": {
+      "uno": "Se importó {{guardados}} alumno.",
+      "otros": "Se importaron {{guardados}} alumnos."
+    },
+    "hechoConOmitidos": {
+      "uno": "Se importó {{guardados}} alumno; {{omitidos}} quedaron fuera.",
+      "otros": "Se importaron {{guardados}} alumnos; {{omitidos}} quedaron fuera."
+    },
+    "descartar": {
+      "titulo": "¿Descartar tus correcciones?",
+      "texto": "Se pierden los cambios que hiciste en la vista previa y los renglones que quitaste.",
+      "seguir": "Seguir revisando",
+      "accion": "Descartar"
+    }
   }
 }

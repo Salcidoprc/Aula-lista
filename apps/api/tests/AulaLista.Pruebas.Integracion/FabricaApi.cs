@@ -90,6 +90,15 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         return (cliente, sesion.DocenteId, correo);
     }
 
+    /// <summary>Docente con el correo ya confirmado, como lo pide RN-001 para dar de alta alumnos.</summary>
+    public async Task<(HttpClient Cliente, Guid DocenteId, string Correo)> RegistrarDocenteVerificadoAsync()
+    {
+        var registrado = await RegistrarDocenteAsync();
+        var token = TokenDelCorreo(registrado.Correo, "Confirma tu correo");
+        (await Cliente().PostAsJsonAsync("/api/v1/cuentas/verificar-correo", new { token })).EnsureSuccessStatusCode();
+        return registrado;
+    }
+
     /// <summary>Saca el token del último correo enviado a una dirección con el asunto indicado.</summary>
     public string TokenDelCorreo(string para, string asunto)
     {

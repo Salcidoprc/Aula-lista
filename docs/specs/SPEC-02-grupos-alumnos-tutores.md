@@ -79,9 +79,10 @@ Un alumno por línea. Se aceptan formatos "Apellidos Nombres", "Nombres Apellido
 | `PUT /api/v1/ciclos/{id}/unidades` | Reemplaza las unidades del ciclo (valida RN-023, RN-026 y RN-027) |
 | `GET /api/v1/grupos/{id}/periodos` | Periodos del grupo: una entrada por unidad con su estado |
 | `GET` / `POST /api/v1/grupos/{id}/alumnos` | Lista y agrega alumnos |
-| `PUT` / `DELETE /api/v1/alumnos/{id}` | Edita o da de baja |
+| `GET` / `PUT` / `DELETE /api/v1/alumnos/{id}` | Ficha, edición o baja |
 | `POST /api/v1/grupos/{id}/importaciones` | Sube archivo, texto o foto; devuelve vista previa |
 | `POST /api/v1/importaciones/{id}/confirmar` | Guarda las filas confirmadas |
+| `GET /api/v1/importaciones/plantilla` | Descarga la plantilla de Excel con las columnas que se detectan |
 | `GET` / `POST /api/v1/alumnos/{id}/tutores` | Lista y vincula tutores |
 | `PUT` / `DELETE /api/v1/alumnos/{id}/tutores/{tutorId}` | Edita parentesco o desvincula |
 
@@ -102,6 +103,7 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - El mismo teléfono aparece como tutor de dos alumnos del grupo (hermanos): un solo tutor vinculado a ambos.
 - El docente escribe un teléfono que ya pertenece a un tutor con otro nombre: se vincula y se avisa "Este número ya está registrado como tutor"; no se muestra el otro nombre.
 - Importación que excede 50 alumnos: se importan los primeros hasta el límite y se informa el resto.
+- Dos grupos con el mismo nombre en el ciclo: se permiten si difieren en grado o materia ("1° A" y "4° A"); con el mismo grado, nombre y materia (sin distinguir mayúsculas) se rechaza con `grupo_duplicado`.
 
 ## Criterios de aceptación
 

@@ -4,8 +4,10 @@
  */
 
 /* Pantalla de una sola columna, al ancho de lectura, con la acción al alcance del pulgar. */
+/* Una columna que puede encogerse: una palabra larga con letra grande no ensancha la pantalla. */
 .pantalla {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--espacio-5);
   width: 100%;
@@ -19,8 +21,95 @@
   max-width: var(--ancho-lectura);
 }
 
+/*
+ * Escritorio (DESIGN.md, "Pantalla ancha"): la pantalla angosta (cuenta) se centra; la ancha ocupa el
+ * contenedor de la app, alineada con el texto de la portada, y cada pantalla reparte sus columnas.
+ */
+@media (min-width: 48rem) {
+  .pantalla {
+    margin-inline: auto;
+    padding-block-start: var(--espacio-7);
+  }
+
+  .pantalla--ancha {
+    max-width: calc(var(--ancho-app) + 2 * var(--margen-app));
+    padding-inline: var(--margen-app);
+  }
+}
+
+/* Lo que solo se muestra en un tamaño: la acción fija abajo en celular, en la cabeza en escritorio. */
+@media (max-width: 47.99rem) {
+  .solo-escritorio {
+    display: none !important;
+  }
+}
+
+@media (min-width: 48rem) {
+  .solo-celular {
+    display: none !important;
+  }
+}
+
+/* Cabeza de pantalla ancha: título a la izquierda y la acción principal a la derecha. */
+.cabeza-pantalla {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--espacio-3) var(--espacio-5);
+}
+
+/* Una columna de .columnas que agrupa varias secciones; en escritorio, la primera pierde su raya. */
+.columna {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--espacio-5);
+}
+
+@media (min-width: 64rem) {
+  .columna > section:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* Dos columnas en escritorio: la principal y un panel lateral fijo al desplazar. En celular, una sola. */
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espacio-5);
+}
+
+@media (min-width: 64rem) {
+  .columnas {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+    gap: var(--espacio-7);
+  }
+
+  .columnas:not(.columnas--pares):not(:has(> .lateral)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .columnas--pares {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .columnas > .lateral {
+    position: sticky;
+    top: var(--espacio-5);
+  }
+}
+
 .pantalla h1 {
   font-size: var(--texto-2xl);
+}
+
+.pantalla h1,
+.pantalla h2 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .pantalla .entrada {
@@ -30,12 +119,15 @@
 
 .formulario {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--espacio-4);
 }
 
 /* Campo: etiqueta visible arriba, 48 px, fondo hundido; con foco, hoja y anillo. */
 .campo {
   display: grid;
+  align-content: start;
+  min-width: 0;
   gap: var(--espacio-1);
 }
 
@@ -50,14 +142,17 @@
   font-size: var(--texto-xs);
 }
 
+/* El renglón de abajo, como el de un cuaderno, marca el campo con contraste de 3:1 (WCAG 1.4.11). */
 .campo input,
 .campo select {
   width: 100%;
+  min-width: 0;
   min-height: 3rem;
   padding: 0 var(--espacio-3);
   border: 0;
   border-radius: var(--radio-md);
   background: var(--color-superficie-hundida);
+  box-shadow: inset 0 -1px 0 var(--color-texto-tenue);
   font-size: var(--texto-base);
   transition: background-color var(--dur-small) var(--ease-out);
 }
@@ -94,6 +189,7 @@
 .campo input:focus-visible,
 .campo select:focus-visible {
   background-color: var(--color-superficie);
+  box-shadow: var(--foco);
 }
 
 .campo input[aria-invalid='true'],
@@ -133,7 +229,7 @@ p.error {
 /* Elección entre pocas opciones (nivel): botones de radio grandes, uno junto al otro. */
 .eleccion {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
   gap: var(--espacio-2);
   margin: 0;
   padding: 0;
@@ -161,14 +257,22 @@ p.error {
     color var(--dur-small) var(--ease-out);
 }
 
+/* Elegida: tinte y borde de la acción; el borde no depende solo del color de fondo (WCAG 1.4.11). */
 .eleccion label:has(input:checked) {
   background: var(--color-accion-tinte);
+  box-shadow: inset 0 0 0 2px var(--color-accion);
   color: var(--color-accion-tinta);
   font-weight: var(--peso-medio);
 }
 
 .eleccion label:has(input:focus-visible) {
   box-shadow: var(--foco);
+}
+
+.eleccion label:has(input:checked:focus-visible) {
+  box-shadow:
+    inset 0 0 0 2px var(--color-accion),
+    var(--foco);
 }
 
 .eleccion input {
@@ -211,26 +315,26 @@ p.error {
   width: 100%;
 }
 
-.boton:active:not(:disabled, [aria-disabled="true"]) {
+.boton:active:not(:disabled, [aria-disabled='true']) {
   transform: scale(var(--escala-presion));
 }
 
 .boton:disabled,
-.boton[aria-disabled="true"] {
+.boton[aria-disabled='true'] {
   cursor: progress;
   opacity: 0.7;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .boton:hover:not(:disabled, [aria-disabled="true"]) {
+  .boton:hover:not(:disabled, [aria-disabled='true']) {
     background-color: var(--color-accion-presionada);
   }
 
-  .boton--secundario:hover:not(:disabled, [aria-disabled="true"]) {
+  .boton--secundario:hover:not(:disabled, [aria-disabled='true']) {
     background-color: var(--color-divisoria);
   }
 
-  .boton--peligro:hover:not(:disabled, [aria-disabled="true"]) {
+  .boton--peligro:hover:not(:disabled, [aria-disabled='true']) {
     background-color: var(--color-peligro-tinta);
   }
 
@@ -390,4 +494,204 @@ dialog.dialogo[open]::backdrop {
 /* El error de una elección ocupa toda la fila, debajo de las opciones. */
 .eleccion .error--eleccion {
   grid-column: 1 / -1;
+}
+
+/* Regreso a la pantalla anterior ("Mis grupos", "Alumnos"), arriba del título. */
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-1);
+  justify-self: start;
+  min-height: var(--tactil-minimo);
+  margin-block: calc(-1 * var(--espacio-4)) calc(-1 * var(--espacio-3));
+  color: var(--color-accion);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+}
+
+.volver app-icono {
+  width: 1rem;
+  height: 1rem;
+}
+
+.volver:active {
+  color: var(--color-accion-presionada);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .volver:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+/* Lista de filas separadas por la divisoria; la fila entera es el objetivo táctil. */
+.filas {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filas > li + li {
+  border-top: 1px solid var(--color-divisoria);
+}
+
+/* Acción principal pegada abajo en el celular, al alcance del pulgar; en pantalla ancha va en su lugar. */
+.pie-accion {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: grid;
+  gap: var(--espacio-2);
+  margin-inline: calc(-1 * max(var(--espacio-4), env(safe-area-inset-left)));
+  padding: var(--espacio-3) max(var(--espacio-4), env(safe-area-inset-right))
+    calc(var(--espacio-3) + env(safe-area-inset-bottom))
+    max(var(--espacio-4), env(safe-area-inset-left));
+  border-top: 1px solid var(--color-divisoria);
+  background: var(--color-fondo);
+}
+
+/* Los avisos flotan sobre la barra: el alto de un .boton más el relleno y el borde. */
+:root:has(.pie-accion) {
+  --alto-pie-accion: calc(3rem + 2 * var(--espacio-3) + 1px);
+}
+
+@media (min-width: 48rem) {
+  :root:has(.pie-accion) {
+    --alto-pie-accion: 0px;
+  }
+
+  .pie-accion {
+    position: static;
+    justify-items: start;
+    margin-inline: 0;
+    padding-inline: 0;
+    border-top: 0;
+    background: none;
+  }
+}
+
+/* Lugar de lo que todavía no llega de la red: misma forma, sin brillo animado. */
+.esqueleto {
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-hundida);
+}
+
+/* Pestañas: subrayado de la acción en la activa; cada una mide al menos 44 px. */
+.pestanas {
+  display: flex;
+  gap: var(--espacio-1);
+  border-bottom: 1px solid var(--color-divisoria);
+}
+
+.pestanas [role='tab'] {
+  min-height: var(--tactil-minimo);
+  padding: 0 var(--espacio-3);
+  border: 0;
+  border-radius: var(--radio-md) var(--radio-md) 0 0;
+  background: none;
+  color: var(--color-texto-suave);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+  box-shadow: inset 0 -3px 0 transparent;
+  transition:
+    color var(--dur-small) var(--ease-out),
+    box-shadow var(--dur-small) var(--ease-out);
+}
+
+.pestanas [role='tab'][aria-selected='true'] {
+  color: var(--color-accion-tinta);
+  box-shadow: inset 0 -3px 0 var(--color-accion);
+}
+
+.pestanas [role='tab']:focus-visible {
+  box-shadow: var(--foco);
+}
+
+/* Área de texto con el mismo trato que el campo. */
+.campo textarea {
+  width: 100%;
+  min-height: 10rem;
+  padding: var(--espacio-3);
+  border: 0;
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-hundida);
+  box-shadow: inset 0 -1px 0 var(--color-texto-tenue);
+  font-size: var(--texto-base);
+  line-height: var(--interlineado);
+  resize: vertical;
+}
+
+.campo textarea:focus-visible {
+  background-color: var(--color-superficie);
+  box-shadow: var(--foco);
+}
+
+.campo textarea::placeholder {
+  color: var(--color-texto-suave);
+}
+
+/* Campos en fila (fechas, nombres y apellidos): dos columnas cuando caben. */
+.campos-en-fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--espacio-3);
+}
+
+/* Dato secundario bajo un título (materia, conteo, fechas). */
+.dato-suave {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+
+/* Desplegables: flecha que gira al abrir, para que no parezcan un título. */
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline: 0.25rem var(--espacio-3);
+  border-block-start: 2px solid currentColor;
+  border-inline-end: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--dur-small) var(--ease-out);
+}
+
+details[open] > summary::before {
+  transform: rotate(135deg);
+}
+
+/* Alto contraste: las sombras desaparecen, así que elegido, pestaña activa e inválido usan contorno. */
+@media (forced-colors: active) {
+  .campo input,
+  .campo select,
+  .campo textarea {
+    border: 1px solid CanvasText;
+  }
+
+  .campo [aria-invalid='true'] {
+    outline: 2px dashed CanvasText;
+  }
+
+  .eleccion label:has(input:checked),
+  .pestanas [role='tab'][aria-selected='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+/* Un teléfono nunca se parte en dos renglones ("667 123 / 4567"). */
+.telefono {
+  white-space: nowrap;
 }

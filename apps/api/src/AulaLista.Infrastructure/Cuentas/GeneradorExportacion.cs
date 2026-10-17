@@ -37,6 +37,31 @@ internal sealed class GeneradorExportacion(IAlmacenArchivos almacen) : IGenerado
 
     private static string Fecha(DateTimeOffset fecha) => fecha.ToString("dd/MM/yyyy HH:mm 'UTC'", Mx);
 
+    private static string Dia(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", Mx);
+
+    private static string NombreGrupo(Application.Grupos.GrupoDto g) =>
+        g.Materia is null ? $"{g.Grado}° {g.Nombre} ({g.CicloNombre})" : $"{g.Grado}° {g.Nombre} {g.Materia} ({g.CicloNombre})";
+
+    private static void Tabla(XLWorkbook libro, string nombre, string[] encabezados, IEnumerable<string[]> filas)
+    {
+        var hoja = libro.Worksheets.Add(nombre);
+        for (var c = 0; c < encabezados.Length; c++)
+        {
+            hoja.Cell(1, c + 1).Value = encabezados[c];
+        }
+
+        var f = 2;
+        foreach (var fila in filas)
+        {
+            for (var c = 0; c < fila.Length; c++)
+            {
+                hoja.Cell(f, c + 1).Value = fila[c];
+            }
+
+            f++;
+        }
+    }
+
     private static byte[] Excel(DatosExportacion d)
     {
         using var libro = new XLWorkbook();
@@ -63,6 +88,31 @@ internal sealed class GeneradorExportacion(IAlmacenArchivos almacen) : IGenerado
             aceptaciones.Cell(fila, 3).Value = Fecha(a.Fecha);
             fila++;
         }
+
+        Tabla(libro, "Ciclos y unidades", ["Ciclo", "Inicio", "Fin", "Unidad", "Inicio de la unidad", "Fin de la unidad"],
+            d.Ciclos.SelectMany(c => c.Unidades.Select(u => new[]
+            {
+                c.Nombre, Dia(c.Inicio), Dia(c.Fin), u.Nombre, Dia(u.Inicio), Dia(u.Fin),
+            })));
+        Tabla(libro, "Grupos", ["Grupo", "Nivel", "Grado", "Materia", "Ciclo", "Alumnos activos", "Mínima", "Aprobatoria", "Archivado"],
+            d.Grupos.Select(g => new[]
+            {
+                g.Nombre, g.Nivel, g.Grado.ToString(Mx), g.Materia ?? string.Empty, g.CicloNombre, g.AlumnosActivos.ToString(Mx),
+                g.CalifMinima.ToString("0.00", Mx), g.CalifAprobatoria.ToString("0.00", Mx), g.ArchivadoEn is { } a ? Fecha(a) : string.Empty,
+            }));
+        var grupos = d.Grupos.ToDictionary(g => g.Id, g => NombreGrupo(g));
+        Tabla(libro, "Alumnos", ["Grupo", "Número", "Apellidos", "Nombres", "Trato", "Baja"],
+            d.Alumnos.Select(a => new[]
+            {
+                grupos.GetValueOrDefault(a.GrupoId, string.Empty), a.NumeroLista.ToString(Mx), a.Apellidos, a.Nombres, a.Trato,
+                a.BajaEn is { } b ? Fecha(b) : string.Empty,
+            }));
+        Tabla(libro, "Tutores", ["Grupo", "Alumno", "Tutor", "WhatsApp", "Correo", "Parentesco"],
+            d.Alumnos.SelectMany(a => a.Tutores.Select(t => new[]
+            {
+                grupos.GetValueOrDefault(a.GrupoId, string.Empty), $"{a.Apellidos} {a.Nombres}".Trim(), t.Nombre, t.Telefono,
+                t.Correo ?? string.Empty, t.Parentesco ?? string.Empty,
+            })));
 
         foreach (var hoja in libro.Worksheets)
         {
@@ -100,6 +150,26 @@ internal sealed class GeneradorExportacion(IAlmacenArchivos almacen) : IGenerado
                 foreach (var a in d.Aceptaciones.OrderBy(a => a.Fecha))
                 {
                     col.Item().Text($"{a.Documento}, versión {a.Version}, {Fecha(a.Fecha)}");
+                }
+
+                foreach (var c in d.Ciclos)
+                {
+                    col.Item().PaddingTop(8).Text($"Ciclo {c.Nombre}").FontSize(14).Bold();
+                    foreach (var u in c.Unidades)
+                    {
+                        col.Item().Text($"{u.Nombre}: {Dia(u.Inicio)} a {Dia(u.Fin)}");
+                    }
+                }
+
+                foreach (var g in d.Grupos)
+                {
+                    col.Item().PaddingTop(8).Text(NombreGrupo(g)).FontSize(14).Bold();
+                    foreach (var a in d.Alumnos.Where(a => a.GrupoId == g.Id))
+                    {
+                        var tutores = string.Join("; ", a.Tutores.Select(t => $"{t.Nombre} {t.Telefono}"));
+                        var baja = a.BajaEn is null ? string.Empty : " (baja)";
+                        col.Item().Text($"{a.NumeroLista}. {a.Apellidos} {a.Nombres}{baja}{(tutores.Length > 0 ? $". Tutores: {tutores}" : string.Empty)}");
+                    }
                 }
             });
             pagina.Footer().AlignCenter().Text(t =>
