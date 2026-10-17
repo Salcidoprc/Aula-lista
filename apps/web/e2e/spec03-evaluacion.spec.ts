@@ -226,4 +226,114 @@ test.describe('SPEC-03: evaluación y captura', () => {
     await otra.goto(actividades[0]);
     await expect(otra.getByText('15 de 15 capturadas')).toBeVisible();
   });
+
+  test('por equipo: 9 al equipo de 4, ajuste a 7 y recalificar con 8 deja 3 con 8 y el ajustado con 7; reorganizar no cambia nada (RN-114 a RN-116)', async ({
+    page,
+    request,
+  }) => {
+    await docenteVerificado(page, request);
+    const grupo = await grupoConAlumnos(page, 5);
+
+    // RN-114: un equipo con los primeros cuatro; el quinto queda sin equipo.
+    await page.getByRole('link', { name: 'Alumnos', exact: true }).click();
+    await page.getByRole('link', { name: 'Equipos' }).click();
+    await expect(page.getByRole('heading', { name: 'Todavía no hay equipos' })).toBeVisible();
+    await page.getByRole('button', { name: 'Nuevo equipo' }).first().click();
+    for (let i = 0; i < 4; i++) {
+      await page.locator('.sin-equipo [data-alumno]').first().click();
+      await page
+        .getByRole('dialog')
+        .getByRole('button', { name: /^Equipo 1/ })
+        .click();
+    }
+    await expect(page.getByText('4 integrantes')).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+    await page.getByRole('button', { name: 'Guardar equipos' }).locator('visible=true').click();
+    await expect(page.getByText('Equipos guardados.')).toBeVisible();
+
+    await page.goto(grupo);
+    await crearRubros(page, [{ tipo: 'Proyecto', peso: '100', forma: 'Con número' }]);
+    await page.getByRole('button', { name: 'Guardar rubros' }).click();
+    await expect(page).toHaveURL(new RegExp(`${grupo}\\?unidad=`));
+    await page.getByRole('button', { name: 'Nueva actividad' }).first().click();
+    await page.getByLabel('Rubro').selectOption({ label: 'Proyecto' });
+    await page.getByRole('radio', { name: 'Por equipo' }).check();
+    await page.getByRole('button', { name: 'Crear y capturar' }).click();
+    await expect(teclado(page)).toBeVisible();
+    const actividad = page.url();
+
+    // RN-115: el equipo abre activo; 9 llega a los cuatro.
+    await expect(teclado(page).getByText('Equipo 1 (4)')).toBeVisible();
+    await teclado(page).getByRole('button', { name: '9', exact: true }).click();
+    const integrantes = page.locator('li.integrante .valor-integrante');
+    await expect(integrantes).toHaveText(['9', '9', '9', '9']);
+    await expect(page.getByText('4 de 5 capturadas')).toBeVisible();
+
+    // Ajuste a un integrante y luego el equipo con 8.
+    await page.getByRole('button', { name: /^Ajustar a 1\./ }).click();
+    const ajustada = page.getByLabel(/^Calificación de 1\./);
+    await expect(ajustada).toBeFocused();
+    await ajustada.fill('7');
+    await ajustada.press('Enter');
+    await expect(page.getByText('Ajustado', { exact: true })).toBeVisible();
+    await page.locator('li.fila--equipo button.alumno').click();
+    await teclado(page).getByRole('button', { name: '8', exact: true }).click();
+    await expect(integrantes).toHaveText(['8', '8', '8']);
+    await expect(ajustada).toHaveValue('7');
+    await expect(
+      page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
+    ).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+
+    await page.reload();
+    await expect(integrantes).toHaveText(['8', '8', '8']);
+    await expect(page.getByLabel(/^Calificación de 1\./)).toHaveValue('7');
+
+    // RN-116: se reorganiza el equipo y la actividad conserva su composición y sus calificaciones.
+    await page.goto(grupo + '/equipos');
+    await page.locator('.equipos [data-alumno]').last().click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Sin equipo' }).click();
+    await page.getByRole('button', { name: 'Guardar equipos' }).locator('visible=true').click();
+    await expect(page.getByText('Equipos guardados.')).toBeVisible();
+    await page.goto(actividad);
+    await expect(teclado(page)).toBeVisible();
+    await expect(page.locator('li.fila--equipo')).toContainText('4 integrantes');
+    await expect(integrantes).toHaveText(['8', '8', '8']);
+    await expect(page.getByLabel(/^Calificación de 1\./)).toHaveValue('7');
+  });
+
+  test('notas: se escriben sin conexión con etiqueta, quedan "Por enviar" y llegan al volver la red', async ({
+    page,
+    request,
+    context,
+  }) => {
+    await docenteVerificado(page, request);
+    await grupoConAlumnos(page, 2);
+    await page.getByRole('link', { name: 'Alumnos', exact: true }).click();
+    await page.getByRole('link', { name: /Álvarez Soto/ }).click();
+    await expect(page.getByRole('link', { name: 'Avance' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(page.getByText('Solo tú ves estas notas.', { exact: false })).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+
+    await context.setOffline(true);
+    await page
+      .getByLabel('Nueva nota')
+      .fill('Participó en la lluvia de ideas y ayudó a su equipo.');
+    await page.getByRole('radio', { name: 'Fortaleza' }).check();
+    await page.getByRole('button', { name: 'Guardar nota' }).click();
+    const notas = page.getByRole('list', { name: 'Notas de la unidad' });
+    await expect(notas.getByText('Por enviar')).toBeVisible();
+    await expect(notas.getByText('Fortaleza')).toBeVisible();
+
+    await context.setOffline(false);
+    await expect(notas.getByText('Por enviar')).toHaveCount(0);
+    await page.reload();
+    await expect(notas.getByText('Participó en la lluvia de ideas', { exact: false })).toHaveCount(
+      1,
+    );
+    await expect(notas.getByText('Fortaleza')).toBeVisible();
+  });
 });

@@ -23,7 +23,14 @@ import { GrupoDto } from '../../api/models/grupo-dto';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
 import { Forma, Marca } from '../../core/calculo/calculo';
 import { codigoDeError } from '../../core/errores/problema';
-import { conCambios, conCeldas, llaveCelda } from '../../core/sincronizacion/celdas';
+import {
+  EquipoDeActividad,
+  SIN_ALUMNO,
+  composicion,
+  conCambios,
+  conCeldas,
+  llaveCelda,
+} from '../../core/sincronizacion/celdas';
 import { ColaSincronizacion } from '../../core/sincronizacion/cola-sincronizacion';
 import { AvisosService } from '../../shared/avisos/avisos.service';
 import { mostrarFecha } from '../../shared/fechas';
@@ -42,6 +49,8 @@ import {
   dosDecimales,
   indexar,
   interpretar,
+  MODOS,
+  Modo,
   numero,
   textoCelda,
   validarValor,
@@ -49,6 +58,18 @@ import {
 } from './matriz';
 
 const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
+const PREFIJO_EQUIPO = 'equipo:';
+
+/** Una fila que se captura: un alumno, un equipo completo o un integrante ajustado (RN-115). */
+interface Fila {
+  readonly clave: string;
+  readonly tipo: 'alumno' | 'equipo' | 'integrante';
+  readonly numero: string;
+  readonly apellidos: string;
+  readonly nombres: string;
+  readonly etiqueta: string;
+  readonly equipo?: EquipoDeActividad;
+}
 
 /**
  * SPEC-03, "Vista por actividad (celular)": la lista del grupo con una celda grande por alumno. Escribir y
@@ -153,14 +174,87 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
               <p class="dato-suave">{{ t('sinAlumnos') }}</p>
             }
 
-            <ol class="alumnos" [attr.aria-label]="t('lista')">
-              @for (a of activos(); track a.id) {
-                <ng-container
-                  [ngTemplateOutlet]="fila"
-                  [ngTemplateOutletContext]="{ $implicit: a, baja: false }"
-                />
+            @if (porEquipo()) {
+              @if (equipos().length === 0 && activos().length) {
+                <div class="aviso aviso--pendiente sin-equipos">
+                  <p>{{ t('equipo.sinEquipos') }}</p>
+                  <a class="boton boton--secundario" [routerLink]="['/grupos', id(), 'equipos']">
+                    <app-icono nombre="equipo" />
+                    {{ t('equipo.armar') }}
+                  </a>
+                </div>
               }
-            </ol>
+              @for (e of equipos(); track e.equipoId) {
+                @let fe = filaEquipo(e);
+                <section class="equipo" [attr.aria-label]="fe.etiqueta">
+                  <ol class="alumnos">
+                    <ng-container
+                      [ngTemplateOutlet]="fila"
+                      [ngTemplateOutletContext]="{ $implicit: fe, baja: false }"
+                    />
+                  </ol>
+                  <ol class="alumnos integrantes" [attr.aria-label]="t('equipo.integrantes')">
+                    @for (a of integrantesDe(e); track a.id) {
+                      @if (editandoIntegrante(a.id)) {
+                        <ng-container
+                          [ngTemplateOutlet]="fila"
+                          [ngTemplateOutletContext]="{ $implicit: filaDe(a.id)!, baja: false }"
+                        />
+                      } @else {
+                        <li class="integrante" [attr.data-alumno]="a.id">
+                          <button
+                            class="alumno"
+                            type="button"
+                            [disabled]="soloLectura()"
+                            [attr.aria-label]="
+                              t('equipo.ajustarA', {
+                                alumno: nombreDe(a),
+                                valor: textoCelda(celdaDe(a.id)) || '—',
+                              })
+                            "
+                            (click)="ajustar(a.id)"
+                          >
+                            <span class="numero cifras">{{ a.numeroLista }}</span>
+                            <span class="nombre"
+                              ><span class="apellidos">{{ a.apellidos }}</span>
+                              {{ a.nombres }}</span
+                            >
+                            <span class="valor-integrante cifras">{{
+                              textoCelda(celdaDe(a.id)) || '—'
+                            }}</span>
+                            @if (!soloLectura()) {
+                              <span class="ajustar dato-suave">{{ t('equipo.ajustar') }}</span>
+                            }
+                          </button>
+                        </li>
+                      }
+                    }
+                  </ol>
+                </section>
+              }
+              @if (sinEquipo().length) {
+                <section class="sin-equipo" aria-labelledby="sin-equipo-titulo">
+                  <h2 id="sin-equipo-titulo">{{ t('equipo.sinEquipo') }}</h2>
+                  <ol class="alumnos">
+                    @for (a of sinEquipo(); track a.id) {
+                      <ng-container
+                        [ngTemplateOutlet]="fila"
+                        [ngTemplateOutletContext]="{ $implicit: filaDe(a.id)!, baja: false }"
+                      />
+                    }
+                  </ol>
+                </section>
+              }
+            } @else {
+              <ol class="alumnos" [attr.aria-label]="t('lista')">
+                @for (a of activos(); track a.id) {
+                  <ng-container
+                    [ngTemplateOutlet]="fila"
+                    [ngTemplateOutletContext]="{ $implicit: filaDe(a.id)!, baja: false }"
+                  />
+                }
+              </ol>
+            }
 
             @if (bajas().length) {
               <section class="bajas" aria-labelledby="bajas-titulo">
@@ -169,7 +263,7 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                   @for (a of bajas(); track a.id) {
                     <ng-container
                       [ngTemplateOutlet]="fila"
-                      [ngTemplateOutletContext]="{ $implicit: a, baja: true }"
+                      [ngTemplateOutletContext]="{ $implicit: filaAlumno(a), baja: true }"
                     />
                   }
                 </ol>
@@ -191,41 +285,55 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
         </div>
       }
 
-      <ng-template #fila let-a let-baja="baja">
-        @let celda = celdaDe(a.id);
-        @let fallo = errores().get(a.id);
+      <ng-template #fila let-f let-baja="baja">
+        @let celda = celdaDe(f.clave);
+        @let fallo = errores().get(f.clave);
         <li
           class="fila"
-          [class.activa]="!baja && activo() === a.id"
+          [class.activa]="!baja && activo() === f.clave"
           [class.con-criterios]="conCriterios()"
-          [attr.data-alumno]="a.id"
+          [class.fila--equipo]="f.tipo === 'equipo'"
+          [class.fila--integrante]="f.tipo === 'integrante'"
+          [attr.data-alumno]="f.clave"
         >
           <button
             class="alumno"
             type="button"
             [disabled]="baja || soloLectura()"
-            [attr.aria-current]="!baja && activo() === a.id ? 'true' : null"
-            (click)="activar(a.id)"
+            [attr.aria-current]="!baja && activo() === f.clave ? 'true' : null"
+            (click)="activar(f.clave)"
           >
-            <span class="numero cifras">{{ a.numeroLista }}</span>
-            <span class="nombre"
-              ><span class="apellidos">{{ a.apellidos }}</span> {{ a.nombres }}</span
-            >
+            @if (f.tipo === 'equipo') {
+              <app-icono class="numero" nombre="equipo" />
+              <span class="nombre"
+                ><span class="apellidos">{{ f.apellidos }}</span>
+                <span class="dato-suave cifras">{{ f.nombres }}</span></span
+              >
+            } @else {
+              <span class="numero cifras">{{ f.numero }}</span>
+              <span class="nombre"
+                ><span class="apellidos">{{ f.apellidos }}</span> {{ f.nombres }}</span
+              >
+            }
           </button>
 
           @if (conCriterios()) {
-            <div class="criterios-fila" role="group" [attr.aria-label]="nombreDe(a)">
+            <div class="criterios-fila" role="group" [attr.aria-label]="f.etiqueta">
               @for (c of rubro()!.criterios; track c.id) {
                 @let vc = criterioDe(celda, c.id);
                 @if (c.forma === 'cumplimiento') {
                   <div class="criterio">
                     <span
                       class="etiqueta-criterio"
-                      [id]="'c-' + a.id + '-' + c.id"
+                      [id]="'c-' + f.clave + '-' + c.id"
                       [attr.title]="c.nombre"
                       >{{ c.nombre }}</span
                     >
-                    <div class="par" role="group" [attr.aria-labelledby]="'c-' + a.id + '-' + c.id">
+                    <div
+                      class="par"
+                      role="group"
+                      [attr.aria-labelledby]="'c-' + f.clave + '-' + c.id"
+                    >
                       @for (m of marcasCumplimiento; track m) {
                         <button
                           type="button"
@@ -234,8 +342,8 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                           [attr.aria-pressed]="vc?.marca === m"
                           [attr.aria-label]="t('marca.' + m)"
                           [disabled]="baja || soloLectura() || bloqueadaPorMarca(celda)"
-                          (focus)="activar(a.id, c.id)"
-                          (click)="capturarCriterio(a.id, c, vc?.marca === m ? '' : m)"
+                          (focus)="activar(f.clave, c.id)"
+                          (click)="capturarCriterio(f.clave, c, vc?.marca === m ? '' : m)"
                         >
                           {{ m === 'cumplio' ? '✓' : '✗' }}
                         </button>
@@ -246,14 +354,14 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                   <div class="criterio">
                     <label
                       class="etiqueta-criterio"
-                      [for]="'c-' + a.id + '-' + c.id"
+                      [for]="'c-' + f.clave + '-' + c.id"
                       [attr.title]="c.nombre"
                       >{{ c.nombre }}</label
                     >
                     <input
                       class="celda celda--chica cifras"
-                      [id]="'c-' + a.id + '-' + c.id"
-                      [attr.data-campo]="a.id + ':' + c.id"
+                      [id]="'c-' + f.clave + '-' + c.id"
+                      [attr.data-campo]="f.clave + ':' + c.id"
                       inputmode="decimal"
                       enterkeyhint="next"
                       autocomplete="off"
@@ -262,11 +370,13 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                         vc?.valor === null || vc?.valor === undefined ? '' : numero(vc.valor)
                       "
                       [readOnly]="baja || soloLectura() || bloqueadaPorMarca(celda)"
-                      [attr.aria-invalid]="errorCriterio(a.id, c.id) ? true : null"
-                      [attr.aria-describedby]="errorCriterio(a.id, c.id) ? 'error-' + a.id : null"
-                      (focus)="activar(a.id, c.id)"
-                      (change)="capturarCriterio(a.id, c, valor($event))"
-                      (keydown.enter)="$event.preventDefault(); siguiente(a.id, c.id)"
+                      [attr.aria-invalid]="errorCriterio(f.clave, c.id) ? true : null"
+                      [attr.aria-describedby]="
+                        errorCriterio(f.clave, c.id) ? 'error-' + f.clave : null
+                      "
+                      (focus)="activar(f.clave, c.id)"
+                      (change)="capturarCriterio(f.clave, c, valor($event))"
+                      (keydown.enter)="$event.preventDefault(); siguiente(f.clave, c.id)"
                     />
                   </div>
                 }
@@ -277,18 +387,18 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
               </div>
             </div>
           } @else if (forma() === 'cumplimiento') {
-            <div class="par" role="group" [attr.aria-label]="nombreDe(a)">
+            <div class="par" role="group" [attr.aria-label]="f.etiqueta">
               @for (m of marcasCumplimiento; track m) {
                 <button
                   type="button"
                   class="marca"
                   [attr.data-marca]="m"
-                  [attr.data-campo]="a.id + ':' + m"
+                  [attr.data-campo]="f.clave + ':' + m"
                   [attr.aria-pressed]="celda?.marca === m"
                   [attr.aria-label]="t('marca.' + m)"
                   [disabled]="baja || soloLectura()"
-                  (focus)="activar(a.id)"
-                  (click)="capturarMarca(a.id, celda?.marca === m ? 'ninguna' : m)"
+                  (focus)="activar(f.clave)"
+                  (click)="capturarMarca(f.clave, celda?.marca === m ? 'ninguna' : m)"
                 >
                   {{ m === 'cumplio' ? '✓' : '✗' }}
                 </button>
@@ -297,23 +407,23 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
           } @else {
             <input
               class="celda cifras"
-              [attr.data-campo]="a.id"
+              [attr.data-campo]="f.clave"
               inputmode="decimal"
               enterkeyhint="next"
               autocomplete="off"
-              [attr.aria-label]="t('calificacionDe', { alumno: nombreDe(a) })"
+              [attr.aria-label]="t('calificacionDe', { alumno: f.etiqueta })"
               [class.con-valor]="!celdaVacia(celda)"
               [value]="textoCelda(celda)"
               [readOnly]="baja || soloLectura()"
               [attr.aria-invalid]="fallo ? true : null"
-              [attr.aria-describedby]="fallo ? 'error-' + a.id : null"
-              (focus)="activar(a.id)"
-              (change)="capturarTexto(a.id, valor($event))"
+              [attr.aria-describedby]="fallo ? 'error-' + f.clave : null"
+              (focus)="activar(f.clave); seleccionar($event)"
+              (change)="capturarTexto(f.clave, valor($event))"
               (keydown.enter)="
-                $event.preventDefault(); capturarTexto(a.id, valor($event)); siguiente(a.id)
+                $event.preventDefault(); capturarTexto(f.clave, valor($event)); siguiente(f.clave)
               "
-              (keydown.arrowdown)="$event.preventDefault(); siguiente(a.id)"
-              (keydown.arrowup)="$event.preventDefault(); anterior(a.id)"
+              (keydown.arrowdown)="$event.preventDefault(); siguiente(f.clave)"
+              (keydown.arrowup)="$event.preventDefault(); anterior(f.clave)"
             />
           }
 
@@ -321,8 +431,25 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
             <span class="marca-especial">{{ t('marca.' + m) }}</span>
           }
 
+          @if (f.tipo === 'integrante' && !baja) {
+            <div class="ajuste">
+              @if (celda?.origen === 'ajustada') {
+                <span class="ajustado">{{ t('equipo.ajustado') }}</span>
+                @if (!soloLectura()) {
+                  <button class="enlace" type="button" (click)="quitarAjuste(f.clave)">
+                    {{ t('equipo.quitarAjuste') }}
+                  </button>
+                }
+              } @else {
+                <span class="dato-suave">{{ t('equipo.ajustando') }}</span>
+              }
+            </div>
+          }
+
           @if (fallo) {
-            <p class="error" [id]="'error-' + a.id" role="alert">{{ texto('errores.' + fallo) }}</p>
+            <p class="error" [id]="'error-' + f.clave" role="alert">
+              {{ texto('errores.' + fallo) }}
+            </p>
           }
         </li>
       </ng-template>
@@ -330,10 +457,17 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
       <ng-template #teclado>
         <div class="teclado" role="group" [attr.aria-label]="t('teclado.titulo')">
           <p class="para" aria-live="polite">
-            @if (alumnoActivo(); as a) {
+            @if (alumnoActivo(); as f) {
               <span class="dato-suave">{{ t('teclado.para') }}</span>
-              <span class="numero cifras">{{ a.numeroLista }}</span>
-              <span class="nombre-activo">{{ a.apellidos }} {{ a.nombres }}</span>
+              @if (f.tipo === 'equipo') {
+                <span class="nombre-activo"
+                  >{{ f.apellidos }}
+                  <span class="cifras">({{ f.equipo!.alumnoIds.length }})</span></span
+                >
+              } @else {
+                <span class="numero cifras">{{ f.numero }}</span>
+                <span class="nombre-activo">{{ f.apellidos }} {{ f.nombres }}</span>
+              }
             } @else {
               <span>{{ t('teclado.listo') }}</span>
             }
@@ -401,6 +535,27 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
               (input)="fechaActividad.set(valor($event))"
             />
           </div>
+          <fieldset class="eleccion">
+            <legend>{{ texto('captura.modo.titulo') }}</legend>
+            @for (m of modos; track m) {
+              <label>
+                <input
+                  type="radio"
+                  name="editar-modo"
+                  [value]="m"
+                  [checked]="modoActividad() === m"
+                  (change)="modoActividad.set(m)"
+                />
+                {{ texto('captura.modo.' + m) }}
+              </label>
+            }
+          </fieldset>
+          @if (modoActividad() === 'por_equipo' && !matriz()?.equipos?.length) {
+            <p class="dato-suave ayuda-modo">
+              {{ texto('captura.modo.sinEquipos') }}
+              <a [routerLink]="['/grupos', id(), 'equipos']">{{ texto('captura.modo.armar') }}</a>
+            </p>
+          }
           @if (errorActividad(); as codigo) {
             <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
           }
@@ -672,6 +827,108 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
       padding-inline: var(--espacio-2);
     }
 
+    /* Por equipo: la fila del equipo lleva la celda; sus integrantes cuelgan debajo con su valor como texto. */
+    .equipo {
+      display: grid;
+    }
+
+    .fila--equipo .apellidos {
+      font-weight: var(--peso-fuerte);
+    }
+
+    .fila--equipo .nombre {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: var(--espacio-2);
+      align-items: baseline;
+    }
+
+    .fila--equipo .nombre .dato-suave {
+      font-size: var(--texto-sm);
+    }
+
+    .fila--equipo app-icono.numero {
+      align-self: center;
+      color: var(--grado-tinta);
+    }
+
+    .integrantes {
+      border-top: 0;
+    }
+
+    /* La sangría va en el contenido, no en la lista: así la celda de un integrante cabe en su renglón. */
+    .integrantes > li > .alumno {
+      margin-inline-start: var(--espacio-5);
+    }
+
+    .integrantes > li.integrante {
+      margin-inline-start: var(--espacio-5);
+    }
+
+    .integrantes > li.integrante > .alumno {
+      margin-inline-start: 0;
+    }
+
+    .integrante {
+      border-bottom: 1px solid var(--color-divisoria);
+    }
+
+    .integrante .alumno {
+      grid-template-columns: 2ch minmax(0, 1fr) auto auto;
+      inline-size: 100%;
+      color: var(--color-texto-suave);
+    }
+
+    .integrante .apellidos {
+      font-weight: var(--peso-normal);
+    }
+
+    .valor-integrante {
+      min-inline-size: 3ch;
+      color: var(--color-texto);
+      font-weight: var(--peso-medio);
+      text-align: end;
+    }
+
+    .ajustar {
+      font-size: var(--texto-sm);
+    }
+
+    .ajuste {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: end;
+      gap: var(--espacio-1) var(--espacio-3);
+      padding-inline: var(--espacio-2);
+      font-size: var(--texto-sm);
+    }
+
+    .ajustado {
+      font-weight: var(--peso-medio);
+      color: var(--color-aviso-tinta);
+    }
+
+    .sin-equipo {
+      display: grid;
+      gap: var(--espacio-2);
+    }
+
+    .sin-equipo h2 {
+      font-size: var(--texto-base);
+    }
+
+    .sin-equipos {
+      display: grid;
+      gap: var(--espacio-3);
+      justify-items: start;
+    }
+
+    .ayuda-modo {
+      font-size: var(--texto-sm);
+    }
+
     .bajas {
       display: grid;
       gap: var(--espacio-2);
@@ -692,7 +949,8 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
         color: var(--color-peligro-tinta);
       }
 
-      .alumno:hover .apellidos {
+      .alumno:hover .apellidos,
+      .integrante .alumno:hover .ajustar {
         text-decoration: underline;
         text-underline-offset: 0.2em;
       }
@@ -747,6 +1005,8 @@ export class Captura implements OnInit {
 
   protected readonly nombre = signal('');
   protected readonly fechaActividad = signal('');
+  protected readonly modoActividad = signal<Modo>('individual');
+  protected readonly modos = MODOS;
   protected readonly intento = signal(false);
   protected readonly ocupado = signal(false);
   protected readonly errorActividad = signal<string | null>(null);
@@ -790,9 +1050,51 @@ export class Captura implements OnInit {
     const total = this.activos().length;
     return total === 0 ? 0 : Math.round((this.capturadas() / total) * 100);
   });
-  protected readonly alumnoActivo = computed(() =>
-    this.activos().find((a) => a.id === this.activo()),
+  /** RN-115: por equipo, la lista va por equipos con sus integrantes y al final los que no tienen equipo. */
+  protected readonly porEquipo = computed(() => this.actividad()?.modo === 'por_equipo');
+  protected readonly equipos = computed(() => {
+    const m = this.matriz();
+    return m && this.porEquipo()
+      ? composicion(m, this.actividadId()).filter((e) => e.alumnoIds.length > 0)
+      : [];
+  });
+  private readonly enEquipo = computed(() => new Set(this.equipos().flatMap((e) => e.alumnoIds)));
+  protected readonly sinEquipo = computed(() =>
+    this.activos().filter((a) => !this.enEquipo().has(a.id)),
   );
+  /** Integrantes que la docente abrió para ajustar; los ya ajustados se quedan abiertos solos. */
+  private readonly ajustando = signal<ReadonlySet<string>>(new Set());
+  /** La calificación de cada equipo: la de sus integrantes que la siguen (no ajustados). */
+  private readonly celdasEquipo = computed(() => {
+    const mapa = new Map<string, CeldaDto | undefined>();
+    for (const e of this.equipos()) {
+      const celda = e.alumnoIds
+        .map((id) => this.celdaAlumno(id))
+        .find((c) => c && c.origen !== 'ajustada' && !celdaVacia(c));
+      mapa.set(PREFIJO_EQUIPO + e.equipoId, celda);
+    }
+    return mapa;
+  });
+  /** Las filas que se capturan, en el orden de la pantalla: el teclado y Enter avanzan por aquí. */
+  protected readonly filas = computed(() => {
+    const filas: Fila[] = [];
+    if (!this.porEquipo()) {
+      filas.push(...this.activos().map((a) => this.filaAlumno(a)));
+    } else {
+      for (const e of this.equipos()) {
+        filas.push(this.filaEquipo(e));
+        filas.push(
+          ...this.integrantesDe(e)
+            .filter((a) => this.editandoIntegrante(a.id))
+            .map((a) => this.filaAlumno(a, 'integrante')),
+        );
+      }
+      filas.push(...this.sinEquipo().map((a) => this.filaAlumno(a)));
+    }
+    return filas;
+  });
+  private readonly filaPorClave = computed(() => new Map(this.filas().map((f) => [f.clave, f])));
+  protected readonly alumnoActivo = computed(() => this.filaPorClave().get(this.activo() ?? ''));
   /** Con criterios, los números del teclado van al criterio numérico con foco. */
   protected readonly teclaNumericaBloqueada = computed(() => {
     if (!this.conCriterios()) {
@@ -841,7 +1143,7 @@ export class Captura implements OnInit {
       const nuevos = new Map(this.errores());
       for (const r of rechazadas) {
         if (r.actividadId === this.actividadId()) {
-          nuevos.set(r.alumnoId, r.codigo);
+          nuevos.set(r.equipoId ? PREFIJO_EQUIPO + r.equipoId : r.alumnoId, r.codigo);
         }
       }
       this.errores.set(nuevos);
@@ -881,6 +1183,11 @@ export class Captura implements OnInit {
     return (evento.target as HTMLInputElement).value;
   }
 
+  /** Al volver a una celda con valor, escribir lo reemplaza en lugar de pegarse al final. */
+  protected seleccionar(evento: Event): void {
+    (evento.target as HTMLInputElement).select();
+  }
+
   protected fecha(valor: string): string {
     return mostrarFecha(valor);
   }
@@ -889,8 +1196,122 @@ export class Captura implements OnInit {
     return `${a.numeroLista}. ${a.apellidos} ${a.nombres}`;
   }
 
-  protected celdaDe(alumnoId: string): CeldaDto | undefined {
+  protected filaAlumno(a: AlumnoMatrizDto, tipo: Fila['tipo'] = 'alumno'): Fila {
+    return {
+      clave: a.id,
+      tipo,
+      numero: String(a.numeroLista),
+      apellidos: a.apellidos,
+      nombres: a.nombres,
+      etiqueta: this.nombreDe(a),
+    };
+  }
+
+  protected filaEquipo(e: EquipoDeActividad): Fila {
+    const cantidad = e.alumnoIds.length;
+    const integrantes = this.i18n.translate(
+      `captura.equipo.cuantos.${cantidad === 1 ? 'uno' : 'otros'}`,
+      { cantidad },
+    );
+    return {
+      clave: PREFIJO_EQUIPO + e.equipoId,
+      tipo: 'equipo',
+      numero: '',
+      apellidos: e.nombre,
+      nombres: integrantes,
+      etiqueta: `${e.nombre} (${integrantes})`,
+      equipo: e,
+    };
+  }
+
+  protected filaDe(clave: string): Fila | undefined {
+    return this.filaPorClave().get(clave);
+  }
+
+  protected integrantesDe(e: EquipoDeActividad): AlumnoMatrizDto[] {
+    const ids = new Set(e.alumnoIds);
+    return this.activos().filter((a) => ids.has(a.id));
+  }
+
+  protected editandoIntegrante(alumnoId: string): boolean {
+    return this.ajustando().has(alumnoId) || this.celdaAlumno(alumnoId)?.origen === 'ajustada';
+  }
+
+  private celdaAlumno(alumnoId: string): CeldaDto | undefined {
     return this.indice()?.celdas.get(llaveCelda({ actividadId: this.actividadId(), alumnoId }));
+  }
+
+  /** La celda de una fila: la del alumno o, para un equipo, la que comparten sus integrantes. */
+  protected celdaDe(clave: string): CeldaDto | undefined {
+    return clave.startsWith(PREFIJO_EQUIPO)
+      ? this.celdasEquipo().get(clave)
+      : this.celdaAlumno(clave);
+  }
+
+  /** Tocar a un integrante abre su campo: lo que capture ahí es solo suyo (RN-115). */
+  protected ajustar(alumnoId: string): void {
+    this.ajustando.update((s) => new Set(s).add(alumnoId));
+    this.activar(alumnoId);
+    this.enfocar(`[data-campo="${alumnoId}"], [data-campo^="${alumnoId}:"]`);
+  }
+
+  /** Vuelve a la calificación del equipo: se vacía su celda y el equipo se manda otra vez. */
+  protected quitarAjuste(alumnoId: string): void {
+    const e = this.equipos().find((x) => x.alumnoIds.includes(alumnoId));
+    if (!e) {
+      return;
+    }
+    const clave = PREFIJO_EQUIPO + e.equipoId;
+    const delEquipo = this.celdaDe(clave);
+    const cambios = [
+      cambio(
+        this.actividadId(),
+        alumnoId,
+        { valor: null, marca: 'ninguna' },
+        this.celdaAlumno(alumnoId),
+      ),
+    ];
+    if (delEquipo) {
+      cambios.push(
+        this.cambioDe(
+          clave,
+          {
+            valor: delEquipo.valor === null ? null : String(delEquipo.valor),
+            marca: delEquipo.marca as Marca,
+          },
+          delEquipo.criterios.map((c) => ({
+            criterioId: c.criterioId,
+            valor: c.valor,
+            marca: c.marca,
+          })),
+        ),
+      );
+    }
+    this.ajustando.update((s) => {
+      const n = new Set(s);
+      n.delete(alumnoId);
+      return n;
+    });
+    this.marcarError(alumnoId, null);
+    this.encolar(cambios);
+    this.activar(clave);
+    this.enfocar(`[data-alumno="${alumnoId}"] .alumno`);
+  }
+
+  /** El cambio de una fila; el de un equipo va sin alumno y con su `equipoId`. */
+  private cambioDe(
+    clave: string,
+    captura: CapturaCelda,
+    criterios: CambioCelda['criterios'] = null,
+  ): CambioCelda {
+    if (clave.startsWith(PREFIJO_EQUIPO)) {
+      return {
+        ...cambio(this.actividadId(), SIN_ALUMNO, captura, undefined, criterios),
+        equipoId: clave.slice(PREFIJO_EQUIPO.length),
+        version: null,
+      };
+    }
+    return cambio(this.actividadId(), clave, captura, this.celdaAlumno(clave), criterios);
   }
 
   protected criterioDe(celda: CeldaDto | undefined, criterioId: string) {
@@ -921,17 +1342,19 @@ export class Captura implements OnInit {
   }
 
   private primeraSinCaptura(despuesDe?: string): string | null {
-    const lista = this.activos();
-    const desde = despuesDe ? lista.findIndex((a) => a.id === despuesDe) + 1 : 0;
+    const lista = this.filas();
+    const desde = despuesDe ? lista.findIndex((f) => f.clave === despuesDe) + 1 : 0;
     return (
-      lista.slice(desde).find((a) => celdaVacia(this.celdaDe(a.id)))?.id ?? lista[desde]?.id ?? null
+      lista.slice(desde).find((f) => celdaVacia(this.celdaDe(f.clave)))?.clave ??
+      lista[desde]?.clave ??
+      null
     );
   }
 
   /** Pasa a la fila (o al criterio) siguiente sin animar nada; si había foco en una celda, lo lleva. */
   protected siguiente(alumnoId: string, criterioId?: string): void {
-    const lista = this.activos();
-    const i = lista.findIndex((a) => a.id === alumnoId);
+    const lista = this.filas();
+    const i = lista.findIndex((f) => f.clave === alumnoId);
     if (criterioId) {
       const numericos = this.rubro()!.criterios.filter((c) => c.forma === 'numerica');
       const j = numericos.findIndex((c) => c.id === criterioId);
@@ -941,7 +1364,7 @@ export class Captura implements OnInit {
       }
       const otro = lista[i + 1];
       if (otro) {
-        this.irA(otro.id, numericos[0]?.id ?? null);
+        this.irA(otro.clave, numericos[0]?.id ?? null);
       } else {
         this.activo.set(null);
       }
@@ -949,7 +1372,7 @@ export class Captura implements OnInit {
     }
     const otro = lista[i + 1];
     if (otro) {
-      this.irA(otro.id, null);
+      this.irA(otro.clave, null);
     } else {
       this.activo.set(null);
       // Lista completa: el foco va al título para no perderse en la página.
@@ -958,10 +1381,10 @@ export class Captura implements OnInit {
   }
 
   protected anterior(alumnoId: string): void {
-    const lista = this.activos();
-    const i = lista.findIndex((a) => a.id === alumnoId);
+    const lista = this.filas();
+    const i = lista.findIndex((f) => f.clave === alumnoId);
     if (i > 0) {
-      this.irA(lista[i - 1].id, null);
+      this.irA(lista[i - 1].clave, null);
     }
   }
 
@@ -1030,7 +1453,7 @@ export class Captura implements OnInit {
     ) {
       return;
     }
-    this.encolar([cambio(this.actividadId(), alumnoId, captura, anterior)]);
+    this.encolar([this.cambioDe(alumnoId, captura)]);
   }
 
   /** Un criterio cambió: se manda la celda con todos sus criterios (RN-112). */
@@ -1071,18 +1494,14 @@ export class Captura implements OnInit {
     ) {
       return;
     }
-    this.encolar([
-      cambio(this.actividadId(), alumnoId, { valor: null, marca: 'ninguna' }, anterior, criterios),
-    ]);
+    this.encolar([this.cambioDe(alumnoId, { valor: null, marca: 'ninguna' }, criterios)]);
   }
 
   /** "Todos cumplieron": las celdas vacías del grupo quedan en ✓; las que ya tienen algo no se tocan. */
   protected todosCumplieron(): void {
-    const cambios = this.activos()
-      .filter((a) => celdaVacia(this.celdaDe(a.id)))
-      .map((a) =>
-        cambio(this.actividadId(), a.id, { valor: null, marca: 'cumplio' }, this.celdaDe(a.id)),
-      );
+    const cambios = this.filas()
+      .filter((f) => f.tipo !== 'integrante' && celdaVacia(this.celdaDe(f.clave)))
+      .map((f) => this.cambioDe(f.clave, { valor: null, marca: 'cumplio' }));
     if (cambios.length) {
       this.encolar(cambios);
     }
@@ -1140,6 +1559,7 @@ export class Captura implements OnInit {
     }
     this.nombre.set(a.nombre);
     this.fechaActividad.set(a.fecha ?? '');
+    this.modoActividad.set(a.modo as Modo);
     this.intento.set(false);
     this.errorActividad.set(null);
     this.hoja().abrir();
@@ -1157,6 +1577,7 @@ export class Captura implements OnInit {
       const editada = await this.servicio.editarActividad(this.actividadId(), {
         nombre: this.nombre().trim(),
         fecha: this.fechaActividad() || null,
+        modo: this.modoActividad(),
       });
       const m = this.matriz()!;
       this.matriz.set({

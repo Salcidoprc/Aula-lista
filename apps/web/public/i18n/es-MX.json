@@ -303,7 +303,9 @@
     "grupo_con_calificaciones": "El grupo ya tiene calificaciones; archívalo en lugar de borrarlo.",
     "calificaciones_menores_a_minima": "Hay calificaciones menores que la nueva mínima. Corrígelas antes de guardar.",
     "unidad_con_datos": "Esa unidad ya tiene rubros o calificaciones; no se puede quitar.",
-    "origen_sin_rubros": "Esa unidad no tiene rubros para copiar. Elige otra."
+    "origen_sin_rubros": "Esa unidad no tiene rubros para copiar. Elige otra.",
+    "equipos_invalidos": "Revisa los equipos: cada alumno va en uno solo y cada equipo necesita un nombre distinto.",
+    "nota_invalida": "La nota no se guardó: revisa el texto (hasta 1,000 caracteres)."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -361,7 +363,8 @@
     "calificaciones": "Calificaciones",
     "rubros": "Rubros de la unidad",
     "captura": "Captura de calificaciones",
-    "tabla": "Tabla de calificaciones"
+    "tabla": "Tabla de calificaciones",
+    "equipos": "Equipos"
   },
   "ciclo": {
     "volver": "Volver",
@@ -495,7 +498,8 @@
       "uno": "Uno por uno",
       "unoTexto": "Escribe apellidos y nombre.",
       "plantilla": "Descargar plantilla de Excel"
-    }
+    },
+    "equipos": "Equipos"
   },
   "configuracion": {
     "volver": "Alumnos",
@@ -613,6 +617,11 @@
       "confirmarTexto": "Sus tutores podrán ver las boletas ya publicadas, pero no las de periodos nuevos.",
       "estado": "Baja desde el {{fecha}}. Se conservan sus calificaciones y boletas.",
       "hecha": "Se dio de baja a {{nombre}}."
+    },
+    "secciones": {
+      "nombre": "Secciones de la ficha",
+      "avance": "Avance",
+      "datos": "Datos"
     }
   },
   "importar": {
@@ -879,6 +888,28 @@
       "conCalificaciones": "Tiene calificaciones capturadas ({{cantidad}}). Se borran y los promedios se recalculan.",
       "accion": "Borrar actividad",
       "listo": "Actividad borrada."
+    },
+    "modo": {
+      "titulo": "Cómo se califica",
+      "individual": "Individual",
+      "por_equipo": "Por equipo",
+      "sinEquipos": "Este grupo todavía no tiene equipos.",
+      "armar": "Armar equipos"
+    },
+    "equipo": {
+      "sinEquipos": "Esta actividad es por equipo, pero el grupo todavía no tiene equipos. Mientras tanto, cada alumno se califica por separado.",
+      "armar": "Armar equipos",
+      "integrantes": "Integrantes",
+      "cuantos": {
+        "uno": "1 integrante",
+        "otros": "{{cantidad}} integrantes"
+      },
+      "ajustar": "Ajustar",
+      "ajustarA": "Ajustar a {{alumno}}, tiene {{valor}}",
+      "ajustando": "Lo que captures aquí es solo para este alumno.",
+      "ajustado": "Ajustado",
+      "quitarAjuste": "Usar la del equipo",
+      "sinEquipo": "Sin equipo"
     }
   },
   "tabla": {
@@ -899,6 +930,94 @@
     "pegado": "Se pegaron {{cantidad}} calificaciones.",
     "pegadoConErrores": "Se pegaron {{cantidad}}; {{errores}} no se aceptaron. Revisa las celdas en rojo.",
     "parcial": "Calificación parcial: hay rubros sin datos.",
-    "notaParcial": "Calificación parcial: algún rubro todavía no tiene calificaciones y su peso se repartió entre los demás."
+    "notaParcial": "Calificación parcial: algún rubro todavía no tiene calificaciones y su peso se repartió entre los demás.",
+    "porEquipo": "Por equipo: "
+  },
+  "equipos": {
+    "volver": "Alumnos",
+    "titulo": "Equipos",
+    "resumen": {
+      "uno": "1 equipo",
+      "otros": "{{cantidad}} equipos"
+    },
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando equipos",
+    "archivado": "Este grupo está archivado: sus equipos ya no se editan.",
+    "sinAlumnos": {
+      "titulo": "Este grupo no tiene alumnos",
+      "texto": "Agrega a tus alumnos para repartirlos en equipos.",
+      "accion": "Ir a Alumnos"
+    },
+    "vacio": {
+      "titulo": "Todavía no hay equipos",
+      "texto": "Arma los equipos una vez y califica cada actividad en equipo con un solo valor. Puedes ajustar a un integrante cuando lo necesites."
+    },
+    "nuevo": "Nuevo equipo",
+    "sinEquipo": "Sin equipo ({{cantidad}})",
+    "todosConEquipo": "Todos tienen equipo.",
+    "sinNombre": "Equipo sin nombre",
+    "nombre": "Nombre del equipo",
+    "errores": {
+      "nombre": "Escribe un nombre de hasta 40 caracteres.",
+      "repetido": "Ya hay un equipo con este nombre."
+    },
+    "integrantes": {
+      "uno": "1 integrante",
+      "otros": "{{cantidad}} integrantes"
+    },
+    "quitar": "Quitar el equipo {{nombre}}",
+    "equipoVacio": "Toca a un alumno sin equipo para moverlo aquí.",
+    "equipoVacioSinLibres": "Sin integrantes. Toca a un alumno de otro equipo para moverlo aquí.",
+    "lateral": "Guardar equipos",
+    "lateralTexto": "Los cambios se aplican a las actividades que aún no se califican por equipo. Las ya calificadas conservan su equipo de ese día.",
+    "guardar": "Guardar equipos",
+    "mover": "Mover",
+    "moverTitulo": "Mover a {{nombre}}",
+    "nuevoCon": "Nuevo equipo",
+    "sinEquipoDestino": "Sin equipo",
+    "salir": {
+      "titulo": "¿Salir sin guardar?",
+      "texto": "Los cambios a los equipos se perderán.",
+      "quedarse": "Seguir editando",
+      "accion": "Salir sin guardar"
+    },
+    "nombreSugerido": "Equipo",
+    "movido": "{{nombre}} ahora está en {{equipo}}.",
+    "movidoSinEquipo": "{{nombre}} quedó sin equipo.",
+    "guardados": "Equipos guardados."
+  },
+  "avance": {
+    "titulo": "Calificaciones",
+    "unidades": "Unidades",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando el avance",
+    "sinUnidades": "Este ciclo todavía no tiene unidades.",
+    "promedio": "Promedio actual de la unidad",
+    "parcial": "Parcial: hay rubros sin calificaciones.",
+    "sinRubros": "Esta unidad todavía no tiene rubros.",
+    "peso": "{{peso}} %",
+    "sinDatos": "Sin datos",
+    "sinActividades": "Sin actividades todavía.",
+    "notas": {
+      "titulo": "Notas",
+      "privado": "Solo tú ves estas notas. Te ayudan a redactar la observación al cerrar la unidad.",
+      "texto": "Nueva nota",
+      "dictado": "Puedes dictar con el micrófono de tu teclado.",
+      "contador": "{{usados}} de {{maximo}}",
+      "requerido": "Escribe la nota.",
+      "etiqueta": "Etiqueta",
+      "guardar": "Guardar nota",
+      "guardada": "Nota guardada.",
+      "sinConexion": "Sin conexión: solo se ven las notas guardadas en este dispositivo.",
+      "vacio": "Todavía no hay notas en esta unidad.",
+      "lista": "Notas de la unidad",
+      "porEnviar": "Por enviar"
+    },
+    "etiquetas": {
+      "ninguna": "Ninguna",
+      "fortaleza": "Fortaleza",
+      "mejora": "Área de mejora",
+      "conducta": "Conducta"
+    }
   }
 }

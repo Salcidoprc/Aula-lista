@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Grupos;
 using AulaLista.Domain.Comun;
@@ -126,6 +127,7 @@ public sealed record CambioCelda(
     Guid? Id, Guid ActividadId, Guid AlumnoId, decimal? Valor, string Marca, IReadOnlyList<CriterioCambio>? Criterios, int? Version,
     Guid? EquipoId = null)
 {
+    [JsonIgnore]
     public bool EsDeEquipo => EquipoId is { } e && e != Guid.Empty;
 }
 

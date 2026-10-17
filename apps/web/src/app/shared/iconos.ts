@@ -18,7 +18,9 @@ export type NombreIcono =
   | 'borrar'
   | 'editar'
   | 'tabla'
-  | 'copiar';
+  | 'copiar'
+  | 'equipo'
+  | 'nota';
 
 const TRAZOS: Record<NombreIcono, string> = {
   volver: 'M10 3.5 5.5 8l4.5 4.5',
@@ -46,6 +48,9 @@ const TRAZOS: Record<NombreIcono, string> = {
     'M9.75 3.25 12.75 6.25M2.75 13.25l.6-3.1 7.4-7.4a1.4 1.4 0 0 1 2 0l.75.75a1.4 1.4 0 0 1 0 2l-7.4 7.4-3.35.35Z',
   tabla: 'M2.75 2.75h10.5v10.5H2.75zM2.75 6.25h10.5M2.75 9.75h10.5M6.25 6.25v7',
   copiar: 'M5.75 5.75h7.5v7.5h-7.5zM10.25 5.75v-3h-7.5v7.5h3',
+  equipo:
+    'M6 7.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5ZM1.75 13.25c.35-2.2 2.1-3.6 4.25-3.6s3.9 1.4 4.25 3.6M10.75 7.1a1.85 1.85 0 1 0 0-3.7M11.75 9.75c1.35.4 2.3 1.6 2.5 3.5',
+  nota: 'M3.25 2.75h9.5v7.5l-3 3h-6.5zM12.75 10.25h-3v3M5.5 5.75h5M5.5 8.25h3',
 };
 
 @Component({

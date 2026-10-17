@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import Dexie, { Table } from 'dexie';
 import { CambioCelda } from '../../api/models/cambio-celda';
+import { CrearNota } from '../../api/models/crear-nota';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
 
 /** Un cambio de la cola de salida con su UUID de idempotencia (RF-037, 02-arquitectura). */
@@ -10,6 +11,14 @@ export interface CambioEnCola {
   /** Milisegundos desde 1970, para enviar en orden y avisar a partir del día 3 (SPEC-03, casos borde). */
   readonly creado: number;
   readonly cambio: CambioCelda;
+}
+
+/** Una nota escrita en el dispositivo que todavía no llega al servidor. Su id es el de la nota. */
+export interface NotaEnCola {
+  readonly id: string;
+  readonly alumnoId: string;
+  readonly creado: number;
+  readonly nota: CrearNota;
 }
 
 /** La matriz del periodo como se vio por última vez, con los cambios locales ya encima. */
@@ -32,8 +41,13 @@ export interface AlmacenLocal {
   pendientes(limite?: number): Promise<CambioEnCola[]>;
   pendientesDe(periodoId: string): Promise<CambioEnCola[]>;
   quitar(ids: readonly string[]): Promise<void>;
+  /** Calificaciones y notas por enviar. */
   contar(): Promise<number>;
   masAntiguo(): Promise<number | null>;
+  encolarNota(nota: NotaEnCola): Promise<void>;
+  /** Las más antiguas primero; con alumno, solo las suyas. */
+  notasPendientes(alumnoId?: string): Promise<NotaEnCola[]>;
+  quitarNota(id: string): Promise<void>;
   /** Lo demás que la captura necesita sin red: el grupo y sus periodos. */
   leerDato<T>(clave: string): Promise<T | undefined>;
   guardarDato(clave: string, valor: unknown): Promise<void>;
@@ -49,6 +63,7 @@ class BaseLocal extends Dexie {
   matrices!: Table<MatrizGuardada, string>;
   cola!: Table<CambioEnCola, string>;
   datos!: Table<Dato, string>;
+  notas!: Table<NotaEnCola, string>;
 
   constructor() {
     super('aula-lista');
@@ -57,6 +72,7 @@ class BaseLocal extends Dexie {
       cola: 'id, creado, periodoId',
       datos: 'clave',
     });
+    this.version(2).stores({ notas: 'id, creado, alumnoId' });
   }
 }
 
@@ -101,12 +117,34 @@ export class AlmacenDexie implements AlmacenLocal {
     await this.db.cola.bulkDelete([...ids]);
   }
 
-  contar(): Promise<number> {
-    return this.db.cola.count();
+  async contar(): Promise<number> {
+    const [celdas, notas] = await Promise.all([this.db.cola.count(), this.db.notas.count()]);
+    return celdas + notas;
   }
 
   async masAntiguo(): Promise<number | null> {
-    return (await this.db.cola.orderBy('creado').first())?.creado ?? null;
+    const [celda, nota] = await Promise.all([
+      this.db.cola.orderBy('creado').first(),
+      this.db.notas.orderBy('creado').first(),
+    ]);
+    const fechas = [celda?.creado, nota?.creado].filter((f): f is number => f !== undefined);
+    return fechas.length ? Math.min(...fechas) : null;
+  }
+
+  async encolarNota(nota: NotaEnCola): Promise<void> {
+    await this.db.notas.put(nota);
+  }
+
+  async notasPendientes(alumnoId?: string): Promise<NotaEnCola[]> {
+    const lista =
+      alumnoId === undefined
+        ? await this.db.notas.toArray()
+        : await this.db.notas.where('alumnoId').equals(alumnoId).toArray();
+    return lista.sort((a, b) => a.creado - b.creado);
+  }
+
+  async quitarNota(id: string): Promise<void> {
+    await this.db.notas.delete(id);
   }
 
   async leerDato<T>(clave: string): Promise<T | undefined> {
@@ -118,11 +156,16 @@ export class AlmacenDexie implements AlmacenLocal {
   }
 
   async borrarTodo(): Promise<void> {
-    await this.db.transaction('rw', this.db.matrices, this.db.cola, this.db.datos, async () => {
-      await this.db.matrices.clear();
-      await this.db.cola.clear();
-      await this.db.datos.clear();
-    });
+    await this.db.transaction(
+      'rw',
+      [this.db.matrices, this.db.cola, this.db.datos, this.db.notas],
+      async () => {
+        await this.db.matrices.clear();
+        await this.db.cola.clear();
+        await this.db.datos.clear();
+        await this.db.notas.clear();
+      },
+    );
   }
 }
 

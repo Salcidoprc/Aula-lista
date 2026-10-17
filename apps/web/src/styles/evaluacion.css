@@ -246,3 +246,53 @@
     min-block-size: var(--tactil-minimo);
   }
 }
+
+/* Chips de unidad: Calificaciones y la vista por alumno. */
+.unidades {
+  display: flex;
+  gap: var(--espacio-2);
+  overflow-x: auto;
+  margin-inline: calc(-1 * var(--espacio-4));
+  padding: var(--espacio-1) var(--espacio-4);
+  scrollbar-width: none;
+}
+
+@media (min-width: 48rem) {
+  .unidades {
+    flex-wrap: wrap;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-height: var(--tactil-minimo);
+  padding: 0 var(--espacio-4);
+  border-radius: var(--radio-pleno);
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto);
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+}
+
+button.chip {
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.chip[aria-current='page'],
+.chip[aria-pressed='true'] {
+  background: var(--grado);
+  color: var(--color-sobre-grado);
+}
+
+.chip .estado {
+  font-size: var(--texto-xs);
+}
+
