@@ -29,7 +29,10 @@ public sealed record RubroMatrizDto(RubroDto Rubro, IReadOnlyList<ActividadDto> 
 
 public sealed record ConfiguracionMatrizDto(decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo);
 
-/// <summary>Todo lo que la captura y la tabla necesitan del periodo, también para guardarlo sin conexión.</summary>
+/// <summary>
+/// Todo lo que la captura y la tabla necesitan del periodo, también para guardarlo sin conexión. <see cref="Equipos"/>
+/// son los de hoy; <see cref="Composiciones"/>, los guardados de cada actividad ya calificada por equipo (RN-116).
+/// </summary>
 public sealed record MatrizCalificacionesDto(
     Guid PeriodoId,
     Guid GrupoId,
@@ -40,7 +43,9 @@ public sealed record MatrizCalificacionesDto(
     IReadOnlyList<RubroMatrizDto> Rubros,
     IReadOnlyList<AlumnoMatrizDto> Alumnos,
     IReadOnlyList<CeldaDto> Celdas,
-    IReadOnlyList<ResultadoAlumnoDto> Resultados);
+    IReadOnlyList<ResultadoAlumnoDto> Resultados,
+    IReadOnlyList<EquipoDto> Equipos,
+    IReadOnlyList<ComposicionDto> Composiciones);
 
 /// <summary>RF-033, RF-034: matriz del periodo. Alumnos activos y, de solo lectura, las bajas con calificaciones.</summary>
 public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, ConsultaRubros consulta)
@@ -65,6 +70,9 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
         var capturadas = celdas.CountBy(c => c.ActividadId).ToDictionary();
         var porRubro = actividades.ToLookup(a => a.RubroId);
         var grupo = periodo.Grupo;
+        var equipos = await repositorio.EquiposAsync(grupo.Id, ct);
+        var composiciones = await repositorio.ComposicionesAsync(
+            actividades.Where(a => a.Modo == ModoActividad.PorEquipo).Select(a => a.Id).ToList(), ct);
         return new MatrizCalificacionesDto(
             periodo.Periodo.Id,
             grupo.Id,
@@ -76,7 +84,12 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
                 r, porRubro[r.Id].OrderBy(a => a.Orden).Select(a => ActividadDto.De(a, capturadas.GetValueOrDefault(a.Id))).ToList())).ToList(),
             alumnos.Select(a => new AlumnoMatrizDto(a.Id, a.NumeroLista, a.Nombres, a.Apellidos, !a.EstaActivo)).ToList(),
             celdas.Select(CeldaDto.De).ToList(),
-            Calcular(rubros.Rubros, porRubro, celdas, alumnos, ReglasPeriodo.Configuracion(grupo)));
+            Calcular(rubros.Rubros, porRubro, celdas, alumnos, ReglasPeriodo.Configuracion(grupo)),
+            equipos.Select(EquipoDto.De).ToList(),
+            composiciones
+                .GroupBy(c => (c.ActividadId, c.EquipoId))
+                .Select(g => new ComposicionDto(g.Key.ActividadId, g.Key.EquipoId, g.First().NombreEquipo, g.Select(c => c.AlumnoId).ToList()))
+                .ToList());
     }
 
     private static List<ResultadoAlumnoDto> Calcular(
@@ -104,9 +117,17 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
 
 public sealed record CriterioCambio(Guid CriterioId, decimal? Valor, string Marca);
 
-/// <summary>Lo capturado en una celda. <see cref="Id"/> es el UUID de la cola sin conexión (RF-037).</summary>
+/// <summary>
+/// Lo capturado en una celda. <see cref="Id"/> es el UUID de la cola sin conexión (RF-037). Con
+/// <see cref="EquipoId"/> (y <see cref="AlumnoId"/> vacío) se califica a un equipo de una actividad por equipo
+/// (RN-115).
+/// </summary>
 public sealed record CambioCelda(
-    Guid? Id, Guid ActividadId, Guid AlumnoId, decimal? Valor, string Marca, IReadOnlyList<CriterioCambio>? Criterios, int? Version);
+    Guid? Id, Guid ActividadId, Guid AlumnoId, decimal? Valor, string Marca, IReadOnlyList<CriterioCambio>? Criterios, int? Version,
+    Guid? EquipoId = null)
+{
+    public bool EsDeEquipo => EquipoId is { } e && e != Guid.Empty;
+}
 
 public sealed record GuardarCalificaciones(IReadOnlyList<CambioCelda> Celdas);
 
@@ -114,7 +135,8 @@ public sealed record GuardarCalificaciones(IReadOnlyList<CambioCelda> Celdas);
 public sealed record SincronizarCambios(IReadOnlyList<CambioCelda> Cambios);
 
 /// <summary>Una celda que no se guardó, con su motivo y la versión vigente para que el cliente la reponga.</summary>
-public sealed record CeldaRechazada(Guid? Id, Guid ActividadId, Guid AlumnoId, string Codigo, string Mensaje, CeldaDto? Vigente);
+public sealed record CeldaRechazada(
+    Guid? Id, Guid ActividadId, Guid AlumnoId, string Codigo, string Mensaje, CeldaDto? Vigente, Guid? EquipoId = null);
 
 /// <summary>Aplicadas y rechazadas por celda: una celda mala no detiene la cola.</summary>
 public sealed record ResultadoCalificaciones(IReadOnlyList<CeldaDto> Aplicadas, IReadOnlyList<CeldaRechazada> Rechazadas);
@@ -126,7 +148,8 @@ internal static class ReglasLote
     public static void Validar(AbstractValidator<CambioCelda> v)
     {
         v.RuleFor(c => c.ActividadId).NotEmpty();
-        v.RuleFor(c => c.AlumnoId).NotEmpty();
+        v.RuleFor(c => c.AlumnoId).Must((c, alumno) => c.EsDeEquipo ? alumno == Guid.Empty : alumno != Guid.Empty)
+            .WithMessage("Cada cambio es de un alumno o de un equipo.");
         v.RuleFor(c => c.Marca).NotNull().MaximumLength(20);
         v.RuleFor(c => c.Criterios).Must(c => c is null || c.Count <= Rubro.MaximoCriterios);
         v.RuleForEach(c => c.Criterios).ChildRules(c => c.RuleFor(x => x.Marca).NotNull().MaximumLength(20));
@@ -210,6 +233,8 @@ public sealed class GuardarCalificacionesCasoUso(
     private readonly Dictionary<Guid, (Rubro Rubro, PeriodoCompleto Periodo, IReadOnlyList<Alumno> Alumnos)?> _rubros = [];
     private readonly Dictionary<Guid, Actividad?> _actividades = [];
     private readonly Dictionary<(Guid, Guid), Calificacion> _celdas = [];
+    private readonly Dictionary<Guid, List<ActividadEquipo>> _composiciones = [];
+    private readonly Dictionary<Guid, IReadOnlyList<Equipo>> _equipos = [];
 
     private async Task<ResultadoCalificaciones> AplicarAsync(IReadOnlyList<CambioCelda> cambios, CancellationToken ct)
     {
@@ -219,7 +244,6 @@ public sealed class GuardarCalificacionesCasoUso(
         var rechazadas = new List<CeldaRechazada>();
         foreach (var cambio in cambios)
         {
-            var clave = (cambio.ActividadId, cambio.AlumnoId);
             if (Revisar(cambio) is { } error)
             {
                 rechazadas.Add(Rechazo(cambio, error));
@@ -228,26 +252,41 @@ public sealed class GuardarCalificacionesCasoUso(
 
             var actividad = _actividades[cambio.ActividadId]!;
             var rubro = _rubros[actividad.RubroId]!.Value.Rubro;
-            var existente = _celdas.GetValueOrDefault(clave);
-            var celda = existente ?? Calificacion.Nueva(actividad, cambio.AlumnoId, ahora);
-
             var reglas = new ReglasCelda(rubro.Forma, rubro.CalifMinima,
                 rubro.Criterios.Select(c => new CriterioCalculo(c.Id, c.Peso, c.Forma, c.CalifMinima)).ToList());
             var criterios = (cambio.Criterios ?? []).Select(c => new CeldaCriterio(c.CriterioId, c.Valor, c.Marca)).ToList();
-            var aplicado = celda.Aplicar(reglas, cambio.Valor, cambio.Marca, criterios, ahora);
-            if (aplicado.EsFallo)
+            if (Calificacion.Validar(reglas, cambio.Valor, cambio.Marca, criterios) is { } invalida)
             {
-                rechazadas.Add(Rechazo(cambio, aplicado.Error));
+                rechazadas.Add(Rechazo(cambio, invalida));
                 continue;
             }
 
-            if (existente is null)
+            if (cambio.EsDeEquipo)
             {
-                repositorio.Agregar(celda); // una celda nueva se guarda solo si pasó sus reglas
-                _celdas[clave] = celda;
+                // RN-115: se copia a cada integrante salvo a los ajustados, que conservan lo suyo.
+                foreach (var alumnoId in Integrantes(actividad, cambio.EquipoId!.Value, ahora))
+                {
+                    var celda = Celda(actividad, alumnoId, ahora);
+                    if (celda.Origen != OrigenCalificacion.Ajustada)
+                    {
+                        celda.Aplicar(reglas, cambio.Valor, cambio.Marca, criterios, ahora, OrigenCalificacion.Equipo);
+                        Guardar(celda);
+                    }
+
+                    aplicadas[(actividad.Id, alumnoId)] = celda;
+                }
+
+                continue;
             }
 
-            aplicadas[clave] = celda;
+            // En una actividad por equipo, calificar a un integrante por separado es un ajuste (RN-115).
+            var origen = actividad.Modo == ModoActividad.PorEquipo && Composicion(actividad).Any(c => c.AlumnoId == cambio.AlumnoId)
+                ? OrigenCalificacion.Ajustada
+                : OrigenCalificacion.Individual;
+            var individual = Celda(actividad, cambio.AlumnoId, ahora);
+            individual.Aplicar(reglas, cambio.Valor, cambio.Marca, criterios, ahora, origen);
+            Guardar(individual);
+            aplicadas[(actividad.Id, cambio.AlumnoId)] = individual;
         }
 
         return new ResultadoCalificaciones(aplicadas.Values.Select(CeldaDto.De).ToList(), rechazadas);
@@ -256,23 +295,84 @@ public sealed class GuardarCalificacionesCasoUso(
     private ErrorNegocio? Revisar(CambioCelda cambio)
     {
         if (_actividades.GetValueOrDefault(cambio.ActividadId) is not { } actividad
-            || _rubros.GetValueOrDefault(actividad.RubroId) is not { } contexto
-            || contexto.Alumnos.FirstOrDefault(a => a.Id == cambio.AlumnoId) is not { } alumno)
+            || _rubros.GetValueOrDefault(actividad.RubroId) is not { } contexto)
         {
             return ErroresEvaluacion.CeldaInexistente;
         }
 
-        if (ReglasPeriodo.PuedeCapturar(contexto.Periodo) is { } bloqueo)
+        if (cambio.EsDeEquipo)
         {
-            return bloqueo;
+            if (actividad.Modo != ModoActividad.PorEquipo || !Composicion(actividad).Any(c => c.EquipoId == cambio.EquipoId))
+            {
+                return ErroresEvaluacion.CeldaInexistente;
+            }
+        }
+        else if (contexto.Alumnos.FirstOrDefault(a => a.Id == cambio.AlumnoId) is not { } alumno)
+        {
+            return ErroresEvaluacion.CeldaInexistente;
+        }
+        else if (!alumno.EstaActivo)
+        {
+            return ReglasPeriodo.PuedeCapturar(contexto.Periodo) ?? ErroresGrupos.AlumnoDadoDeBaja;
         }
 
-        return alumno.EstaActivo ? null : ErroresGrupos.AlumnoDadoDeBaja;
+        return ReglasPeriodo.PuedeCapturar(contexto.Periodo);
+    }
+
+    private Calificacion Celda(Actividad actividad, Guid alumnoId, DateTimeOffset ahora) =>
+        _celdas.GetValueOrDefault((actividad.Id, alumnoId)) ?? Calificacion.Nueva(actividad, alumnoId, ahora);
+
+    /// <summary>Una celda nueva se agrega solo cuando ya pasó sus reglas.</summary>
+    private void Guardar(Calificacion celda)
+    {
+        if (_celdas.TryAdd((celda.ActividadId, celda.AlumnoId), celda))
+        {
+            repositorio.Agregar(celda);
+        }
+    }
+
+    /// <summary>
+    /// RN-116: la composición guardada de la actividad o, si todavía no se califica por equipo, la de hoy (sin
+    /// guardar). Solo integrantes activos.
+    /// </summary>
+    private List<(Guid EquipoId, Guid AlumnoId)> Composicion(Actividad actividad)
+    {
+        if (_composiciones.TryGetValue(actividad.Id, out var guardada) && guardada.Count > 0)
+        {
+            return guardada.Select(c => (c.EquipoId, c.AlumnoId)).ToList();
+        }
+
+        var contexto = _rubros[actividad.RubroId]!.Value;
+        var activos = contexto.Alumnos.Where(a => a.EstaActivo).Select(a => a.Id).ToHashSet();
+        return (_equipos.GetValueOrDefault(contexto.Periodo.Grupo.Id) ?? [])
+            .SelectMany(e => e.Integrantes.Where(i => activos.Contains(i.AlumnoId)).Select(i => (e.Id, i.AlumnoId)))
+            .ToList();
+    }
+
+    /// <summary>Los integrantes del equipo en esta actividad; la primera calificación por equipo guarda la composición.</summary>
+    private List<Guid> Integrantes(Actividad actividad, Guid equipoId, DateTimeOffset ahora)
+    {
+        if (!_composiciones.TryGetValue(actividad.Id, out var guardada) || guardada.Count == 0)
+        {
+            var contexto = _rubros[actividad.RubroId]!.Value;
+            var activos = contexto.Alumnos.Where(a => a.EstaActivo).Select(a => a.Id).ToHashSet();
+            guardada = [.. ActividadEquipo.Tomar(actividad, _equipos.GetValueOrDefault(contexto.Periodo.Grupo.Id) ?? [], activos, ahora)];
+            foreach (var integrante in guardada)
+            {
+                repositorio.Agregar(integrante);
+            }
+
+            _composiciones[actividad.Id] = guardada;
+        }
+
+        var bajas = _rubros[actividad.RubroId]!.Value.Alumnos.Where(a => !a.EstaActivo).Select(a => a.Id).ToHashSet();
+        return guardada.Where(c => c.EquipoId == equipoId && !bajas.Contains(c.AlumnoId)).Select(c => c.AlumnoId).ToList();
     }
 
     private CeldaRechazada Rechazo(CambioCelda cambio, ErrorNegocio error) => new(
         cambio.Id, cambio.ActividadId, cambio.AlumnoId, error.Codigo, error.Mensaje,
-        _celdas.TryGetValue((cambio.ActividadId, cambio.AlumnoId), out var vigente) ? CeldaDto.De(vigente) : null);
+        _celdas.TryGetValue((cambio.ActividadId, cambio.AlumnoId), out var vigente) ? CeldaDto.De(vigente) : null,
+        cambio.EsDeEquipo ? cambio.EquipoId : null);
 
     private async Task CargarAsync(IReadOnlyList<CambioCelda> cambios, CancellationToken ct)
     {
@@ -310,13 +410,30 @@ public sealed class GuardarCalificacionesCasoUso(
         {
             _celdas.TryAdd((celda.ActividadId, celda.AlumnoId), celda);
         }
+
+        var porEquipo = actividades.Where(a => a.Modo == ModoActividad.PorEquipo).ToList();
+        foreach (var grupo in porEquipo.Select(a => _rubros.GetValueOrDefault(a.RubroId)?.Periodo.Grupo.Id).OfType<Guid>().Distinct())
+        {
+            if (!_equipos.ContainsKey(grupo))
+            {
+                _equipos[grupo] = await repositorio.EquiposAsync(grupo, ct);
+            }
+        }
+
+        foreach (var composicion in (await repositorio.ComposicionesAsync(porEquipo.Select(a => a.Id).ToList(), ct)).GroupBy(c => c.ActividadId))
+        {
+            _composiciones[composicion.Key] = [.. composicion];
+        }
     }
 
     private async Task<ResultadoCalificaciones> VigentesAsync(IReadOnlyList<CambioCelda> cambios, CancellationToken ct)
     {
         await CargarAsync(cambios, ct);
         var aplicadas = cambios
-            .Select(c => _celdas.GetValueOrDefault((c.ActividadId, c.AlumnoId)))
+            .SelectMany(c => c.EsDeEquipo
+                ? (_composiciones.GetValueOrDefault(c.ActividadId) ?? []).Where(x => x.EquipoId == c.EquipoId)
+                    .Select(x => _celdas.GetValueOrDefault((c.ActividadId, x.AlumnoId)))
+                : [_celdas.GetValueOrDefault((c.ActividadId, c.AlumnoId))])
             .OfType<Calificacion>()
             .DistinctBy(c => (c.ActividadId, c.AlumnoId))
             .Select(CeldaDto.De)

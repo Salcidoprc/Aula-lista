@@ -3,11 +3,13 @@ using AulaLista.Domain.Grupos;
 
 namespace AulaLista.Domain.Evaluacion;
 
-/// <summary>Cómo se califica una actividad (RN-115). Por equipo llega con los equipos (H3.2).</summary>
+/// <summary>Cómo se califica una actividad (RN-115).</summary>
 public static class ModoActividad
 {
     public const string Individual = "individual";
     public const string PorEquipo = "por_equipo";
+
+    public static readonly IReadOnlySet<string> Todos = new HashSet<string> { Individual, PorEquipo };
 }
 
 /// <summary>Una tarea, examen o práctica dentro de un rubro de actividades (RF-032, RN-032).</summary>
@@ -15,13 +17,14 @@ public sealed class Actividad : Entidad
 {
     public const int LongitudNombre = 60;
 
-    private Actividad(Rubro rubro, string nombre, DateOnly? fecha, int orden, DateTimeOffset ahora)
+    private Actividad(Rubro rubro, string nombre, DateOnly? fecha, string modo, int orden, DateTimeOffset ahora)
         : base(ahora)
     {
         RubroId = rubro.Id;
         DocenteId = rubro.DocenteId;
         Nombre = nombre;
         Fecha = fecha;
+        Modo = modo;
         Orden = orden;
     }
 
@@ -43,34 +46,39 @@ public sealed class Actividad : Entidad
 
     /// <summary>RN-039: solo en rubros de actividades y con fecha dentro de la unidad del periodo.</summary>
     public static Resultado<Actividad> Crear(
-        Rubro rubro, TipoRubro tipo, Unidad unidad, string nombre, DateOnly? fecha, int orden, DateTimeOffset ahora)
+        Rubro rubro, TipoRubro tipo, Unidad unidad, string nombre, DateOnly? fecha, string modo, int orden, DateTimeOffset ahora)
     {
         if (tipo.Comportamiento != Comportamiento.Actividades)
         {
             return Resultado.Fallo<Actividad>(ErroresEvaluacion.RubroSinActividades);
         }
 
-        return Validar(unidad, nombre, fecha) is { } error
+        return Validar(unidad, nombre, fecha, modo) is { } error
             ? Resultado.Fallo<Actividad>(error)
-            : Resultado.Exito(new Actividad(rubro, nombre.Trim(), fecha, orden, ahora));
+            : Resultado.Exito(new Actividad(rubro, nombre.Trim(), fecha, modo, orden, ahora));
     }
 
-    public Resultado Editar(Unidad unidad, string nombre, DateOnly? fecha, DateTimeOffset ahora)
+    /// <summary>
+    /// El modo se puede cambiar cuando sea: cada alumno conserva su calificación (RN-117) y la composición de
+    /// equipos se toma con la primera calificación por equipo (RN-116).
+    /// </summary>
+    public Resultado Editar(Unidad unidad, string nombre, DateOnly? fecha, string modo, DateTimeOffset ahora)
     {
-        if (Validar(unidad, nombre, fecha) is { } error)
+        if (Validar(unidad, nombre, fecha, modo) is { } error)
         {
             return Resultado.Fallo(error);
         }
 
         Nombre = nombre.Trim();
         Fecha = fecha;
+        Modo = modo;
         MarcarActualizada(ahora);
         return Resultado.Exito();
     }
 
-    private static ErrorNegocio? Validar(Unidad unidad, string nombre, DateOnly? fecha)
+    private static ErrorNegocio? Validar(Unidad unidad, string nombre, DateOnly? fecha, string modo)
     {
-        if (string.IsNullOrWhiteSpace(nombre) || nombre.Trim().Length > LongitudNombre)
+        if (string.IsNullOrWhiteSpace(nombre) || nombre.Trim().Length > LongitudNombre || !ModoActividad.Todos.Contains(modo))
         {
             return ErroresEvaluacion.ActividadInvalida;
         }
@@ -134,8 +142,13 @@ public sealed class Calificacion : Entidad
     public CeldaCalculo ACalculo() => new(
         Valor, Marca, _criterios.Select(c => new CeldaCriterio(c.CriterioId, c.Valor, c.Marca)).ToList());
 
-    /// <summary>Valida y aplica lo capturado. Una celda sin valor ni marca queda vacía y no cuenta.</summary>
-    public Resultado Aplicar(ReglasCelda reglas, decimal? valor, string marca, IReadOnlyList<CeldaCriterio> criterios, DateTimeOffset ahora)
+    /// <summary>
+    /// Valida y aplica lo capturado. Una celda sin valor ni marca queda vacía y no cuenta. <paramref name="origen"/>
+    /// dice si vino del alumno, de su equipo o de un ajuste (RN-115); una celda que se vacía vuelve a ser individual.
+    /// </summary>
+    public Resultado Aplicar(
+        ReglasCelda reglas, decimal? valor, string marca, IReadOnlyList<CeldaCriterio> criterios, DateTimeOffset ahora,
+        string origen = OrigenCalificacion.Individual)
     {
         if (Validar(reglas, valor, marca, criterios) is { } error)
         {
@@ -160,6 +173,7 @@ public sealed class Calificacion : Entidad
             Valor = reglas.Forma == FormaCalificacion.Numerica && marca == MarcaCalificacion.Ninguna ? valor : null;
         }
 
+        Origen = EstaVacia ? OrigenCalificacion.Individual : origen;
         Version++;
         MarcarActualizada(ahora);
         return Resultado.Exito();

@@ -423,6 +423,172 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
         Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, error.SqlState);
     }
 
+    [Fact]
+    public async Task SPEC03_EquipoDe4Con9_AjusteA7_YRecalificarCon8_TresTienen8YElAjustadoConserva7()
+    {
+        var g = await PrepararAsync(5);
+        var rubro = (await GuardarRubrosAsync(g, Simple("Proyecto", 100m)))[0];
+        var equipos = await GuardarEquiposAsync(g, ("Los Halcones", g.Alumnos.Take(4).ToArray()));
+        var actividad = await CrearActividadAsync(g, rubro.Id, "Maqueta", "por_equipo");
+
+        await GuardarAsync(g, CeldaEquipo(actividad, equipos[0], "9"));
+        var primera = await MatrizAsync(g);
+        Assert.All(g.Alumnos.Take(4), a => Assert.Equal(9m, ValorDe(primera, actividad, a)));
+        Assert.Null(ValorDe(primera, actividad, g.Alumnos[4])); // sin equipo: se califica solo
+
+        await GuardarAsync(g, Celda(actividad, g.Alumnos[1], "7"));
+        await GuardarAsync(g, CeldaEquipo(actividad, equipos[0], "8"));
+
+        var matriz = await MatrizAsync(g);
+        Assert.Equal([8m, 7m, 8m, 8m], g.Alumnos.Take(4).Select(a => ValorDe(matriz, actividad, a)));
+        Assert.Equal(["equipo", "ajustada", "equipo", "equipo"], g.Alumnos.Take(4).Select(a => CeldaDe(matriz, actividad, a).GetProperty("origen").GetString()));
+        Assert.Equal(7m, PromedioRubro(matriz, g.Alumnos[1], rubro.Id)); // RN-117: cuenta su propia calificación
+    }
+
+    [Fact]
+    public async Task RN116_ReorganizarEquiposDespuesDeCalificar_NoCambiaCalificacionesNiComposicion()
+    {
+        var g = await PrepararAsync(4);
+        var rubro = (await GuardarRubrosAsync(g, Simple("Proyecto", 100m)))[0];
+        var equipos = await GuardarEquiposAsync(g, ("Rojo", [g.Alumnos[0], g.Alumnos[1]]), ("Azul", [g.Alumnos[2], g.Alumnos[3]]));
+        var actividad = await CrearActividadAsync(g, rubro.Id, "Maqueta", "por_equipo");
+        await GuardarAsync(g, CeldaEquipo(actividad, equipos[0], "9"), CeldaEquipo(actividad, equipos[1], "6"));
+
+        // El alumno 1 pasa de Rojo a Azul y se agrega un equipo nuevo vacío.
+        var respuesta = await g.Cliente.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/equipos", new
+        {
+            equipos = new object[]
+            {
+                new { id = equipos[0], nombre = "Rojo", alumnoIds = new[] { g.Alumnos[0] } },
+                new { id = equipos[1], nombre = "Azul", alumnoIds = new[] { g.Alumnos[2], g.Alumnos[3], g.Alumnos[1] } },
+                new { nombre = "Verde", alumnoIds = Array.Empty<Guid>() },
+            },
+        });
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
+
+        var matriz = await MatrizAsync(g);
+        Assert.Equal([9m, 9m, 6m, 6m], g.Alumnos.Select(a => ValorDe(matriz, actividad, a)));
+        var rojo = matriz.GetProperty("composiciones").EnumerateArray().Single(c => c.GetProperty("equipoId").GetGuid() == equipos[0]);
+        Assert.Equal(new[] { g.Alumnos[0], g.Alumnos[1] }.Order(), rojo.GetProperty("alumnoIds").EnumerateArray().Select(a => a.GetGuid()).Order());
+
+        // Recalificar a Rojo en esta actividad sigue la composición guardada: el alumno 1 también cambia.
+        await GuardarAsync(g, CeldaEquipo(actividad, equipos[0], "10"));
+        matriz = await MatrizAsync(g);
+        Assert.Equal([10m, 10m, 6m, 6m], g.Alumnos.Select(a => ValorDe(matriz, actividad, a)));
+        Assert.Equal(3, matriz.GetProperty("equipos").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task RN114_UnAlumnoEnDosEquiposONombreRepetido_SeRechazaConEquiposInvalidos()
+    {
+        var g = await PrepararAsync(2);
+        var enDos = await g.Cliente.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/equipos", new
+        {
+            equipos = new object[]
+            {
+                new { nombre = "Uno", alumnoIds = new[] { g.Alumnos[0] } },
+                new { nombre = "Dos", alumnoIds = new[] { g.Alumnos[0], g.Alumnos[1] } },
+            },
+        });
+        var repetido = await g.Cliente.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/equipos", new
+        {
+            equipos = new object[] { new { nombre = "Uno", alumnoIds = Array.Empty<Guid>() }, new { nombre = "uno ", alumnoIds = Array.Empty<Guid>() } },
+        });
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, enDos.StatusCode);
+        Assert.Equal("equipos_invalidos", await CodigoAsync(enDos));
+        Assert.Equal("equipos_invalidos", await CodigoAsync(repetido));
+        Assert.Equal(0, await ContarAsync($"SELECT count(*) FROM equipo WHERE grupo_id = '{g.GrupoId}'"));
+    }
+
+    [Fact]
+    public async Task RF037_EquipoSinConexion_LlegaUnaVezAunqueSeReenvie()
+    {
+        var g = await PrepararAsync(3);
+        var rubro = (await GuardarRubrosAsync(g, Simple("Proyecto", 100m)))[0];
+        var equipos = await GuardarEquiposAsync(g, ("Todos", g.Alumnos.ToArray()));
+        var actividad = await CrearActividadAsync(g, rubro.Id, "Maqueta", "por_equipo");
+        var cambio = new
+        {
+            id = Guid.NewGuid(),
+            actividadId = actividad,
+            alumnoId = Guid.Empty,
+            equipoId = equipos[0],
+            valor = 8.5m,
+            marca = "ninguna",
+            version = 0,
+        };
+
+        var primera = await SincronizarAsync(g, new[] { cambio });
+        var segunda = await SincronizarAsync(g, new[] { cambio });
+
+        Assert.Equal(3, primera.GetProperty("aplicadas").GetArrayLength());
+        Assert.Equal(3, segunda.GetProperty("aplicadas").GetArrayLength());
+        Assert.All(segunda.GetProperty("aplicadas").EnumerateArray(), c => Assert.Equal(1, c.GetProperty("version").GetInt32()));
+        Assert.Equal(3, await ContarAsync($"SELECT count(*) FROM actividad_equipo WHERE actividad_id = '{actividad}'"));
+    }
+
+    [Fact]
+    public async Task SPEC03_EquipoEnActividadIndividual_SeRechazaConCeldaInexistente()
+    {
+        var g = await PrepararAsync(2);
+        var rubro = (await GuardarRubrosAsync(g, Simple("Proyecto", 100m)))[0];
+        var equipos = await GuardarEquiposAsync(g, ("Todos", g.Alumnos.ToArray()));
+        var actividad = await CrearActividadAsync(g, rubro.Id, "Individual");
+
+        var resultado = await GuardarAsync(g, CeldaEquipo(actividad, equipos[0], "9"));
+
+        Assert.Equal("celda_inexistente", resultado.GetProperty("rechazadas")[0].GetProperty("codigo").GetString());
+        Assert.Equal(equipos[0], resultado.GetProperty("rechazadas")[0].GetProperty("equipoId").GetGuid());
+    }
+
+    [Fact]
+    public async Task SPEC03_Notas_SeGuardanUnaVezPorIdYSeListanConSuEtiqueta()
+    {
+        var g = await PrepararAsync(1);
+        var id = Guid.NewGuid();
+        var nota = new { id, periodoId = g.PeriodoId, texto = "Explicó el ciclo del agua a sus compañeros.", etiqueta = "fortaleza", fecha = "2026-09-02" };
+
+        var primera = await g.Cliente.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas", nota);
+        var repetida = await g.Cliente.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas", nota);
+        var larga = await g.Cliente.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas",
+            new { id = Guid.NewGuid(), periodoId = g.PeriodoId, texto = new string('a', 1001) });
+        var etiqueta = await g.Cliente.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas",
+            new { id = Guid.NewGuid(), periodoId = g.PeriodoId, texto = "Hola", etiqueta = "secreta" });
+        var lista = await g.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/alumnos/{g.Alumnos[0]}/notas");
+
+        Assert.Equal(HttpStatusCode.Created, primera.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, repetida.StatusCode);
+        Assert.Equal("nota_invalida", await CodigoAsync(larga));
+        Assert.Equal("nota_invalida", await CodigoAsync(etiqueta));
+        var guardada = Assert.Single(lista.EnumerateArray());
+        Assert.Equal(id, guardada.GetProperty("id").GetGuid());
+        Assert.Equal("fortaleza", guardada.GetProperty("etiqueta").GetString());
+        Assert.Equal("2026-09-02", guardada.GetProperty("fecha").GetString());
+    }
+
+    [Fact]
+    public async Task RNF001_EquiposYNotasDeOtroDocente_Responden404()
+    {
+        var g = await PrepararAsync(1);
+        var equipos = await GuardarEquiposAsync(g, ("Uno", [g.Alumnos[0]]));
+        var nota = new { id = Guid.NewGuid(), periodoId = g.PeriodoId, texto = "Privada" };
+        Assert.Equal(HttpStatusCode.Created, (await g.Cliente.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas", nota)).StatusCode);
+        var (intruso, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+
+        var respuestas = new[]
+        {
+            await intruso.GetAsync($"/api/v1/grupos/{g.GrupoId}/equipos"),
+            await intruso.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/equipos", new { equipos = Array.Empty<object>() }),
+            await intruso.GetAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas"),
+            await intruso.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas", new { id = Guid.NewGuid(), periodoId = g.PeriodoId, texto = "x" }),
+            await intruso.PostAsJsonAsync($"/api/v1/alumnos/{g.Alumnos[0]}/notas", nota), // reenviar el id de otro no la revela
+        };
+
+        Assert.All(respuestas, r => Assert.Equal(HttpStatusCode.NotFound, r.StatusCode));
+        Assert.Equal(1, await ContarAsync($"SELECT count(*) FROM equipo WHERE id = '{equipos[0]}'"));
+    }
+
     private sealed record Grupo(HttpClient Cliente, Guid DocenteId, Guid CicloId, Guid GrupoId, Guid PeriodoId, IReadOnlyList<Guid> Alumnos, JsonElement Tipos)
     {
         public Guid Tipo(string nombre) =>
@@ -520,9 +686,9 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
             .ToList();
     }
 
-    private static async Task<Guid> CrearActividadAsync(Grupo g, Guid rubro, string nombre)
+    private static async Task<Guid> CrearActividadAsync(Grupo g, Guid rubro, string nombre, string modo = "individual")
     {
-        var respuesta = await g.Cliente.PostAsJsonAsync($"/api/v1/rubros/{rubro}/actividades", new { nombre });
+        var respuesta = await g.Cliente.PostAsJsonAsync($"/api/v1/rubros/{rubro}/actividades", new { nombre, modo });
         Assert.Equal(HttpStatusCode.Created, respuesta.StatusCode);
         return (await respuesta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
     }
@@ -536,6 +702,31 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
         criterios,
         version,
     };
+
+    private static object CeldaEquipo(Guid actividad, Guid equipo, string valor) => new
+    {
+        actividadId = actividad,
+        alumnoId = Guid.Empty,
+        equipoId = equipo,
+        valor = decimal.Parse(valor, CultureInfo.InvariantCulture),
+        marca = "ninguna",
+        version = 0,
+    };
+
+    private static async Task<List<Guid>> GuardarEquiposAsync(Grupo g, params (string Nombre, Guid[] Alumnos)[] equipos)
+    {
+        var respuesta = await g.Cliente.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/equipos",
+            new { equipos = equipos.Select(e => new { nombre = e.Nombre, alumnoIds = e.Alumnos }) });
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
+        return (await respuesta.Content.ReadFromJsonAsync<JsonElement>()).EnumerateArray().Select(e => e.GetProperty("id").GetGuid()).ToList();
+    }
+
+    private static JsonElement CeldaDe(JsonElement matriz, Guid actividad, Guid alumno) =>
+        Celdas(matriz).Single(c => c.GetProperty("actividadId").GetGuid() == actividad && c.GetProperty("alumnoId").GetGuid() == alumno);
+
+    private static decimal? ValorDe(JsonElement matriz, Guid actividad, Guid alumno) =>
+        Celdas(matriz).Where(c => c.GetProperty("actividadId").GetGuid() == actividad && c.GetProperty("alumnoId").GetGuid() == alumno)
+            .Select(c => Valor(c, "valor")).FirstOrDefault();
 
     private static object[] Criterios(RubroCreado rubro, params string[] valores) =>
         valores.Select((v, i) => (object)new { criterioId = rubro.Criterios[i], valor = decimal.Parse(v, CultureInfo.InvariantCulture), marca = "ninguna" }).ToArray();

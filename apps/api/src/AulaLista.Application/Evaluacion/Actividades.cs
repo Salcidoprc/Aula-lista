@@ -12,11 +12,16 @@ public sealed record ActividadDto(Guid Id, Guid RubroId, string Nombre, DateOnly
     public static ActividadDto De(Actividad a, int capturadas) => new(a.Id, a.RubroId, a.Nombre, a.Fecha, a.Modo, a.Orden, capturadas);
 }
 
-public sealed record DatosActividad(string Nombre, DateOnly? Fecha);
+/// <summary>Sin <see cref="Modo"/>, una actividad nueva es individual y una editada conserva el suyo (RN-115).</summary>
+public sealed record DatosActividad(string Nombre, DateOnly? Fecha, string? Modo = null);
 
 internal sealed class DatosActividadValidador : AbstractValidator<DatosActividad>
 {
-    public DatosActividadValidador() => RuleFor(c => c.Nombre).NotNull().MaximumLength(Actividad.LongitudNombre * 2);
+    public DatosActividadValidador()
+    {
+        RuleFor(c => c.Nombre).NotNull().MaximumLength(Actividad.LongitudNombre * 2);
+        RuleFor(c => c.Modo).MaximumLength(20);
+    }
 }
 
 /// <summary>El rubro con su periodo, para aplicar las reglas del periodo a sus actividades.</summary>
@@ -68,7 +73,8 @@ public sealed class CrearActividadCasoUso(ContextoRubros contexto, IRepositorioE
 
         var existentes = await repositorio.ActividadesAsync([rubroId], ct);
         var orden = existentes.Count == 0 ? 0 : existentes.Max(a => a.Orden) + 1;
-        var creada = Actividad.Crear(rubro, tipo, periodo.Unidad, comando.Nombre, comando.Fecha, orden, reloj.GetUtcNow());
+        var creada = Actividad.Crear(
+            rubro, tipo, periodo.Unidad, comando.Nombre, comando.Fecha, comando.Modo ?? ModoActividad.Individual, orden, reloj.GetUtcNow());
         if (creada.EsFallo)
         {
             return Resultado.Fallo<ActividadDto>(creada.Error);
@@ -97,7 +103,7 @@ public sealed class EditarActividadCasoUso(
             return Resultado.Fallo<ActividadDto>(bloqueo);
         }
 
-        var editada = actividad.Editar(periodo.Unidad, comando.Nombre, comando.Fecha, reloj.GetUtcNow());
+        var editada = actividad.Editar(periodo.Unidad, comando.Nombre, comando.Fecha, comando.Modo ?? actividad.Modo, reloj.GetUtcNow());
         if (editada.EsFallo)
         {
             return Resultado.Fallo<ActividadDto>(editada.Error);
