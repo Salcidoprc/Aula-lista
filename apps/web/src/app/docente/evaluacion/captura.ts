@@ -119,7 +119,7 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
           }
         </div>
 
-        <p class="avance cifras" aria-live="polite">
+        <p class="avance cifras">
           {{ t('avance', { capturadas: capturadas(), total: activos().length }) }}
           <span class="progreso" aria-hidden="true">
             <span [style.inline-size.%]="porcentaje()"></span>
@@ -132,7 +132,12 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
 
         <div class="columnas">
           <div class="principal">
-            @if (forma() === 'cumplimiento' && !conCriterios() && !soloLectura()) {
+            @if (
+              forma() === 'cumplimiento' &&
+              !conCriterios() &&
+              !soloLectura() &&
+              capturadas() < activos().length
+            ) {
               <button
                 class="boton boton--secundario todos"
                 type="button"
@@ -251,6 +256,7 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
                       "
                       [readOnly]="baja || soloLectura() || bloqueadaPorMarca(celda)"
                       [attr.aria-invalid]="errorCriterio(a.id, c.id) ? true : null"
+                      [attr.aria-describedby]="errorCriterio(a.id, c.id) ? 'error-' + a.id : null"
                       (focus)="activar(a.id, c.id)"
                       (change)="capturarCriterio(a.id, c, valor($event))"
                       (keydown.enter)="$event.preventDefault(); siguiente(a.id, c.id)"
@@ -482,6 +488,11 @@ const RAPIDOS = ['10', '9', '8', '7', '6', '5'] as const;
       column-gap: var(--espacio-3);
       padding-block: var(--espacio-2);
       border-bottom: 1px solid var(--color-divisoria);
+    }
+
+    /* Al pasar de alumno, la fila queda por encima del teclado fijo (alto en --alto-pie-accion). */
+    .fila {
+      scroll-margin-block: var(--espacio-4) calc(var(--alto-pie-accion, 0px) + var(--espacio-4));
     }
 
     .fila.con-criterios {
@@ -905,12 +916,12 @@ export class Captura implements OnInit {
     const campo = criterioId ? `${alumnoId}:${criterioId}` : alumnoId;
     const el = this.host.nativeElement.querySelector<HTMLElement>(`[data-campo="${campo}"]`);
     if (enCelda && el) {
-      el.focus();
-    } else {
-      this.host.nativeElement
-        .querySelector<HTMLElement>(`[data-alumno="${alumnoId}"]`)
-        ?.scrollIntoView({ block: 'nearest' });
+      el.focus({ preventScroll: true });
     }
+    // La fila respeta su scroll-margin: no queda escondida tras el teclado fijo del celular.
+    this.host.nativeElement
+      .querySelector<HTMLElement>(`[data-alumno="${alumnoId}"]`)
+      ?.scrollIntoView({ block: 'nearest' });
   }
 
   private marcarError(alumnoId: string, codigo: string | null): void {
@@ -1026,6 +1037,11 @@ export class Captura implements OnInit {
       return;
     }
     if (valor === 'no_entrego' || valor === 'exento') {
+      // Tocar otra vez la misma marca la quita: así se deshace sin tecla de borrar.
+      if (this.celdaDe(alumnoId)?.marca === valor) {
+        this.capturar(alumnoId, { valor: null, marca: 'ninguna' });
+        return;
+      }
       this.capturar(alumnoId, { valor: null, marca: valor });
       this.siguiente(alumnoId);
       return;

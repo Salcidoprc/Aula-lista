@@ -356,7 +356,6 @@ export function unidadDeHoy(
 
     .chip .estado {
       font-size: var(--texto-xs);
-      opacity: 0.8;
     }
 
     .principal {
@@ -642,18 +641,27 @@ export class Calificaciones implements OnInit {
     return (evento.target as HTMLInputElement).value;
   }
 
-  protected capturadas(actividad: ActividadDto): number {
+  /** Celdas con algo capturado por actividad, solo de alumnos activos; se calcula una vez por matriz. */
+  private readonly conteo = computed(() => {
     const m = this.matriz();
+    const mapa = new Map<string, number>();
     if (!m) {
-      return 0;
+      return mapa;
     }
     const activos = new Set(m.alumnos.filter((a) => !a.dadoDeBaja).map((a) => a.id));
-    return m.celdas.filter(
-      (c) =>
-        c.actividadId === actividad.id &&
+    for (const c of m.celdas) {
+      if (
         activos.has(c.alumnoId) &&
-        (c.valor !== null || c.marca !== 'ninguna' || c.criterios.length > 0),
-    ).length;
+        (c.valor !== null || c.marca !== 'ninguna' || c.criterios.length > 0)
+      ) {
+        mapa.set(c.actividadId, (mapa.get(c.actividadId) ?? 0) + 1);
+      }
+    }
+    return mapa;
+  });
+
+  protected capturadas(actividad: ActividadDto): number {
+    return this.conteo().get(actividad.id) ?? 0;
   }
 
   protected porcentaje(actividad: ActividadDto): number {

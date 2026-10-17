@@ -208,13 +208,22 @@ interface Problema {
                       <td class="promedio cifras">{{ dos(res?.rubros?.get(c.rubro.id)) }}</td>
                     }
                   }
-                  <td class="total cifras">{{ dos(res?.periodo) }}</td>
+                  <td class="total cifras">
+                    {{ dos(res?.periodo) }}
+                    @if (parcial(res)) {
+                      <span class="parcial" aria-hidden="true" [title]="t('parcial')">*</span>
+                      <span class="solo-lector">{{ t('parcial') }}</span>
+                    }
+                  </td>
                   <td class="total final cifras">{{ final(res) }}</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
+        @if (hayParciales()) {
+          <p class="nota-parcial dato-suave">* {{ t('notaParcial') }}</p>
+        }
       }
     </div>
   `,
@@ -374,14 +383,17 @@ interface Problema {
       border: 0;
       border-radius: var(--radio-sm);
       background: transparent;
+      box-shadow: inset 0 -1px 0 var(--color-texto-tenue);
       color: var(--color-texto);
       font: inherit;
+      font-size: var(--texto-base); /* 16 px: iOS no acerca al enfocar */
       font-weight: var(--peso-medio);
       text-align: center;
       transition: background-color var(--dur-small) var(--ease-out);
     }
 
     .celda.con-valor {
+      box-shadow: none;
       background: var(--grado-tinte);
     }
 
@@ -416,6 +428,14 @@ interface Problema {
       padding-inline: var(--espacio-3);
       border-inline-start: 2px solid var(--color-divisoria);
       font-weight: var(--peso-fuerte);
+    }
+
+    .parcial {
+      color: var(--color-aviso-tinta);
+    }
+
+    .nota-parcial {
+      font-size: var(--texto-sm);
     }
 
     td.final {
@@ -589,6 +609,15 @@ export class Tabla implements OnInit {
   protected dos(valor: ResultadoPeriodo['periodo'] | undefined): string {
     return valor === undefined ? '—' : dosDecimales(valor);
   }
+
+  /** RN-033: algún rubro sin datos y su peso se repartió entre los demás. */
+  protected parcial(res: ResultadoPeriodo | undefined): boolean {
+    return !!res?.periodo && res.sinDatos.length > 0;
+  }
+
+  protected readonly hayParciales = computed(() =>
+    [...this.resultados().values()].some((r) => this.parcial(r)),
+  );
 
   /** La calificación final con los decimales y el redondeo del grupo (RN-035). */
   protected final(res: ResultadoPeriodo | undefined): string {

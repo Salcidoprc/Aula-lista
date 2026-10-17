@@ -25,6 +25,7 @@ import { claveGrado, nombreGrupo } from '../../shared/grados';
 import { Hoja } from '../../shared/hoja';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
+import { ConCambiosSinGuardar } from '../../shared/rutas';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { GruposService, portadaDeGrupo } from '../grupos/grupos.service';
 import {
@@ -135,6 +136,10 @@ interface Fuente {
                       </button>
                     }
                   </header>
+
+                  @if (r.tieneCalificaciones) {
+                    <p class="ayuda-bloque dato-suave">{{ t('conCalificaciones') }}</p>
+                  }
 
                   <div class="rejilla">
                     <div class="campo campo--nombre">
@@ -252,11 +257,7 @@ interface Fuente {
                       <span>
                         {{ t('conCriterios') }}
                         <span class="ayuda" [id]="r.clave + '-criterios-ayuda'">
-                          {{
-                            r.tieneCalificaciones
-                              ? t('bloqueadaPorCalificaciones')
-                              : t('conCriteriosAyuda')
-                          }}
+                          {{ t('conCriteriosAyuda') }}
                         </span>
                       </span>
                     </label>
@@ -439,9 +440,6 @@ interface Fuente {
               {{ t('forma.' + f) }}
             </label>
           }
-          @if (bloqueada) {
-            <p class="ayuda">{{ t('bloqueadaPorCalificaciones') }}</p>
-          }
         </fieldset>
       </ng-template>
 
@@ -491,6 +489,25 @@ interface Fuente {
             </button>
           </div>
         </div>
+      </dialog>
+
+      <dialog
+        #dialogoSalir
+        class="dialogo"
+        closedby="any"
+        aria-labelledby="dialogo-salir-titulo"
+        (close)="decidirSalida(dialogoSalir.returnValue === 'salir')"
+      >
+        <form class="contenido" method="dialog">
+          <h2 id="dialogo-salir-titulo">{{ t('salir.titulo') }}</h2>
+          <p>{{ t('salir.texto') }}</p>
+          <div class="acciones">
+            <button class="boton boton--secundario" value="quedarse">
+              {{ t('salir.quedarse') }}
+            </button>
+            <button class="boton boton--peligro" value="salir">{{ t('salir.accion') }}</button>
+          </div>
+        </form>
       </dialog>
 
       <app-hoja etiqueta="copiar-titulo">
@@ -570,6 +587,10 @@ interface Fuente {
       min-width: 0;
       font-size: var(--texto-lg);
       overflow-wrap: anywhere;
+    }
+
+    .ayuda-bloque {
+      font-size: var(--texto-sm);
     }
 
     .numero {
@@ -767,7 +788,7 @@ interface Fuente {
     }
   `,
 })
-export class Rubros implements OnInit {
+export class Rubros implements OnInit, ConCambiosSinGuardar {
   private readonly servicio = inject(EvaluacionService);
   private readonly grupos = inject(GruposService);
   private readonly avisos = inject(AvisosService);
@@ -783,6 +804,8 @@ export class Rubros implements OnInit {
   readonly periodoId = input.required<string>();
 
   protected readonly hoja = viewChild.required(Hoja);
+  private readonly dialogoSalir = viewChild.required<ElementRef<HTMLDialogElement>>('dialogoSalir');
+  private resolverSalida: ((salir: boolean) => void) | null = null;
   protected readonly dialogoBorrar =
     viewChild.required<ElementRef<HTMLDialogElement>>('dialogoBorrar');
 
@@ -826,6 +849,22 @@ export class Rubros implements OnInit {
   protected readonly errores = computed(() =>
     this.intento() ? validar(this.borrador(), this.tiposPorId()) : new Map<string, ErrorBorrador>(),
   );
+
+  /** Con cambios sin guardar, pregunta antes de salir (se pierden pesos y criterios editados). */
+  puedeSalir(): boolean | Promise<boolean> {
+    if (!this.hayCambios() || !this.editable()) {
+      return true;
+    }
+    const dialogo = this.dialogoSalir().nativeElement;
+    dialogo.returnValue = '';
+    dialogo.showModal();
+    return new Promise((resolver) => (this.resolverSalida = resolver));
+  }
+
+  protected decidirSalida(salir: boolean): void {
+    this.resolverSalida?.(salir);
+    this.resolverSalida = null;
+  }
 
   async ngOnInit(): Promise<void> {
     await this.cargar();

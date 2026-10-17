@@ -177,7 +177,8 @@
 }
 
 .tecla--marca {
-  font-size: var(--texto-sm);
+  font-size: var(--texto-xs);
+  white-space: nowrap;
   font-weight: var(--peso-medio);
 }
 
@@ -198,5 +199,18 @@
 @media (hover: hover) and (pointer: fine) {
   .tecla:hover:not(:disabled) {
     background: var(--color-divisoria);
+  }
+}
+
+/*
+ * El teclado rápido fijo mide más que una barra de un botón: los avisos flotan sobre él y la fila activa se
+ * desplaza por encima (scroll-margin en captura.ts). Dos renglones de teclas, la línea "Para…" y el relleno.
+ */
+@media (max-width: 47.99rem) {
+  :root:has(.pie-accion.teclado-celular) {
+    --alto-pie-accion: calc(
+      2 * 3rem + 2 * var(--espacio-2) + 1.5rem + 2 * var(--espacio-3) + 1px +
+        env(safe-area-inset-bottom)
+    );
   }
 }

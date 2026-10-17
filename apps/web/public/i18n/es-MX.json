@@ -831,6 +831,13 @@
       "ayuda": "Se copian los rubros con sus pesos y criterios; las actividades no.",
       "accion": "Copiar rubros",
       "listo": "Rubros copiados. Revisa los pesos y guarda si cambias algo."
+    },
+    "conCalificaciones": "Ya tiene calificaciones: su forma de calificar y sus criterios ya no cambian.",
+    "salir": {
+      "titulo": "¿Salir sin guardar?",
+      "texto": "Los cambios a los rubros se pierden.",
+      "accion": "Salir sin guardar",
+      "quedarse": "Seguir editando"
     }
   },
   "captura": {
@@ -890,6 +897,8 @@
     "baja": "Baja",
     "celda": "{{alumno}}, {{actividad}}",
     "pegado": "Se pegaron {{cantidad}} calificaciones.",
-    "pegadoConErrores": "Se pegaron {{cantidad}}; {{errores}} no se aceptaron. Revisa las celdas en rojo."
+    "pegadoConErrores": "Se pegaron {{cantidad}}; {{errores}} no se aceptaron. Revisa las celdas en rojo.",
+    "parcial": "Calificación parcial: hay rubros sin datos.",
+    "notaParcial": "Calificación parcial: algún rubro todavía no tiene calificaciones y su peso se repartió entre los demás."
   }
 }

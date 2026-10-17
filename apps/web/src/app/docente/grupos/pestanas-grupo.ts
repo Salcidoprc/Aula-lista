@@ -74,6 +74,13 @@ import { ClaveGrado } from '../../shared/portada/portada';
       box-shadow: var(--foco);
     }
 
+    /* Con foco, la activa conserva su raya: el foco no borra cuál está elegida. */
+    .vistas a.activa:focus-visible {
+      box-shadow:
+        var(--foco),
+        inset 0 -3px 0 var(--grado);
+    }
+
     .ajustes {
       display: inline-flex;
       align-items: center;

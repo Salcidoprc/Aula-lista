@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { confirmarSalida } from './shared/rutas';
 import { requierePerfilCompleto, requiereSesion, soloSinSesion } from './core/sesion/guardias';
 
 export const routes: Routes = [
@@ -47,6 +48,7 @@ export const routes: Routes = [
       {
         path: ':id/periodos/:periodoId/rubros',
         title: 'titulos.rubros',
+        canDeactivate: [confirmarSalida],
         loadComponent: () => import('./docente/evaluacion/rubros').then((m) => m.Rubros),
       },
       {

@@ -4,3 +4,12 @@ export function rutaLocal(volver: string | null | undefined): string {
     ? volver
     : '/';
 }
+
+/** Pantalla con cambios sin guardar: pregunta antes de salir. */
+export interface ConCambiosSinGuardar {
+  puedeSalir(): boolean | Promise<boolean>;
+}
+
+/** `canDeactivate` de las pantallas que implementan `ConCambiosSinGuardar`. */
+export const confirmarSalida = (pantalla: ConCambiosSinGuardar | null) =>
+  pantalla?.puedeSalir() ?? true;
