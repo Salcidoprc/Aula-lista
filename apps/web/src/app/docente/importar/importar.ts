@@ -56,7 +56,7 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="pantalla pantalla--ancha" *transloco="let t; prefix: 'importar'">
-      <a class="volver" [routerLink]="['/grupos', id()]" (click)="salir($event)">
+      <a class="volver" [routerLink]="['/grupos', id(), 'alumnos']" (click)="salir($event)">
         <app-icono nombre="volver" />
         {{ t('volver') }}
       </a>
@@ -874,7 +874,7 @@ export class Importar implements OnInit {
   protected async descartar(): Promise<void> {
     if (this.destinoAlDescartar === 'grupo') {
       this.editado.set(false);
-      await this.router.navigate(['/grupos', this.id()]);
+      await this.router.navigate(['/grupos', this.id(), 'alumnos']);
     } else {
       this.empezarDeNuevo();
     }
@@ -915,7 +915,7 @@ export class Importar implements OnInit {
             })
           : this.i18n.translate('importar.hecho.' + forma(guardados), { guardados }),
       );
-      await this.router.navigate(['/grupos', this.id()]);
+      await this.router.navigate(['/grupos', this.id(), 'alumnos']);
     } catch (e) {
       this.errorConfirmar.set(codigoDeError(e));
     } finally {

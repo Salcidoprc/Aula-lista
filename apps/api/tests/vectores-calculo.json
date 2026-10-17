@@ -1,0 +1,175 @@
+{
+  "descripcion": "Vectores de prueba del cálculo de calificaciones (RN-036). Los usan las pruebas del backend (Calculo) y del frontend (core/calculo). Los números van como texto para no perder exactitud. Cada caso es un alumno.",
+  "casos": [
+    {
+      "nombre": "SPEC-03: Actividades 30% con 8, 9, 10, 7 y 6 promedia 8.00 y aporta 2.40; con Proyecto 40% y Examen 30% la unidad da 8.10",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "actividades", "peso": "30", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8" }, { "valor": "9" }, { "valor": "10" }, { "valor": "7" }, { "valor": "6" }] },
+        { "id": "proyecto", "peso": "40", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "9" }] },
+        { "id": "examen", "peso": "30", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7" }] }
+      ],
+      "esperado": { "rubros": { "actividades": "8.00", "proyecto": "9.00", "examen": "7.00" }, "periodo": "8.10", "final": "8.10", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-112: Exposición con criterios 40/30/30 y 9, 8 y 10 da 9.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "exposicion", "peso": "100", "forma": "numerica", "califMinima": "5",
+          "criterios": [
+            { "id": "informacion", "peso": "40", "forma": "numerica", "califMinima": "5" },
+            { "id": "presentacion", "peso": "30", "forma": "numerica", "califMinima": "5" },
+            { "id": "dominio", "peso": "30", "forma": "numerica", "califMinima": "5" }
+          ],
+          "celdas": [{ "criterios": [{ "id": "informacion", "valor": "9" }, { "id": "presentacion", "valor": "8" }, { "id": "dominio", "valor": "10" }] }]
+        }
+      ],
+      "esperado": { "rubros": { "exposicion": "9.00" }, "periodo": "9.00", "final": "9.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-119: criterio por cumplimiento con mínima 0 y ❌ aporta 0: 9, 8 y ❌ con 40/30/30 da 6.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "exposicion", "peso": "100", "forma": "numerica", "califMinima": "5",
+          "criterios": [
+            { "id": "informacion", "peso": "40", "forma": "numerica", "califMinima": "5" },
+            { "id": "presentacion", "peso": "30", "forma": "numerica", "califMinima": "5" },
+            { "id": "material", "peso": "30", "forma": "cumplimiento", "califMinima": "0" }
+          ],
+          "celdas": [{ "criterios": [{ "id": "informacion", "valor": "9" }, { "id": "presentacion", "valor": "8" }, { "id": "material", "marca": "no_cumplio" }] }]
+        }
+      ],
+      "esperado": { "rubros": { "exposicion": "6.00" }, "periodo": "6.00", "final": "6.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-112: si falta un criterio, se reparten los pesos de los calificados: 9 (40) y 8 (30) da 8.57",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "exposicion", "peso": "100", "forma": "numerica", "califMinima": "5",
+          "criterios": [
+            { "id": "informacion", "peso": "40", "forma": "numerica", "califMinima": "5" },
+            { "id": "presentacion", "peso": "30", "forma": "numerica", "califMinima": "5" },
+            { "id": "dominio", "peso": "30", "forma": "numerica", "califMinima": "5" }
+          ],
+          "celdas": [{ "criterios": [{ "id": "informacion", "valor": "9" }, { "id": "presentacion", "valor": "8" }] }]
+        }
+      ],
+      "esperado": { "rubros": { "exposicion": "8.57" }, "periodo": "8.57", "final": "8.57", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-118: Tareas por cumplimiento con mínima 5 y 4 ✅ y 1 ❌ da 9.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "cumplimiento", "califMinima": "5", "celdas": [{ "marca": "cumplio" }, { "marca": "cumplio" }, { "marca": "cumplio" }, { "marca": "cumplio" }, { "marca": "no_cumplio" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "9.00" }, "periodo": "9.00", "final": "9.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-032: No entregó cuenta como la mínima del rubro (5): 10 y No entregó da 7.50",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "10" }, { "marca": "no_entrego" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "7.50" }, "periodo": "7.50", "final": "7.50", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-032: Exento y celda vacía no cuentan: 8, Exento y vacía da 8.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8" }, { "marca": "exento" }, {}] }
+      ],
+      "esperado": { "rubros": { "tareas": "8.00" }, "periodo": "8.00", "final": "8.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-033: un rubro sin datos reparte su peso: Tareas 30% con 8 y Examen 70% sin datos da 8.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "30", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8" }] },
+        { "id": "examen", "peso": "70", "forma": "numerica", "califMinima": "5", "celdas": [{}, { "marca": "exento" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "8.00", "examen": null }, "periodo": "8.00", "final": "8.00", "sinDatos": ["examen"] }
+    },
+    {
+      "nombre": "RN-034: si el cálculo da menos que la mínima del grupo (5), se reporta 5",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "numerica", "califMinima": "0", "celdas": [{ "valor": "3" }, { "valor": "4" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "3.50" }, "periodo": "5.00", "final": "5.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-035: 7.456 con 1 decimal hacia arriba da 7.5",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 1, "redondeo": "arriba" },
+      "rubros": [
+        { "id": "a", "peso": "60", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7.76" }] },
+        { "id": "b", "peso": "40", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7" }] }
+      ],
+      "esperado": { "rubros": { "a": "7.76", "b": "7.00" }, "periodo": "7.46", "final": "7.5", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-035: 7.456 con 1 decimal hacia abajo da 7.4",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 1, "redondeo": "abajo" },
+      "rubros": [
+        { "id": "a", "peso": "60", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7.76" }] },
+        { "id": "b", "peso": "40", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7" }] }
+      ],
+      "esperado": { "rubros": { "a": "7.76", "b": "7.00" }, "periodo": "7.46", "final": "7.4", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-035: 7.456 con 1 decimal al más cercano da 7.5",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 1, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "a", "peso": "60", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7.76" }] },
+        { "id": "b", "peso": "40", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7" }] }
+      ],
+      "esperado": { "rubros": { "a": "7.76", "b": "7.00" }, "periodo": "7.46", "final": "7.5", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-035: sin redondeos intermedios: 10, 9 y 9 promedia 9.33 y con 0 decimales hacia arriba da 10",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 0, "redondeo": "arriba" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "10" }, { "valor": "9" }, { "valor": "9" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "9.33" }, "periodo": "9.33", "final": "10", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-035: el medio redondea hacia arriba: 8.25 y 8 promedian 8.125 y se muestran como 8.13",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "100", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8.25" }, { "valor": "8" }] }
+      ],
+      "esperado": { "rubros": { "tareas": "8.13" }, "periodo": "8.13", "final": "8.13", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-033: sin ningún dato no hay calificación del periodo",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "tareas", "peso": "50", "forma": "numerica", "califMinima": "5", "celdas": [{}] },
+        { "id": "examen", "peso": "50", "forma": "cumplimiento", "califMinima": "5", "celdas": [] }
+      ],
+      "esperado": { "rubros": { "tareas": null, "examen": null }, "periodo": null, "final": null, "sinDatos": ["tareas", "examen"] }
+    },
+    {
+      "nombre": "RN-112: No entregó en una actividad con criterios vale la mínima del rubro; Exento no cuenta",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "exposicion", "peso": "100", "forma": "numerica", "califMinima": "6",
+          "criterios": [
+            { "id": "informacion", "peso": "50", "forma": "numerica", "califMinima": "5" },
+            { "id": "presentacion", "peso": "50", "forma": "numerica", "califMinima": "5" }
+          ],
+          "celdas": [
+            { "criterios": [{ "id": "informacion", "valor": "10" }, { "id": "presentacion", "valor": "9" }] },
+            { "marca": "no_entrego" },
+            { "marca": "exento", "criterios": [{ "id": "informacion", "valor": "2" }] }
+          ]
+        }
+      ],
+      "esperado": { "rubros": { "exposicion": "7.75" }, "periodo": "7.75", "final": "7.75", "sinDatos": [] }
+    }
+  ]
+}

@@ -462,7 +462,7 @@ export class CrearGrupo implements OnInit {
           body: { ...comunes, nombre: this.nombres()[0] },
         });
         this.servicio.recordar(creado);
-        await this.router.navigate(['/grupos', creado.id]);
+        await this.router.navigate(['/grupos', creado.id, 'alumnos']);
       }
     } catch (e) {
       this.error.set(codigoDeError(e));

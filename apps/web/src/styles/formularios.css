@@ -37,14 +37,17 @@
   }
 }
 
-/* Lo que solo se muestra en un tamaño: la acción fija abajo en celular, en la cabeza en escritorio. */
-@media (max-width: 47.99rem) {
+/*
+ * Lo que solo se muestra en un tamaño: la acción fija abajo en celular y tableta, en la cabeza en escritorio.
+ * El corte es el de .columnas: el panel lateral solo existe donde hay dos columnas.
+ */
+@media (max-width: 63.99rem) {
   .solo-escritorio {
     display: none !important;
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .solo-celular {
     display: none !important;
   }
@@ -558,7 +561,7 @@ dialog.dialogo[open]::backdrop {
   --alto-pie-accion: calc(3rem + 2 * var(--espacio-3) + 1px);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   :root:has(.pie-accion) {
     --alto-pie-accion: 0px;
   }

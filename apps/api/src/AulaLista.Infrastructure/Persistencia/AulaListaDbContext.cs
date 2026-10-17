@@ -1,5 +1,6 @@
 using AulaLista.Application.Comun;
 using AulaLista.Domain.Cuentas;
+using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
 using AulaLista.Domain.Operacion;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,20 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<Importacion> Importaciones => Set<Importacion>();
 
+    public DbSet<TipoRubro> TiposRubro => Set<TipoRubro>();
+
+    public DbSet<Rubro> Rubros => Set<Rubro>();
+
+    public DbSet<Criterio> Criterios => Set<Criterio>();
+
+    public DbSet<Actividad> Actividades => Set<Actividad>();
+
+    public DbSet<Calificacion> Calificaciones => Set<Calificacion>();
+
+    public DbSet<CalificacionCriterio> CalificacionesCriterio => Set<CalificacionCriterio>();
+
+    public DbSet<CambioSincronizado> CambiosSincronizados => Set<CambioSincronizado>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -64,5 +79,11 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<Alumno>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<VinculoTutor>().HasQueryFilter(v => v.DocenteId == DocenteActual);
         modelBuilder.Entity<Importacion>().HasQueryFilter(i => i.DocenteId == DocenteActual);
+        modelBuilder.Entity<Rubro>().HasQueryFilter(r => r.DocenteId == DocenteActual);
+        modelBuilder.Entity<Criterio>().HasQueryFilter(c => c.DocenteId == DocenteActual);
+        modelBuilder.Entity<Actividad>().HasQueryFilter(a => a.DocenteId == DocenteActual);
+        modelBuilder.Entity<Calificacion>().HasQueryFilter(c => c.DocenteId == DocenteActual);
+        modelBuilder.Entity<CalificacionCriterio>().HasQueryFilter(c => c.DocenteId == DocenteActual);
+        modelBuilder.Entity<CambioSincronizado>().HasQueryFilter(c => c.DocenteId == DocenteActual);
     }
 }

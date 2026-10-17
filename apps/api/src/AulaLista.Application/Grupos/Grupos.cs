@@ -186,22 +186,24 @@ public sealed class ArchivarGrupoCasoUso(IRepositorioGrupos repositorio, IUnidad
     }
 }
 
-/// <summary>
-/// Borra el grupo con sus periodos y alumnos. SPEC-02 solo lo permite sin calificaciones; las calificaciones
-/// llegan en H3, que agrega esa revisión.
-/// </summary>
-public sealed class BorrarGrupoCasoUso(IRepositorioGrupos repositorio, IUnidadDeTrabajo unidad)
+/// <summary>Borra el grupo con sus periodos y alumnos. SPEC-02 solo lo permite sin calificaciones.</summary>
+public sealed class BorrarGrupoCasoUso(IRepositorioGrupos repositorio, IDatosDeEvaluacion evaluacion, IUnidadDeTrabajo unidad)
 {
-    public async Task<bool> EjecutarAsync(Guid id, CancellationToken ct)
+    public async Task<Resultado?> EjecutarAsync(Guid id, CancellationToken ct)
     {
         if (await repositorio.GrupoAsync(id, ct) is not { } grupo)
         {
-            return false;
+            return null;
+        }
+
+        if (await evaluacion.GrupoTieneCalificacionesAsync(id, ct))
+        {
+            return Resultado.Fallo(Domain.Evaluacion.ErroresEvaluacion.GrupoConCalificaciones);
         }
 
         repositorio.Borrar(grupo);
         await unidad.GuardarAsync(ct);
-        return true;
+        return Resultado.Exito();
     }
 }
 

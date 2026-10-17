@@ -278,7 +278,32 @@
     "archivo_invalido": "Sube un archivo .xlsx o .csv de hasta 2 MB.",
     "archivo_ilegible": "No pudimos leer el archivo. Revisa que sea un Excel o CSV con encabezados.",
     "importacion_confirmada": "Esa importación ya se guardó.",
-    "unidad_nombre_requerido": "Escribe el nombre de la unidad."
+    "unidad_nombre_requerido": "Escribe el nombre de la unidad.",
+    "pesos_no_suman_100": "Los pesos de los rubros deben sumar 100.",
+    "pesos_criterios_no_suman_100": "Los pesos de los criterios de un rubro deben sumar 100.",
+    "rubros_invalidos": "Una unidad tiene hasta 20 rubros, cada uno con nombre y un peso de 0 a 100.",
+    "criterios_invalidos": "Un rubro tiene de 2 a 10 criterios, cada uno con nombre y peso.",
+    "tipo_rubro_invalido": "Elige uno de los tipos de rubro disponibles.",
+    "forma_invalida": "La forma de calificar es con número o por cumplimiento.",
+    "minima_invalida": "La calificación mínima va de 0 a 10, con hasta dos decimales.",
+    "forma_con_calificaciones": "La forma de calificar solo se cambia mientras no haya calificaciones.",
+    "borrado_requiere_confirmacion": "Lo que vas a borrar tiene calificaciones. Confirma para borrarlas también.",
+    "periodo_en_cierre": "La unidad está en cierre: los rubros y pesos ya no se editan.",
+    "periodo_cerrado": "La unidad está cerrada: es de solo lectura.",
+    "periodo_con_rubros": "Esta unidad ya tiene rubros. Quítalos antes de copiar otros.",
+    "actividad_invalida": "La actividad necesita un nombre de hasta 60 caracteres.",
+    "fecha_fuera_de_unidad": "La fecha debe caer dentro de la unidad.",
+    "rubro_sin_actividades": "Este rubro se calcula solo; no lleva actividades.",
+    "calificacion_fuera_de_rango": "La calificación va de 0 a 10.",
+    "calificacion_invalida": "Usa números con hasta dos decimales, o NE (no entregó) y EX (exento).",
+    "calificacion_menor_a_minima": "La calificación no puede ser menor que la mínima del rubro.",
+    "marca_invalida": "En este rubro se marca ✓ (cumplió) o ✗ (no cumplió).",
+    "criterio_inexistente": "Ese criterio ya no es de este rubro. Recarga la actividad.",
+    "celda_inexistente": "Esa actividad o ese alumno ya no están en el grupo.",
+    "grupo_con_calificaciones": "El grupo ya tiene calificaciones; archívalo en lugar de borrarlo.",
+    "calificaciones_menores_a_minima": "Hay calificaciones menores que la nueva mínima. Corrígelas antes de guardar.",
+    "unidad_con_datos": "Esa unidad ya tiene rubros o calificaciones; no se puede quitar.",
+    "origen_sin_rubros": "Esa unidad no tiene rubros para copiar. Elige otra."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -332,7 +357,11 @@
     "grupo": "Alumnos del grupo",
     "configuracionGrupo": "Configuración del grupo",
     "importar": "Importar alumnos",
-    "alumno": "Ficha del alumno"
+    "alumno": "Ficha del alumno",
+    "calificaciones": "Calificaciones",
+    "rubros": "Rubros de la unidad",
+    "captura": "Captura de calificaciones",
+    "tabla": "Tabla de calificaciones"
   },
   "ciclo": {
     "volver": "Volver",
@@ -673,5 +702,203 @@
       "seguir": "Seguir revisando",
       "accion": "Descartar"
     }
+  },
+  "sincronizacion": {
+    "guardado": "Guardado",
+    "pendiente": "Por enviar: {{cantidad}}",
+    "enviando": "Enviando…",
+    "sin_conexion": "Sin conexión: guardado aquí",
+    "atrasado": "Sin enviar desde hace {{dias}} días ({{cantidad}}). Conéctate a internet."
+  },
+  "pestanasGrupo": {
+    "nombre": "Vistas del grupo",
+    "calificaciones": "Calificaciones",
+    "alumnos": "Alumnos",
+    "configuracion": "Configuración"
+  },
+  "calificaciones": {
+    "misGrupos": "Mis grupos",
+    "titulo": "Calificaciones",
+    "verTabla": "Ver tabla",
+    "unidades": "Unidades del ciclo",
+    "estado": {
+      "abierto": "abierta",
+      "en_cierre": "en cierre",
+      "cerrado": "cerrada"
+    },
+    "estadoCorto": {
+      "abierto": "",
+      "en_cierre": "Cierre",
+      "cerrado": "Cerrada"
+    },
+    "archivado": "Este grupo está archivado: puedes consultar sus calificaciones, pero ya no editarlas.",
+    "soloLectura": "Esta unidad está cerrada: sus calificaciones son de solo lectura.",
+    "enCierre": "Esta unidad está en cierre: puedes corregir calificaciones, pero los rubros ya no cambian.",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando calificaciones",
+    "sinAlumnos": {
+      "titulo": "Primero, tu lista",
+      "texto": "Agrega a tus alumnos para empezar a calificar.",
+      "accion": "Agregar alumnos"
+    },
+    "sinRubros": {
+      "titulo": "Define cómo vas a calificar",
+      "texto": "Crea los rubros de esta unidad (por ejemplo Tareas 30 %, Proyecto 40 % y Examen 30 %) o cópialos de otra unidad o grupo.",
+      "accion": "Crear rubros"
+    },
+    "forma": {
+      "numerica": "Con número",
+      "cumplimiento": "Cumplió o no cumplió"
+    },
+    "criterios": "{{cantidad}} criterios",
+    "sinActividades": "Sin actividades todavía.",
+    "avance": "Capturadas:",
+    "nueva": {
+      "titulo": "Nueva actividad",
+      "rubro": "Rubro",
+      "nombre": "Nombre",
+      "requerido": "Escribe el nombre de la actividad.",
+      "fecha": "Fecha (opcional)",
+      "capturar": "Crear y capturar"
+    },
+    "resumen": "{{alumnos}} alumnos · {{actividades}} actividades",
+    "editarRubros": "Editar rubros",
+    "pesos": "Pesos: {{suma}} de 100",
+    "pesosIncompletos": "Ajusta los pesos para que sumen 100 antes de cerrar la unidad."
+  },
+  "rubros": {
+    "volver": "Calificaciones",
+    "titulo": "Rubros de la unidad",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando rubros",
+    "archivado": "Este grupo está archivado: sus rubros ya no se editan.",
+    "bloqueado": {
+      "en_cierre": "La unidad está en cierre: los rubros y pesos ya no cambian.",
+      "cerrado": "La unidad está cerrada: sus rubros son de solo lectura.",
+      "abierto": ""
+    },
+    "vacio": {
+      "titulo": "Esta unidad no tiene rubros",
+      "texto": "Agrega los rubros que uses (tareas, proyecto, examen…) con su peso, o cópialos de otra unidad o grupo."
+    },
+    "agregar": "Agregar rubro",
+    "sinNombre": "Rubro sin nombre",
+    "quitar": "Quitar el rubro {{nombre}}",
+    "nombre": "Nombre",
+    "tipo": "Tipo",
+    "peso": "Peso",
+    "minima": "Mínima",
+    "minimaAyuda": "\"No entregó\" vale esto.",
+    "asistencia": "Se calcula con las tomas de asistencia de la unidad.",
+    "forma": {
+      "titulo": "Cómo se califica",
+      "numerica": "Con número",
+      "cumplimiento": "Cumplió ✓ / ✗"
+    },
+    "bloqueadaPorCalificaciones": "Ya tiene calificaciones: esto ya no cambia.",
+    "conCriterios": "Calificar por criterios",
+    "conCriteriosAyuda": "Por ejemplo, una exposición con información, presentación y dominio del tema.",
+    "criterios": "Criterios",
+    "sumaCriterios": "Suman {{suma}} de 100",
+    "criterio": "Criterio {{n}}",
+    "quitarCriterio": "Quitar el criterio {{nombre}}",
+    "agregarCriterio": "Agregar criterio",
+    "maximo": "Llegaste al máximo de {{maximo}} rubros por unidad.",
+    "pesos": "Pesos: {{suma}} de 100",
+    "pesosIncompletos": "Puedes guardar así; para cerrar la unidad deben sumar 100.",
+    "guardar": "Guardar rubros",
+    "guardados": "Rubros guardados.",
+    "cancelar": "Cancelar",
+    "errores": {
+      "nombre": "Escribe un nombre.",
+      "peso": "Usa un número de 0 a 100, con hasta dos decimales.",
+      "minima": "Usa un número de 0 a 10, con hasta dos decimales.",
+      "sumaCriterios": "Los pesos de los criterios deben sumar 100.",
+      "cantidadCriterios": "Usa de 2 a 10 criterios.",
+      "tipo": "Elige un tipo."
+    },
+    "confirmarBorrado": {
+      "titulo": "¿Borrar también sus calificaciones?",
+      "texto": "Quitaste rubros o criterios que ya tienen calificaciones. Si guardas, se borran y los promedios se recalculan.",
+      "accion": "Borrar y guardar"
+    },
+    "copiar": {
+      "abrir": "Copiar de otra unidad",
+      "titulo": "Copiar rubros",
+      "buscando": "Buscando tus unidades…",
+      "ninguna": "Todavía no tienes otra unidad con rubros.",
+      "desde": "Copiar desde",
+      "ayuda": "Se copian los rubros con sus pesos y criterios; las actividades no.",
+      "accion": "Copiar rubros",
+      "listo": "Rubros copiados. Revisa los pesos y guarda si cambias algo."
+    },
+    "conCalificaciones": "Ya tiene calificaciones: su forma de calificar y sus criterios ya no cambian.",
+    "salir": {
+      "titulo": "¿Salir sin guardar?",
+      "texto": "Los cambios a los rubros se pierden.",
+      "accion": "Salir sin guardar",
+      "quedarse": "Seguir editando"
+    }
+  },
+  "captura": {
+    "volver": "Calificaciones",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando la actividad",
+    "avance": "{{capturadas}} de {{total}} capturadas",
+    "soloLectura": "Esta actividad es de solo lectura.",
+    "todosCumplieron": "Todos cumplieron",
+    "sinAlumnos": "Este grupo no tiene alumnos activos.",
+    "lista": "Alumnos",
+    "bajas": "Dados de baja",
+    "resultado": "Resultado",
+    "calificacionDe": "Calificación de {{alumno}}",
+    "marca": {
+      "cumplio": "Cumplió",
+      "no_cumplio": "No cumplió",
+      "no_entrego": "No entregó",
+      "exento": "Exento",
+      "ninguna": ""
+    },
+    "teclado": {
+      "titulo": "Teclado rápido",
+      "para": "Para",
+      "listo": "Todos capturados. Toca un alumno para cambiar su calificación."
+    },
+    "noSeGuardo": "No se pudo guardar en este dispositivo. Revisa el espacio libre e intenta de nuevo.",
+    "cancelar": "Cancelar",
+    "editar": {
+      "titulo": "Editar actividad",
+      "nombre": "Nombre",
+      "requerido": "Escribe el nombre de la actividad.",
+      "fecha": "Fecha (opcional)",
+      "guardar": "Guardar"
+    },
+    "borrar": {
+      "titulo": "¿Borrar esta actividad?",
+      "texto": "Todavía no tiene calificaciones.",
+      "conCalificaciones": "Tiene calificaciones capturadas ({{cantidad}}). Se borran y los promedios se recalculan.",
+      "accion": "Borrar actividad",
+      "listo": "Actividad borrada."
+    }
+  },
+  "tabla": {
+    "volver": "Calificaciones",
+    "titulo": "Tabla de calificaciones",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando la tabla",
+    "sinActividades": "Todavía no hay actividades en esta unidad.",
+    "soloLectura": "Esta unidad es de solo lectura.",
+    "ayuda": "Flechas, Enter y Tab para moverte. Puedes pegar una columna o un rango copiado de Excel.",
+    "problema": "{{alumno}}, {{actividad}}:",
+    "alumno": "Alumno",
+    "periodo": "Unidad",
+    "final": "Final",
+    "promedio": "Prom.",
+    "baja": "Baja",
+    "celda": "{{alumno}}, {{actividad}}",
+    "pegado": "Se pegaron {{cantidad}} calificaciones.",
+    "pegadoConErrores": "Se pegaron {{cantidad}}; {{errores}} no se aceptaron. Revisa las celdas en rojo.",
+    "parcial": "Calificación parcial: hay rubros sin datos.",
+    "notaParcial": "Calificación parcial: algún rubro todavía no tiene calificaciones y su peso se repartió entre los demás."
   }
 }

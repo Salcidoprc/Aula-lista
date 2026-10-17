@@ -3,6 +3,7 @@ using AulaLista.Application.Grupos;
 using AulaLista.Domain.Comun;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using static AulaLista.Api.Comun.Respuestas;
 
 namespace AulaLista.Api.Grupos;
 
@@ -29,7 +30,8 @@ internal static class GruposEndpoints
             .Produces<IReadOnlyList<GrupoDto>>(StatusCodes.Status201Created).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
         grupos.MapGet("/{id:guid}", ObtenerGrupo).WithName("ObtenerGrupo").Produces<GrupoDto>().Produces(StatusCodes.Status404NotFound);
         grupos.MapPut("/{id:guid}", EditarGrupo).WithName("EditarGrupo").Produces<GrupoDto>().ProducesProblem(StatusCodes.Status422UnprocessableEntity);
-        grupos.MapDelete("/{id:guid}", BorrarGrupo).WithName("BorrarGrupo").Produces(StatusCodes.Status204NoContent);
+        grupos.MapDelete("/{id:guid}", BorrarGrupo).WithName("BorrarGrupo")
+            .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status409Conflict);
         grupos.MapPost("/{id:guid}/archivar", ArchivarGrupo).WithName("ArchivarGrupo").Produces(StatusCodes.Status204NoContent);
         grupos.MapGet("/{id:guid}/periodos", Periodos).WithName("ListarPeriodos").Produces<IReadOnlyList<PeriodoDto>>();
         grupos.MapGet("/{id:guid}/alumnos", ListarAlumnos).WithName("ListarAlumnos").Produces<IReadOnlyList<AlumnoDto>>();
@@ -110,7 +112,7 @@ internal static class GruposEndpoints
     }
 
     private static async Task<IResult> BorrarGrupo(Guid id, BorrarGrupoCasoUso caso, CancellationToken ct) =>
-        await caso.EjecutarAsync(id, ct) ? TypedResults.NoContent() : TypedResults.NotFound();
+        SinContenido(await caso.EjecutarAsync(id, ct));
 
     private static async Task<IResult> ArchivarGrupo(Guid id, ArchivarGrupoCasoUso caso, CancellationToken ct) =>
         await caso.EjecutarAsync(id, ct) ? TypedResults.NoContent() : TypedResults.NotFound();
@@ -162,27 +164,6 @@ internal static class GruposEndpoints
     private static async Task<IResult> ConfirmarImportacion(
         Guid id, ConfirmarImportacion cuerpo, IValidator<ConfirmarImportacion> validador, ConfirmarImportacionCasoUso caso, CancellationToken ct) =>
         await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct));
-
-    private static IResult Respuesta<T>(Resultado<T>? resultado) => resultado switch
-    {
-        null => TypedResults.NotFound(),
-        { EsExito: true } => TypedResults.Ok(resultado.Valor),
-        _ => resultado.Error.AProblemaHttp(),
-    };
-
-    private static IResult Creado<T>(Resultado<T>? resultado, Func<T, string> ubicacion) => resultado switch
-    {
-        null => TypedResults.NotFound(),
-        { EsExito: true } => TypedResults.Created(ubicacion(resultado.Valor), resultado.Valor),
-        _ => resultado.Error.AProblemaHttp(),
-    };
-
-    private static IResult SinContenido(Resultado? resultado) => resultado switch
-    {
-        null => TypedResults.NotFound(),
-        { EsExito: true } => TypedResults.NoContent(),
-        _ => resultado.Error.AProblemaHttp(),
-    };
 }
 
 /// <summary>Un archivo .xlsx o .csv (RF-013), o el texto pegado con un alumno por línea (RF-014).</summary>

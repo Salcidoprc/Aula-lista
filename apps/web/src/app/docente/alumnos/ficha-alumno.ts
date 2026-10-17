@@ -60,7 +60,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
   template: `
     <div class="pantalla pantalla--ancha" *transloco="let t; prefix: 'alumno'">
       @if (alumno(); as a) {
-        <a class="volver" [routerLink]="['/grupos', a.grupoId]">
+        <a class="volver" [routerLink]="['/grupos', a.grupoId, 'alumnos']">
           <app-icono nombre="volver" />
           {{ grupo() ? t('volverA', { grupo: nombreDelGrupo() }) : t('volver') }}
         </a>
@@ -773,7 +773,7 @@ export class FichaAlumno implements OnInit {
       this.avisos.mostrar(
         this.i18n.translate('alumno.baja.hecha', { nombre: this.alumno()!.nombres }),
       );
-      await this.router.navigate(['/grupos', grupoId]);
+      await this.router.navigate(['/grupos', grupoId, 'alumnos']);
     } catch (e) {
       this.dialogoBaja().nativeElement.close();
       this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');

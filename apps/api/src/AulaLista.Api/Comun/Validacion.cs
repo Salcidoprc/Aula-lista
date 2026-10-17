@@ -1,6 +1,7 @@
 using AulaLista.Application.Comun;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
+using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
 using FluentValidation;
 
@@ -38,6 +39,11 @@ internal static class Validacion
             _ when error == ErroresGrupos.CicloDuplicado || error == ErroresGrupos.GrupoDuplicado
                 || error == ErroresGrupos.TutorYaVinculado || error == ErroresGrupos.ImportacionConfirmada
                 || error == ErroresGrupos.GrupoArchivado || error == ErroresGrupos.UnidadCerrada
+                || error == ErroresGrupos.UnidadConDatos
+                => StatusCodes.Status409Conflict,
+            _ when error == ErroresEvaluacion.BorradoRequiereConfirmacion || error == ErroresEvaluacion.PeriodoEnCierre
+                || error == ErroresEvaluacion.PeriodoCerrado || error == ErroresEvaluacion.PeriodoConRubros
+                || error == ErroresEvaluacion.GrupoConCalificaciones || error == ErroresEvaluacion.FormaConCalificaciones
                 => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status422UnprocessableEntity,
         };

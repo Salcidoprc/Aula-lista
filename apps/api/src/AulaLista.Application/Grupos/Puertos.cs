@@ -36,6 +36,9 @@ public interface IRepositorioGrupos
 
     Task<IReadOnlyList<PeriodoDeGrupo>> PeriodosAsync(Guid grupoId, CancellationToken cancellationToken);
 
+    /// <summary>El periodo con su unidad y su grupo, o nulo si no es del docente.</summary>
+    Task<PeriodoCompleto?> PeriodoAsync(Guid id, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<Alumno>> AlumnosAsync(Guid grupoId, CancellationToken cancellationToken);
 
     Task<Alumno?> AlumnoAsync(Guid id, CancellationToken cancellationToken);
@@ -56,9 +59,21 @@ public interface IRepositorioGrupos
     Task<Importacion?> ImportacionAsync(Guid id, CancellationToken cancellationToken);
 }
 
+/// <summary>Lo que Grupos necesita saber de la evaluación sin leer sus tablas (lo implementa Evaluación).</summary>
+public interface IDatosDeEvaluacion
+{
+    /// <summary>Unidades del ciclo con rubros en algún grupo (RN-027: no se pueden borrar).</summary>
+    Task<IReadOnlySet<Guid>> UnidadesConDatosAsync(Guid cicloId, CancellationToken cancellationToken);
+
+    /// <summary>Si el grupo tiene alguna calificación capturada (SPEC-02: entonces no se borra).</summary>
+    Task<bool> GrupoTieneCalificacionesAsync(Guid grupoId, CancellationToken cancellationToken);
+}
+
 public sealed record GrupoConConteo(Grupo Grupo, string CicloNombre, int AlumnosActivos);
 
 public sealed record PeriodoDeGrupo(Periodo Periodo, Unidad Unidad);
+
+public sealed record PeriodoCompleto(Periodo Periodo, Unidad Unidad, Grupo Grupo);
 
 /// <summary>Tutores compartidos entre docentes (ADR-0014): solo se vinculan por la función de la base.</summary>
 public interface ITutores

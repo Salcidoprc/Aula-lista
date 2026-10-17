@@ -24,16 +24,18 @@ import { PerfilService } from '../../core/sesion/perfil.service';
 import { descargarArchivo } from '../../shared/descarga';
 import { crearEnfoque } from '../../shared/foco';
 import { Hoja } from '../../shared/hoja';
+import { claveGrado } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { ReenviarVerificacion } from '../cuenta/reenviar-verificacion';
 import { GruposService, portadaDeGrupo } from './grupos.service';
+import { PestanasGrupo } from './pestanas-grupo';
 
 const MAXIMO_ALUMNOS = 50;
 
 /**
- * SPEC-02, "Alumnos del grupo": lista con número, nombre, tutores y estado, y las formas de agregar
+ * SPEC-02, "Alumnos del grupo" (segunda vista del grupo): lista con número, nombre, tutores y estado, y las formas de agregar
  * (importar de Excel, pegar lista o uno por uno). La portada toma el color y el número del grado.
  */
 @Component({
@@ -46,6 +48,7 @@ const MAXIMO_ALUMNOS = 50;
     Icono,
     Ocupado,
     ReenviarVerificacion,
+    PestanasGrupo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -55,22 +58,16 @@ const MAXIMO_ALUMNOS = 50;
         {{ t('misGrupos') }}
       </a>
 
-      <div class="cabeza">
-        <hgroup>
-          <h1 tabindex="-1">{{ t('titulo') }}</h1>
-          @if (grupo()) {
-            <p class="dato-suave cifras">
-              {{ t('conteo', { activos: activos().length, maximo: maximo }) }}
-            </p>
-          }
-        </hgroup>
+      <app-pestanas-grupo [id]="id()" [grado]="clave()" />
+
+      <hgroup>
+        <h1 tabindex="-1">{{ t('titulo') }}</h1>
         @if (grupo()) {
-          <a class="boton boton--secundario" [routerLink]="['/grupos', id(), 'ajustes']">
-            <app-icono nombre="ajustes" />
-            {{ t('configuracion') }}
-          </a>
+          <p class="dato-suave cifras">
+            {{ t('conteo', { activos: activos().length, maximo: maximo }) }}
+          </p>
         }
-      </div>
+      </hgroup>
 
       @if (grupo()?.archivadoEn) {
         <p class="aviso aviso--pendiente">{{ t('archivado') }}</p>
@@ -296,20 +293,6 @@ const MAXIMO_ALUMNOS = 50;
     </div>
   `,
   styles: `
-    .cabeza {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: end;
-      justify-content: space-between;
-      gap: var(--espacio-3);
-    }
-
-    /* Con letra muy grande el botón no se sale de la pantalla: su texto se acomoda dentro. */
-    .cabeza .boton {
-      max-width: 100%;
-      overflow-wrap: anywhere;
-    }
-
     hgroup {
       display: grid;
       gap: var(--espacio-1);
@@ -552,6 +535,10 @@ export class Grupo implements OnInit {
       .filter((a) => !a.bajaEn)
       .sort((a, b) => Number(a.numeroLista) - Number(b.numeroLista)),
   );
+  protected readonly clave = computed(() => {
+    const g = this.grupo();
+    return g ? claveGrado(g.nivel, g.grado) : undefined;
+  });
   protected readonly bajas = computed(() => (this.alumnos() ?? []).filter((a) => a.bajaEn));
   protected readonly lleno = computed(() => this.activos().length >= MAXIMO_ALUMNOS);
   protected readonly sinVerificar = computed(() => this.perfil()?.correoVerificado === false);

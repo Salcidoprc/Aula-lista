@@ -151,10 +151,10 @@ public sealed class CicloEscolar : Entidad
 
     /// <summary>
     /// Reemplaza las unidades (RN-023, RN-026, RN-027). Las que traen id se editan, las demás se agregan y las que
-    /// faltan se borran. Una unidad cerrada en algún grupo no cambia de fechas ni se borra. Devuelve las nuevas.
+    /// faltan se borran. Una unidad cerrada en algún grupo no cambia de fechas ni se borra; una con rubros no se borra. Devuelve las nuevas.
     /// </summary>
     public Resultado<IReadOnlyList<Unidad>> ReemplazarUnidades(
-        IReadOnlyList<UnidadPropuesta> propuestas, IReadOnlySet<Guid> cerradas, DateTimeOffset ahora)
+        IReadOnlyList<UnidadPropuesta> propuestas, IReadOnlySet<Guid> cerradas, IReadOnlySet<Guid> conDatos, DateTimeOffset ahora)
     {
         if (propuestas.Count is < 1 or > MaximoUnidades)
         {
@@ -193,6 +193,11 @@ public sealed class CicloEscolar : Entidad
             {
                 return Resultado.Fallo<IReadOnlyList<Unidad>>(ErroresGrupos.UnidadCerrada);
             }
+        }
+
+        if (_unidades.Any(u => !conId.Contains(u.Id) && conDatos.Contains(u.Id)))
+        {
+            return Resultado.Fallo<IReadOnlyList<Unidad>>(ErroresGrupos.UnidadConDatos);
         }
 
         _unidades.RemoveAll(u => !conId.Contains(u.Id));

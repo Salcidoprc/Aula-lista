@@ -1,8 +1,10 @@
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
+using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
 using AulaLista.Infrastructure.Comun;
 using AulaLista.Infrastructure.Cuentas;
+using AulaLista.Infrastructure.Evaluacion;
 using AulaLista.Infrastructure.Grupos;
 using AulaLista.Infrastructure.Persistencia;
 using AulaLista.Infrastructure.Trabajos;
@@ -38,6 +40,9 @@ public static class DependencyInjection
         services.AddSingleton<ILimitadorIntentos, LimitadorIntentosEnMemoria>();
 
         services.AddScoped<IRepositorioGrupos, RepositorioGrupos>();
+        services.AddScoped<RepositorioEvaluacion>();
+        services.AddScoped<IRepositorioEvaluacion>(sp => sp.GetRequiredService<RepositorioEvaluacion>());
+        services.AddScoped<IDatosDeEvaluacion>(sp => sp.GetRequiredService<RepositorioEvaluacion>());
         services.AddScoped<ITutores, Tutores>();
         services.AddSingleton<IHojasDeCalculo, HojasDeCalculo>();
 

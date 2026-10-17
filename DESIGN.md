@@ -259,11 +259,13 @@ Desde 48 rem, las pantallas de cuenta (una sola columna corta) se centran y el r
 
 - Mis grupos: los grupos de cada ciclo son tarjetas en cuadrícula, y "Crear grupo" sube a la cabeza.
 - Grupo: la lista a la izquierda y, a la derecha, un panel con las formas de agregar alumnos, sin abrir la hoja.
+- Calificaciones, rubros y captura: el contenido a la izquierda y un panel lateral fijo con el resumen de la unidad, la suma de pesos o el teclado rápido.
+- Tabla de calificaciones: solo escritorio, a todo el ancho del contenedor y con desplazamiento propio.
 - Crear grupo: campos a la izquierda y la vista de las tapas a la derecha.
 - Ciclo: los datos del ciclo a la izquierda, fijos al desplazar, y las unidades a la derecha.
 - Configuración del grupo, ficha del alumno y ajustes: dos columnas que conservan el orden del celular al leerse de izquierda a derecha.
 
-La acción fija abajo (`.pie-accion`) es solo del celular. Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`.
+La acción fija abajo (`.pie-accion`) es del celular y la tableta (menos de 64 rem, donde la página es de una columna). Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`, con el mismo corte de 64 rem que `.columnas`: el panel lateral solo aparece donde hay dos columnas. El alto real del pie se publica en `--alto-pie-accion` para que la fila o el campo con foco no queden debajo.
 
 La portada ocupa todo el ancho arriba, de 72 px más el área segura como mínimo; crece con el título, no con adorno. La acción principal va abajo, al alcance del pulgar.
 
@@ -309,6 +311,27 @@ Número de lista (`texto-suave`, `.cifras`), nombre del alumno y la celda de cal
 - **Activa:** fondo `superficie` con borde interior de 2 px `--grado`.
 - **Guardada:** fondo `--grado-tinte`, texto `--grado-tinta`; el cambio de fondo dura 160 ms (catálogo de la regla 07).
 - **Botones rápidos** (10, 9, 8, 7, 6, "No entregó"): fondo `superficie-hundida`, 700, 44 px, `--radio-lg`, `scale(0.97)` al presionar. Pasar al siguiente alumno no se anima.
+
+### Pestañas del grupo (`app-pestanas-grupo`)
+Bajo "Mis grupos": Calificaciones (abre primero) y Alumnos, como navegación con `aria-current`, no como pestañas ARIA. La activa lleva texto `--grado-tinta` y una raya inferior de 3 px `--grado`; la configuración queda a la derecha (solo ícono bajo 30 rem).
+
+### Calificaciones de la unidad
+Chips de unidad (la elegida con fondo `--grado`), la barra "Pesos: n de 100" en `--grado-tinte` (en `aviso-tinte` si no suman 100) y los rubros como secciones con su peso en `--grado-tinta`; cada actividad es una fila con fecha y avance (capturadas/activos y barra de 6 px). En escritorio, el resumen de la unidad, "Nueva actividad", "Ver tabla" y "Editar rubros" van en el panel lateral.
+
+### Editor de rubros
+Un bloque por rubro separado por divisoria: número en `--grado-tinta`, nombre (con nombres sugeridos del tipo), tipo, peso con "%", mínima, forma (Con número / Cumplió ✓ / ✗) y la casilla de criterios. Los criterios van en un panel `superficie-hundida` con sus campos en `superficie`. La suma de pesos está siempre a la vista: pie fijo en celular, panel lateral en escritorio.
+
+### Teclado rápido
+Cuatro columnas: 10, 9, 8, 7 / 6, 5, "No entregó", "Exento"; arriba dice para quién ("Para 7 Jiménez Ríos Sebastián", hasta dos renglones). En pantalla baja (celular de lado o texto grande) las teclas van en un solo renglón que se desliza. Fijo abajo en celular, panel lateral en escritorio. Las teclas no roban el foco; con criterios, los números van al criterio con foco. La fila activa lleva fondo `--grado-tinte` y raya izquierda de 3 px `--grado`.
+
+### Cumplimiento
+Dos botones por alumno, ✓ y ✗, de 56 × 44 px. Elegido: tinte y borde interior de 2 px de `exito` o `peligro`, no solo color. Tocar de nuevo el elegido lo limpia.
+
+### Tabla (escritorio)
+Alumnos por actividades, agrupadas por rubro con su columna "Prom." en `superficie-hundida`, y al final Unidad y Final (Final en `--grado-tinta`). Encabezado y columna de nombres fijos al desplazar; celdas de 56 × 36 px con fondo `--grado-tinte` cuando tienen valor. Las actividades con criterios muestran su resultado en `texto-suave` y se capturan en su vista.
+
+### Indicador de sincronización
+En la navegación de la portada: ícono y texto ("Guardado", "Por enviar: n", "Enviando…", "Sin conexión: guardado aquí"). El ícono entra con fundido y desenfoque de 2 px en 200 ms; el de "Enviando" gira, salvo con movimiento reducido.
 
 ### Actividad seleccionada
 Bloque con fondo `--grado-tinte`, texto `--grado-tinta`, `--radio-lg`, 12 px de relleno. No es tarjeta: no lleva sombra ni borde.

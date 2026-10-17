@@ -69,15 +69,18 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 
 | Método y ruta | Descripción |
 | --- | --- |
-| `GET` / `PUT /api/v1/periodos/{id}/rubros` | Lee y reemplaza rubros (valida RN-031 solo al iniciar cierre; permite guardar borradores) |
-| `POST /api/v1/periodos/{id}/rubros/copiar` | Copia rubros desde otro periodo |
+| `GET /api/v1/tipos-rubro` | Catálogo de tipos activos con su comportamiento, forma sugerida y nombres sugeridos (RN-039, RN-110) |
+| `GET` / `PUT /api/v1/periodos/{id}/rubros` | Lee y reemplaza rubros (valida RN-031 solo al iniciar cierre; permite guardar borradores). Si quita rubros o criterios con calificaciones responde 409 `borrado_requiere_confirmacion` hasta recibir `confirmarBorrado: true`; en cierre o cerrado, 409 `periodo_en_cierre` o `periodo_cerrado` |
+| `POST /api/v1/periodos/{id}/rubros/copiar` | Copia rubros y criterios desde otro periodo del docente (`desdePeriodoId`); sin actividades. Si el destino ya tiene rubros, 409 `periodo_con_rubros` |
 | `GET` / `POST /api/v1/rubros/{id}/actividades` | Lista y crea actividades |
-| `PUT` / `DELETE /api/v1/actividades/{id}` | Edita o borra (borrar pide confirmación si tiene calificaciones) |
+| `PUT` / `DELETE /api/v1/actividades/{id}` | Edita o borra; borrar con calificaciones responde 409 `borrado_requiere_confirmacion` salvo con `?confirmar=true` |
 | `GET /api/v1/periodos/{id}/calificaciones` | Matriz completa del periodo con promedios calculados |
 | `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId o equipoId, valor o criterios[], marca, version}` con `Idempotency-Key`; por equipo escribe a cada integrante no ajustado (RN-115) |
 | `GET` / `PUT /api/v1/grupos/{id}/equipos` | Lee y reemplaza los equipos del grupo (RN-114) |
 | `GET` / `POST /api/v1/alumnos/{id}/notas` | Lista y crea notas |
-| `POST /api/v1/sincronizacion` | Recibe la cola sin conexión (ver arquitectura) |
+| `POST /api/v1/sincronizacion` | Recibe la cola sin conexión (hasta 100 cambios con UUID único; ver arquitectura). Responde `aplicadas` y `rechazadas` con su código y la celda vigente |
+
+Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_suman_100`, `rubros_invalidos`, `criterios_invalidos`, `tipo_rubro_invalido`, `forma_invalida`, `minima_invalida`, `forma_con_calificaciones`, `borrado_requiere_confirmacion`, `periodo_en_cierre`, `periodo_cerrado`, `periodo_con_rubros`, `actividad_invalida`, `fecha_fuera_de_unidad`, `rubro_sin_actividades`, `calificacion_fuera_de_rango`, `calificacion_invalida`, `calificacion_menor_a_minima`, `calificaciones_menores_a_minima`, `marca_invalida`, `criterio_inexistente`, `celda_inexistente`, `alumno_dado_de_baja`, `grupo_con_calificaciones` (borrar grupo, SPEC-02) y `unidad_con_datos` (quitar una unidad con rubros, SPEC-02).
 
 ## Casos borde
 

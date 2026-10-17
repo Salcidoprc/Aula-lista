@@ -133,6 +133,8 @@
   --dur-medium: 220ms;
   --dur-large: 300ms;
   --dur-hoja: 400ms;
+  --dur-icono: 200ms;
+  --dur-giro: 1s;
   --desplazamiento-pantalla: 8px;
   --desplazamiento-aviso: 1rem;
   --escala-presion: 0.97;

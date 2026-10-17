@@ -111,7 +111,8 @@ erDiagram
 | `toma_asistencia` | grupo_id, docente_id, fecha | Única por grupo y fecha (RN-100); la unidad se deduce de la fecha |
 | `asistencia` | toma_asistencia_id, alumno_id, estado (presente, retardo, falta, justificada), version | Única por toma y alumno |
 | `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |
-| `calificacion_criterio` | actividad_id, alumno_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio |
+| `calificacion_criterio` | calificacion_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio; único por calificación y criterio; se borra con su calificación |
+| `cambio_sincronizado` | id (UUID del cliente o `Idempotency-Key`), docente_id, aplicado_en | Cambios ya aplicados: reenviar el mismo UUID no duplica (RF-037) |
 | `alumno` | grupo_id, nombres, apellidos, numero_lista, trato (neutro, el, ella), seudonimo, baja_en | Sin CURP ni fecha de nacimiento |
 | `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061. RLS sin FORCE: el docente solo lee tutores con los que tiene vínculo y se crea por la función `vincular_tutor` (ADR-0014) |
 | `vinculo_tutor` | alumno_id, tutor_id, docente_id, nombre, correo, telefono_e164, parentesco | Lo que capturó cada docente; máximo 3 tutores por alumno |
@@ -156,11 +157,11 @@ Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen ant
 
 ## Sincronización sin conexión (RF-037, RNF-014)
 
-1. Al abrir un grupo, la PWA descarga a IndexedDB el grupo, alumnos, unidades del ciclo, periodo abierto, rubros, actividades, calificaciones, tomas de asistencia de la unidad y notas.
+1. Al abrir un grupo, la PWA guarda en IndexedDB (Dexie, solo desde `core/sincronizacion`) el grupo, sus unidades, el catálogo de tipos de rubro y la matriz de la unidad que se abre (rubros, actividades, alumnos y calificaciones). Las tomas de asistencia y las notas se agregan en H3.2 y H3.3. Todo se borra al cerrar sesión.
 2. Cada cambio local se guarda en IndexedDB y en una cola de salida con un UUID de idempotencia y la `version` conocida del registro.
 3. Al haber conexión, la cola se envía en orden a `POST /api/v1/sincronizacion` en lotes de hasta 100 cambios.
 4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; las notas nunca chocan porque cada nota es un registro nuevo. El cliente recibe la versión vigente y actualiza su copia.
-5. La UI muestra siempre el estado: "Guardado", "Pendiente de enviar (n)" o "Sin conexión".
+5. La UI muestra siempre el estado en la portada: "Guardado", "Por enviar: n", "Enviando" o "Sin conexión"; a partir del día 3 sin enviar avisa cuántos días lleva. Una celda rechazada (por ejemplo `celda_inexistente`) sale de la cola, el servidor manda su valor vigente y la pantalla marca el error en esa celda.
 6. Lo que no funciona sin conexión: generar observaciones, publicar boletas, enviar avisos y pagos.
 
 ## Jobs en segundo plano
