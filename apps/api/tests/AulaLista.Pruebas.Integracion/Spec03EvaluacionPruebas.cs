@@ -31,6 +31,19 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
     }
 
     [Fact]
+    public async Task RN111_LosCriteriosSeLeenEnElOrdenEnQueSeGuardaron()
+    {
+        var g = await PrepararAsync(0);
+        await GuardarRubrosAsync(g, Exposicion("numerica", 0m));
+
+        var leidos = await g.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/periodos/{g.PeriodoId}/rubros");
+        var nombres = leidos.GetProperty("rubros")[0].GetProperty("criterios").EnumerateArray()
+            .Select(c => c.GetProperty("nombre").GetString()).ToList();
+
+        Assert.Equal(["Información", "Presentación", "Dominio del tema"], nombres);
+    }
+
+    [Fact]
     public async Task SPEC03_CriteriosQueSuman90_SeRechazanConPesosCriteriosNoSuman100()
     {
         var g = await PrepararAsync(0);

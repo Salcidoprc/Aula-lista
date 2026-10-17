@@ -1,11 +1,12 @@
 import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiConfiguration } from '../../api/api-configuration';
 import { cerrarSesion } from '../../api/fn/cuentas/cerrar-sesion';
 import { cerrarTodasLasSesiones } from '../../api/fn/cuentas/cerrar-todas-las-sesiones';
 import { renovarSesion } from '../../api/fn/cuentas/renovar-sesion';
 import { RespuestaSesion } from '../../api/models/respuesta-sesion';
+import { ColaSincronizacion } from '../sincronizacion/cola-sincronizacion';
 
 /** Marca las llamadas que no deben reintentarse con una sesión renovada (las de la propia sesión). */
 export const SIN_RENOVAR = new HttpContextToken<boolean>(() => false);
@@ -22,6 +23,7 @@ const CANDADO_RENOVAR = 'aula-lista-renovar-sesion';
 export class SesionService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(ApiConfiguration);
+  private readonly injector = inject(Injector);
   private readonly token = signal<string | null>(null);
   private readonly docente = signal<string | null>(null);
   private renovacion: Promise<boolean> | null = null;
@@ -59,6 +61,7 @@ export class SesionService {
       await firstValueFrom(fn(this.http, this.config.rootUrl, undefined, this.contexto()));
     } finally {
       this.olvidar();
+      await this.borrarDatosLocales();
     }
   }
 
@@ -67,6 +70,19 @@ export class SesionService {
     this.token.set(null);
     this.docente.set(null);
     this.sinCookie = true;
+  }
+
+  /**
+   * Calificaciones de menores guardadas para trabajar sin conexión: al cerrar sesión no se quedan en el
+   * dispositivo. La cola se pide al usarse para no volver circular la inyección (la cola usa HTTP y HTTP usa la
+   * sesión).
+   */
+  private async borrarDatosLocales(): Promise<void> {
+    try {
+      await this.injector.get(ColaSincronizacion).borrarTodo();
+    } catch {
+      // Sin IndexedDB no hay nada que borrar.
+    }
   }
 
   private async renovarAhora(): Promise<boolean> {

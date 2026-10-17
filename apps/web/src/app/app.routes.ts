@@ -35,8 +35,29 @@ export const routes: Routes = [
       },
       {
         path: ':id',
+        title: 'titulos.calificaciones',
+        loadComponent: () =>
+          import('./docente/evaluacion/calificaciones').then((m) => m.Calificaciones),
+      },
+      {
+        path: ':id/alumnos',
         title: 'titulos.grupo',
         loadComponent: () => import('./docente/grupos/grupo').then((m) => m.Grupo),
+      },
+      {
+        path: ':id/periodos/:periodoId/rubros',
+        title: 'titulos.rubros',
+        loadComponent: () => import('./docente/evaluacion/rubros').then((m) => m.Rubros),
+      },
+      {
+        path: ':id/periodos/:periodoId/actividades/:actividadId',
+        title: 'titulos.captura',
+        loadComponent: () => import('./docente/evaluacion/captura').then((m) => m.Captura),
+      },
+      {
+        path: ':id/periodos/:periodoId/tabla',
+        title: 'titulos.tabla',
+        loadComponent: () => import('./docente/evaluacion/tabla').then((m) => m.Tabla),
       },
       {
         path: ':id/ajustes',

@@ -12,13 +12,22 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, skip } from 'rxjs';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
+import { IndicadorSincronizacion } from './core/sincronizacion/indicador-sincronizacion';
 import { Avisos } from './shared/avisos/avisos';
 import { Portada } from './shared/portada/portada';
 import { PortadaService } from './shared/portada/portada.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, TranslocoDirective, Avisos, Portada],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    TranslocoDirective,
+    Avisos,
+    Portada,
+    IndicadorSincronizacion,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container *transloco="let t">
@@ -46,6 +55,7 @@ import { PortadaService } from './shared/portada/portada.service';
               <a routerLink="/ajustes" routerLinkActive="activo" ariaCurrentWhenActive="page">{{
                 t('app.ajustes')
               }}</a>
+              <app-indicador-sincronizacion />
             </nav>
           }
         </app-portada>

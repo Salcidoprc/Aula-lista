@@ -56,7 +56,9 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByLabel('Contraseña').fill('no-es-la-contrasena');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
-    await expect(page.getByRole('main').getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      'El correo o la contraseña no coinciden.',
+    );
   });
 
   test('sin sesión, una pantalla del docente lleva a entrar y luego regresa', async ({ page }) => {
@@ -141,6 +143,8 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await page.getByLabel('Correo').fill(correo);
     await page.getByLabel('Contraseña').fill(CONTRASENA);
     await page.getByRole('button', { name: 'Entrar' }).click();
-    await expect(page.getByRole('main').getByRole('alert')).toHaveText('El correo o la contraseña no coinciden.');
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText(
+      'El correo o la contraseña no coinciden.',
+    );
   });
 });

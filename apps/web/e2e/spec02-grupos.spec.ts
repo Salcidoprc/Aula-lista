@@ -91,20 +91,18 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
   }) => {
     await docenteVerificado(page, request);
     await crearCicloYGrupo(page);
-    await page.goto(page.url() + '/importar?origen=excel');
+    await page.goto(page.url().replace(/\/alumnos$/, '') + '/importar?origen=excel');
     const csv = [
       'No.;Apellidos;Nombre(s);Nombre del tutor;Celular;Parentesco',
       '1;García López;Ana;María López;667 123 4567;Mamá',
       '2;Hernández;Luis;Pedro Hernández;12345;Papá',
       '3;Soto;Eva;;;',
     ].join('\n');
-    await page
-      .locator('input[type=file]')
-      .setInputFiles({
-        name: 'lista.csv',
-        mimeType: 'text/csv',
-        buffer: Buffer.from(csv, 'utf-8'),
-      });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'lista.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(csv, 'utf-8'),
+    });
 
     await expect(page.getByText('2 listos')).toBeVisible();
     await expect(page.getByText('1 por corregir')).toBeVisible();

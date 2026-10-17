@@ -51,7 +51,7 @@ public sealed class ConsultaRubros(IRepositorioEvaluacion repositorio)
             rubros.OrderBy(r => r.Orden).Select(r => new RubroDto(
                 r.Id, r.Nombre, r.TipoRubroId, tipos.TryGetValue(r.TipoRubroId, out var t) ? t.Comportamiento : Comportamiento.Actividades,
                 r.Peso, r.Forma, r.CalifMinima, r.Orden, rubrosConDatos.Contains(r.Id),
-                r.Criterios.Select(c => new CriterioDto(c.Id, c.Nombre, c.Peso, c.Forma, c.CalifMinima, criteriosConDatos.Contains(c.Id))).ToList()))
+                r.Criterios.OrderBy(c => c.Orden).Select(c => new CriterioDto(c.Id, c.Nombre, c.Peso, c.Forma, c.CalifMinima, criteriosConDatos.Contains(c.Id))).ToList()))
                 .ToList());
     }
 }
