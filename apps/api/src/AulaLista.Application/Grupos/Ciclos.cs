@@ -104,7 +104,8 @@ internal sealed class ReemplazarUnidadesValidador : AbstractValidator<Reemplazar
 /// Reemplaza las unidades del ciclo (RN-023, RN-026, RN-027). El cambio aplica a todos los grupos del ciclo
 /// porque los periodos toman nombre y fechas de su unidad; cada unidad nueva crea su periodo en cada grupo.
 /// </summary>
-public sealed class ReemplazarUnidadesCasoUso(IRepositorioGrupos repositorio, IUnidadDeTrabajo unidad, TimeProvider reloj)
+public sealed class ReemplazarUnidadesCasoUso(
+    IRepositorioGrupos repositorio, IDatosDeEvaluacion evaluacion, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<CicloDto>?> EjecutarAsync(Guid cicloId, ReemplazarUnidades comando, CancellationToken ct)
     {
@@ -116,7 +117,8 @@ public sealed class ReemplazarUnidadesCasoUso(IRepositorioGrupos repositorio, IU
         var ahora = reloj.GetUtcNow();
         var cerradas = await repositorio.UnidadesCerradasAsync(cicloId, ct);
         var propuestas = comando.Unidades.Select(u => new UnidadPropuesta(u.Id, u.Nombre, u.Inicio, u.Fin)).ToList();
-        var resultado = ciclo.ReemplazarUnidades(propuestas, cerradas, ahora);
+        var conDatos = await evaluacion.UnidadesConDatosAsync(cicloId, ct);
+        var resultado = ciclo.ReemplazarUnidades(propuestas, cerradas, conDatos, ahora);
         if (resultado.EsFallo)
         {
             return Resultado.Fallo<CicloDto>(resultado.Error);

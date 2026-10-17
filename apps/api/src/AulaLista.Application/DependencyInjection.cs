@@ -20,6 +20,8 @@ public static class DependencyInjection
 
         services.AddScoped<EmisorSesiones>();
         services.AddScoped<Grupos.VerificacionCorreo>();
+        services.AddScoped<Evaluacion.ConsultaRubros>();
+        services.AddScoped<Evaluacion.ContextoRubros>();
         return services;
     }
 }

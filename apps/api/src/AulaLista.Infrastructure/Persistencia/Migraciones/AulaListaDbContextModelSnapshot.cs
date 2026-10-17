@@ -361,6 +361,431 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Actividad", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateOnly?>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<string>("Modo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("modo");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<Guid>("RubroId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubro_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_actividad");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_actividad_docente_id");
+
+                    b.HasIndex("RubroId")
+                        .HasDatabaseName("ix_actividad_rubro_id");
+
+                    b.ToTable("actividad", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_actividad_modo", "modo IN ('individual', 'por_equipo')");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActividadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actividad_id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Marca")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("marca");
+
+                    b.Property<string>("Origen")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("origen");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal?>("Valor")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("valor");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calificacion");
+
+                    b.HasIndex("AlumnoId")
+                        .HasDatabaseName("ix_calificacion_alumno_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_calificacion_docente_id");
+
+                    b.HasIndex("ActividadId", "AlumnoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_calificacion_actividad_id_alumno_id");
+
+                    b.ToTable("calificacion", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_calificacion_marca", "marca IN ('ninguna', 'cumplio', 'no_cumplio', 'no_entrego', 'exento')");
+
+                            t.HasCheckConstraint("ck_calificacion_origen", "origen IN ('individual', 'equipo', 'ajustada')");
+
+                            t.HasCheckConstraint("ck_calificacion_valor", "valor IS NULL OR valor BETWEEN 0 AND 10");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.CalificacionCriterio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CalificacionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("calificacion_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CriterioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("criterio_id");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Marca")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("marca");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal?>("Valor")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_calificacion_criterio");
+
+                    b.HasIndex("CriterioId")
+                        .HasDatabaseName("ix_calificacion_criterio_criterio_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_calificacion_criterio_docente_id");
+
+                    b.HasIndex("CalificacionId", "CriterioId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_calificacion_criterio_calificacion_id_criterio_id");
+
+                    b.ToTable("calificacion_criterio", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_calificacion_criterio_marca", "marca IN ('ninguna', 'cumplio', 'no_cumplio')");
+
+                            t.HasCheckConstraint("ck_calificacion_criterio_valor", "valor IS NULL OR valor BETWEEN 0 AND 10");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.CambioSincronizado", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cambio_sincronizado");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_cambio_sincronizado_docente_id");
+
+                    b.ToTable("cambio_sincronizado", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Criterio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("CalifMinima")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("calif_minima");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Forma")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("forma");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<decimal>("Peso")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("peso");
+
+                    b.Property<Guid>("RubroId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rubro_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_criterio");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_criterio_docente_id");
+
+                    b.HasIndex("RubroId")
+                        .HasDatabaseName("ix_criterio_rubro_id");
+
+                    b.ToTable("criterio", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_criterio_calif_minima", "calif_minima BETWEEN 0 AND 10");
+
+                            t.HasCheckConstraint("ck_criterio_forma", "forma IN ('numerica', 'cumplimiento')");
+
+                            t.HasCheckConstraint("ck_criterio_peso", "peso BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("CalifMinima")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("calif_minima");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Forma")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("forma");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("periodo_id");
+
+                    b.Property<decimal>("Peso")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("peso");
+
+                    b.Property<Guid>("TipoRubroId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tipo_rubro_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rubro");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_rubro_docente_id");
+
+                    b.HasIndex("PeriodoId")
+                        .HasDatabaseName("ix_rubro_periodo_id");
+
+                    b.HasIndex("TipoRubroId")
+                        .HasDatabaseName("ix_rubro_tipo_rubro_id");
+
+                    b.ToTable("rubro", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_rubro_calif_minima", "calif_minima BETWEEN 0 AND 10");
+
+                            t.HasCheckConstraint("ck_rubro_forma", "forma IN ('numerica', 'cumplimiento')");
+
+                            t.HasCheckConstraint("ck_rubro_peso", "peso BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.TipoRubro", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
+
+                    b.Property<string>("Comportamiento")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("comportamiento");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<string>("FormaSugerida")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("forma_sugerida");
+
+                    b.Property<string>("Icono")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("icono");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("nombre");
+
+                    b.PrimitiveCollection<string[]>("NombresSugeridos")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("nombres_sugeridos");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tipo_rubro");
+
+                    b.HasIndex("Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tipo_rubro_nombre");
+
+                    b.ToTable("tipo_rubro", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tipo_rubro_comportamiento", "comportamiento IN ('actividades', 'asistencia')");
+
+                            t.HasCheckConstraint("ck_tipo_rubro_forma_sugerida", "forma_sugerida IN ('numerica', 'cumplimiento')");
+                        });
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Grupos.Alumno", b =>
                 {
                     b.Property<Guid>("Id")
@@ -949,6 +1374,87 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasConstraintName("fk_token_cuenta_cuenta_cuenta_id");
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Actividad", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Evaluacion.Rubro", null)
+                        .WithMany()
+                        .HasForeignKey("RubroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_actividad_rubros_rubro_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Evaluacion.Actividad", null)
+                        .WithMany()
+                        .HasForeignKey("ActividadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_calificacion_actividad_actividad_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_calificacion_alumno_alumno_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.CalificacionCriterio", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Evaluacion.Calificacion", null)
+                        .WithMany("Criterios")
+                        .HasForeignKey("CalificacionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_calificacion_criterio_calificacion_calificacion_id");
+
+                    b.HasOne("AulaLista.Domain.Evaluacion.Criterio", null)
+                        .WithMany()
+                        .HasForeignKey("CriterioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_calificacion_criterio_criterios_criterio_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.CambioSincronizado", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Cuentas.Docente", null)
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cambio_sincronizado_docentes_docente_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Criterio", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Evaluacion.Rubro", null)
+                        .WithMany("Criterios")
+                        .HasForeignKey("RubroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_criterio_rubros_rubro_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubro_periodo_periodo_id");
+
+                    b.HasOne("AulaLista.Domain.Evaluacion.TipoRubro", null)
+                        .WithMany()
+                        .HasForeignKey("TipoRubroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_rubro_tipos_rubro_tipo_rubro_id");
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Grupos.Alumno", b =>
                 {
                     b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
@@ -1038,6 +1544,16 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_vinculo_tutor_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
+                {
+                    b.Navigation("Criterios");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>
+                {
+                    b.Navigation("Criterios");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Grupos.CicloEscolar", b =>

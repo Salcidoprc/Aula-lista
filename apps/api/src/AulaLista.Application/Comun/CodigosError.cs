@@ -1,4 +1,5 @@
 using AulaLista.Domain.Cuentas;
+using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
 
 namespace AulaLista.Application.Comun;
@@ -22,5 +23,6 @@ public static class CodigosError
         ErrorInterno,
         .. ErroresCuentas.Todos.Select(e => e.Codigo),
         .. ErroresGrupos.Todos.Select(e => e.Codigo),
+        .. ErroresEvaluacion.Todos.Select(e => e.Codigo),
     ];
 }

@@ -74,6 +74,14 @@ internal sealed class RepositorioGrupos(AulaListaDbContext db) : IRepositorioGru
 
     public void Agregar(IEnumerable<Periodo> periodos) => db.Periodos.AddRange(periodos);
 
+    public async Task<PeriodoCompleto?> PeriodoAsync(Guid id, CancellationToken cancellationToken) =>
+        await db.Periodos
+            .Where(p => p.Id == id)
+            .Join(db.Unidades, p => p.UnidadId, u => u.Id, (p, u) => new { p, u })
+            .Join(db.Grupos, x => x.p.GrupoId, g => g.Id, (x, g) => new { x.p, x.u, g })
+            .Select(x => new PeriodoCompleto(x.p, x.u, x.g))
+            .SingleOrDefaultAsync(cancellationToken);
+
     public async Task<IReadOnlyList<PeriodoDeGrupo>> PeriodosAsync(Guid grupoId, CancellationToken cancellationToken) =>
         (await db.Periodos
             .Where(p => p.GrupoId == grupoId)

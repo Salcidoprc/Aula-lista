@@ -88,7 +88,7 @@ public sealed class CicloEscolarPruebas
             new UnidadPropuesta(u[2].Id, u[2].Nombre, u[2].Inicio, u[2].Fin),
         };
 
-        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), Ahora);
+        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), new HashSet<Guid>(), Ahora);
 
         Assert.Equal(ErroresGrupos.UnidadesTraslapadas, resultado.Error);
     }
@@ -105,7 +105,7 @@ public sealed class CicloEscolarPruebas
             new UnidadPropuesta(u[1].Id, "Segunda", u[1].Inicio, u[1].Fin),
         };
 
-        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), Ahora);
+        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), new HashSet<Guid>(), Ahora);
 
         Assert.True(resultado.EsExito);
         Assert.Equal(["Primera", "Segunda", "Tercera"], ciclo.Unidades.OrderBy(x => x.Orden).Select(x => x.Nombre));
@@ -119,7 +119,7 @@ public sealed class CicloEscolarPruebas
         var propuestas = u.Select(x => new UnidadPropuesta(x.Id, x.Nombre, x.Inicio, x.Fin)).ToList();
         propuestas[^1] = propuestas[^1] with { Fin = Fin.AddDays(1) };
 
-        Assert.Equal(ErroresGrupos.UnidadFueraDeCiclo, ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), Ahora).Error);
+        Assert.Equal(ErroresGrupos.UnidadFueraDeCiclo, ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), new HashSet<Guid>(), Ahora).Error);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public sealed class CicloEscolarPruebas
         var propuestas = u.Select(x => new UnidadPropuesta(x.Id, x.Nombre, x.Inicio, x.Fin)).ToList();
         propuestas[0] = propuestas[0] with { Fin = propuestas[0].Fin.AddDays(-1) };
 
-        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid> { u[0].Id }, Ahora);
+        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid> { u[0].Id }, new HashSet<Guid>(), Ahora);
 
         Assert.Equal(ErroresGrupos.UnidadCerrada, resultado.Error);
     }
@@ -144,7 +144,7 @@ public sealed class CicloEscolarPruebas
         propuestas[^1] = propuestas[^1] with { Fin = propuestas[^1].Fin.AddDays(-20) };
         propuestas.Add(new UnidadPropuesta(null, "Recuperación", Fin.AddDays(-19), Fin));
 
-        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), Ahora);
+        var resultado = ciclo.ReemplazarUnidades(propuestas, new HashSet<Guid>(), new HashSet<Guid>(), Ahora);
 
         Assert.True(resultado.EsExito);
         Assert.Equal("Recuperación", Assert.Single(resultado.Valor).Nombre);

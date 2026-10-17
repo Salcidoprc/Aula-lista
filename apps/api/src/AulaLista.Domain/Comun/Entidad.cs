@@ -10,6 +10,14 @@ public abstract class Entidad
         UpdatedAt = ahora;
     }
 
+    /// <summary>Para registros con id fijo, como el catálogo sembrado o una clave de idempotencia del cliente.</summary>
+    protected Entidad(Guid id, DateTimeOffset ahora)
+    {
+        Id = id;
+        CreatedAt = ahora;
+        UpdatedAt = ahora;
+    }
+
     /// <summary>Constructor para EF Core.</summary>
     protected Entidad()
     {

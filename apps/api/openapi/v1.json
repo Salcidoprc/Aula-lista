@@ -839,6 +839,16 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -1368,6 +1378,119 @@
         }
       }
     },
+    "/api/v1/tipos-rubro": {
+      "get": {
+        "tags": [
+          "Rubros"
+        ],
+        "operationId": "ListarTiposRubro",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TipoRubroDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/calificaciones": {
+      "put": {
+        "tags": [
+          "Calificaciones"
+        ],
+        "operationId": "GuardarCalificaciones",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardarCalificaciones"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoCalificaciones"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sincronizacion": {
+      "post": {
+        "tags": [
+          "Calificaciones"
+        ],
+        "operationId": "Sincronizar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SincronizarCambios"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoCalificaciones"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/cuentas/google/inicio": {
       "get": {
         "tags": [
@@ -1380,10 +1503,415 @@
           }
         }
       }
+    },
+    "/api/v1/periodos/{id}/rubros": {
+      "get": {
+        "tags": [
+          "Rubros"
+        ],
+        "operationId": "ObtenerRubros",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubrosDelPeriodoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Rubros"
+        ],
+        "operationId": "ReemplazarRubros",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReemplazarRubros"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubrosDelPeriodoDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/rubros/copiar": {
+      "post": {
+        "tags": [
+          "Rubros"
+        ],
+        "operationId": "CopiarRubros",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopiarRubros"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RubrosDelPeriodoDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/calificaciones": {
+      "get": {
+        "tags": [
+          "Calificaciones"
+        ],
+        "operationId": "ObtenerMatrizCalificaciones",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatrizCalificacionesDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/rubros/{id}/actividades": {
+      "get": {
+        "tags": [
+          "Actividades"
+        ],
+        "operationId": "ListarActividades",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActividadDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Actividades"
+        ],
+        "operationId": "CrearActividad",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosActividad"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActividadDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/actividades/{id}": {
+      "put": {
+        "tags": [
+          "Actividades"
+        ],
+        "operationId": "EditarActividad",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosActividad"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActividadDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Actividades"
+        ],
+        "operationId": "BorrarActividad",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "confirmar",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ActividadDto": {
+        "required": [
+          "id",
+          "rubroId",
+          "nombre",
+          "fecha",
+          "modo",
+          "orden",
+          "capturadas"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rubroId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "modo": {
+            "type": "string"
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "capturadas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ActualizarPerfil": {
         "required": [
           "nombre",
@@ -1485,6 +2013,39 @@
           }
         }
       },
+      "AlumnoMatrizDto": {
+        "required": [
+          "id",
+          "numeroLista",
+          "nombres",
+          "apellidos",
+          "dadoDeBaja"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numeroLista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "dadoDeBaja": {
+            "type": "boolean"
+          }
+        }
+      },
       "CambiarContrasena": {
         "required": [
           "actual",
@@ -1500,6 +2061,160 @@
           },
           "nueva": {
             "type": "string"
+          }
+        }
+      },
+      "CambioCelda": {
+        "required": [
+          "id",
+          "actividadId",
+          "alumnoId",
+          "valor",
+          "marca",
+          "criterios",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "actividadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "criterios": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/CriterioCambio"
+            }
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "CeldaDto": {
+        "required": [
+          "actividadId",
+          "alumnoId",
+          "valor",
+          "marca",
+          "origen",
+          "version",
+          "criterios"
+        ],
+        "type": "object",
+        "properties": {
+          "actividadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "origen": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "criterios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CriterioCeldaDto"
+            }
+          }
+        }
+      },
+      "CeldaRechazada": {
+        "required": [
+          "id",
+          "actividadId",
+          "alumnoId",
+          "codigo",
+          "mensaje",
+          "vigente"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "actividadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "vigente": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CeldaDto"
+              }
+            ]
           }
         }
       },
@@ -1540,6 +2255,44 @@
           }
         }
       },
+      "ConfiguracionMatrizDto": {
+        "required": [
+          "califMinima",
+          "califAprobatoria",
+          "decimalesFinal",
+          "redondeo"
+        ],
+        "type": "object",
+        "properties": {
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "califAprobatoria": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "redondeo": {
+            "type": "string"
+          }
+        }
+      },
       "ConfirmarImportacion": {
         "required": [
           "filas"
@@ -1551,6 +2304,18 @@
             "items": {
               "$ref": "#/components/schemas/FilaImportacion"
             }
+          }
+        }
+      },
+      "CopiarRubros": {
+        "required": [
+          "desdePeriodoId"
+        ],
+        "type": "object",
+        "properties": {
+          "desdePeriodoId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -1661,6 +2426,160 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "CriterioCambio": {
+        "required": [
+          "criterioId",
+          "valor",
+          "marca"
+        ],
+        "type": "object",
+        "properties": {
+          "criterioId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "marca": {
+            "type": "string"
+          }
+        }
+      },
+      "CriterioCeldaDto": {
+        "required": [
+          "criterioId",
+          "valor",
+          "marca"
+        ],
+        "type": "object",
+        "properties": {
+          "criterioId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "marca": {
+            "type": "string"
+          }
+        }
+      },
+      "CriterioDto": {
+        "required": [
+          "id",
+          "nombre",
+          "peso",
+          "forma",
+          "califMinima",
+          "tieneCalificaciones"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "peso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "forma": {
+            "type": "string"
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "tieneCalificaciones": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CriterioEntrada": {
+        "required": [
+          "id",
+          "nombre",
+          "peso",
+          "forma",
+          "califMinima"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "peso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "forma": {
+            "type": "string"
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "DatosActividad": {
+        "required": [
+          "nombre",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },
@@ -1980,6 +2899,67 @@
           }
         }
       },
+      "GuardarCalificaciones": {
+        "required": [
+          "celdas"
+        ],
+        "type": "object",
+        "properties": {
+          "celdas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CambioCelda"
+            }
+          }
+        }
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "IFormFile": {
         "type": [
           "null",
@@ -1999,6 +2979,72 @@
           },
           "contrasena": {
             "type": "string"
+          }
+        }
+      },
+      "MatrizCalificacionesDto": {
+        "required": [
+          "periodoId",
+          "grupoId",
+          "estado",
+          "soloLectura",
+          "configuracion",
+          "sumaPesos",
+          "rubros",
+          "alumnos",
+          "celdas",
+          "resultados"
+        ],
+        "type": "object",
+        "properties": {
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "soloLectura": {
+            "type": "boolean"
+          },
+          "configuracion": {
+            "$ref": "#/components/schemas/ConfiguracionMatrizDto"
+          },
+          "sumaPesos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "rubros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RubroMatrizDto"
+            }
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlumnoMatrizDto"
+            }
+          },
+          "celdas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CeldaDto"
+            }
+          },
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultadoAlumnoDto"
+            }
           }
         }
       },
@@ -2161,6 +3207,46 @@
           }
         }
       },
+      "PromedioRubroDto": {
+        "required": [
+          "rubroId",
+          "promedio"
+        ],
+        "type": "object",
+        "properties": {
+          "rubroId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "promedio": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ReemplazarRubros": {
+        "required": [
+          "rubros",
+          "confirmarBorrado"
+        ],
+        "type": "object",
+        "properties": {
+          "rubros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RubroEntrada"
+            }
+          },
+          "confirmarBorrado": {
+            "type": "boolean"
+          }
+        }
+      },
       "ReemplazarUnidades": {
         "required": [
           "unidades"
@@ -2273,6 +3359,74 @@
           }
         }
       },
+      "ResultadoAlumnoDto": {
+        "required": [
+          "alumnoId",
+          "rubros",
+          "periodo",
+          "final",
+          "rubrosSinDatos"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rubros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromedioRubroDto"
+            }
+          },
+          "periodo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "final": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "rubrosSinDatos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ResultadoCalificaciones": {
+        "required": [
+          "aplicadas",
+          "rechazadas"
+        ],
+        "type": "object",
+        "properties": {
+          "aplicadas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CeldaDto"
+            }
+          },
+          "rechazadas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CeldaRechazada"
+            }
+          }
+        }
+      },
       "ResultadoImportacion": {
         "required": [
           "guardados",
@@ -2314,6 +3468,193 @@
           }
         }
       },
+      "RubroDto": {
+        "required": [
+          "id",
+          "nombre",
+          "tipoRubroId",
+          "comportamiento",
+          "peso",
+          "forma",
+          "califMinima",
+          "orden",
+          "tieneCalificaciones",
+          "criterios"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "tipoRubroId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "comportamiento": {
+            "type": "string"
+          },
+          "peso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "forma": {
+            "type": "string"
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tieneCalificaciones": {
+            "type": "boolean"
+          },
+          "criterios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CriterioDto"
+            }
+          }
+        }
+      },
+      "RubroEntrada": {
+        "required": [
+          "id",
+          "nombre",
+          "tipoRubroId",
+          "peso",
+          "forma",
+          "califMinima",
+          "criterios"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "tipoRubroId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "peso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "forma": {
+            "type": "string"
+          },
+          "califMinima": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "criterios": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/CriterioEntrada"
+            }
+          }
+        }
+      },
+      "RubroMatrizDto": {
+        "required": [
+          "rubro",
+          "actividades"
+        ],
+        "type": "object",
+        "properties": {
+          "rubro": {
+            "$ref": "#/components/schemas/RubroDto"
+          },
+          "actividades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActividadDto"
+            }
+          }
+        }
+      },
+      "RubrosDelPeriodoDto": {
+        "required": [
+          "periodoId",
+          "estado",
+          "sumaPesos",
+          "rubros"
+        ],
+        "type": "object",
+        "properties": {
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "sumaPesos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "rubros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RubroDto"
+            }
+          }
+        }
+      },
+      "SincronizarCambios": {
+        "required": [
+          "cambios"
+        ],
+        "type": "object",
+        "properties": {
+          "cambios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CambioCelda"
+            }
+          }
+        }
+      },
       "SolicitarEliminacion": {
         "required": [
           "contrasena"
@@ -2347,6 +3688,45 @@
         "properties": {
           "token": {
             "type": "string"
+          }
+        }
+      },
+      "TipoRubroDto": {
+        "required": [
+          "id",
+          "nombre",
+          "descripcion",
+          "icono",
+          "comportamiento",
+          "formaSugerida",
+          "nombresSugeridos"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "icono": {
+            "type": "string"
+          },
+          "comportamiento": {
+            "type": "string"
+          },
+          "formaSugerida": {
+            "type": "string"
+          },
+          "nombresSugeridos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2596,6 +3976,15 @@
     },
     {
       "name": "Importaciones"
+    },
+    {
+      "name": "Rubros"
+    },
+    {
+      "name": "Calificaciones"
+    },
+    {
+      "name": "Actividades"
     }
   ]
 }
