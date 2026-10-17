@@ -60,14 +60,22 @@ const MAXIMO_ALUMNOS = 50;
 
       <app-pestanas-grupo [id]="id()" [grado]="clave()" />
 
-      <hgroup>
-        <h1 tabindex="-1">{{ t('titulo') }}</h1>
-        @if (grupo()) {
-          <p class="dato-suave cifras">
-            {{ t('conteo', { activos: activos().length, maximo: maximo }) }}
-          </p>
+      <div class="encabezado">
+        <hgroup>
+          <h1 tabindex="-1">{{ t('titulo') }}</h1>
+          @if (grupo()) {
+            <p class="dato-suave cifras">
+              {{ t('conteo', { activos: activos().length, maximo: maximo }) }}
+            </p>
+          }
+        </hgroup>
+        @if (activos().length > 0) {
+          <a class="boton boton--secundario" [routerLink]="['/grupos', id(), 'equipos']">
+            <app-icono nombre="equipo" />
+            {{ t('equipos') }}
+          </a>
         }
-      </hgroup>
+      </div>
 
       @if (grupo()?.archivadoEn) {
         <p class="aviso aviso--pendiente">{{ t('archivado') }}</p>
@@ -296,6 +304,14 @@ const MAXIMO_ALUMNOS = 50;
     hgroup {
       display: grid;
       gap: var(--espacio-1);
+    }
+
+    .encabezado {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--espacio-3);
     }
 
     h2 {

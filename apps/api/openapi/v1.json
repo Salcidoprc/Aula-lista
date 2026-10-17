@@ -1857,6 +1857,181 @@
           }
         }
       }
+    },
+    "/api/v1/grupos/{id}/equipos": {
+      "get": {
+        "tags": [
+          "Equipos"
+        ],
+        "operationId": "ListarEquipos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipoDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Equipos"
+        ],
+        "operationId": "ReemplazarEquipos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReemplazarEquipos"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipoDto"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alumnos/{id}/notas": {
+      "get": {
+        "tags": [
+          "Notas"
+        ],
+        "operationId": "ListarNotas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotaDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Notas"
+        ],
+        "operationId": "CrearNota",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearNota"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotaDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2120,6 +2295,13 @@
               "string"
             ],
             "format": "int32"
+          },
+          "equipoId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -2215,6 +2397,13 @@
                 "$ref": "#/components/schemas/CeldaDto"
               }
             ]
+          },
+          "equipoId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -2251,6 +2440,35 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UnidadDto"
+            }
+          }
+        }
+      },
+      "ComposicionDto": {
+        "required": [
+          "actividadId",
+          "equipoId",
+          "nombre",
+          "alumnoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "actividadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "equipoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "alumnoIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -2429,6 +2647,42 @@
           }
         }
       },
+      "CrearNota": {
+        "required": [
+          "id",
+          "periodoId",
+          "texto",
+          "etiqueta",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "etiqueta": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fecha": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "CriterioCambio": {
         "required": [
           "criterioId",
@@ -2580,6 +2834,39 @@
               "string"
             ],
             "format": "date"
+          },
+          "modo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "DatosEquipo": {
+        "required": [
+          "id",
+          "nombre",
+          "alumnoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "alumnoIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2730,6 +3017,30 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "EquipoDto": {
+        "required": [
+          "id",
+          "nombre",
+          "alumnoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "alumnoIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -2993,7 +3304,9 @@
           "rubros",
           "alumnos",
           "celdas",
-          "resultados"
+          "resultados",
+          "equipos",
+          "composiciones"
         ],
         "type": "object",
         "properties": {
@@ -3045,6 +3358,53 @@
             "items": {
               "$ref": "#/components/schemas/ResultadoAlumnoDto"
             }
+          },
+          "equipos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EquipoDto"
+            }
+          },
+          "composiciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComposicionDto"
+            }
+          }
+        }
+      },
+      "NotaDto": {
+        "required": [
+          "id",
+          "alumnoId",
+          "periodoId",
+          "texto",
+          "etiqueta",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "etiqueta": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -3226,6 +3586,20 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "ReemplazarEquipos": {
+        "required": [
+          "equipos"
+        ],
+        "type": "object",
+        "properties": {
+          "equipos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DatosEquipo"
+            }
           }
         }
       },
@@ -3985,6 +4359,12 @@
     },
     {
       "name": "Actividades"
+    },
+    {
+      "name": "Equipos"
+    },
+    {
+      "name": "Notas"
     }
   ]
 }

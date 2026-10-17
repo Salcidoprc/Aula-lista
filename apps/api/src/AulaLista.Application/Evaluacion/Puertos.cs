@@ -43,4 +43,22 @@ public interface IRepositorioEvaluacion
     Task<IReadOnlySet<Guid>> CambiosAplicadosAsync(IReadOnlyCollection<Guid> claves, CancellationToken cancellationToken);
 
     void Agregar(CambioSincronizado cambio);
+
+    /// <summary>Equipos del grupo con sus integrantes, en orden (RN-114).</summary>
+    Task<IReadOnlyList<Equipo>> EquiposAsync(Guid grupoId, CancellationToken cancellationToken);
+
+    void Agregar(Equipo equipo);
+
+    void Borrar(Equipo equipo);
+
+    /// <summary>Composición guardada de las actividades por equipo dadas (RN-116).</summary>
+    Task<IReadOnlyList<ActividadEquipo>> ComposicionesAsync(IReadOnlyCollection<Guid> actividadIds, CancellationToken cancellationToken);
+
+    void Agregar(ActividadEquipo integrante);
+
+    Task<IReadOnlyList<Nota>> NotasAsync(Guid alumnoId, CancellationToken cancellationToken);
+
+    Task<Nota?> NotaAsync(Guid id, CancellationToken cancellationToken);
+
+    void Agregar(Nota nota);
 }

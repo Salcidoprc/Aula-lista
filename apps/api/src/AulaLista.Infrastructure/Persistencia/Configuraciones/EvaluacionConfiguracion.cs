@@ -152,3 +152,66 @@ internal sealed class CambioSincronizadoConfiguracion : IEntityTypeConfiguration
         builder.HasOne<Docente>().WithMany().HasForeignKey(c => c.DocenteId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class EquipoConfiguracion : IEntityTypeConfiguration<Equipo>
+{
+    public void Configure(EntityTypeBuilder<Equipo> builder)
+    {
+        builder.ToTable("equipo");
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).ValueGeneratedNever();
+        builder.Property(e => e.Nombre).HasMaxLength(Equipo.LongitudNombre).IsRequired();
+        builder.HasIndex(e => e.GrupoId);
+        builder.HasIndex(e => e.DocenteId);
+        builder.HasOne<Grupo>().WithMany().HasForeignKey(e => e.GrupoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(e => e.Integrantes).WithOne().HasForeignKey(i => i.EquipoId).OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(e => e.Integrantes).HasField("_integrantes").UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+}
+
+internal sealed class EquipoAlumnoConfiguracion : IEntityTypeConfiguration<EquipoAlumno>
+{
+    public void Configure(EntityTypeBuilder<EquipoAlumno> builder)
+    {
+        builder.ToTable("equipo_alumno");
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).ValueGeneratedNever();
+        builder.HasIndex(e => e.AlumnoId).IsUnique(); // RN-114: un alumno en un solo equipo a la vez
+        builder.HasIndex(e => e.EquipoId);
+        builder.HasIndex(e => e.DocenteId);
+        builder.HasOne<Alumno>().WithMany().HasForeignKey(e => e.AlumnoId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class ActividadEquipoConfiguracion : IEntityTypeConfiguration<ActividadEquipo>
+{
+    public void Configure(EntityTypeBuilder<ActividadEquipo> builder)
+    {
+        builder.ToTable("actividad_equipo");
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.Id).ValueGeneratedNever();
+        builder.Property(a => a.NombreEquipo).HasMaxLength(Equipo.LongitudNombre).IsRequired();
+        builder.HasIndex(a => new { a.ActividadId, a.AlumnoId }).IsUnique();
+        builder.HasIndex(a => a.AlumnoId);
+        builder.HasIndex(a => a.DocenteId);
+        builder.HasOne<Actividad>().WithMany().HasForeignKey(a => a.ActividadId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Alumno>().WithMany().HasForeignKey(a => a.AlumnoId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class NotaConfiguracion : IEntityTypeConfiguration<Nota>
+{
+    public void Configure(EntityTypeBuilder<Nota> builder)
+    {
+        builder.ToTable("nota", t => t.HasCheckConstraint("ck_nota_etiqueta", "etiqueta IN ('ninguna', 'fortaleza', 'mejora', 'conducta')"));
+        builder.HasKey(n => n.Id);
+        builder.Property(n => n.Id).ValueGeneratedNever();
+        builder.Property(n => n.Texto).HasMaxLength(Nota.LongitudTexto).IsRequired();
+        builder.Property(n => n.Etiqueta).HasMaxLength(20).IsRequired();
+        builder.HasIndex(n => new { n.AlumnoId, n.Fecha });
+        builder.HasIndex(n => n.PeriodoId);
+        builder.HasIndex(n => n.DocenteId);
+        builder.HasOne<Alumno>().WithMany().HasForeignKey(n => n.AlumnoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Periodo>().WithMany().HasForeignKey(n => n.PeriodoId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

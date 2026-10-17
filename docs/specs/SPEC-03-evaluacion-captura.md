@@ -74,13 +74,13 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 | `POST /api/v1/periodos/{id}/rubros/copiar` | Copia rubros y criterios desde otro periodo del docente (`desdePeriodoId`); sin actividades. Si el destino ya tiene rubros, 409 `periodo_con_rubros` |
 | `GET` / `POST /api/v1/rubros/{id}/actividades` | Lista y crea actividades |
 | `PUT` / `DELETE /api/v1/actividades/{id}` | Edita o borra; borrar con calificaciones responde 409 `borrado_requiere_confirmacion` salvo con `?confirmar=true` |
-| `GET /api/v1/periodos/{id}/calificaciones` | Matriz completa del periodo con promedios calculados |
-| `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId o equipoId, valor o criterios[], marca, version}` con `Idempotency-Key`; por equipo escribe a cada integrante no ajustado (RN-115) |
-| `GET` / `PUT /api/v1/grupos/{id}/equipos` | Lee y reemplaza los equipos del grupo (RN-114) |
-| `GET` / `POST /api/v1/alumnos/{id}/notas` | Lista y crea notas |
+| `GET /api/v1/periodos/{id}/calificaciones` | Matriz completa del periodo con promedios calculados, los equipos de hoy y la composición guardada de cada actividad por equipo |
+| `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId o equipoId, valor o criterios[], marca, version}` con `Idempotency-Key`; por equipo (`alumnoId` vacío) escribe a cada integrante no ajustado (RN-115) y la primera vez guarda la composición (RN-116). Calificar por separado a un integrante marca su celda `ajustada`; vaciarla la regresa al equipo |
+| `GET` / `PUT /api/v1/grupos/{id}/equipos` | Lee y reemplaza los equipos del grupo (RN-114): cada equipo con `id` se conserva, sin `id` es nuevo y el que falta se quita. Nombres distintos de hasta 40 caracteres, hasta 30 equipos; un alumno en dos equipos responde `equipos_invalidos` |
+| `GET` / `POST /api/v1/alumnos/{id}/notas` | Lista y crea notas `{id, periodoId, texto, etiqueta, fecha}`. El `id` lo genera el cliente: reenviar la misma nota no la duplica |
 | `POST /api/v1/sincronizacion` | Recibe la cola sin conexión (hasta 100 cambios con UUID único; ver arquitectura). Responde `aplicadas` y `rechazadas` con su código y la celda vigente |
 
-Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_suman_100`, `rubros_invalidos`, `criterios_invalidos`, `tipo_rubro_invalido`, `forma_invalida`, `minima_invalida`, `forma_con_calificaciones`, `borrado_requiere_confirmacion`, `periodo_en_cierre`, `periodo_cerrado`, `periodo_con_rubros`, `actividad_invalida`, `fecha_fuera_de_unidad`, `rubro_sin_actividades`, `calificacion_fuera_de_rango`, `calificacion_invalida`, `calificacion_menor_a_minima`, `calificaciones_menores_a_minima`, `marca_invalida`, `criterio_inexistente`, `celda_inexistente`, `alumno_dado_de_baja`, `grupo_con_calificaciones` (borrar grupo, SPEC-02) y `unidad_con_datos` (quitar una unidad con rubros, SPEC-02).
+Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_suman_100`, `rubros_invalidos`, `criterios_invalidos`, `tipo_rubro_invalido`, `forma_invalida`, `minima_invalida`, `forma_con_calificaciones`, `borrado_requiere_confirmacion`, `periodo_en_cierre`, `periodo_cerrado`, `periodo_con_rubros`, `actividad_invalida`, `fecha_fuera_de_unidad`, `rubro_sin_actividades`, `calificacion_fuera_de_rango`, `calificacion_invalida`, `calificacion_menor_a_minima`, `calificaciones_menores_a_minima`, `marca_invalida`, `criterio_inexistente`, `celda_inexistente`, `equipos_invalidos`, `nota_invalida`, `alumno_dado_de_baja`, `grupo_con_calificaciones` (borrar grupo, SPEC-02) y `unidad_con_datos` (quitar una unidad con rubros, SPEC-02).
 
 ## Casos borde
 

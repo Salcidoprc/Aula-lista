@@ -2,9 +2,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Api } from '../../api/api';
 import { CambioCelda } from '../../api/models/cambio-celda';
+import { CrearNota } from '../../api/models/crear-nota';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
 import { SincronizarCambios } from '../../api/models/sincronizar-cambios';
-import { ALMACEN_LOCAL, AlmacenLocal, CambioEnCola, MatrizGuardada } from './almacen-local';
+import {
+  ALMACEN_LOCAL,
+  AlmacenLocal,
+  CambioEnCola,
+  MatrizGuardada,
+  NotaEnCola,
+} from './almacen-local';
 import { ColaSincronizacion } from './cola-sincronizacion';
 
 /** IndexedDB en memoria con el mismo contrato. */
@@ -39,8 +46,18 @@ class AlmacenMemoria implements AlmacenLocal {
   async quitar(ids: readonly string[]) {
     this.cola = this.cola.filter((c) => !ids.includes(c.id));
   }
+  notas: NotaEnCola[] = [];
   async contar() {
-    return this.cola.length;
+    return this.cola.length + this.notas.length;
+  }
+  async encolarNota(nota: NotaEnCola) {
+    this.notas = [...this.notas.filter((n) => n.id !== nota.id), nota];
+  }
+  async notasPendientes(alumnoId?: string) {
+    return this.notas.filter((n) => alumnoId === undefined || n.alumnoId === alumnoId);
+  }
+  async quitarNota(id: string) {
+    this.notas = this.notas.filter((n) => n.id !== id);
   }
   async masAntiguo() {
     return this.cola[0]?.creado ?? null;
@@ -56,6 +73,7 @@ class AlmacenMemoria implements AlmacenLocal {
     this.datos.clear();
     this.matrices.clear();
     this.cola = [];
+    this.notas = [];
   }
 }
 
@@ -65,9 +83,16 @@ class ServidorFalso {
   readonly celdas = new Map<string, number>();
   sinRed = false;
 
-  async invoke(_fn: unknown, params: { body: SincronizarCambios }) {
+  readonly notas = new Map<string, number>();
+
+  async invoke(_fn: unknown, params: { body: SincronizarCambios | CrearNota }) {
     if (this.sinRed) {
       throw new HttpErrorResponse({ status: 0 });
+    }
+    if (!('cambios' in params.body)) {
+      // POST /alumnos/{id}/notas: la misma nota con el mismo id no se duplica.
+      this.notas.set(params.body.id, (this.notas.get(params.body.id) ?? 0) + 1);
+      return { ...params.body };
     }
     const aplicadas = params.body.cambios.map((c) => {
       const llave = `${c.actividadId}:${c.alumnoId}`;
@@ -153,6 +178,56 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
     window.dispatchEvent(new Event('online'));
     await cola.enviar();
     expect(confirmados).toEqual([9]);
+  });
+
+  it('una confirmación no pisa una celda que se está capturando en ese momento', async () => {
+    servidor.sinRed = true;
+    await cola.guardar(matriz(), [{ ...cambio(1), valor: 6 }]);
+    await cola.enviar();
+    servidor.sinRed = false;
+    // La siguiente captura de la misma celda tarda en escribirse: la confirmación llega antes.
+    let soltar!: () => void;
+    const original = almacen.guardarYEncolar.bind(almacen);
+    almacen.guardarYEncolar = async (m, c) => {
+      await new Promise<void>((r) => (soltar = r));
+      return original(m, c);
+    };
+    const escritura = cola.guardar(matriz(), [{ ...cambio(1), valor: 9 }]);
+    const confirmados: unknown[] = [];
+    cola.alConfirmar((r) => confirmados.push(...[...r.vigentes.values()].map((c) => c?.valor)));
+    window.dispatchEvent(new Event('online'));
+    await vi.waitFor(() => expect(almacen.cola).toHaveLength(0));
+    expect(servidor.aplicados.size).toBe(1);
+    expect(confirmados).toEqual([]);
+    soltar();
+    await escritura;
+    await cola.enviar();
+    await vi.waitFor(() => expect(confirmados).toEqual([9]));
+  });
+
+  it('SPEC-03: una nota escrita sin conexión se guarda en el dispositivo y llega al volver la red', async () => {
+    servidor.sinRed = true;
+    const nota: CrearNota = {
+      id: 'n1',
+      periodoId: 'p1',
+      texto: 'Participó en la lluvia de ideas.',
+      etiqueta: 'fortaleza',
+      fecha: '2026-10-17',
+    };
+    await cola.guardarNota('al1', nota);
+    await cola.enviar();
+    expect(cola.pendientes()).toBe(1);
+    expect(await cola.notasPendientes('al1')).toEqual([expect.objectContaining({ id: 'n1' })]);
+
+    const enviadas: string[] = [];
+    cola.alEnviarNota((alumno) => enviadas.push(alumno));
+    servidor.sinRed = false;
+    window.dispatchEvent(new Event('online'));
+    await cola.enviar();
+
+    expect(cola.pendientes()).toBe(0);
+    expect(servidor.notas.get('n1')).toBe(1);
+    expect(enviadas).toEqual(['al1']);
   });
 
   it('al cerrar sesión no deja calificaciones en el dispositivo', async () => {

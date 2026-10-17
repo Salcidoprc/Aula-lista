@@ -418,6 +418,58 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.ActividadEquipo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActividadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actividad_id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<Guid>("EquipoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("equipo_id");
+
+                    b.Property<string>("NombreEquipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("nombre_equipo");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_actividad_equipo");
+
+                    b.HasIndex("AlumnoId")
+                        .HasDatabaseName("ix_actividad_equipo_alumno_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_actividad_equipo_docente_id");
+
+                    b.HasIndex("ActividadId", "AlumnoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_actividad_equipo_actividad_id_alumno_id");
+
+                    b.ToTable("actividad_equipo", (string)null);
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -637,6 +689,152 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                             t.HasCheckConstraint("ck_criterio_forma", "forma IN ('numerica', 'cumplimiento')");
 
                             t.HasCheckConstraint("ck_criterio_peso", "peso BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Equipo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<Guid>("GrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_id");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_equipo");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_equipo_docente_id");
+
+                    b.HasIndex("GrupoId")
+                        .HasDatabaseName("ix_equipo_grupo_id");
+
+                    b.ToTable("equipo", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.EquipoAlumno", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<Guid>("EquipoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("equipo_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_equipo_alumno");
+
+                    b.HasIndex("AlumnoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_equipo_alumno_alumno_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_equipo_alumno_docente_id");
+
+                    b.HasIndex("EquipoId")
+                        .HasDatabaseName("ix_equipo_alumno_equipo_id");
+
+                    b.ToTable("equipo_alumno", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Nota", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Etiqueta")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("etiqueta");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("periodo_id");
+
+                    b.Property<string>("Texto")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("texto");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_nota");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_nota_docente_id");
+
+                    b.HasIndex("PeriodoId")
+                        .HasDatabaseName("ix_nota_periodo_id");
+
+                    b.HasIndex("AlumnoId", "Fecha")
+                        .HasDatabaseName("ix_nota_alumno_id_fecha");
+
+                    b.ToTable("nota", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_nota_etiqueta", "etiqueta IN ('ninguna', 'fortaleza', 'mejora', 'conducta')");
                         });
                 });
 
@@ -1384,6 +1582,23 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasConstraintName("fk_actividad_rubros_rubro_id");
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.ActividadEquipo", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Evaluacion.Actividad", null)
+                        .WithMany()
+                        .HasForeignKey("ActividadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_actividad_equipo_actividad_actividad_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_actividad_equipo_alumnos_alumno_id");
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
                 {
                     b.HasOne("AulaLista.Domain.Evaluacion.Actividad", null)
@@ -1436,6 +1651,50 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_criterio_rubros_rubro_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Equipo", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipo_grupos_grupo_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.EquipoAlumno", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipo_alumno_alumno_alumno_id");
+
+                    b.HasOne("AulaLista.Domain.Evaluacion.Equipo", null)
+                        .WithMany("Integrantes")
+                        .HasForeignKey("EquipoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipo_alumno_equipos_equipo_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Nota", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_nota_alumno_alumno_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_nota_periodos_periodo_id");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>
@@ -1549,6 +1808,11 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
                 {
                     b.Navigation("Criterios");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Equipo", b =>
+                {
+                    b.Navigation("Integrantes");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>

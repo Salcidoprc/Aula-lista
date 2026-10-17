@@ -1,8 +1,7 @@
 import { TipoRubroDto } from '../../api/models/tipo-rubro-dto';
 import { fraccion } from '../../core/calculo/decimal';
 import { aEntrada, criterioNuevo, rubroNuevo, validar } from './borrador-rubros';
-import { unidadDeHoy } from './calificaciones';
-import { interpretar, leerPegado, numero, textoCelda, validarValor } from './matriz';
+import { interpretar, leerPegado, numero, textoCelda, unidadDeHoy, validarValor } from './matriz';
 
 const tareas: TipoRubroDto = {
   id: 't1',

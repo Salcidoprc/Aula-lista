@@ -6,6 +6,7 @@ export interface CeldaRechazada {
   actividadId: string;
   alumnoId: string;
   codigo: string;
+  equipoId?: (string | null);
   id: (string | null);
   mensaje: string;
   vigente: (null | CeldaDto);

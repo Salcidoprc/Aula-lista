@@ -48,6 +48,14 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<CambioSincronizado> CambiosSincronizados => Set<CambioSincronizado>();
 
+    public DbSet<Equipo> Equipos => Set<Equipo>();
+
+    public DbSet<EquipoAlumno> EquiposAlumno => Set<EquipoAlumno>();
+
+    public DbSet<ActividadEquipo> ActividadesEquipo => Set<ActividadEquipo>();
+
+    public DbSet<Nota> Notas => Set<Nota>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -85,5 +93,9 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<Calificacion>().HasQueryFilter(c => c.DocenteId == DocenteActual);
         modelBuilder.Entity<CalificacionCriterio>().HasQueryFilter(c => c.DocenteId == DocenteActual);
         modelBuilder.Entity<CambioSincronizado>().HasQueryFilter(c => c.DocenteId == DocenteActual);
+        modelBuilder.Entity<Equipo>().HasQueryFilter(e => e.DocenteId == DocenteActual);
+        modelBuilder.Entity<EquipoAlumno>().HasQueryFilter(e => e.DocenteId == DocenteActual);
+        modelBuilder.Entity<ActividadEquipo>().HasQueryFilter(a => a.DocenteId == DocenteActual);
+        modelBuilder.Entity<Nota>().HasQueryFilter(n => n.DocenteId == DocenteActual);
     }
 }

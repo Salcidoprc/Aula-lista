@@ -116,6 +116,7 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
 
     await expect(page.getByText('Se importaron 3 alumnos.')).toBeVisible();
     await page.getByRole('link', { name: /García López Ana/ }).click();
+    await page.getByRole('link', { name: 'Datos' }).click();
     await expect(page.getByText('María López').first()).toBeVisible();
     await expect(page.getByText('667 123 4567')).toBeVisible();
   });
@@ -135,6 +136,7 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
 
     await page.getByRole('link', { name: /Ruiz Vega/ }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ana Sofía Ruiz Vega');
+    await page.getByRole('link', { name: 'Datos' }).click();
     await sinFallasDeAccesibilidad(page);
 
     await page.getByLabel('Nombre del tutor').fill('Rosa Vega');

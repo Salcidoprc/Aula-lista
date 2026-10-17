@@ -28,25 +28,7 @@ import { controlarPortada } from '../../shared/portada/portada.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
 import { PestanasGrupo } from '../grupos/pestanas-grupo';
 import { EvaluacionService } from './evaluacion.service';
-import { numero } from './matriz';
-
-/** Hoy en la zona del docente, como "2026-10-17". */
-function hoy(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-/** La unidad que abre: la que tiene a hoy entre sus fechas; si no, la primera abierta; si no, la última. */
-export function unidadDeHoy(
-  periodos: readonly PeriodoDto[],
-  fecha = hoy(),
-): PeriodoDto | undefined {
-  return (
-    periodos.find((p) => p.inicio <= fecha && fecha <= p.fin) ??
-    periodos.find((p) => p.estado === 'abierto') ??
-    periodos.at(-1)
-  );
-}
+import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
 
 /**
  * SPEC-03, "Rubros del periodo" y la puerta a la captura: la vista que abre el grupo. Unidad elegida, suma de
@@ -302,6 +284,27 @@ export function unidadDeHoy(
               (input)="fechaNueva.set(valor($event))"
             />
           </div>
+          <fieldset class="eleccion">
+            <legend>{{ texto('captura.modo.titulo') }}</legend>
+            @for (m of modos; track m) {
+              <label>
+                <input
+                  type="radio"
+                  name="nueva-modo"
+                  [value]="m"
+                  [checked]="modoNueva() === m"
+                  (change)="modoNueva.set(m)"
+                />
+                {{ texto('captura.modo.' + m) }}
+              </label>
+            }
+          </fieldset>
+          @if (modoNueva() === 'por_equipo' && !matriz()?.equipos?.length) {
+            <p class="dato-suave ayuda-modo">
+              {{ texto('captura.modo.sinEquipos') }}
+              <a [routerLink]="['/grupos', id(), 'equipos']">{{ texto('captura.modo.armar') }}</a>
+            </p>
+          }
           @if (errorNueva(); as codigo) {
             <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
           }
@@ -313,49 +316,13 @@ export function unidadDeHoy(
     </div>
   `,
   styles: `
+    .ayuda-modo {
+      font-size: var(--texto-sm);
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-1);
-    }
-
-    .unidades {
-      display: flex;
-      gap: var(--espacio-2);
-      overflow-x: auto;
-      margin-inline: calc(-1 * var(--espacio-4));
-      padding: var(--espacio-1) var(--espacio-4);
-      scrollbar-width: none;
-    }
-
-    @media (min-width: 48rem) {
-      .unidades {
-        flex-wrap: wrap;
-        margin-inline: 0;
-        padding-inline: 0;
-      }
-    }
-
-    .chip {
-      display: inline-flex;
-      flex: none;
-      align-items: center;
-      gap: var(--espacio-2);
-      min-height: var(--tactil-minimo);
-      padding: 0 var(--espacio-4);
-      border-radius: var(--radio-pleno);
-      background: var(--color-superficie-hundida);
-      color: var(--color-texto);
-      font-weight: var(--peso-medio);
-      text-decoration: none;
-    }
-
-    .chip[aria-current='page'] {
-      background: var(--grado);
-      color: var(--color-sobre-grado);
-    }
-
-    .chip .estado {
-      font-size: var(--texto-xs);
     }
 
     .principal {
@@ -530,6 +497,8 @@ export class Calificaciones implements OnInit {
   protected readonly rubroNueva = signal('');
   protected readonly nombreNueva = signal('');
   protected readonly fechaNueva = signal('');
+  protected readonly modoNueva = signal<Modo>('individual');
+  protected readonly modos = MODOS;
   protected readonly intento = signal(false);
   protected readonly creando = signal(false);
   protected readonly errorNueva = signal<string | null>(null);
@@ -676,6 +645,7 @@ export class Calificaciones implements OnInit {
     const p = this.periodo();
     const d = hoy();
     this.fechaNueva.set(p && p.inicio <= d && d <= p.fin ? d : '');
+    this.modoNueva.set('individual');
     this.intento.set(false);
     this.errorNueva.set(null);
     this.hoja().abrir();
@@ -702,6 +672,7 @@ export class Calificaciones implements OnInit {
       const actividad = await this.servicio.crearActividad(this.rubroNueva(), {
         nombre: this.nombreNueva().trim(),
         fecha: this.fechaNueva() || null,
+        modo: this.modoNueva(),
       });
       this.hoja().cerrar();
       await this.router.navigate([

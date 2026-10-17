@@ -3,6 +3,7 @@ import { ActividadDto } from '../../api/models/actividad-dto';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CeldaDto } from '../../api/models/celda-dto';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
+import { PeriodoDto } from '../../api/models/periodo-dto';
 import { RubroDto } from '../../api/models/rubro-dto';
 import {
   Forma,
@@ -13,6 +14,10 @@ import {
 } from '../../core/calculo/calculo';
 import { Fraccion, Sentido, comparar, fraccion, formatear } from '../../core/calculo/decimal';
 import { llaveCelda } from '../../core/sincronizacion/celdas';
+
+/** Cómo se califica una actividad (RN-115). */
+export const MODOS = ['individual', 'por_equipo'] as const;
+export type Modo = (typeof MODOS)[number];
 
 /** Lo que se escribe en una celda, ya interpretado. */
 export interface Captura {
@@ -202,4 +207,22 @@ export function cambio(
 export function leerPegado(texto: string): string[][] {
   const renglones = texto.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n');
   return renglones.map((r) => r.split('\t'));
+}
+
+/** Hoy en la zona del docente, como "2026-10-17". */
+export function hoy(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** La unidad que abre: la que tiene a hoy entre sus fechas; si no, la primera abierta; si no, la última. */
+export function unidadDeHoy(
+  periodos: readonly PeriodoDto[],
+  fecha = hoy(),
+): PeriodoDto | undefined {
+  return (
+    periodos.find((p) => p.inicio <= fecha && fecha <= p.fin) ??
+    periodos.find((p) => p.estado === 'abierto') ??
+    periodos.at(-1)
+  );
 }
