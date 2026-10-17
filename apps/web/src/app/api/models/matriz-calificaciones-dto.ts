@@ -3,13 +3,17 @@
 
 import { AlumnoMatrizDto } from '../models/alumno-matriz-dto';
 import { CeldaDto } from '../models/celda-dto';
+import { ComposicionDto } from '../models/composicion-dto';
 import { ConfiguracionMatrizDto } from '../models/configuracion-matriz-dto';
+import { EquipoDto } from '../models/equipo-dto';
 import { ResultadoAlumnoDto } from '../models/resultado-alumno-dto';
 import { RubroMatrizDto } from '../models/rubro-matriz-dto';
 export interface MatrizCalificacionesDto {
   alumnos: Array<AlumnoMatrizDto>;
   celdas: Array<CeldaDto>;
+  composiciones: Array<ComposicionDto>;
   configuracion: ConfiguracionMatrizDto;
+  equipos: Array<EquipoDto>;
   estado: string;
   grupoId: string;
   periodoId: string;

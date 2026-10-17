@@ -152,7 +152,12 @@ interface Problema {
                           c.actividad.id,
                         ]"
                         [attr.title]="c.actividad.nombre"
-                        >{{ c.actividad.nombre }}</a
+                      >
+                        @if (c.actividad.modo === 'por_equipo') {
+                          <app-icono class="por-equipo" nombre="equipo" />
+                          <span class="solo-lector">{{ t('porEquipo') }}</span>
+                        }
+                        {{ c.actividad.nombre }}</a
                       >
                     </th>
                   } @else {
@@ -231,6 +236,13 @@ interface Problema {
     </div>
   `,
   styles: `
+    .por-equipo {
+      inline-size: 0.875rem;
+      block-size: 0.875rem;
+      margin-inline-end: var(--espacio-1);
+      vertical-align: -0.125em;
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-1);

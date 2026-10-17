@@ -107,7 +107,7 @@ erDiagram
 | `actividad` | rubro_id, nombre, fecha, modo (individual, por_equipo), orden | |
 | `equipo` | grupo_id, docente_id, nombre | |
 | `equipo_alumno` | equipo_id, alumno_id | Un alumno en un equipo a la vez (RN-114) |
-| `actividad_equipo` | actividad_id, nombre_equipo, alumno_id | Composición con que se calificó (RN-116) |
+| `actividad_equipo` | actividad_id, equipo_id, nombre_equipo, alumno_id | Composición con que se calificó (RN-116); `equipo_id` sin llave foránea, el equipo puede ya no existir |
 | `toma_asistencia` | grupo_id, docente_id, fecha | Única por grupo y fecha (RN-100); la unidad se deduce de la fecha |
 | `asistencia` | toma_asistencia_id, alumno_id, estado (presente, retardo, falta, justificada), version | Única por toma y alumno |
 | `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |

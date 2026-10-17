@@ -70,6 +70,29 @@ internal sealed class RepositorioEvaluacion(AulaListaDbContext db) : IRepositori
 
     public void Agregar(CambioSincronizado cambio) => db.CambiosSincronizados.Add(cambio);
 
+    public async Task<IReadOnlyList<Equipo>> EquiposAsync(Guid grupoId, CancellationToken cancellationToken) =>
+        await db.Equipos.Include(e => e.Integrantes).Where(e => e.GrupoId == grupoId).OrderBy(e => e.Orden).ThenBy(e => e.Nombre)
+            .ToListAsync(cancellationToken);
+
+    public void Agregar(Equipo equipo) => db.Equipos.Add(equipo);
+
+    public void Borrar(Equipo equipo) => db.Equipos.Remove(equipo);
+
+    public async Task<IReadOnlyList<ActividadEquipo>> ComposicionesAsync(IReadOnlyCollection<Guid> actividadIds, CancellationToken cancellationToken) =>
+        actividadIds.Count == 0
+            ? []
+            : await db.ActividadesEquipo.Where(a => actividadIds.Contains(a.ActividadId)).ToListAsync(cancellationToken);
+
+    public void Agregar(ActividadEquipo integrante) => db.ActividadesEquipo.Add(integrante);
+
+    public async Task<IReadOnlyList<Nota>> NotasAsync(Guid alumnoId, CancellationToken cancellationToken) =>
+        await db.Notas.Where(n => n.AlumnoId == alumnoId).OrderByDescending(n => n.Fecha).ThenByDescending(n => n.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+    public Task<Nota?> NotaAsync(Guid id, CancellationToken cancellationToken) => db.Notas.SingleOrDefaultAsync(n => n.Id == id, cancellationToken);
+
+    public void Agregar(Nota nota) => db.Notas.Add(nota);
+
     public async Task<IReadOnlySet<Guid>> UnidadesConDatosAsync(Guid cicloId, CancellationToken cancellationToken) =>
         (await db.Rubros
             .Join(db.Periodos, r => r.PeriodoId, p => p.Id, (r, p) => p.UnidadId)

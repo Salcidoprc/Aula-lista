@@ -330,6 +330,15 @@ Dos botones por alumno, ✓ y ✗, de 56 × 44 px. Elegido: tinte y borde interi
 ### Tabla (escritorio)
 Alumnos por actividades, agrupadas por rubro con su columna "Prom." en `superficie-hundida`, y al final Unidad y Final (Final en `--grado-tinta`). Encabezado y columna de nombres fijos al desplazar; celdas de 56 × 36 px con fondo `--grado-tinte` cuando tienen valor. Las actividades con criterios muestran su resultado en `texto-suave` y se capturan en su vista.
 
+### Equipos del grupo
+"Sin equipo" arriba sobre `superficie-hundida` y un bloque por equipo con su nombre editable, el conteo de integrantes y quitar; en escritorio los equipos van en cuadrícula y "Guardar equipos" en el panel lateral. Mover a un alumno es un toque: se toca su fila y la hoja "Mover a…" lista los equipos (el actual con `aria-current`), "Nuevo equipo" y "Sin equipo". Sin arrastre y sin animación al mover.
+
+### Captura por equipo
+La fila del equipo lleva el ícono de equipo, su nombre y la celda; debajo, sus integrantes con sangría, su valor como texto y "Ajustar". Un integrante ajustado se vuelve fila de captura normal con "Ajustado" en `aviso-tinta` y "Usar la del equipo". "Sin equipo" va al final con filas normales. En el teclado, "Para" dice "Equipo 1 (4)". En la tabla, un ícono de equipo de 14 px antes del nombre de la actividad.
+
+### Ficha del alumno
+Dos vistas con la misma pestaña subrayada en `--grado` que el grupo: Avance (abre) y Datos. Avance: chips de unidad, el promedio de la unidad en `texto-2xl` y `--grado-tinta`, rubros en desplegables con peso, promedio y una barra de proporción (promedio sobre 10), y Notas: área de texto con la pista de dictado del teclado, contador visible desde 800 caracteres, etiqueta única (Ninguna, Fortaleza, Área de mejora, Conducta) y la lista de la más nueva a la más vieja; una nota sin enviar dice "Por enviar" en `aviso-tinta`. El texto fijo "Solo tú ves estas notas" recuerda que nunca llegan a tutores.
+
 ### Indicador de sincronización
 En la navegación de la portada: ícono y texto ("Guardado", "Por enviar: n", "Enviando…", "Sin conexión: guardado aquí"). El ícono entra con fundido y desenfoque de 2 px en 200 ms; el de "Enviando" gira, salvo con movimiento reducido.
 

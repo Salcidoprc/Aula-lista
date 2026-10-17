@@ -6,7 +6,7 @@ using static AulaLista.Api.Comun.Respuestas;
 
 namespace AulaLista.Api.Evaluacion;
 
-/// <summary>SPEC-03: tipos de rubro, rubros y criterios, actividades, calificaciones y la cola sin conexión.</summary>
+/// <summary>SPEC-03: tipos de rubro, rubros y criterios, actividades, calificaciones, equipos, notas y la cola sin conexión.</summary>
 internal static class EvaluacionEndpoints
 {
     public static RouteGroupBuilder MapEvaluacion(this RouteGroupBuilder api)
@@ -40,6 +40,18 @@ internal static class EvaluacionEndpoints
             .Produces<ResultadoCalificaciones>().ProducesValidationProblem();
         api.MapPost("/sincronizacion", Sincronizar).WithTags("Calificaciones").WithName("Sincronizar")
             .Produces<ResultadoCalificaciones>().ProducesValidationProblem();
+
+        var grupos = api.MapGroup("/grupos").WithTags("Equipos");
+        grupos.MapGet("/{id:guid}/equipos", ListarEquipos).WithName("ListarEquipos")
+            .Produces<IReadOnlyList<EquipoDto>>().Produces(StatusCodes.Status404NotFound);
+        grupos.MapPut("/{id:guid}/equipos", ReemplazarEquipos).WithName("ReemplazarEquipos")
+            .Produces<IReadOnlyList<EquipoDto>>().ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        var alumnos = api.MapGroup("/alumnos").WithTags("Notas");
+        alumnos.MapGet("/{id:guid}/notas", ListarNotas).WithName("ListarNotas")
+            .Produces<IReadOnlyList<NotaDto>>().Produces(StatusCodes.Status404NotFound);
+        alumnos.MapPost("/{id:guid}/notas", CrearNota).WithName("CrearNota")
+            .Produces<NotaDto>(StatusCodes.Status201Created).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
         return api;
     }
 
@@ -81,4 +93,18 @@ internal static class EvaluacionEndpoints
     private static async Task<IResult> Sincronizar(
         SincronizarCambios cuerpo, IValidator<SincronizarCambios> validador, GuardarCalificacionesCasoUso caso, CancellationToken ct) =>
         await validador.ValidarAsync(cuerpo, ct) ?? TypedResults.Ok(await caso.EjecutarAsync(cuerpo, ct));
+
+    private static async Task<IResult> ListarEquipos(Guid id, ListarEquiposCasoUso caso, CancellationToken ct) =>
+        await caso.EjecutarAsync(id, ct) is { } lista ? TypedResults.Ok(lista) : TypedResults.NotFound();
+
+    private static async Task<IResult> ReemplazarEquipos(
+        Guid id, ReemplazarEquipos cuerpo, IValidator<ReemplazarEquipos> validador, ReemplazarEquiposCasoUso caso, CancellationToken ct) =>
+        await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct));
+
+    private static async Task<IResult> ListarNotas(Guid id, ListarNotasCasoUso caso, CancellationToken ct) =>
+        await caso.EjecutarAsync(id, ct) is { } lista ? TypedResults.Ok(lista) : TypedResults.NotFound();
+
+    private static async Task<IResult> CrearNota(
+        Guid id, CrearNota cuerpo, IValidator<CrearNota> validador, CrearNotaCasoUso caso, CancellationToken ct) =>
+        await validador.ValidarAsync(cuerpo, ct) ?? Creado(await caso.EjecutarAsync(id, cuerpo, ct), n => $"/api/v1/alumnos/{n.AlumnoId}/notas");
 }

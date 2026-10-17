@@ -3,5 +3,6 @@
 
 export interface DatosActividad {
   fecha: (string | null);
+  modo?: (string | null);
   nombre: string;
 }

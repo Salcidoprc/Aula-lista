@@ -2,12 +2,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from '../../api/api';
 import { sincronizar } from '../../api/fn/calificaciones/sincronizar';
+import { crearNota } from '../../api/fn/notas/crear-nota';
 import { CambioCelda } from '../../api/models/cambio-celda';
+import { CrearNota } from '../../api/models/crear-nota';
 import { CeldaDto } from '../../api/models/celda-dto';
 import { CeldaRechazada } from '../../api/models/celda-rechazada';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
-import { ALMACEN_LOCAL, CambioEnCola } from './almacen-local';
-import { conCambios, conCeldas, llaveCelda } from './celdas';
+import { ALMACEN_LOCAL, CambioEnCola, NotaEnCola } from './almacen-local';
+import { conCambios, conCeldas, llaveCelda, llavesDeCambio } from './celdas';
 
 /** 02-arquitectura: lotes de hasta 100 cambios. */
 const LOTE = 100;
@@ -34,6 +36,7 @@ export class ColaSincronizacion {
   private readonly api = inject(Api);
   private readonly almacen = inject(ALMACEN_LOCAL);
   private readonly oyentes = new Set<(resultado: ResultadoLote) => void>();
+  private readonly oyentesNotas = new Set<(alumnoId: string) => void>();
   private envio: Promise<void> | null = null;
   private otraVez = false;
   private reintento: ReturnType<typeof setTimeout> | null = null;
@@ -61,6 +64,11 @@ export class ColaSincronizacion {
     return desde === null ? 0 : Math.floor((Date.now() - desde) / DIA_MS);
   });
 
+  /** Celdas con una captura que se está escribiendo en el dispositivo (cuántas a la vez). */
+  private readonly escribiendo = new Map<string, number>();
+  /** Confirmaciones en curso: cada una junta las celdas que se capturan mientras se aplica. */
+  private readonly colectores = new Set<Set<string>>();
+
   constructor() {
     if (typeof window !== 'undefined') {
       const enLinea = (): void => {
@@ -87,6 +95,34 @@ export class ColaSincronizacion {
 
   /** Guarda la matriz con la captura ya aplicada y encola sus cambios. Después intenta enviarlos. */
   async guardar(matriz: MatrizCalificacionesDto, cambios: readonly CambioCelda[]): Promise<void> {
+    // Mientras se escribe, una confirmación que llegue no debe pisar estas celdas con lo que tenía el servidor.
+    const llaves = cambios.flatMap((c) => llavesDeCambio(matriz, c));
+    for (const llave of llaves) {
+      this.escribiendo.set(llave, (this.escribiendo.get(llave) ?? 0) + 1);
+      for (const tocadas of this.colectores) {
+        tocadas.add(llave);
+      }
+    }
+    try {
+      await this.encolar(matriz, cambios);
+    } finally {
+      for (const llave of llaves) {
+        const n = (this.escribiendo.get(llave) ?? 1) - 1;
+        if (n > 0) {
+          this.escribiendo.set(llave, n);
+        } else {
+          this.escribiendo.delete(llave);
+        }
+      }
+    }
+    await this.contar();
+    void this.enviar();
+  }
+
+  private async encolar(
+    matriz: MatrizCalificacionesDto,
+    cambios: readonly CambioCelda[],
+  ): Promise<void> {
     const ahora = Date.now();
     const enCola: CambioEnCola[] = cambios.map((cambio, i) => {
       const id = crypto.randomUUID();
@@ -98,8 +134,6 @@ export class ColaSincronizacion {
       };
     });
     await this.almacen.guardarYEncolar(matriz, enCola);
-    await this.contar();
-    void this.enviar();
   }
 
   /** La matriz del servidor con los cambios de este dispositivo que aún no se envían. */
@@ -111,6 +145,27 @@ export class ColaSincronizacion {
     );
     await this.almacen.guardarMatriz(completa);
     return completa;
+  }
+
+  /**
+   * Una nota nueva (SPEC-03): se guarda en el dispositivo y se envía cuando haya red. Cada nota es un registro
+   * nuevo con su id, así que reenviarla no la duplica (02-arquitectura).
+   */
+  async guardarNota(alumnoId: string, nota: CrearNota): Promise<void> {
+    await this.almacen.encolarNota({ id: nota.id, alumnoId, creado: Date.now(), nota });
+    await this.contar();
+    void this.enviar();
+  }
+
+  /** Las notas del alumno que todavía no llegan al servidor. */
+  async notasPendientes(alumnoId: string): Promise<readonly NotaEnCola[]> {
+    return this.almacen.notasPendientes(alumnoId).catch(() => []);
+  }
+
+  /** Avisa cuando una nota llegó al servidor (o se descartó). Devuelve cómo dejar de escuchar. */
+  alEnviarNota(oyente: (alumnoId: string) => void): () => void {
+    this.oyentesNotas.add(oyente);
+    return () => this.oyentesNotas.delete(oyente);
   }
 
   async matrizGuardada(periodoId: string): Promise<MatrizCalificacionesDto | null> {
@@ -188,6 +243,40 @@ export class ColaSincronizacion {
   }
 
   private async enviarLotes(): Promise<void> {
+    await this.enviarCeldas();
+    await this.enviarNotas();
+  }
+
+  /** Las notas, una por una y en orden. Un 4xx (alumno o periodo que ya no admite notas) la descarta. */
+  private async enviarNotas(): Promise<void> {
+    for (const pendiente of await this.almacen.notasPendientes()) {
+      if (!this.conexion()) {
+        return;
+      }
+      this.mandando.set(true);
+      try {
+        await this.api.invoke(crearNota, { id: pendiente.alumnoId, body: pendiente.nota });
+      } catch (error) {
+        const estado = error instanceof HttpErrorResponse ? error.status : 0;
+        if (estado === 0) {
+          this.conexion.set(false);
+        }
+        if (estado === 0 || estado === 401 || estado >= 500) {
+          if (estado !== 401) {
+            this.programarReintento();
+          }
+          return;
+        }
+      }
+      await this.almacen.quitarNota(pendiente.id);
+      await this.contar();
+      for (const oyente of this.oyentesNotas) {
+        oyente(pendiente.alumnoId);
+      }
+    }
+  }
+
+  private async enviarCeldas(): Promise<void> {
     for (;;) {
       const lote = await this.almacen.pendientes(LOTE);
       if (lote.length === 0 || !this.conexion()) {
@@ -226,8 +315,35 @@ export class ColaSincronizacion {
     aplicadas: readonly CeldaDto[],
     rechazadas: readonly CeldaRechazada[],
   ): Promise<void> {
+    // Celdas que se capturan mientras se confirma: su cambio quizá aún no está en la cola que se lee aquí.
+    const tocadas = new Set(this.escribiendo.keys());
+    this.colectores.add(tocadas);
+    try {
+      await this.aplicarConfirmacion(lote, aplicadas, rechazadas, tocadas);
+    } finally {
+      this.colectores.delete(tocadas);
+    }
+  }
+
+  private async aplicarConfirmacion(
+    lote: readonly CambioEnCola[],
+    aplicadas: readonly CeldaDto[],
+    rechazadas: readonly CeldaRechazada[],
+    tocadas: ReadonlySet<string>,
+  ): Promise<void> {
     await this.almacen.quitar(lote.map((c) => c.id));
-    const siguen = new Set((await this.almacen.pendientes()).map((c) => llaveCelda(c.cambio)));
+    // Las celdas con otro cambio detrás en la cola; uno por equipo cuenta por cada integrante.
+    const matrices = new Map<string, MatrizCalificacionesDto | undefined>();
+    const siguen = new Set<string>();
+    for (const c of await this.almacen.pendientes()) {
+      if (!matrices.has(c.periodoId)) {
+        matrices.set(c.periodoId, (await this.almacen.leerMatriz(c.periodoId))?.matriz);
+      }
+      const matriz = matrices.get(c.periodoId);
+      for (const llave of matriz ? llavesDeCambio(matriz, c.cambio) : [llaveCelda(c.cambio)]) {
+        siguen.add(llave);
+      }
+    }
     const vigentes = new Map<string, CeldaDto | null>();
     for (const celda of aplicadas) {
       vigentes.set(llaveCelda(celda), celda);
@@ -238,6 +354,12 @@ export class ColaSincronizacion {
     for (const llave of siguen) {
       vigentes.delete(llave); // otro cambio de esa celda viene detrás: manda el más nuevo
     }
+    const sinTocadas = (): void => {
+      for (const llave of tocadas) {
+        vigentes.delete(llave);
+      }
+    };
+    sinTocadas();
 
     for (const periodoId of new Set(lote.map((c) => c.periodoId))) {
       const guardada = await this.almacen.leerMatriz(periodoId);
@@ -246,6 +368,7 @@ export class ColaSincronizacion {
       }
     }
     await this.contar();
+    sinTocadas(); // las que se capturaron mientras se guardaba la copia local
     const resultado: ResultadoLote = { vigentes, rechazadas };
     for (const oyente of this.oyentes) {
       oyente(resultado);

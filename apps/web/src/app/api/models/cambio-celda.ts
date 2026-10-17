@@ -6,6 +6,7 @@ export interface CambioCelda {
   actividadId: string;
   alumnoId: string;
   criterios: (Array<CriterioCambio> | null);
+  equipoId?: (string | null);
   id: (string | null);
   marca: string;
   valor: (number | string | null);

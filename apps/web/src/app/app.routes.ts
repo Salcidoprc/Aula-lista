@@ -46,6 +46,12 @@ export const routes: Routes = [
         loadComponent: () => import('./docente/grupos/grupo').then((m) => m.Grupo),
       },
       {
+        path: ':id/equipos',
+        title: 'titulos.equipos',
+        canDeactivate: [confirmarSalida],
+        loadComponent: () => import('./docente/evaluacion/equipos').then((m) => m.Equipos),
+      },
+      {
         path: ':id/periodos/:periodoId/rubros',
         title: 'titulos.rubros',
         canDeactivate: [confirmarSalida],
