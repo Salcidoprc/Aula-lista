@@ -87,7 +87,11 @@ const LONGITUD_NOMBRE = 40;
           <p class="aviso aviso--pendiente">{{ t('archivado') }}</p>
         }
 
-        <form class="columnas" (submit)="$event.preventDefault(); guardar()" novalidate>
+        <form
+          class="columnas columnas--equipos"
+          (submit)="$event.preventDefault(); guardar()"
+          novalidate
+        >
           <div class="principal">
             @if (activos().length === 0) {
               <section class="vacio" aria-labelledby="sin-alumnos-titulo">
@@ -109,23 +113,6 @@ const LONGITUD_NOMBRE = 40;
                 }
               </section>
             } @else {
-              @if (sinEquipo().length) {
-                <section class="sin-equipo" aria-labelledby="sin-equipo-titulo">
-                  <h2 id="sin-equipo-titulo" class="cifras">
-                    {{ t('sinEquipo', { cantidad: sinEquipo().length }) }}
-                  </h2>
-                  <ng-container
-                    [ngTemplateOutlet]="integrantes"
-                    [ngTemplateOutletContext]="{ $implicit: sinEquipo() }"
-                  />
-                </section>
-              } @else {
-                <p class="completo">
-                  <app-icono nombre="guardado" />
-                  {{ t('todosConEquipo') }}
-                </p>
-              }
-
               <div class="equipos">
                 @for (e of borrador(); track e.clave; let i = $index) {
                   <section class="equipo" [attr.aria-labelledby]="e.clave + '-titulo'">
@@ -201,13 +188,41 @@ const LONGITUD_NOMBRE = 40;
             }
           </div>
 
-          @if (borrador().length > 0 || hayCambios()) {
-            <aside class="lateral solo-escritorio" aria-labelledby="resumen-equipos">
-              <h2 id="resumen-equipos">{{ t('lateral') }}</h2>
-              <p class="dato-suave">{{ t('lateralTexto') }}</p>
-              <ng-container [ngTemplateOutlet]="pie" />
-            </aside>
-          }
+          <!--
+            En celular "Sin equipo" va primero (order); en escritorio, a la derecha junto a "Guardar", para que
+            los equipos queden a la vista aunque el grupo sea grande.
+          -->
+          <div class="lado">
+            @if (activos().length > 0 && borrador().length > 0) {
+              @if (sinEquipo().length) {
+                <section class="sin-equipo" aria-labelledby="sin-equipo-titulo">
+                  <h2 id="sin-equipo-titulo" class="cifras">
+                    {{ t('sinEquipo', { cantidad: sinEquipo().length }) }}
+                  </h2>
+                  <ng-container
+                    [ngTemplateOutlet]="integrantes"
+                    [ngTemplateOutletContext]="{ $implicit: sinEquipo() }"
+                  />
+                </section>
+              } @else {
+                <p class="completo">
+                  <app-icono nombre="guardado" />
+                  {{ t('todosConEquipo') }}
+                </p>
+              }
+            }
+            @if (borrador().length > 0 || hayCambios()) {
+              <aside class="lateral solo-escritorio" aria-labelledby="resumen-equipos">
+                <h2 id="resumen-equipos">{{ t('lateral') }}</h2>
+                <p class="dato-suave">{{ t('lateralTexto') }}</p>
+                @if (hayCambios()) {
+                  <ng-container [ngTemplateOutlet]="pie" />
+                } @else {
+                  <p class="sin-cambios dato-suave">{{ t('sinCambios') }}</p>
+                }
+              </aside>
+            }
+          </div>
         </form>
       }
 
@@ -220,6 +235,12 @@ const LONGITUD_NOMBRE = 40;
                 type="button"
                 [disabled]="!editable()"
                 [attr.data-alumno]="a.id"
+                aria-haspopup="dialog"
+                [attr.aria-label]="
+                  editable()
+                    ? t('moverA', { nombre: a.apellidos + ' ' + a.nombres, numero: a.numeroLista })
+                    : null
+                "
                 (click)="elegir(a)"
               >
                 <span class="numero cifras">{{ a.numeroLista }}</span>
@@ -344,6 +365,40 @@ const LONGITUD_NOMBRE = 40;
     }
 
     /* "Sin equipo" pide atención: superficie hundida, sin tarjeta ni borde de color. */
+    .lado {
+      display: contents;
+    }
+
+    .lado > .sin-equipo,
+    .lado > .completo {
+      order: -1;
+    }
+
+    @media (min-width: 64rem) {
+      form.columnas.columnas--equipos {
+        grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+      }
+
+      .lado {
+        display: grid;
+        gap: var(--espacio-4);
+        position: sticky;
+        top: var(--espacio-5);
+        max-block-size: calc(100dvh - 2 * var(--espacio-5));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .lado > .sin-equipo,
+      .lado > .completo {
+        order: 0;
+      }
+
+      .lado > .lateral {
+        position: static;
+      }
+    }
+
     .sin-equipo {
       display: grid;
       gap: var(--espacio-2);

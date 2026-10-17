@@ -252,6 +252,7 @@
   display: flex;
   gap: var(--espacio-2);
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   margin-inline: calc(-1 * var(--espacio-4));
   padding: var(--espacio-1) var(--espacio-4);
   scrollbar-width: none;
@@ -280,6 +281,7 @@
 }
 
 button.chip {
+  touch-action: manipulation;
   border: 0;
   font-family: inherit;
   font-size: inherit;
@@ -295,4 +297,3 @@ button.chip {
 .chip .estado {
   font-size: var(--texto-xs);
 }
-

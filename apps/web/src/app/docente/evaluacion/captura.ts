@@ -188,10 +188,26 @@ interface Fila {
                 @let fe = filaEquipo(e);
                 <section class="equipo" [attr.aria-label]="fe.etiqueta">
                   <ol class="alumnos">
-                    <ng-container
-                      [ngTemplateOutlet]="fila"
-                      [ngTemplateOutletContext]="{ $implicit: fe, baja: false }"
-                    />
+                    @if (todosAjustados(e)) {
+                      <!-- Sin integrantes que sigan al equipo, no hay calificación de equipo que capturar. -->
+                      <li class="fila fila--equipo">
+                        <span class="alumno">
+                          <app-icono class="numero" nombre="equipo" />
+                          <span class="nombre"
+                            ><span class="apellidos">{{ fe.apellidos }}</span>
+                            <span class="dato-suave cifras">{{ fe.nombres }}</span></span
+                          >
+                        </span>
+                        <span class="todos-ajustados dato-suave">{{
+                          t('equipo.todosAjustados')
+                        }}</span>
+                      </li>
+                    } @else {
+                      <ng-container
+                        [ngTemplateOutlet]="fila"
+                        [ngTemplateOutletContext]="{ $implicit: fe, baja: false }"
+                      />
+                    }
                   </ol>
                   <ol class="alumnos integrantes" [attr.aria-label]="t('equipo.integrantes')">
                     @for (a of integrantesDe(e); track a.id) {
@@ -209,7 +225,7 @@ interface Fila {
                             [attr.aria-label]="
                               t('equipo.ajustarA', {
                                 alumno: nombreDe(a),
-                                valor: textoCelda(celdaDe(a.id)) || '—',
+                                valor: textoCelda(celdaDe(a.id)) || t('sinCalificacion'),
                               })
                             "
                             (click)="ajustar(a.id)"
@@ -442,6 +458,9 @@ interface Fila {
                 }
               } @else {
                 <span class="dato-suave">{{ t('equipo.ajustando') }}</span>
+                <button class="enlace" type="button" (click)="cancelarAjuste(f.clave)">
+                  {{ t('equipo.cancelar') }}
+                </button>
               }
             </div>
           }
@@ -905,6 +924,17 @@ interface Fila {
       font-size: var(--texto-sm);
     }
 
+    .ajuste .enlace {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: var(--tactil-minimo);
+    }
+
+    .todos-ajustados {
+      font-size: var(--texto-sm);
+      text-align: end;
+    }
+
     .ajustado {
       font-weight: var(--peso-medio);
       color: var(--color-aviso-tinta);
@@ -1082,7 +1112,9 @@ export class Captura implements OnInit {
       filas.push(...this.activos().map((a) => this.filaAlumno(a)));
     } else {
       for (const e of this.equipos()) {
-        filas.push(this.filaEquipo(e));
+        if (!this.todosAjustados(e)) {
+          filas.push(this.filaEquipo(e));
+        }
         filas.push(
           ...this.integrantesDe(e)
             .filter((a) => this.editandoIntegrante(a.id))
@@ -1253,6 +1285,21 @@ export class Captura implements OnInit {
     this.ajustando.update((s) => new Set(s).add(alumnoId));
     this.activar(alumnoId);
     this.enfocar(`[data-campo="${alumnoId}"], [data-campo^="${alumnoId}:"]`);
+  }
+
+  protected todosAjustados(e: EquipoDeActividad): boolean {
+    return e.alumnoIds.every((id) => this.celdaAlumno(id)?.origen === 'ajustada');
+  }
+
+  /** Cierra el campo de un integrante que se abrió sin cambiarlo. */
+  protected cancelarAjuste(alumnoId: string): void {
+    this.ajustando.update((s) => {
+      const n = new Set(s);
+      n.delete(alumnoId);
+      return n;
+    });
+    this.marcarError(alumnoId, null);
+    this.enfocar(`[data-alumno="${alumnoId}"] .alumno`);
   }
 
   /** Vuelve a la calificación del equipo: se vacía su celda y el equipo se manda otra vez. */

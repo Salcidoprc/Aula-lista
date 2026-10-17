@@ -909,8 +909,11 @@
       "ajustando": "Lo que captures aquí es solo para este alumno.",
       "ajustado": "Ajustado",
       "quitarAjuste": "Usar la del equipo",
-      "sinEquipo": "Sin equipo"
-    }
+      "sinEquipo": "Sin equipo",
+      "todosAjustados": "Todos sus integrantes están ajustados.",
+      "cancelar": "Cancelar ajuste"
+    },
+    "sinCalificacion": "sin calificación"
   },
   "tabla": {
     "volver": "Calificaciones",
@@ -984,7 +987,9 @@
     "nombreSugerido": "Equipo",
     "movido": "{{nombre}} ahora está en {{equipo}}.",
     "movidoSinEquipo": "{{nombre}} quedó sin equipo.",
-    "guardados": "Equipos guardados."
+    "guardados": "Equipos guardados.",
+    "moverA": "Mover a {{nombre}}, número {{numero}}",
+    "sinCambios": "Sin cambios por guardar."
   },
   "avance": {
     "titulo": "Calificaciones",
@@ -1008,16 +1013,18 @@
       "etiqueta": "Etiqueta",
       "guardar": "Guardar nota",
       "guardada": "Nota guardada.",
-      "sinConexion": "Sin conexión: solo se ven las notas guardadas en este dispositivo.",
+      "sinConexion": "Sin conexión: puede haber notas de otros dispositivos que todavía no se ven aquí.",
       "vacio": "Todavía no hay notas en esta unidad.",
       "lista": "Notas de la unidad",
-      "porEnviar": "Por enviar"
+      "porEnviar": "Por enviar",
+      "guardadaAqui": "Nota guardada en este dispositivo. Se envía al volver la conexión."
     },
     "etiquetas": {
       "ninguna": "Ninguna",
       "fortaleza": "Fortaleza",
       "mejora": "Área de mejora",
       "conducta": "Conducta"
-    }
+    },
+    "sinCalificacion": "sin calificación"
   }
 }

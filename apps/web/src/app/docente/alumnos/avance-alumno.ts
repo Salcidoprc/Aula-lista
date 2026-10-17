@@ -76,74 +76,84 @@ interface NotaVista {
         </div>
       }
 
-      @if (error(); as codigo) {
+      @if (sinUnidades()) {
+        <p class="dato-suave">{{ t('sinUnidades') }}</p>
+      } @else if (!periodo() && error(); as codigo) {
         <div class="aviso aviso--error" role="alert">
           <p>{{ texto('errores.' + codigo) }}</p>
-          <button class="boton boton--secundario" type="button" (click)="cargarMatriz()">
+          <button class="boton boton--secundario" type="button" (click)="reintentar()">
             {{ t('reintentar') }}
           </button>
-        </div>
-      } @else if (sinUnidades()) {
-        <p class="dato-suave">{{ t('sinUnidades') }}</p>
-      } @else if (!matriz()) {
-        <div role="status" [attr.aria-label]="t('cargando')">
-          <span class="esqueleto promedio-esqueleto" aria-hidden="true"></span>
-          <span class="esqueleto fila-esqueleto" aria-hidden="true"></span>
-          <span class="esqueleto fila-esqueleto" aria-hidden="true"></span>
         </div>
       } @else {
         <div class="columnas columnas--pares">
           <section class="calificaciones" aria-labelledby="avance-titulo">
             <h2 id="avance-titulo" class="solo-lector">{{ t('titulo') }}</h2>
-            <div class="promedio-actual">
-              <span class="etiqueta dato-suave">{{ t('promedio') }}</span>
-              <span class="valor cifras">{{ promedio() }}</span>
-              @if (parcial()) {
-                <span class="parcial dato-suave">{{ t('parcial') }}</span>
-              }
-            </div>
-
-            @if (rubros().length === 0) {
-              <p class="dato-suave">{{ t('sinRubros') }}</p>
+            <!-- El error y la espera son solo de las calificaciones: las notas se escriben aunque no haya red. -->
+            @if (error(); as codigo) {
+              <div class="aviso aviso--error" role="alert">
+                <p>{{ texto('errores.' + codigo) }}</p>
+                <button class="boton boton--secundario" type="button" (click)="reintentar()">
+                  {{ t('reintentar') }}
+                </button>
+              </div>
+            } @else if (!matriz()) {
+              <div role="status" [attr.aria-label]="t('cargando')">
+                <span class="esqueleto promedio-esqueleto" aria-hidden="true"></span>
+                <span class="esqueleto fila-esqueleto" aria-hidden="true"></span>
+                <span class="esqueleto fila-esqueleto" aria-hidden="true"></span>
+              </div>
             } @else {
-              <ul class="rubros">
-                @for (r of rubros(); track r.id) {
-                  <li class="rubro">
-                    <details>
-                      <summary>
-                        <span class="cabeza-rubro">
-                          <span class="nombre">{{ r.nombre }}</span>
-                          <span class="peso dato-suave cifras">{{
-                            t('peso', { peso: r.peso })
-                          }}</span>
-                          <span
-                            class="valor-rubro cifras"
-                            [class.sin-datos]="r.promedio === null"
-                            >{{ r.promedio ?? t('sinDatos') }}</span
-                          >
-                          <span class="progreso" aria-hidden="true">
-                            <span [style.inline-size.%]="r.porcentaje"></span>
-                          </span>
-                        </span>
-                      </summary>
-                      @if (r.actividades.length === 0) {
-                        <p class="dato-suave sin-actividades">{{ t('sinActividades') }}</p>
-                      } @else {
-                        <ul class="actividades">
-                          @for (a of r.actividades; track a.id) {
-                            <li>
-                              <span class="nombre-actividad">{{ a.nombre }}</span>
-                              <span class="cifras" [class.dato-suave]="!a.capturada">{{
-                                a.texto
-                              }}</span>
-                            </li>
-                          }
-                        </ul>
-                      }
-                    </details>
-                  </li>
+              <div class="promedio-actual">
+                <span class="etiqueta dato-suave">{{ t('promedio') }}</span>
+                <span class="valor cifras">{{ promedio() }}</span>
+                @if (parcial()) {
+                  <span class="parcial dato-suave">{{ t('parcial') }}</span>
                 }
-              </ul>
+              </div>
+
+              @if (rubros().length === 0) {
+                <p class="dato-suave">{{ t('sinRubros') }}</p>
+              } @else {
+                <ul class="rubros">
+                  @for (r of rubros(); track r.id) {
+                    <li class="rubro">
+                      <details>
+                        <summary>
+                          <span class="cabeza-rubro">
+                            <span class="nombre">{{ r.nombre }}</span>
+                            <span class="peso dato-suave cifras">{{
+                              t('peso', { peso: r.peso })
+                            }}</span>
+                            <span
+                              class="valor-rubro cifras"
+                              [class.sin-datos]="r.promedio === null"
+                              >{{ r.promedio ?? t('sinDatos') }}</span
+                            >
+                            <span class="progreso" aria-hidden="true">
+                              <span [style.inline-size.%]="r.porcentaje"></span>
+                            </span>
+                          </span>
+                        </summary>
+                        @if (r.actividades.length === 0) {
+                          <p class="dato-suave sin-actividades">{{ t('sinActividades') }}</p>
+                        } @else {
+                          <ul class="actividades">
+                            @for (a of r.actividades; track a.id) {
+                              <li>
+                                <span class="nombre-actividad">{{ a.nombre }}</span>
+                                <span class="cifras" [class.dato-suave]="!a.capturada">{{
+                                  a.texto
+                                }}</span>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </details>
+                    </li>
+                  }
+                </ul>
+              }
             }
           </section>
 
@@ -165,18 +175,20 @@ interface NotaVista {
                     [value]="borrador()"
                     (input)="borrador.set(valor($event))"
                     [attr.aria-invalid]="intento() && !borrador().trim() ? true : null"
-                    aria-describedby="nota-ayuda"
+                    [attr.aria-describedby]="
+                      intento() && !borrador().trim() ? 'nota-error nota-ayuda' : 'nota-ayuda'
+                    "
                   ></textarea>
                   <p id="nota-ayuda" class="ayuda dato-suave">
                     {{ t('notas.dictado') }}
                     @if (borrador().length >= avisoLongitud) {
-                      <span class="cifras contador">
+                      <span class="cifras contador" aria-live="polite">
                         {{ t('notas.contador', { usados: borrador().length, maximo: longitud }) }}
                       </span>
                     }
                   </p>
                   @if (intento() && !borrador().trim()) {
-                    <p class="error" role="alert">{{ t('notas.requerido') }}</p>
+                    <p id="nota-error" class="error" role="alert">{{ t('notas.requerido') }}</p>
                   }
                 </div>
                 <fieldset class="eleccion etiquetas">
@@ -567,6 +579,7 @@ export class AvanceAlumno {
   }
 
   private async cargar(grupoId: string): Promise<void> {
+    this.error.set(null);
     try {
       const periodos = await this.servicio.periodos(grupoId);
       this.periodos.set(periodos);
@@ -585,6 +598,15 @@ export class AvanceAlumno {
     }
     this.periodo.set(p);
     await this.cargarMatriz();
+  }
+
+  /** Sin unidad, se vuelve a leer todo; con unidad, solo sus calificaciones. */
+  protected reintentar(): void {
+    if (this.periodo()) {
+      void this.cargarMatriz();
+    } else {
+      void this.cargar(this.alumno().grupoId);
+    }
   }
 
   protected async cargarMatriz(): Promise<void> {
@@ -650,7 +672,13 @@ export class AvanceAlumno {
       this.etiqueta.set('ninguna');
       this.intento.set(false);
       await this.cargarNotas();
-      this.avisos.mostrar(this.i18n.translate('avance.notas.guardada'));
+      this.avisos.mostrar(
+        this.i18n.translate(
+          this.cola.estado() === 'sin_conexion'
+            ? 'avance.notas.guardadaAqui'
+            : 'avance.notas.guardada',
+        ),
+      );
     } catch {
       this.avisos.mostrar(this.i18n.translate('captura.noSeGuardo'), 'error');
     } finally {
