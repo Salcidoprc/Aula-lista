@@ -5,6 +5,7 @@ using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Tutores;
 using FluentValidation;
 
 namespace AulaLista.Api.Comun;
@@ -32,6 +33,7 @@ internal static class Validacion
         var estado = error.Codigo switch
         {
             _ when error == ErroresCuentas.CredencialesInvalidas || error == ErroresCuentas.SesionInvalida
+                || error == ErroresTutores.EnlaceInvalido
                 => StatusCodes.Status401Unauthorized,
             _ when error == ErroresCuentas.DemasiadosIntentos => StatusCodes.Status429TooManyRequests,
             _ when error == ErroresCuentas.CorreoRegistrado => StatusCodes.Status409Conflict,

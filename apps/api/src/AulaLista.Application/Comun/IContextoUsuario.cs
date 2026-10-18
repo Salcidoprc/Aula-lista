@@ -18,4 +18,10 @@ public interface IContextoUsuario
     /// Debe llamarse antes de abrir la transacción para que RLS lo vea.
     /// </summary>
     void AsumirDocente(Guid docenteId);
+
+    /// <summary>
+    /// Actúa como el tutor dueño de un enlace o una sesión ya probados por su hash (SPEC-06). Debe llamarse antes
+    /// de <see cref="IUnidadDeTrabajo.EnTransaccionAsync{T}"/> para que RLS lo vea.
+    /// </summary>
+    void AsumirTutor(Guid tutorId);
 }

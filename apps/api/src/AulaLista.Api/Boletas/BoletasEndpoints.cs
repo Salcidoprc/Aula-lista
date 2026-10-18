@@ -1,6 +1,8 @@
 using AulaLista.Api.Comun;
+using AulaLista.Api.Tutores;
 using AulaLista.Application.Boletas;
 using AulaLista.Application.Comun;
+using AulaLista.Application.Tutores;
 using static AulaLista.Api.Comun.Respuestas;
 
 namespace AulaLista.Api.Boletas;
@@ -27,6 +29,7 @@ internal static class BoletasEndpoints
 
         var boletas = api.MapGroup("/boletas").WithTags("Boletas");
         boletas.MapGet("/{id:guid}/pdf", PdfDeBoleta).WithName("DescargarBoleta")
+            .RequireAuthorization(AutenticacionTutor.PoliticaDocenteOTutor)
             .Produces(StatusCodes.Status200OK, contentType: Pdf).ProducesProblem(StatusCodes.Status409Conflict);
         boletas.MapPost("/{id:guid}/corregir", Corregir).WithName("CorregirBoleta")
             .Produces<BoletasDto>().ProducesProblem(StatusCodes.Status409Conflict);
@@ -53,8 +56,19 @@ internal static class BoletasEndpoints
             var r => r.Error.AProblemaHttp(),
         };
 
-    private static async Task<IResult> PdfDeBoleta(Guid id, ObtenerPdfBoletaCasoUso caso, IAlmacenArchivos almacen, CancellationToken ct)
+    /// <summary>El docente baja cualquier boleta suya; el tutor, solo la publicada de un hijo suyo (SPEC-06).</summary>
+    private static async Task<IResult> PdfDeBoleta(
+        Guid id, IContextoUsuario usuario, ObtenerPdfBoletaCasoUso caso, PdfBoletaTutorCasoUso delTutor, IAlmacenArchivos almacen,
+        CancellationToken ct)
     {
+        if (usuario.DocenteId is null)
+        {
+            return await delTutor.EjecutarAsync(id, ct) is { Ruta: { } ruta } archivo
+                && await almacen.AbrirAsync(ruta, ct) is { } contenido
+                ? TypedResults.File(contenido, Pdf, archivo.Nombre)
+                : TypedResults.NotFound();
+        }
+
         var resultado = await caso.EjecutarAsync(id, ct);
         if (resultado is null)
         {

@@ -91,5 +91,7 @@ public sealed class RlsPruebas(BaseDeDatosFixture baseDeDatos)
         public Guid? FamiliaSesionId => null;
 
         public void AsumirDocente(Guid docenteId) => throw new NotSupportedException();
+
+        public void AsumirTutor(Guid tutorId) => throw new NotSupportedException();
     }
 }

@@ -1,12 +1,14 @@
 using System.Net.Mail;
 using AulaLista.Application.Comun;
+using AulaLista.Application.Tutores;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Grupos;
 using FluentValidation;
 
 namespace AulaLista.Application.Grupos;
 
-public sealed record TutorDto(Guid Id, string Nombre, string Telefono, string? Correo, string? Parentesco)
+/// <summary><see cref="Enlace"/> solo viene en la ficha del alumno: nulo si nunca se le envió un enlace (RN-063, RN-065).</summary>
+public sealed record TutorDto(Guid Id, string Nombre, string Telefono, string? Correo, string? Parentesco, EstadoEnlaceDto? Enlace = null)
 {
     public static TutorDto De(VinculoTutor v) => new(v.TutorId, v.Nombre, v.TelefonoE164, v.Correo, v.Parentesco);
 }
@@ -46,7 +48,7 @@ public sealed class ListarAlumnosCasoUso(IRepositorioGrupos repositorio)
     }
 }
 
-public sealed class ObtenerAlumnoCasoUso(IRepositorioGrupos repositorio)
+public sealed class ObtenerAlumnoCasoUso(IRepositorioGrupos repositorio, EstadoEnlaces enlaces)
 {
     public async Task<AlumnoDto?> EjecutarAsync(Guid id, CancellationToken ct)
     {
@@ -55,7 +57,9 @@ public sealed class ObtenerAlumnoCasoUso(IRepositorioGrupos repositorio)
             return null;
         }
 
-        return AlumnoDto.De(alumno, await repositorio.VinculosAsync([alumno.Id], ct));
+        var dto = AlumnoDto.De(alumno, await repositorio.VinculosAsync([alumno.Id], ct));
+        var estados = await enlaces.LeerAsync(dto.Tutores.Select(t => t.Id).ToList(), ct);
+        return dto with { Tutores = dto.Tutores.Select(t => t with { Enlace = estados.GetValueOrDefault(t.Id) }).ToList() };
     }
 }
 

@@ -17,6 +17,7 @@ import { darDeBajaAlumno } from '../../api/fn/alumnos/dar-de-baja-alumno';
 import { desvincularTutor } from '../../api/fn/alumnos/desvincular-tutor';
 import { editarAlumno } from '../../api/fn/alumnos/editar-alumno';
 import { editarTutor } from '../../api/fn/alumnos/editar-tutor';
+import { enviarEnlaceTutor } from '../../api/fn/alumnos/enviar-enlace-tutor';
 import { obtenerAlumno } from '../../api/fn/alumnos/obtener-alumno';
 import { vincularTutor } from '../../api/fn/alumnos/vincular-tutor';
 import { AlumnoDto } from '../../api/models/alumno-dto';
@@ -24,9 +25,10 @@ import { GrupoDto } from '../../api/models/grupo-dto';
 import { TutorDto } from '../../api/models/tutor-dto';
 import { codigoDeError } from '../../core/errores/problema';
 import { AvisosService } from '../../shared/avisos/avisos.service';
-import { mostrarFecha } from '../../shared/fechas';
+import { fechaLarga, mostrarFecha } from '../../shared/fechas';
 import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { claveGrado, nombreGrupo } from '../../shared/grados';
+import { Hoja } from '../../shared/hoja';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
 import { controlarPortada } from '../../shared/portada/portada.service';
@@ -50,6 +52,17 @@ interface TutorEnEdicion {
 
 const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', parentesco: '' };
 
+interface EnlaceAbierto {
+  tutor: TutorDto;
+  url: string;
+  expiraEn: string;
+}
+
+/** wa.me lleva el número sin "+" y el mensaje ya escrito; el docente lo manda desde su propio WhatsApp. */
+export function urlWhatsApp(telefono: string, mensaje: string): string {
+  return `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
+}
+
 /**
  * La ficha del alumno en dos secciones. Avance, la que abre: SPEC-03, "Vista por alumno". Datos: SPEC-02,
  * "Ficha del alumno (sección datos)", con nombre, trato (RN-020), número de lista (RN-013), tutores con
@@ -57,7 +70,7 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
  */
 @Component({
   selector: 'app-ficha-alumno',
-  imports: [TranslocoDirective, RouterLink, NgTemplateOutlet, Icono, Ocupado, AvanceAlumno],
+  imports: [TranslocoDirective, RouterLink, NgTemplateOutlet, Icono, Ocupado, AvanceAlumno, Hoja],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -255,9 +268,40 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
                             @if (tutor.correo) {
                               <span class="dato-suave correo">{{ tutor.correo }}</span>
                             }
+                            <span class="dato-suave">
+                              @if (tutor.enlace?.ultimoAccesoEn; as acceso) {
+                                {{ t('enlace.abrio', { fecha: fechaLarga(acceso) }) }}
+                              } @else {
+                                {{ t('enlace.sinAbrir') }}
+                              }
+                            </span>
                           </div>
+                          @if (tutor.enlace?.sospechoso && !soloLectura()) {
+                            <div class="aviso aviso--pendiente sospechoso">
+                              <p>{{ t('enlace.sospechoso') }}</p>
+                              <button
+                                class="enlace enlace--solo"
+                                type="button"
+                                (click)="pedirRegenerar(tutor)"
+                              >
+                                {{ t('enlace.regenerar') }}
+                                <span class="solo-lector">{{ tutor.nombre }}</span>
+                              </button>
+                            </div>
+                          }
                           @if (!soloLectura()) {
                             <div class="acciones">
+                              <button
+                                class="boton boton--secundario enviar"
+                                type="button"
+                                [id]="'enlace-' + tutor.id"
+                                [appOcupado]="enviandoEnlace() === tutor.id"
+                                (click)="enviarEnlace(tutor)"
+                              >
+                                <app-icono nombre="enlace" />
+                                {{ t('enlace.enviar') }}
+                                <span class="solo-lector">{{ tutor.nombre }}</span>
+                              </button>
                               <button
                                 class="boton boton--secundario"
                                 type="button"
@@ -459,6 +503,68 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
         </div>
       </dialog>
 
+      <app-hoja etiqueta="enlace-titulo" (cerrada)="alCerrarEnlace()">
+        @if (enlace(); as e) {
+          <h2 id="enlace-titulo">{{ t('enlace.titulo', { nombre: e.tutor.nombre }) }}</h2>
+          <p class="nota">{{ t('enlace.texto', { fecha: fechaLarga(e.expiraEn) }) }}</p>
+          <div class="acciones-hoja">
+            <a
+              class="boton boton--ancho"
+              [href]="urlWhatsApp(e.tutor, e.url)"
+              target="_blank"
+              rel="noopener"
+            >
+              <app-icono nombre="mensaje" />
+              {{ t('enlace.whatsapp') }}
+            </a>
+            <button
+              class="boton boton--secundario boton--ancho"
+              type="button"
+              (click)="copiar(e.url)"
+            >
+              <app-icono nombre="copiar" />
+              {{ copiado() ? t('enlace.copiado') : t('enlace.copiar') }}
+            </button>
+          </div>
+          <p class="regenerar">
+            <button class="enlace enlace--solo" type="button" (click)="pedirRegenerar(e.tutor)">
+              {{ t('enlace.regenerar') }}
+            </button>
+          </p>
+        }
+      </app-hoja>
+
+      <dialog
+        #dialogoRegenerar
+        class="dialogo"
+        closedby="any"
+        aria-labelledby="dialogo-regenerar-titulo"
+      >
+        <div class="contenido">
+          <h2 id="dialogo-regenerar-titulo">
+            {{ t('enlace.regenerarTitulo', { nombre: porRegenerar()?.nombre }) }}
+          </h2>
+          <p>{{ t('enlace.regenerarTexto') }}</p>
+          <div class="acciones">
+            <button
+              class="boton boton--secundario"
+              type="button"
+              (click)="dialogoRegenerar.close()"
+            >
+              {{ t('cancelar') }}
+            </button>
+            <button
+              class="boton boton--peligro"
+              type="button"
+              [appOcupado]="!!enviandoEnlace()"
+              (click)="regenerar()"
+            >
+              {{ t('enlace.regenerarAccion') }}
+            </button>
+          </div>
+        </div>
+      </dialog>
+
       <dialog #dialogoQuitar class="dialogo" closedby="any" aria-labelledby="dialogo-quitar-titulo">
         <div class="contenido">
           <h2 id="dialogo-quitar-titulo">
@@ -599,6 +705,13 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
       gap: var(--espacio-2);
     }
 
+    /* En el celular el envío del enlace va en su propio renglón; Editar y Quitar quedan juntos debajo. */
+    @media (max-width: 29.99rem) {
+      .acciones .enviar {
+        flex: 1 0 100%;
+      }
+    }
+
     .nuevo-tutor {
       padding-top: var(--espacio-3);
     }
@@ -610,6 +723,22 @@ const TUTOR_VACIO: TutorEnEdicion = { nombre: '', telefono: '', correo: '', pare
     .nota {
       max-width: var(--ancho-lectura);
       color: var(--color-texto-suave);
+    }
+
+    .sospechoso {
+      display: grid;
+      justify-items: start;
+      gap: var(--espacio-1);
+    }
+
+    .acciones-hoja {
+      display: grid;
+      gap: var(--espacio-2);
+    }
+
+    .regenerar {
+      display: flex;
+      justify-content: center;
     }
   `,
 })
@@ -629,6 +758,9 @@ export class FichaAlumno implements OnInit {
   protected readonly dialogoBaja = viewChild.required<ElementRef<HTMLDialogElement>>('dialogoBaja');
   protected readonly dialogoQuitar =
     viewChild.required<ElementRef<HTMLDialogElement>>('dialogoQuitar');
+  protected readonly dialogoRegenerar =
+    viewChild.required<ElementRef<HTMLDialogElement>>('dialogoRegenerar');
+  private readonly hojaEnlace = viewChild.required(Hoja);
 
   protected readonly tratos = TRATOS;
   protected readonly maximoTutores = MAXIMO_TUTORES;
@@ -652,6 +784,11 @@ export class FichaAlumno implements OnInit {
   protected readonly avisoRegistrado = signal(false);
   protected readonly porQuitar = signal<TutorDto | null>(null);
   protected readonly dandoDeBaja = signal(false);
+  protected readonly enlace = signal<EnlaceAbierto | null>(null);
+  protected readonly enviandoEnlace = signal<string | null>(null);
+  protected readonly porRegenerar = signal<TutorDto | null>(null);
+  protected readonly copiado = signal(false);
+  protected readonly fechaLarga = fechaLarga;
 
   protected readonly soloLectura = computed(
     () => !!this.alumno()?.bajaEn || !!this.grupo()?.archivadoEn,
@@ -854,6 +991,84 @@ export class FichaAlumno implements OnInit {
       this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
     } finally {
       this.dandoDeBaja.set(false);
+    }
+  }
+
+  /** RN-063: reenviar crea un enlace nuevo sin revocar los anteriores (el token original no se guarda). */
+  protected async enviarEnlace(tutor: TutorDto): Promise<void> {
+    await this.pedirEnlace(tutor, false);
+  }
+
+  protected pedirRegenerar(tutor: TutorDto): void {
+    this.porRegenerar.set(tutor);
+    this.dialogoRegenerar().nativeElement.showModal();
+  }
+
+  /** RN-063: regenerar revoca los enlaces y sesiones anteriores del tutor y queda en auditoría. */
+  protected async regenerar(): Promise<void> {
+    const tutor = this.porRegenerar();
+    if (!tutor) {
+      return;
+    }
+    const listo = await this.pedirEnlace(tutor, true);
+    this.dialogoRegenerar().nativeElement.close();
+    if (listo) {
+      this.reemplazarTutores((lista) =>
+        lista.map((t) =>
+          t.id === tutor.id ? { ...t, enlace: { ultimoAccesoEn: null, sospechoso: false } } : t,
+        ),
+      );
+      this.avisos.mostrar(
+        this.i18n.translate('alumno.enlace.regenerado', { nombre: tutor.nombre }),
+      );
+    }
+  }
+
+  protected urlWhatsApp(tutor: TutorDto, url: string): string {
+    const mensaje = this.i18n.translate('alumno.enlace.mensaje', {
+      tutor: tutor.nombre,
+      alumno: this.alumno()?.nombres ?? '',
+      url,
+    });
+    return urlWhatsApp(tutor.telefono, mensaje);
+  }
+
+  protected async copiar(url: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(url);
+      this.copiado.set(true);
+    } catch {
+      this.avisos.mostrar(this.texto('alumno.enlace.noCopiado'), 'error');
+    }
+  }
+
+  protected alCerrarEnlace(): void {
+    const tutor = this.enlace()?.tutor;
+    this.enlace.set(null);
+    this.copiado.set(false);
+    if (tutor) {
+      this.enfocar(`#enlace-${tutor.id}`);
+    }
+  }
+
+  private async pedirEnlace(tutor: TutorDto, regenerar: boolean): Promise<boolean> {
+    this.enviandoEnlace.set(tutor.id);
+    try {
+      const nuevo = await this.api.invoke(enviarEnlaceTutor, {
+        id: this.id(),
+        tutorId: tutor.id,
+        body: { regenerar },
+      });
+      this.copiado.set(false);
+      this.enlace.set({ tutor, url: nuevo.url, expiraEn: nuevo.expiraEn });
+      this.hojaEnlace().abrir();
+      return true;
+    } catch (e) {
+      this.dialogoRegenerar().nativeElement.close();
+      this.avisos.mostrar(this.texto('errores.' + codigoDeError(e)), 'error');
+      return false;
+    } finally {
+      this.enviandoEnlace.set(null);
     }
   }
 

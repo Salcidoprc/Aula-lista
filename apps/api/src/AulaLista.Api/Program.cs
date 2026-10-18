@@ -7,9 +7,11 @@ using AulaLista.Api.Cuentas;
 using AulaLista.Api.Evaluacion;
 using AulaLista.Api.Grupos;
 using AulaLista.Api.Operacion;
+using AulaLista.Api.Tutores;
 using AulaLista.Application;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
+using AulaLista.Application.Tutores;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Infrastructure;
 using AulaLista.Infrastructure.Persistencia;
@@ -44,10 +46,14 @@ var esGeneracionOpenApi = System.Reflection.Assembly.GetEntryAssembly()?.GetName
 var opcionesCuentas = builder.Services.AddOptions<OpcionesCuentas>()
     .Bind(builder.Configuration.GetSection(OpcionesCuentas.Seccion))
     .ValidateDataAnnotations();
+var opcionesTutores = builder.Services.AddOptions<OpcionesTutores>()
+    .Bind(builder.Configuration.GetSection(OpcionesTutores.Seccion))
+    .ValidateDataAnnotations();
 if (!esGeneracionOpenApi)
 {
     opcionesJwt.ValidateOnStart();
     opcionesCuentas.ValidateOnStart();
+    opcionesTutores.ValidateOnStart();
 }
 
 var autenticacion = builder.Services
@@ -63,7 +69,8 @@ var autenticacion = builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.ClaveFirma)),
             ClockSkew = TimeSpan.FromSeconds(30),
         };
-    });
+    })
+    .AddScheme<AuthenticationSchemeOptions, AutenticacionTutor>(AutenticacionTutor.Esquema, null);
 
 // RF-002: Google solo se activa con credenciales (Google__ClientId y Google__ClientSecret por variable de entorno).
 var google = builder.Configuration.GetSection("Google");
@@ -88,10 +95,17 @@ if (!string.IsNullOrWhiteSpace(google["ClientId"]) && !string.IsNullOrWhiteSpace
 }
 
 // Toda ruta requiere autenticación salvo las marcadas con AllowAnonymous.
+// SPEC-06: el portal solo acepta la cookie del tutor; el PDF de una boleta acepta al docente o al tutor.
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .Build());
+        .Build())
+    .AddPolicy(AutenticacionTutor.Politica, p => p
+        .AddAuthenticationSchemes(AutenticacionTutor.Esquema)
+        .RequireClaim(ContextoUsuarioHttp.ClaimTutor))
+    .AddPolicy(AutenticacionTutor.PoliticaDocenteOTutor, p => p
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, AutenticacionTutor.Esquema)
+        .RequireAuthenticatedUser());
 
 // RNF-004: 5 intentos de inicio de sesión por minuto por IP (el límite por cuenta vive en el caso de uso).
 builder.Services.AddRateLimiter(o =>
@@ -99,6 +113,13 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy(CuentasEndpoints.PoliticaInicioSesion, http =>
     {
         var limite = builder.Configuration.GetValue($"{OpcionesCuentas.Seccion}:{nameof(OpcionesCuentas.IntentosInicioSesionPorMinuto)}", 5);
+        return RateLimitPartition.GetFixedWindowLimiter(
+            http.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = limite, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
+    });
+    o.AddPolicy(TutoresEndpoints.PoliticaCanje, http =>
+    {
+        var limite = builder.Configuration.GetValue($"{OpcionesTutores.Seccion}:{nameof(OpcionesTutores.CanjesPorMinuto)}", 10);
         return RateLimitPartition.GetFixedWindowLimiter(
             http.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
             _ => new FixedWindowRateLimiterOptions { PermitLimit = limite, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
@@ -152,6 +173,7 @@ api.MapGrupos();
 api.MapEvaluacion();
 api.MapCierre();
 api.MapBoletas();
+api.MapTutores();
 if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is { } esquemas
     && await esquemas.GetSchemeAsync(GoogleEndpoints.EsquemaGoogle) is not null)
 {

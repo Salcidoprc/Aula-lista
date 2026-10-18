@@ -5,6 +5,7 @@ using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
 using AulaLista.Domain.Operacion;
+using AulaLista.Domain.Tutores;
 using Microsoft.EntityFrameworkCore;
 
 namespace AulaLista.Infrastructure.Persistencia;
@@ -69,6 +70,11 @@ public sealed class AulaListaDbContext : DbContext
     public DbSet<LlamadaIa> LlamadasIa => Set<LlamadaIa>();
 
     public DbSet<Boleta> Boletas => Set<Boleta>();
+
+    /// <summary>Sin filtro por dueño ni RLS, como <see cref="Sesiones"/>: se buscan por hash del token (ADR-0013).</summary>
+    public DbSet<EnlaceTutor> EnlacesTutor => Set<EnlaceTutor>();
+
+    public DbSet<SesionTutor> SesionesTutor => Set<SesionTutor>();
 
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 

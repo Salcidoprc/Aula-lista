@@ -20,4 +20,17 @@ public static class MigracionesRls
                 WITH CHECK (docente_id = NULLIF(current_setting('app.docente_id', true), '')::uuid);
             """);
     }
+
+    /// <summary>
+    /// SPEC-06: política de solo lectura para el tutor de la solicitud, sumada a la del docente. Sin
+    /// <c>app.tutor_id</c> no se evalúa la condición, para no cargar las consultas del docente.
+    /// </summary>
+    public static void HabilitarLecturaDelTutor(this MigrationBuilder migrationBuilder, string tabla, string condicion)
+    {
+        ArgumentNullException.ThrowIfNull(migrationBuilder);
+        migrationBuilder.Sql($"""
+            CREATE POLICY {tabla}_del_tutor ON {tabla} FOR SELECT
+                USING (NULLIF(current_setting('app.tutor_id', true), '') IS NOT NULL AND ({condicion}));
+            """);
+    }
 }

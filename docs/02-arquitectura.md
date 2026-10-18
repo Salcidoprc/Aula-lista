@@ -119,7 +119,8 @@ erDiagram
 | `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061. RLS sin FORCE: el docente solo lee tutores con los que tiene vínculo y se crea por la función `vincular_tutor` (ADR-0014) |
 | `vinculo_tutor` | alumno_id, tutor_id, docente_id, nombre, correo, telefono_e164, parentesco | Lo que capturó cada docente; máximo 3 tutores por alumno |
 | `importacion` | grupo_id, docente_id, origen (excel, csv, texto), confirmada_en | Solo metadatos; el archivo no se guarda (ADR-0014) |
-| `enlace_tutor` | tutor_id, token_hash, creado_por_docente_id, expira_en, revocado_en, ultimo_uso_en | |
+| `enlace_tutor` | tutor_id, alumno_id, token_hash (único), creado_por_docente_id, expira_en, revocado_en, ultimo_uso_en, sospechoso_en | Solo el hash del token (RN-060). RLS forzado: lo leen su tutor, el docente con vínculo y la búsqueda por hash de `tutor_del_enlace` |
+| `sesion_tutor` | tutor_id, enlace_id, token_hash (único), expira_en, revocada_en, ultimo_uso_en | Sesión del portal (cookie de 90 días, RN-062). Mismo RLS que `enlace_tutor`, con `tutor_de_la_sesion` |
 | `nota` | alumno_id, periodo_id, texto, etiqueta (fortaleza, mejora, conducta, ninguna), fecha | |
 | `observacion` | alumno_id, docente_id, periodo_id, estado (sin_generar, generando, borrador, aprobada, publicada), texto, borrador_ia, texto_final, instruccion, regeneraciones (0 a 5), modelo, version_prompt, tokens_entrada, tokens_salida, fallo (rechazo, longitud, error), datos_cambiaron, aprobada_en | Una por alumno y periodo; `borrador_ia` es la primera versión (RN-045) |
 | `estilo_observaciones` | docente_id (llave), longitud (breve, normal, detallada), persona (segunda, tercera), ejemplos (text[], hasta 3 de 800 caracteres) | Sin fila, el estilo por defecto (normal, tercera) |
@@ -140,6 +141,8 @@ erDiagram
 3. Además, cada consulta de EF Core filtra explícitamente por dueño (filtros globales de consulta).
 4. La app se conecta con un rol de base de datos sin `BYPASSRLS`. Las migraciones usan otro rol.
 5. Las pruebas de integración intentan leer datos de otro docente y de otro tutor en cada endpoint y deben fallar.
+
+Portal del tutor: el enlace y la cookie se buscan por hash con las funciones `tutor_del_enlace` y `tutor_de_la_sesion`, que fijan `app.token_hash` solo durante la búsqueda; con el tutor conocido se fija `app.tutor_id` y las políticas de lectura del tutor limitan `vinculo_tutor`, `alumno`, `grupo`, `docente`, `boleta` (publicadas y vigentes), `periodo` y `unidad` a sus vínculos (SPEC-06).
 
 Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen antes de conocer al docente (inicio de sesión, tokens). Solo las usan los casos de uso de `Cuentas` y se buscan por hash del token o correo normalizado (ADR-0013).
 

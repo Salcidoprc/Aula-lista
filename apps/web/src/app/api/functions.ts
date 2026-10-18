@@ -83,6 +83,8 @@ export type { EditarTutor$Params as EditarTutor$Params } from './fn/alumnos/edit
 export { editarTutor as editarTutor } from './fn/alumnos/editar-tutor';
 export type { DesvincularTutor$Params as DesvincularTutor$Params } from './fn/alumnos/desvincular-tutor';
 export { desvincularTutor as desvincularTutor } from './fn/alumnos/desvincular-tutor';
+export type { EnviarEnlaceTutor$Params as EnviarEnlaceTutor$Params } from './fn/alumnos/enviar-enlace-tutor';
+export { enviarEnlaceTutor as enviarEnlaceTutor } from './fn/alumnos/enviar-enlace-tutor';
 export type { ConfirmarImportacion$Params as ConfirmarImportacion$Params } from './fn/importaciones/confirmar-importacion';
 export { confirmarImportacion as confirmarImportacion } from './fn/importaciones/confirmar-importacion';
 export type { DescargarPlantilla$Params as DescargarPlantilla$Params } from './fn/importaciones/descargar-plantilla';
@@ -161,3 +163,9 @@ export type { DescargarBoleta$Params as DescargarBoleta$Params } from './fn/bole
 export { descargarBoleta as descargarBoleta } from './fn/boletas/descargar-boleta';
 export type { CorregirBoleta$Params as CorregirBoleta$Params } from './fn/boletas/corregir-boleta';
 export { corregirBoleta as corregirBoleta } from './fn/boletas/corregir-boleta';
+export type { CanjearEnlaceTutor$Params as CanjearEnlaceTutor$Params } from './fn/portal-del-tutor/canjear-enlace-tutor';
+export { canjearEnlaceTutor as canjearEnlaceTutor } from './fn/portal-del-tutor/canjear-enlace-tutor';
+export type { ListarHijosTutor$Params as ListarHijosTutor$Params } from './fn/portal-del-tutor/listar-hijos-tutor';
+export { listarHijosTutor as listarHijosTutor } from './fn/portal-del-tutor/listar-hijos-tutor';
+export type { ObtenerHijoTutor$Params as ObtenerHijoTutor$Params } from './fn/portal-del-tutor/obtener-hijo-tutor';
+export { obtenerHijoTutor as obtenerHijoTutor } from './fn/portal-del-tutor/obtener-hijo-tutor';

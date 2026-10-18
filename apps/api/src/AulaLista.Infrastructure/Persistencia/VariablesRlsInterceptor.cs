@@ -32,6 +32,13 @@ internal sealed class VariablesRlsInterceptor(IContextoUsuario contexto) : DbTra
         return result;
     }
 
+    /// <summary>Vuelve a fijar las variables en una transacción ya abierta (después de asumir a un usuario).</summary>
+    public async Task FijarAsync(DbConnection connection, DbTransaction transaction, CancellationToken cancellationToken)
+    {
+        await using var comando = CrearComando(connection, transaction);
+        await comando.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     private DbCommand CrearComando(DbConnection connection, DbTransaction transaction)
     {
         var comando = connection.CreateCommand();

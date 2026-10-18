@@ -61,8 +61,12 @@ export class Hoja {
   /** Inicio del arrastre y la última muestra, para medir la velocidad al soltar y no el promedio. */
   private arrastre: { y: number; dy: number; ultimoY: number; ultimoT: number } | null = null;
 
+  /** Si ya está abierta no hace nada: `showModal()` lanza un error sobre un diálogo abierto. */
   abrir(): void {
-    this.dialogo().nativeElement.showModal();
+    const el = this.dialogo().nativeElement;
+    if (!el.open) {
+      el.showModal();
+    }
   }
 
   cerrar(): void {

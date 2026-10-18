@@ -181,6 +181,10 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'tutor',
+    loadChildren: () => import('./tutor/portal.routes').then((m) => m.rutasPortal),
+  },
+  {
     path: 'legal/:documento',
     title: 'titulos.legal',
     loadComponent: () => import('./legal/legal').then((m) => m.Legal),
