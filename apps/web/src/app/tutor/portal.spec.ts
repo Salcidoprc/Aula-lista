@@ -2,7 +2,10 @@ import { HijoDto } from '../api/models/hijo-dto';
 import { urlWhatsApp } from '../docente/alumnos/ficha-alumno';
 import {
   calificacion,
+  destinoDelEnlace,
   esCorregida,
+  esIos,
+  estadoPush,
   etiquetaHijo,
   fechaCorta,
   grupoDelHijo,
@@ -22,6 +25,8 @@ const hijo = (cambios: Partial<HijoDto>): HijoDto => ({
   docente: 'Ana López',
   dadoDeBaja: false,
   ultimaBoleta: null,
+  ultimoAviso: null,
+  avisosSinLeer: 0,
   ...cambios,
 });
 
@@ -78,5 +83,53 @@ describe('urlWhatsApp (RN-063)', () => {
     expect(url).toBe(
       'https://wa.me/526671234567?text=Hola%3A%20https%3A%2F%2Faulalista.mx%2Ftutor%23abc',
     );
+  });
+});
+
+describe('destinoDelEnlace (SPEC-07)', () => {
+  const id = '0f8fad5b-d9cb-469f-a165-70867728950e';
+
+  it('lleva al hijo y a la pestaña Avisos del enlace', () => {
+    expect(destinoDelEnlace(`?alumno=${id}&ver=avisos`)).toEqual({ alumno: id, ver: 'avisos' });
+    expect(destinoDelEnlace(`?alumno=${id}`)).toEqual({ alumno: id, ver: null });
+  });
+
+  it.each(['', '?alumno=../x', '?ver=avisos', `?alumno=${id}x`])('ignora "%s"', (busqueda) => {
+    expect(destinoDelEnlace(busqueda)).toBeNull();
+  });
+
+  it('no acepta pestañas desconocidas', () => {
+    expect(destinoDelEnlace(`?alumno=${id}&ver=otra`)?.ver).toBeNull();
+  });
+});
+
+describe('estadoPush (RF-064, RN-066)', () => {
+  const base = {
+    soportado: true,
+    ios: false,
+    instalada: false,
+    permiso: 'default',
+    suscrito: false,
+  } as const;
+
+  it('en iPhone pide agregar a inicio antes que nada', () => {
+    expect(estadoPush({ ...base, ios: true, soportado: false, permiso: null })).toBe(
+      'agregarInicio',
+    );
+    expect(estadoPush({ ...base, ios: true, instalada: true })).toBe('apagado');
+  });
+
+  it('distingue sin soporte, denegado, apagado y activado', () => {
+    expect(estadoPush({ ...base, soportado: false })).toBe('sinSoporte');
+    expect(estadoPush({ ...base, permiso: 'denied' })).toBe('denegado');
+    expect(estadoPush(base)).toBe('apagado');
+    expect(estadoPush({ ...base, permiso: 'granted', suscrito: true })).toBe('activado');
+    expect(estadoPush({ ...base, permiso: 'default', suscrito: true })).toBe('apagado');
+  });
+
+  it('reconoce el iPad que se presenta como Mac', () => {
+    expect(esIos('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0)', 'iPhone', 5)).toBe(true);
+    expect(esIos('Mozilla/5.0 (Macintosh)', 'MacIntel', 5)).toBe(true);
+    expect(esIos('Mozilla/5.0 (Macintosh)', 'MacIntel', 0)).toBe(false);
   });
 });

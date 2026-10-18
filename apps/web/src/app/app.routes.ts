@@ -57,6 +57,16 @@ export const routes: Routes = [
           import('./docente/asistencia/historial-asistencia').then((m) => m.HistorialAsistencia),
       },
       {
+        path: ':id/avisos',
+        title: 'titulos.avisos',
+        loadComponent: () => import('./docente/avisos/avisos-grupo').then((m) => m.AvisosGrupo),
+      },
+      {
+        path: ':id/avisos/nuevo',
+        title: 'titulos.nuevoAviso',
+        loadComponent: () => import('./docente/avisos/nuevo-aviso').then((m) => m.NuevoAviso),
+      },
+      {
         path: ':id/equipos',
         title: 'titulos.equipos',
         canDeactivate: [confirmarSalida],
@@ -113,6 +123,12 @@ export const routes: Routes = [
     canActivate: [requiereSesion, requierePerfilCompleto],
     title: 'titulos.alumno',
     loadComponent: () => import('./docente/alumnos/ficha-alumno').then((m) => m.FichaAlumno),
+  },
+  {
+    path: 'avisos/:id',
+    canActivate: [requiereSesion, requierePerfilCompleto],
+    title: 'titulos.aviso',
+    loadComponent: () => import('./docente/avisos/detalle-aviso').then((m) => m.DetalleAviso),
   },
   {
     path: 'bienvenida',

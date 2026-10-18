@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using AulaLista.Application.Avisos;
 using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
@@ -41,6 +42,15 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
     {
         var ids = boletaIds.ToArray();
         _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(e => e.PrepararBoletasAsync(docenteId, ids, null, CancellationToken.None)));
+    }
+
+    public void EncolarAviso(Guid docenteId, Guid avisoId) =>
+        _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(e => e.EnviarAvisoAsync(docenteId, avisoId, CancellationToken.None)));
+
+    public void EncolarAvisoBoletas(Guid docenteId, Guid periodoId, IReadOnlyList<Guid> boletaIds)
+    {
+        var ids = boletaIds.ToArray();
+        _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(e => e.AvisarBoletasAsync(docenteId, periodoId, ids, CancellationToken.None)));
     }
 
     public void Despachar()
@@ -207,6 +217,36 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
             throw;
         }
     }
+
+    /// <summary>
+    /// RF-071: envía el aviso. Sin reintentos automáticos para no duplicar push ni correos; lo que falló se cuenta
+    /// en la bitácora sin datos de nadie.
+    /// </summary>
+    [AutomaticRetry(Attempts = 0)]
+    public async Task EnviarAvisoAsync(Guid docenteId, Guid avisoId, CancellationToken cancellationToken)
+    {
+        var fallas = await EnAlcanceAsync(
+            docenteId, sp => sp.GetRequiredService<EnviarAvisoTrabajo>().EjecutarAsync(avisoId, cancellationToken), cancellationToken);
+        if (fallas > 0)
+        {
+            FallaronEnvios(registro, fallas, "aviso", avisoId);
+        }
+    }
+
+    /// <summary>RN-054: avisa que las boletas publicadas ya están en el portal.</summary>
+    [AutomaticRetry(Attempts = 0)]
+    public async Task AvisarBoletasAsync(Guid docenteId, Guid periodoId, Guid[] boletaIds, CancellationToken cancellationToken)
+    {
+        var fallas = await EnAlcanceAsync(
+            docenteId, sp => sp.GetRequiredService<AvisarBoletasTrabajo>().EjecutarAsync(periodoId, boletaIds, cancellationToken), cancellationToken);
+        if (fallas > 0)
+        {
+            FallaronEnvios(registro, fallas, "periodo", periodoId);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Fallaron {Fallas} envíos de {Entidad} {Id}")]
+    private static partial void FallaronEnvios(ILogger registro, int fallas, string entidad, Guid id);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Falló la redacción de observaciones del periodo {PeriodoId}")]
     private static partial void FalloRedaccion(ILogger registro, Exception ex, Guid periodoId);

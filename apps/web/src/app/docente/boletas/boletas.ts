@@ -24,16 +24,24 @@ export interface ResumenPublicacion {
   readonly boletas: number;
   readonly whatsapp: number;
   readonly correo: number;
+  readonly push: number;
+  /** Tutores a los que no les llegará por ningún canal: el docente se los comparte al publicar (RN-054). */
+  readonly porCompartir: number;
   /** Alumnos sin ningún tutor registrado: su boleta se publica pero nadie recibe aviso. */
   readonly sinContacto: readonly BoletaAlumnoDto[];
 }
 
-/** El resumen previo a publicar: cuántos tutores tienen WhatsApp, cuántos correo y quién no tiene contacto. */
+/**
+ * El resumen previo a publicar (RN-054): cuántos tutores recibirán WhatsApp, correo o push, a cuántos tendrá que
+ * compartirla el docente y qué alumnos no tienen tutor. Un tutor con dos hijos cuenta en cada uno.
+ */
 export function resumenPublicacion(alumnos: readonly BoletaAlumnoDto[]): ResumenPublicacion {
   return {
     boletas: alumnos.length,
     whatsapp: alumnos.reduce((n, a) => n + Number(a.tutoresWhatsapp), 0),
     correo: alumnos.reduce((n, a) => n + Number(a.tutoresCorreo), 0),
+    push: alumnos.reduce((n, a) => n + Number(a.tutoresPush), 0),
+    porCompartir: alumnos.reduce((n, a) => n + Number(a.tutoresPorCompartir), 0),
     sinContacto: alumnos.filter((a) => Number(a.tutoresWhatsapp) === 0),
   };
 }

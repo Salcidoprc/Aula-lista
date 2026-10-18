@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { BoletaAlumnoDto } from '../../api/models/boleta-alumno-dto';
 import { BoletasDto } from '../../api/models/boletas-dto';
+import { TutorPorCompartirDto } from '../../api/models/tutor-por-compartir-dto';
 import { GrupoDto } from '../../api/models/grupo-dto';
 import { PeriodoDto } from '../../api/models/periodo-dto';
 import { codigoDeError } from '../../core/errores/problema';
@@ -27,6 +28,9 @@ import { Ocupado } from '../../shared/ocupado';
 import { forma } from '../../shared/plural';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { EvaluacionService } from '../evaluacion/evaluacion.service';
+import { urlWhatsApp } from '../alumnos/ficha-alumno';
+import { nombresAlumnos } from '../avisos/avisos';
+import { AvisosGrupoService } from '../avisos/avisos.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
 import { BoletasService } from './boletas.service';
 import {
@@ -49,7 +53,8 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
 /**
  * SPEC-05, "Boletas y envío" (RF-050 a RF-055): genera las boletas de las observaciones aprobadas, deja ver cada PDF,
  * descargar el del grupo y exportar a Excel, publica con un resumen previo, emite versiones corregidas y cierra o
- * reabre la unidad (RN-048, RN-038). Los avisos a tutores llegan con SPEC-07; aquí se publica y se cuenta a quién.
+ * reabre la unidad (RN-048, RN-038). Publicar avisa a los tutores (RN-054); a quien no tiene ningún canal, el
+ * docente le comparte la boleta desde su WhatsApp.
  */
 @Component({
   selector: 'app-boletas-periodo',
@@ -391,7 +396,7 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
         }
       </ng-template>
 
-      <app-hoja etiqueta="publicar-titulo" (cerrada)="errorPublicar.set(null)">
+      <app-hoja #hojaPublicar etiqueta="publicar-titulo" (cerrada)="errorPublicar.set(null)">
         @if (resumenPrevio(); as r) {
           <h2 id="publicar-titulo" class="cifras">
             {{ t('confirmar.titulo.' + forma(r.boletas), { cantidad: r.boletas }) }}
@@ -404,6 +409,14 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
             <div>
               <dt>{{ t('confirmar.correo') }}</dt>
               <dd>{{ r.correo }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('confirmar.push') }}</dt>
+              <dd>{{ r.push }}</dd>
+            </div>
+            <div [class.falta]="r.porCompartir > 0">
+              <dt>{{ t('confirmar.porCompartir') }}</dt>
+              <dd>{{ r.porCompartir }}</dd>
             </div>
             <div [class.falta]="r.sinContacto.length > 0">
               <dt>{{ t('confirmar.sinContacto') }}</dt>
@@ -444,6 +457,47 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
             </button>
           </div>
         }
+      </app-hoja>
+
+      <app-hoja #hojaCompartir etiqueta="compartir-titulo" (cerrada)="errorCompartir.set(null)">
+        <h2 id="compartir-titulo">{{ t('compartir.titulo') }}</h2>
+        <p class="dato-suave">
+          {{ t('compartir.texto.' + forma(porCompartir().length), { n: porCompartir().length }) }}
+        </p>
+        <ul class="filas por-compartir">
+          @for (p of porCompartir(); track p.tutorId) {
+            <li>
+              <span class="quien">
+                <span class="nombre">{{ p.nombre }}</span>
+                <span class="dato-suave">{{ hijosDe(p) }}</span>
+              </span>
+              <button
+                class="boton"
+                type="button"
+                [class.boton--secundario]="compartidos().has(p.tutorId)"
+                [disabled]="!enLinea()"
+                [appOcupado]="compartiendo() === p.tutorId"
+                (click)="compartir(p)"
+              >
+                <app-icono [nombre]="compartidos().has(p.tutorId) ? 'guardado' : 'mensaje'" />
+                {{ compartidos().has(p.tutorId) ? t('compartir.hecho') : t('compartir.accion') }}
+                <span class="solo-lector">{{ p.nombre }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+        @if (errorCompartir(); as codigo) {
+          <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+        }
+        <div class="acciones-hoja">
+          <button
+            class="boton boton--secundario boton--ancho"
+            type="button"
+            (click)="hojaCompartir.cerrar()"
+          >
+            {{ t('compartir.listo') }}
+          </button>
+        </div>
       </app-hoja>
 
       <dialog #dialogoCorregir class="dialogo" closedby="any" aria-labelledby="corregir-titulo">
@@ -956,6 +1010,31 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
       margin-block-start: var(--espacio-4);
     }
 
+    .por-compartir {
+      margin-block: var(--espacio-3);
+      border-block: 1px solid var(--color-divisoria);
+    }
+
+    .por-compartir li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacio-2) var(--espacio-4);
+      padding-block: var(--espacio-3);
+    }
+
+    .por-compartir .quien {
+      display: grid;
+      gap: 0.125rem;
+      min-inline-size: 0;
+    }
+
+    .por-compartir .nombre {
+      font-weight: var(--peso-medio);
+      overflow-wrap: anywhere;
+    }
+
     .fila-esqueleto {
       display: block;
       inline-size: 100%;
@@ -966,6 +1045,7 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
 })
 export class BoletasPeriodo implements OnInit {
   private readonly servicio = inject(BoletasService);
+  private readonly avisosTutores = inject(AvisosGrupoService);
   private readonly evaluacion = inject(EvaluacionService);
   private readonly i18n = inject(TranslocoService);
   private readonly avisos = inject(AvisosService);
@@ -979,7 +1059,8 @@ export class BoletasPeriodo implements OnInit {
   readonly id = input.required<string>();
   readonly periodoId = input.required<string>();
 
-  protected readonly hoja = viewChild.required(Hoja);
+  protected readonly hoja = viewChild.required<Hoja>('hojaPublicar');
+  protected readonly hojaCompartir = viewChild.required<Hoja>('hojaCompartir');
   private readonly dialogoCorregir =
     viewChild.required<ElementRef<HTMLDialogElement>>('dialogoCorregir');
   private readonly dialogoCerrar =
@@ -993,6 +1074,11 @@ export class BoletasPeriodo implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly errorAccion = signal<string | null>(null);
   protected readonly errorPublicar = signal<string | null>(null);
+  protected readonly errorCompartir = signal<string | null>(null);
+  /** RN-054: tutores sin ningún canal tras publicar; el docente les comparte la boleta desde su WhatsApp. */
+  protected readonly porCompartir = signal<readonly TutorPorCompartirDto[]>([]);
+  protected readonly compartidos = signal<ReadonlySet<string>>(new Set());
+  protected readonly compartiendo = signal<string | null>(null);
   protected readonly errorDialogo = signal<string | null>(null);
   protected readonly trabajando = signal<Accion | null>(null);
   protected readonly anuncio = signal('');
@@ -1118,13 +1204,18 @@ export class BoletasPeriodo implements OnInit {
     this.errorPublicar.set(null);
     this.trabajando.set('publicar');
     try {
-      const nuevo = await this.servicio.publicar(
+      const { boletas: nuevo, porCompartir } = await this.servicio.publicar(
         this.periodoId(),
         elegidos.size > 0 ? [...elegidos] : undefined,
       );
       this.hoja().cerrar();
       this.elegidos.set(new Set());
       this.mostrar(nuevo);
+      if (porCompartir.length > 0) {
+        this.porCompartir.set(porCompartir);
+        this.compartidos.set(new Set());
+        this.hojaCompartir().abrir();
+      }
       this.avisos.mostrar(this.texto('boletas.publicadasAviso.' + forma(cantidad), { cantidad }));
       if (primera) {
         this.recordarPublicacion();
@@ -1135,6 +1226,38 @@ export class BoletasPeriodo implements OnInit {
       this.errorPublicar.set(codigoDeError(e));
     } finally {
       this.trabajando.set(null);
+    }
+  }
+  protected hijosDe(p: TutorPorCompartirDto): string {
+    return nombresAlumnos(p.alumnos);
+  }
+
+  /** La ventana se abre en el mismo toque, para que el navegador no la bloquee; wa.me llega con el enlace. */
+  protected async compartir(p: TutorPorCompartirDto): Promise<void> {
+    const ventana = window.open('', '_blank');
+    this.errorCompartir.set(null);
+    this.compartiendo.set(p.tutorId);
+    try {
+      const enlace = await this.avisosTutores.compartirBoleta(p.boletaId, p.tutorId);
+      const mensaje = this.i18n.translate('boletas.compartir.mensaje', {
+        tutor: p.nombre,
+        hijos: nombresAlumnos(p.alumnos),
+        unidad: this.periodo()?.nombre ?? '',
+        url: enlace.url,
+      });
+      const destino = urlWhatsApp(p.telefono, mensaje);
+      if (ventana) {
+        ventana.opener = null;
+        ventana.location.href = destino;
+      } else {
+        window.location.href = destino;
+      }
+      this.compartidos.update((c) => new Set(c).add(p.tutorId));
+    } catch (e) {
+      ventana?.close();
+      this.errorCompartir.set(codigoDeError(e));
+    } finally {
+      this.compartiendo.set(null);
     }
   }
 

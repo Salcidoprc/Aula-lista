@@ -116,7 +116,7 @@ erDiagram
 | `calificacion_criterio` | calificacion_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio; único por calificación y criterio; se borra con su calificación |
 | `cambio_sincronizado` | id (UUID del cliente o `Idempotency-Key`), docente_id, aplicado_en | Cambios ya aplicados: reenviar el mismo UUID no duplica (RF-037) |
 | `alumno` | grupo_id, nombres, apellidos, numero_lista, trato (neutro, el, ella), seudonimo, baja_en | Sin CURP ni fecha de nacimiento |
-| `tutor` | telefono_e164 (único), nombre, correo, push_suscripciones (jsonb) | Compartido entre docentes; ver RN-061. RLS sin FORCE: el docente solo lee tutores con los que tiene vínculo y se crea por la función `vincular_tutor` (ADR-0014) |
+| `tutor` | telefono_e164 (único), nombre, correo | Compartido entre docentes; ver RN-061. RLS sin FORCE: el docente solo lee tutores con los que tiene vínculo y se crea por la función `vincular_tutor` (ADR-0014) |
 | `vinculo_tutor` | alumno_id, tutor_id, docente_id, nombre, correo, telefono_e164, parentesco | Lo que capturó cada docente; máximo 3 tutores por alumno |
 | `importacion` | grupo_id, docente_id, origen (excel, csv, texto), confirmada_en | Solo metadatos; el archivo no se guarda (ADR-0014) |
 | `enlace_tutor` | tutor_id, alumno_id, token_hash (único), creado_por_docente_id, expira_en, revocado_en, ultimo_uso_en, sospechoso_en | Solo el hash del token (RN-060). RLS forzado: lo leen su tutor, el docente con vínculo y la búsqueda por hash de `tutor_del_enlace` |
@@ -126,9 +126,10 @@ erDiagram
 | `estilo_observaciones` | docente_id (llave), longitud (breve, normal, detallada), persona (segunda, tercera), ejemplos (text[], hasta 3 de 800 caracteres) | Sin fila, el estilo por defecto (normal, tercera) |
 | `llamada_ia` | docente_id, grupo_id, modelo, version_prompt, tokens_entrada, tokens_salida, tokens_cache_leidos, duracion_ms, resultado | Una por llamada, sin contenido; base del límite por hora y de `consumo_mensual` |
 | `boleta` | alumno_id, docente_id, periodo_id, version, datos (jsonb con la foto de calificaciones), codigo (8 caracteres, único), emitida_en, pdf_ruta, fallo_pdf, publicada_en, reemplazada_por | Las versiones no se borran; RLS por docente |
-| `aviso` | grupo_id, docente_id, titulo, cuerpo, urgente, destinatarios (todos o lista) | |
-| `entrega_aviso` | aviso_id, tutor_id, canal (push, correo, whatsapp, compartido), estado, leido_en | |
-| `mensaje_whatsapp` | grupo_id, tutor_id, plantilla, categoria, id_meta, estado, costo_estimado | Base del límite mensual |
+| `aviso` | grupo_id, docente_id, titulo, cuerpo, urgente, para_todos, creado_en, borrado_en | Borrar lo oculta del portal y queda en auditoría (RN-076); RLS por docente |
+| `entrega_aviso` | aviso_id, tutor_id, push, correo, whatsapp, sin_saldo_whatsapp, compartido_en, leido_en | Una por aviso y tutor; los canales se fijan al enviar. RLS por docente; el tutor lee las suyas y solo actualiza `leido_en` |
+| `suscripcion_push` | tutor_id, endpoint, p256dh, auth | Única por tutor y endpoint; solo servicios de push conocidos (contra SSRF). RLS forzado: la escribe su tutor; el docente con vínculo la lee para enviar y borra las vencidas |
+| `mensaje_whatsapp` | grupo_id, docente_id, tutor_id, plantilla, referencia_id (aviso o periodo), id_meta, estado (pendiente, enviado, entregado, leido, fallido), costo_estimado | Base del límite (RN-086): se aparta al decidir el envío y los fallidos no cuentan. El webhook solo hace avanzar el estado |
 | `consumo_mensual` | grupo_id, mes, mensajes_whatsapp, tokens_ia_entrada, tokens_ia_salida | |
 | `suscripcion` | docente_id, proveedor, modalidad (tarjeta, prepago_oxxo), id_externo, estado, grupos_pro, periodo_actual_fin, pagado_hasta, gracia_hasta | |
 | `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, cantidad, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
@@ -180,7 +181,7 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | --- | --- | --- |
 | Generar observaciones de un grupo | El docente lo pide en el cierre | 3, con espera exponencial |
 | Generar boletas PDF | Al publicar | 3 |
-| Enviar notificaciones (push, correo, WhatsApp) | Al publicar boletas o avisos | 5 |
+| Enviar notificaciones (push, correo, WhatsApp) | Al publicar boletas o avisos | 0 (un reintento duplicaría mensajes; las fallas se cuentan en la bitácora sin datos personales) |
 | Procesar webhooks de pagos y de WhatsApp | Webhook recibido | 5 |
 | Generar exportación de datos (RF-008) | El docente la pide | 3 |
 | Limpieza por retención (RNF-009) | Diario a las 03:00, hora del centro de México | 3 |
@@ -191,9 +192,9 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | Servicio | Uso | Interfaz en Application |
 | --- | --- | --- |
 | API de Claude | Observaciones (Haiku 5.5) y lectura de fotos de listas | `IRedactorObservaciones`, `ILectorListas` |
-| WhatsApp Cloud API | Plantillas de boleta disponible y aviso urgente | `IMensajeriaWhatsApp` |
+| WhatsApp Cloud API | Plantillas de boleta disponible y aviso urgente; simulado hasta tener credenciales (`Whatsapp__Proveedor`) | `ICanalWhatsapp` |
 | Correo (Brevo, ADR-0008) | Verificación, recuperación, avisos | `IEnvioCorreo` |
-| Web Push (VAPID) | Avisos y boletas | `INotificacionPush` |
+| Web Push (VAPID) | Avisos y boletas; simulado hasta tener claves (`Push__Proveedor`) | `ICanalPush` |
 | Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009) | `IPasarelaPagos` |
 | QuestPDF | Boletas | `IGeneradorBoletas` |
 | Almacenamiento de objetos | PDFs, exportaciones y respaldos; en el piloto, disco del servidor en un volumen (ADR-0013) | `IAlmacenArchivos` |

@@ -18,6 +18,11 @@ export const rutasPortal: Routes = [
     loadComponent: () => import('./boleta-tutor').then((m) => m.BoletaTutor),
   },
   {
+    path: 'notificaciones',
+    title: 'titulos.notificaciones',
+    loadComponent: () => import('./notificaciones').then((m) => m.Notificaciones),
+  },
+  {
     path: 'enlace-invalido',
     title: 'titulos.enlaceInvalido',
     loadComponent: () => import('./enlace-invalido').then((m) => m.EnlaceInvalido),

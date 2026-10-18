@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Infrastructure;
+using AulaLista.Infrastructure.Avisos;
 using AulaLista.Infrastructure.Comun;
 using AulaLista.Infrastructure.Trabajos;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +38,14 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
 
     public BuzonCorreo Buzon => Services.GetRequiredService<BuzonCorreo>();
 
+    /// <summary>Lo que habría salido por el WhatsApp del sistema (SPEC-07).</summary>
+    public CanalWhatsappSimulado Whatsapp => Services.GetRequiredService<CanalWhatsappSimulado>();
+
+    /// <summary>Las notificaciones push que habrían salido (SPEC-07).</summary>
+    public CanalPushSimulado Push => Services.GetRequiredService<CanalPushSimulado>();
+
+    public const string SecretoWebhook = "secreto-de-la-app-de-meta-de-pruebas";
+
     /// <summary>La IA de las pruebas: guarda lo que se le envía y responde como el redactor simulado.</summary>
     public RedactorDePrueba Redactor => Services.GetRequiredService<RedactorDePrueba>();
 
@@ -53,6 +62,7 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         builder.UseSetting("Ia:SolicitudesPorHora", solicitudesIaPorHora.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.UseSetting("Almacen:Ruta", _almacen);
         builder.UseSetting("Trabajos:Servidor", "false");
+        builder.UseSetting("Whatsapp:SecretoApp", SecretoWebhook);
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<TimeProvider>();
@@ -159,6 +169,15 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         {
             var ids = boletaIds.ToArray();
             _pendientes.Add(() => ejecutor.PrepararBoletasAsync(docenteId, ids, null, CancellationToken.None));
+        }
+
+        public void EncolarAviso(Guid docenteId, Guid avisoId) =>
+            _pendientes.Add(() => ejecutor.EnviarAvisoAsync(docenteId, avisoId, CancellationToken.None));
+
+        public void EncolarAvisoBoletas(Guid docenteId, Guid periodoId, IReadOnlyList<Guid> boletaIds)
+        {
+            var ids = boletaIds.ToArray();
+            _pendientes.Add(() => ejecutor.AvisarBoletasAsync(docenteId, periodoId, ids, CancellationToken.None));
         }
 
         public void Despachar()

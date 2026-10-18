@@ -60,7 +60,7 @@ public sealed record SesionConEnlace(SesionTutor Sesion, EnlaceTutor Enlace);
 
 /// <summary>Un hijo del tutor con su grupo y su docente (RN-061).</summary>
 public sealed record HijoTutor(
-    Guid AlumnoId, string Nombres, string Apellidos, DateTimeOffset? BajaEn, string Nivel, int Grado, string Grupo, string? Materia,
+    Guid AlumnoId, Guid GrupoId, string Nombres, string Apellidos, DateTimeOffset? BajaEn, string Nivel, int Grado, string Grupo, string? Materia,
     string? Docente);
 
 /// <summary>Una boleta publicada y vigente con la fecha de inicio de su unidad, para ordenarlas.</summary>

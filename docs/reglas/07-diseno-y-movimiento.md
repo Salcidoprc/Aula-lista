@@ -135,6 +135,7 @@ Toda animación responde "¿para qué?": consistencia espacial, indicar un cambi
 | Generación de observaciones con IA | Lista de alumnos con estado por fila; cada observación aparece con fundido al llegar, escalonado corto | SPEC-04 |
 | Aprobar observación | El botón cambia de "Aprobar" a "Aprobada" con transición de ancho por `clip-path` y un check | SPEC-04 |
 | Publicar boletas | Barra de progreso real; al terminar, un único detalle de celebración discreto la primera vez que el docente publica | SPEC-05 |
+| Avisos: "Leído por n de m" | La barra crece con `transform` en 240 ms cuando el refresco trae lecturas nuevas; al abrir la pantalla ya está en su lugar. Las listas de avisos no se animan al entrar | SPEC-07 |
 | Portal del tutor: cambiar entre hijos | Pestañas con indicador que se desliza y contenido con fundido | SPEC-06 |
 | Abrir boleta en el portal | La tarjeta del periodo se expande hacia la vista de detalle con View Transition compartida | SPEC-06 |
 | Estados vacíos y de carga | Esqueletos sin brillo animado continuo; el contenido real entra con fundido | Todas |

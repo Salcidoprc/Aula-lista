@@ -2878,7 +2878,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BoletasDto"
+                  "$ref": "#/components/schemas/PublicacionDto"
                 }
               }
             }
@@ -3177,6 +3177,454 @@
           }
         }
       }
+    },
+    "/api/v1/grupos/{id}/avisos": {
+      "get": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "ListarAvisos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvisosDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "CrearAviso",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearAviso"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvisoDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/avisos/destinatarios": {
+      "get": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "ListarDestinatariosAviso",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinatariosDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/avisos/{id}": {
+      "get": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "ObtenerAviso",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvisoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "BorrarAviso",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/avisos/{id}/entregas/{tutorId}/compartir": {
+      "post": {
+        "tags": [
+          "Avisos"
+        ],
+        "operationId": "CompartirAviso",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tutorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnlaceDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/boletas/{id}/tutores/{tutorId}/compartir": {
+      "post": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "CompartirBoleta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tutorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnlaceDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/alumnos/{id}/avisos": {
+      "get": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "ListarAvisosHijoTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AvisoTutorDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/alumnos/{id}/avisos/leidos": {
+      "post": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "LeerAvisosHijoTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/contacto": {
+      "get": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "ObtenerContactoTutor",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactoTutorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "GuardarCorreoTutor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardarCorreoTutor"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactoTutorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/push": {
+      "post": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "SuscribirPushTutor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuscribirPush"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "DesuscribirPushTutor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesuscribirPush"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3342,6 +3790,26 @@
           }
         }
       },
+      "AlumnoDeTutorDto": {
+        "required": [
+          "id",
+          "nombres",
+          "apellidos"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          }
+        }
+      },
       "AlumnoDto": {
         "required": [
           "id",
@@ -3461,6 +3929,188 @@
           }
         }
       },
+      "AvisoDto": {
+        "required": [
+          "id",
+          "grupoId",
+          "titulo",
+          "cuerpo",
+          "urgente",
+          "paraTodos",
+          "creadoEn",
+          "destinatarios",
+          "leidos",
+          "entregas"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "cuerpo": {
+            "type": "string"
+          },
+          "urgente": {
+            "type": "boolean"
+          },
+          "paraTodos": {
+            "type": "boolean"
+          },
+          "creadoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "destinatarios": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "leidos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "entregas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntregaDto"
+            }
+          }
+        }
+      },
+      "AvisoResumenDto": {
+        "required": [
+          "id",
+          "titulo",
+          "urgente",
+          "creadoEn",
+          "destinatarios",
+          "leidos"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "urgente": {
+            "type": "boolean"
+          },
+          "creadoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "destinatarios": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "leidos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "AvisosDto": {
+        "required": [
+          "grupoId",
+          "soloLectura",
+          "tutores",
+          "avisos"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "soloLectura": {
+            "type": "boolean"
+          },
+          "tutores": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvisoResumenDto"
+            }
+          }
+        }
+      },
+      "AvisoTutorDto": {
+        "required": [
+          "id",
+          "titulo",
+          "cuerpo",
+          "urgente",
+          "creadoEn",
+          "docente",
+          "leidoEn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "cuerpo": {
+            "type": "string"
+          },
+          "urgente": {
+            "type": "boolean"
+          },
+          "creadoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "docente": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "leidoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
       "BoletaAlumnoDto": {
         "required": [
           "alumnoId",
@@ -3476,7 +4126,9 @@
           "desactualizada",
           "falloPdf",
           "tutoresWhatsapp",
-          "tutoresCorreo"
+          "tutoresCorreo",
+          "tutoresPush",
+          "tutoresPorCompartir"
         ],
         "type": "object",
         "properties": {
@@ -3555,6 +4207,22 @@
             "format": "int32"
           },
           "tutoresCorreo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tutoresPush": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tutoresPorCompartir": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "integer",
@@ -4037,6 +4705,24 @@
           }
         }
       },
+      "ContactoTutorDto": {
+        "required": [
+          "correo",
+          "clavePush"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "clavePush": {
+            "type": "string"
+          }
+        }
+      },
       "ConteosBoletasDto": {
         "required": [
           "sinAprobar",
@@ -4159,6 +4845,42 @@
           "desdePeriodoId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "CrearAviso": {
+        "required": [
+          "titulo",
+          "cuerpo",
+          "urgente",
+          "tutorIds"
+        ],
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cuerpo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "urgente": {
+            "type": "boolean"
+          },
+          "tutorIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -4495,6 +5217,99 @@
           }
         }
       },
+      "DestinatarioDto": {
+        "required": [
+          "tutorId",
+          "nombre",
+          "parentesco",
+          "alumnos",
+          "push",
+          "correo",
+          "urgentesRestantes"
+        ],
+        "type": "object",
+        "properties": {
+          "tutorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "parentesco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlumnoDeTutorDto"
+            }
+          },
+          "push": {
+            "type": "boolean"
+          },
+          "correo": {
+            "type": "boolean"
+          },
+          "urgentesRestantes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "DestinatariosDto": {
+        "required": [
+          "grupoId",
+          "soloLectura",
+          "urgentesPorTutor",
+          "tutores"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "soloLectura": {
+            "type": "boolean"
+          },
+          "urgentesPorTutor": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tutores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinatarioDto"
+            }
+          }
+        }
+      },
+      "DesuscribirPush": {
+        "required": [
+          "endpoint"
+        ],
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "DetalleHijoDto": {
         "required": [
           "hijo",
@@ -4695,6 +5510,82 @@
           },
           "expiraEn": {
             "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EntregaDto": {
+        "required": [
+          "tutorId",
+          "nombre",
+          "telefono",
+          "alumnos",
+          "push",
+          "correo",
+          "whatsapp",
+          "estadoWhatsapp",
+          "sinSaldoWhatsapp",
+          "porCompartir",
+          "compartidoEn",
+          "leidoEn"
+        ],
+        "type": "object",
+        "properties": {
+          "tutorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "telefono": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlumnoDeTutorDto"
+            }
+          },
+          "push": {
+            "type": "boolean"
+          },
+          "correo": {
+            "type": "boolean"
+          },
+          "whatsapp": {
+            "type": "boolean"
+          },
+          "estadoWhatsapp": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sinSaldoWhatsapp": {
+            "type": "boolean"
+          },
+          "porCompartir": {
+            "type": "boolean"
+          },
+          "compartidoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "leidoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date-time"
           }
         }
@@ -5055,6 +5946,20 @@
           }
         }
       },
+      "GuardarCorreoTutor": {
+        "required": [
+          "correo"
+        ],
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "GuardarEstilo": {
         "required": [
           "longitud",
@@ -5088,7 +5993,9 @@
           "materia",
           "docente",
           "dadoDeBaja",
-          "ultimaBoleta"
+          "ultimaBoleta",
+          "ultimoAviso",
+          "avisosSinLeer"
         ],
         "type": "object",
         "properties": {
@@ -5140,6 +6047,24 @@
                 "$ref": "#/components/schemas/ResumenBoletaDto"
               }
             ]
+          },
+          "ultimoAviso": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ResumenAvisoDto"
+              }
+            ]
+          },
+          "avisosSinLeer": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -5622,6 +6547,24 @@
           }
         }
       },
+      "PublicacionDto": {
+        "required": [
+          "boletas",
+          "porCompartir"
+        ],
+        "type": "object",
+        "properties": {
+          "boletas": {
+            "$ref": "#/components/schemas/BoletasDto"
+          },
+          "porCompartir": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TutorPorCompartirDto"
+            }
+          }
+        }
+      },
       "ReemplazarEquipos": {
         "required": [
           "equipos"
@@ -5933,6 +6876,31 @@
             "items": {
               "$ref": "#/components/schemas/ErrorDeFila"
             }
+          }
+        }
+      },
+      "ResumenAvisoDto": {
+        "required": [
+          "id",
+          "titulo",
+          "creadoEn",
+          "leido"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "creadoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "leido": {
+            "type": "boolean"
           }
         }
       },
@@ -6258,6 +7226,34 @@
           }
         }
       },
+      "SuscribirPush": {
+        "required": [
+          "endpoint",
+          "p256dh",
+          "auth"
+        ],
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "p256dh": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auth": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "TipoRubroDto": {
         "required": [
           "id",
@@ -6392,6 +7388,38 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "TutorPorCompartirDto": {
+        "required": [
+          "tutorId",
+          "nombre",
+          "telefono",
+          "boletaId",
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "tutorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "boletaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlumnoDeTutorDto"
+            }
           }
         }
       },
@@ -6599,6 +7627,9 @@
     },
     {
       "name": "Portal del tutor"
+    },
+    {
+      "name": "Avisos"
     }
   ]
 }

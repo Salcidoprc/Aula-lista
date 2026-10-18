@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { MisHijosDto } from '../api/models/mis-hijos-dto';
+import { fechaAviso } from '../shared/fechas';
 import { controlarPortada } from '../shared/portada/portada.service';
 import { Tapa } from '../shared/tapa';
 import {
@@ -10,6 +11,7 @@ import {
   grupoDelHijo,
   nombreCompleto,
   primerNombre,
+  destinoDelEnlace,
   tokenDelFragmento,
 } from './portal';
 import { PortalService } from './portal.service';
@@ -77,10 +79,24 @@ import { PortalService } from './portal.service';
                   } @else {
                     <span class="boleta boleta--sin etiqueta">{{ t('sinBoletas') }}</span>
                   }
+                  @if (hijo.ultimoAviso; as a) {
+                    <span class="ultimo-aviso" [class.sin-leer]="!a.leido">
+                      @if (!a.leido) {
+                        <span class="punto" aria-hidden="true"></span>
+                        <span class="solo-lector">{{ t('nuevo') }}:</span>
+                      }
+                      <span class="texto-aviso">{{
+                        t('ultimoAviso', { titulo: a.titulo, fecha: fechaAviso(a.creadoEn) })
+                      }}</span>
+                    </span>
+                  }
                 </a>
               </li>
             }
           </ul>
+          <a class="enlace enlace--solo" routerLink="/tutor/notificaciones">
+            {{ t('notificaciones.enlace') }}
+          </a>
         }
       }
     </section>
@@ -139,6 +155,36 @@ import { PortalService } from './portal.service';
       line-height: 1;
     }
 
+    /* El último aviso ocupa todo el ancho bajo los datos: el título se lee aunque la boleta esté al lado. */
+    .ultimo-aviso {
+      grid-column: 2 / -1;
+      display: flex;
+      align-items: center;
+      gap: var(--espacio-2);
+      min-width: 0;
+      color: var(--color-texto-suave);
+      font-size: var(--texto-sm);
+    }
+
+    .ultimo-aviso.sin-leer {
+      color: var(--color-texto);
+      font-weight: var(--peso-medio);
+    }
+
+    .texto-aviso {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .punto {
+      flex: none;
+      inline-size: 0.5rem;
+      block-size: 0.5rem;
+      border-radius: 50%;
+      background: var(--color-accion);
+    }
+
     .boleta--sin {
       max-width: 7rem;
     }
@@ -189,6 +235,7 @@ export class MisHijos implements OnInit {
   private readonly router = inject(Router);
   private readonly i18n = inject(TranslocoService);
   private readonly portada = controlarPortada();
+  private destino: { alumno: string; ver: string | null } | null = null;
 
   protected readonly datos = signal<MisHijosDto | null>(null);
   protected readonly estado = signal<'cargando' | 'error' | 'vacio' | 'listo'>('cargando');
@@ -196,12 +243,15 @@ export class MisHijos implements OnInit {
   protected readonly grupo = grupoDelHijo;
   protected readonly final = calificacion;
   protected readonly fecha = fechaLarga;
+  protected readonly fechaAviso = fechaAviso;
 
   async ngOnInit(): Promise<void> {
     // El token llega en el fragmento para no quedar en bitácoras; se quita de la barra en cuanto se canjea.
     const token = tokenDelFragmento(location.hash);
-    if (location.hash) {
-      history.replaceState(history.state, '', location.pathname + location.search);
+    // El enlace de un aviso o una boleta (SPEC-07) dice a qué hijo y pestaña ir: ?alumno=…&ver=avisos.
+    this.destino = destinoDelEnlace(location.search);
+    if (location.hash || location.search) {
+      history.replaceState(history.state, '', location.pathname);
     }
     if (token) {
       try {
@@ -220,8 +270,16 @@ export class MisHijos implements OnInit {
     this.estado.set('cargando');
     try {
       const datos = await this.portal.misHijos();
-      if (datos.hijos.length === 1) {
-        await this.router.navigate(['/tutor/alumnos', datos.hijos[0].id], { replaceUrl: true });
+      const destino = this.destino;
+      this.destino = null;
+      const elegido =
+        datos.hijos.find((h) => h.id === destino?.alumno) ??
+        (datos.hijos.length === 1 ? datos.hijos[0] : null);
+      if (elegido) {
+        await this.router.navigate(['/tutor/alumnos', elegido.id], {
+          replaceUrl: true,
+          queryParams: destino?.ver ? { ver: destino.ver } : undefined,
+        });
         return;
       }
       this.datos.set(datos);

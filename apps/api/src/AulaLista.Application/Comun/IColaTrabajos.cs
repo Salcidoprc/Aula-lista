@@ -10,4 +10,10 @@ public interface IColaTrabajos
 
     /// <summary>Prepara el PDF de cada boleta dada (RF-050).</summary>
     void EncolarBoletas(Guid docenteId, IReadOnlyList<Guid> boletaIds);
+
+    /// <summary>Envía un aviso ya planeado por push, correo y WhatsApp (RF-071).</summary>
+    void EncolarAviso(Guid docenteId, Guid avisoId);
+
+    /// <summary>Avisa a los tutores que las boletas publicadas ya están disponibles (RN-054).</summary>
+    void EncolarAvisoBoletas(Guid docenteId, Guid periodoId, IReadOnlyList<Guid> boletaIds);
 }

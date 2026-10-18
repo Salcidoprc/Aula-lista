@@ -55,7 +55,7 @@ internal sealed class ConsultasTutor(AulaListaDbContext db) : IConsultasTutor
             join g in db.Grupos.IgnoreQueryFilters() on a.GrupoId equals g.Id
             join d in db.Docentes.IgnoreQueryFilters() on a.DocenteId equals d.Id into docentes
             from d in docentes.DefaultIfEmpty()
-            select new HijoTutor(a.Id, a.Nombres, a.Apellidos, a.BajaEn, g.Nivel, g.Grado, g.Nombre, g.Materia, d.Nombre))
+            select new HijoTutor(a.Id, a.GrupoId, a.Nombres, a.Apellidos, a.BajaEn, g.Nivel, g.Grado, g.Nombre, g.Materia, d.Nombre))
             .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<BoletaDeHijo>> BoletasAsync(

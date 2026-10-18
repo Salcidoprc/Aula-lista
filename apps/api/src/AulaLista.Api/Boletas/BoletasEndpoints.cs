@@ -21,7 +21,7 @@ internal static class BoletasEndpoints
         periodos.MapPost("/{id:guid}/boletas/generar", Generar).WithName("GenerarBoletas")
             .Produces<BoletasDto>().ProducesProblem(StatusCodes.Status409Conflict);
         periodos.MapPost("/{id:guid}/boletas/publicar", Publicar).WithName("PublicarBoletas")
-            .Produces<BoletasDto>().ProducesProblem(StatusCodes.Status409Conflict);
+            .Produces<PublicacionDto>().ProducesProblem(StatusCodes.Status409Conflict);
         periodos.MapGet("/{id:guid}/boletas/pdf", PdfDelGrupo).WithName("DescargarBoletasDelGrupo")
             .Produces(StatusCodes.Status200OK, contentType: Pdf).ProducesProblem(StatusCodes.Status409Conflict);
         periodos.MapGet("/{id:guid}/exportacion.xlsx", Exportar).WithName("ExportarPeriodo")

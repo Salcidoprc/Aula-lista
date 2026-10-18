@@ -1,4 +1,5 @@
 using AulaLista.Application.Comun;
+using AulaLista.Domain.Avisos;
 using AulaLista.Domain.Boletas;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Cuentas;
@@ -76,6 +77,14 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<SesionTutor> SesionesTutor => Set<SesionTutor>();
 
+    public DbSet<Aviso> Avisos => Set<Aviso>();
+
+    public DbSet<EntregaAviso> EntregasAviso => Set<EntregaAviso>();
+
+    public DbSet<SuscripcionPush> SuscripcionesPush => Set<SuscripcionPush>();
+
+    public DbSet<MensajeWhatsapp> MensajesWhatsapp => Set<MensajeWhatsapp>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -123,5 +132,8 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<EstiloObservaciones>().HasQueryFilter(e => e.DocenteId == DocenteActual);
         modelBuilder.Entity<LlamadaIa>().HasQueryFilter(l => l.DocenteId == DocenteActual);
         modelBuilder.Entity<Boleta>().HasQueryFilter(b => b.DocenteId == DocenteActual);
+        modelBuilder.Entity<Aviso>().HasQueryFilter(a => a.DocenteId == DocenteActual);
+        modelBuilder.Entity<EntregaAviso>().HasQueryFilter(e => e.DocenteId == DocenteActual);
+        modelBuilder.Entity<MensajeWhatsapp>().HasQueryFilter(m => m.DocenteId == DocenteActual);
     }
 }
