@@ -334,7 +334,12 @@
     "observacion_sin_aprobar": "Aprueba la observación del alumno antes de emitir su boleta.",
     "sin_boletas_por_publicar": "No hay boletas listas para publicar. Genera las boletas primero.",
     "boletas_desactualizadas": "Algunas boletas ya no coinciden con los datos actuales. Vuelve a generarlas antes de publicar.",
-    "sin_boletas": "Todavía no hay boletas. Genera las boletas primero."
+    "sin_boletas": "Todavía no hay boletas. Genera las boletas primero.",
+    "aviso_titulo_invalido": "Escribe un título de hasta 80 caracteres.",
+    "aviso_cuerpo_invalido": "Escribe el aviso; puede tener hasta 1,000 caracteres.",
+    "aviso_sin_destinatarios": "Elige al menos un tutor del grupo.",
+    "suscripcion_push_invalida": "Este navegador no pudo activar las notificaciones.",
+    "correo_tutor_invalido": "Revisa el correo; parece incompleto."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -403,7 +408,11 @@
     "misHijos": "Mis hijos",
     "hijo": "Boletas de tu hija o hijo",
     "boletaTutor": "Boleta",
-    "enlaceInvalido": "Enlace no válido"
+    "enlaceInvalido": "Enlace no válido",
+    "avisos": "Avisos del grupo",
+    "nuevoAviso": "Nuevo aviso",
+    "aviso": "Aviso",
+    "notificaciones": "Notificaciones"
   },
   "ciclo": {
     "volver": "Volver",
@@ -792,7 +801,8 @@
     "calificaciones": "Calificaciones",
     "alumnos": "Alumnos",
     "asistencia": "Asistencia",
-    "configuracion": "Configuración"
+    "configuracion": "Configuración",
+    "avisos": "Avisos"
   },
   "asistencia": {
     "misGrupos": "Mis grupos",
@@ -1376,8 +1386,8 @@
       "sin_aprobar": "Sin aprobar"
     },
     "generar": "Generar boletas ({{cantidad}})",
-    "publicar": "Publicar boletas ({{cantidad}})",
-    "publicarElegidas": "Publicar las elegidas ({{cantidad}})",
+    "publicar": "Publicar y avisar a tutores ({{cantidad}})",
+    "publicarElegidas": "Publicar las elegidas y avisar ({{cantidad}})",
     "pdfGrupo": "Descargar PDF del grupo",
     "excel": "Exportar a Excel",
     "terminado": {
@@ -1402,9 +1412,11 @@
       "correo": "Tutores con correo",
       "sinContacto": "Alumnos sin tutor registrado",
       "quienes": "Ver quiénes",
-      "avisos": "Por ahora la boleta queda publicada y lista para el tutor; el aviso por WhatsApp o correo se activa en una próxima versión.",
+      "avisos": "Cada tutor recibe un aviso por WhatsApp por unidad, además de notificación o correo si los tiene. A quien no le llegue por ningún lado, se la compartes tú al terminar.",
       "leyenda": "Cada boleta dice: Reporte de evaluación del docente. No es un documento oficial.",
-      "accion": "Publicar"
+      "accion": "Publicar y avisar",
+      "push": "Con notificación",
+      "porCompartir": "Se los compartes tú"
     },
     "corregir": {
       "accion": "Emitir versión corregida",
@@ -1431,6 +1443,17 @@
       "registro": "La reapertura queda registrada en tu historial.",
       "confirmar": "Reabrir",
       "hecho": "Unidad reabierta"
+    },
+    "compartir": {
+      "titulo": "Compártela tú",
+      "texto": {
+        "uno": "A 1 tutor no le llega el aviso por ningún canal. Mándale la boleta desde tu WhatsApp.",
+        "otros": "A {{n}} tutores no les llega el aviso por ningún canal. Mándales la boleta desde tu WhatsApp."
+      },
+      "accion": "Enviar por WhatsApp",
+      "hecho": "Enviada",
+      "listo": "Listo",
+      "mensaje": "Hola, {{tutor}}. Ya está el reporte del {{unidad}} de {{hijos}}. Míralo aquí: {{url}}"
     }
   },
   "portal": {
@@ -1466,6 +1489,146 @@
     "noOficial": "Reporte de evaluación del docente. No es un documento oficial.",
     "invalidoTitulo": "Este enlace ya no funciona",
     "invalidoTexto": "Pide a la maestra o al maestro un enlace nuevo.",
-    "invalidoNota": "Los enlaces vencen al terminar el ciclo escolar o cuando se genera uno nuevo."
+    "invalidoNota": "Los enlaces vencen al terminar el ciclo escolar o cuando se genera uno nuevo.",
+    "avisos": "Avisos",
+    "avisosSinLeer": {
+      "uno": "1 aviso sin leer",
+      "otros": "{{n}} avisos sin leer"
+    },
+    "urgente": "Urgente",
+    "nuevo": "Nuevo",
+    "sinAvisos": "Aquí verás los avisos de la maestra o el maestro.",
+    "ultimoAviso": "Aviso: {{titulo}} · {{fecha}}",
+    "notificaciones": {
+      "enlace": "Recibir avisos en este celular o por correo",
+      "volver": "Mis hijos",
+      "titulo": "Notificaciones",
+      "subtitulo": "Elige cómo te llegan los avisos y las boletas.",
+      "errorRed": "No pudimos cargar la información. Revisa tu conexión e inténtalo de nuevo.",
+      "reintentar": "Reintentar",
+      "cargando": "Cargando",
+      "push": {
+        "titulo": "Avisos en este celular",
+        "texto": "Te avisamos aquí en cuanto la maestra o el maestro envíe un aviso o publique una boleta.",
+        "activar": "Activar notificaciones",
+        "activadas": "Activadas en este celular",
+        "desactivar": "Desactivar",
+        "denegado": "Este navegador tiene bloqueadas las notificaciones de Aula Lista.",
+        "denegadoComo": "Para permitirlas, toca el candado o el ícono junto a la dirección, entra a Permisos y activa Notificaciones.",
+        "iphone": "En iPhone las notificaciones llegan solo si agregas Aula Lista a tu pantalla de inicio:",
+        "iphonePaso1": "Toca el botón Compartir de Safari (el cuadro con la flecha).",
+        "iphonePaso2": "Elige \"Agregar a pantalla de inicio\".",
+        "iphonePaso3": "Abre Aula Lista desde el ícono nuevo y vuelve a esta pantalla.",
+        "sinSoporte": "Este navegador no recibe notificaciones. Registra tu correo para que no se te pase nada.",
+        "error": "No se pudieron activar. Inténtalo de nuevo."
+      },
+      "correo": {
+        "titulo": "Correo",
+        "campo": "Tu correo",
+        "ayuda": "Opcional. Déjalo vacío para no recibir correos.",
+        "invalido": "Revisa el correo; parece incompleto.",
+        "guardar": "Guardar",
+        "guardado": "Correo guardado",
+        "quitado": "Ya no recibirás correos",
+        "error": "No se pudo guardar. Inténtalo de nuevo."
+      }
+    }
+  },
+  "avisos": {
+    "titulo": "Avisos",
+    "tutores": {
+      "uno": "1 tutor en el grupo",
+      "otros": "{{n}} tutores en el grupo"
+    },
+    "nuevo": "Nuevo aviso",
+    "reintentar": "Reintentar",
+    "cargando": "Cargando avisos",
+    "urgente": "Urgente",
+    "leidoPor": "Leído por {{leidos}} de {{total}}",
+    "vacio": {
+      "titulo": "Aún no envías avisos",
+      "texto": "Un aviso llega a los tutores del grupo por notificación, correo o WhatsApp, y ves quién ya lo leyó. Sirve para salidas, tareas o recordatorios."
+    },
+    "sinTutores": {
+      "titulo": "Agrega tutores para enviar avisos",
+      "texto": "Los avisos llegan a los tutores que registraste en la ficha de cada alumno.",
+      "accion": "Ir a Alumnos"
+    },
+    "archivado": "Este grupo está archivado; ya no se envían avisos.",
+    "para": "Para",
+    "todos": "Todos los tutores ({{n}})",
+    "elegir": "Elegir",
+    "elegirTutores": "Tutores que recibirán el aviso",
+    "buscar": "Buscar tutor o alumno",
+    "sinResultados": "Nadie coincide con la búsqueda.",
+    "elegidosCuenta": {
+      "uno": "1 tutor elegido",
+      "otros": "{{n}} tutores elegidos"
+    },
+    "errorElegir": "Elige al menos un tutor.",
+    "tituloCampo": "Título",
+    "tituloAyuda": "Corto y claro: \"Salida temprano el viernes\".",
+    "errorTitulo": "Escribe un título.",
+    "cuerpo": "Aviso",
+    "errorCuerpo": "Escribe el aviso.",
+    "contador": "{{usados}} de {{maximo}}",
+    "urgenteCampo": "Urgente: también por WhatsApp",
+    "urgenteAyuda": "Cada tutor puede recibir {{n}} avisos urgentes al mes por WhatsApp.",
+    "urgenteAgotados": {
+      "uno": "1 tutor ya recibió sus {{limite}} urgentes de este mes; a él le llega sin WhatsApp.",
+      "otros": "{{n}} tutores ya recibieron sus {{limite}} urgentes de este mes; a ellos les llega sin WhatsApp."
+    },
+    "urgenteSinSaldo": "Este mes ya se usaron los {{n}} urgentes por WhatsApp de cada tutor. El mes que entra vuelven.",
+    "llegara": "Cómo llegará",
+    "canales": {
+      "nombre": "Canales",
+      "push": "Notificación",
+      "correo": "Correo",
+      "whatsapp": "WhatsApp",
+      "compartir": "Lo compartes tú",
+      "compartido": "Compartido",
+      "sinSaldo": "Sin WhatsApp este mes"
+    },
+    "compartirNota": "A quien no tiene notificaciones ni correo se lo compartes tú desde tu WhatsApp, con un toque, en la pantalla del aviso.",
+    "enviar": "Enviar aviso",
+    "sinEditar": "Un aviso enviado ya no se edita; solo se puede borrar.",
+    "sinConexion": "Sin conexión: conéctate para enviar el aviso.",
+    "enviado": {
+      "uno": "Aviso enviado a 1 tutor",
+      "otros": "Aviso enviado a {{n}} tutores"
+    },
+    "enviadoEl": "Enviado el {{fecha}}",
+    "paraTodos": "Para todos los tutores",
+    "paraElegidos": {
+      "uno": "Para 1 tutor elegido",
+      "otros": "Para {{n}} tutores elegidos"
+    },
+    "compartelo": {
+      "titulo": "Compártelo tú",
+      "texto": "Estos tutores no tienen notificaciones ni correo. Mándales el aviso desde tu WhatsApp; el enlace es personal y cuenta cuando lo leen.",
+      "accion": "Enviar por WhatsApp",
+      "otraVez": "Enviar otra vez",
+      "compartido": "Compartido el {{fecha}}",
+      "mensaje": "Hola, {{tutor}}. Hay un aviso del grupo {{grupo}}: \"{{titulo}}\". Léelo aquí: {{url}}"
+    },
+    "porTutor": "Por tutor",
+    "tutorSinDatos": "Tutor ya no ligado al grupo",
+    "leidoEl": "Leído el {{fecha}}",
+    "sinLeer": "Sin leer",
+    "estadosWhatsapp": {
+      "pendiente": "enviando",
+      "enviado": "enviado",
+      "entregado": "entregado",
+      "leido": "leído",
+      "fallido": "no llegó"
+    },
+    "borrar": {
+      "accion": "Borrar aviso",
+      "titulo": "¿Borrar este aviso?",
+      "texto": "Los tutores dejan de verlo en Aula Lista. Lo que ya les llegó por correo o WhatsApp no se puede quitar.",
+      "confirmar": "Borrar",
+      "hecho": "Aviso borrado"
+    },
+    "cancelar": "Cancelar"
   }
 }

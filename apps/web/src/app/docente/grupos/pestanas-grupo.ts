@@ -5,7 +5,7 @@ import { Icono } from '../../shared/iconos';
 import { ClaveGrado } from '../../shared/portada/portada';
 
 /**
- * Las vistas del grupo: Calificaciones (la que abre, por decisión del docente), Alumnos y Asistencia. Son páginas, no
+ * Las vistas del grupo: Calificaciones (la que abre, por decisión del docente), Alumnos, Asistencia y Avisos. Son páginas, no
  * paneles: van como navegación con `aria-current`, no como pestañas ARIA. La configuración queda a la derecha.
  */
 @Component({
@@ -41,6 +41,14 @@ import { ClaveGrado } from '../../shared/portada/portada';
           ariaCurrentWhenActive="page"
           >{{ t('asistencia') }}</a
         >
+        <a
+          [routerLink]="['/grupos', id(), 'avisos']"
+          routerLinkActive="activa"
+          #v4
+          (isActiveChange)="aLaVista($event, v4)"
+          ariaCurrentWhenActive="page"
+          >{{ t('avisos') }}</a
+        >
       </nav>
       <a class="ajustes" [routerLink]="['/grupos', id(), 'ajustes']">
         <app-icono nombre="ajustes" />
@@ -57,7 +65,7 @@ import { ClaveGrado } from '../../shared/portada/portada';
       border-bottom: 1px solid var(--color-divisoria);
     }
 
-    /* Con tres vistas, en 320 px o con texto grande la fila se desliza sola; la página no se desborda. */
+    /* Con cuatro vistas, en 320 px o con texto grande la fila se desliza sola; la página no se desborda. */
     .vistas {
       display: flex;
       gap: var(--espacio-1);

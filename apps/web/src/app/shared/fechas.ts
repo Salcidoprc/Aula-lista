@@ -21,3 +21,23 @@ const FECHA_LARGA = new Intl.DateTimeFormat('es-MX', {
 export function fechaLarga(instante: string): string {
   return FECHA_LARGA.format(new Date(instante));
 }
+
+const CORTA = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' });
+const CORTA_CON_ANO = new Intl.DateTimeFormat('es-MX', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+const HORA = new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit' });
+
+/** "12 oct" o, de otro año, "12 oct 2025"; en la zona del dispositivo. */
+export function fechaAviso(instante: string, ahora: Date = new Date()): string {
+  const fecha = new Date(instante);
+  const formato = fecha.getFullYear() === ahora.getFullYear() ? CORTA : CORTA_CON_ANO;
+  return formato.format(fecha).replace('.', '');
+}
+
+/** "12 oct, 8:05 p.m.": cuándo se envió o se leyó. */
+export function fechaHoraAviso(instante: string, ahora: Date = new Date()): string {
+  return `${fechaAviso(instante, ahora)}, ${HORA.format(new Date(instante))}`;
+}

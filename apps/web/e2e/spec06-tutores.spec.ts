@@ -73,10 +73,10 @@ test.describe('SPEC-06: portal de tutores', () => {
     await expect(page.locator('.fila[data-estado="lista"]')).toHaveCount(NOMBRES.length, {
       timeout: 60_000,
     });
-    await visible(page, `Publicar boletas (${NOMBRES.length})`).click();
+    await visible(page, `Publicar y avisar a tutores (${NOMBRES.length})`).click();
     await page
       .getByRole('dialog', { name: `Vas a publicar ${NOMBRES.length} boletas` })
-      .getByRole('button', { name: 'Publicar', exact: true })
+      .getByRole('button', { name: 'Publicar y avisar', exact: true })
       .click();
     await expect(page.getByText(`${NOMBRES.length} boletas publicadas`)).toBeVisible();
 

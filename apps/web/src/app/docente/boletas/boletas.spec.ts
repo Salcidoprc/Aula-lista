@@ -28,6 +28,8 @@ const alumno = (
   falloPdf: false,
   tutoresWhatsapp: 1,
   tutoresCorreo: 0,
+  tutoresPush: 0,
+  tutoresPorCompartir: 0,
   ...extra,
 });
 
@@ -50,13 +52,13 @@ describe('boletas (SPEC-05)', () => {
     expect(porCorregir(alumno('1', 'lista', { desactualizada: true }))).toBe(false);
   });
 
-  it('resume tutores por WhatsApp, por correo y alumnos sin contacto antes de publicar', () => {
+  it('RN-054: resume por dónde llega el aviso de cada boleta antes de publicar', () => {
     const r = resumenPublicacion([
-      alumno('1', 'lista', { tutoresWhatsapp: 2, tutoresCorreo: 1 }),
+      alumno('1', 'lista', { tutoresWhatsapp: 2, tutoresCorreo: 1, tutoresPush: 1 }),
       alumno('2', 'lista', { tutoresWhatsapp: 0, tutoresCorreo: 0 }),
-      alumno('3', 'lista'),
+      alumno('3', 'lista', { tutoresPorCompartir: 1 }),
     ]);
-    expect(r).toMatchObject({ boletas: 3, whatsapp: 3, correo: 1 });
+    expect(r).toMatchObject({ boletas: 3, whatsapp: 3, correo: 1, push: 1, porCompartir: 1 });
     expect(r.sinContacto.map((a) => a.alumnoId)).toEqual(['2']);
   });
 

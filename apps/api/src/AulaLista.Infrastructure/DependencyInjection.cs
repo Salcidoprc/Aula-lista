@@ -1,4 +1,5 @@
 using Anthropic;
+using AulaLista.Application.Avisos;
 using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
@@ -6,6 +7,7 @@ using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
 using AulaLista.Application.Tutores;
+using AulaLista.Infrastructure.Avisos;
 using AulaLista.Infrastructure.Boletas;
 using AulaLista.Infrastructure.Cierre;
 using AulaLista.Infrastructure.Comun;
@@ -62,7 +64,10 @@ public static class DependencyInjection
         services.AddSingleton<IGeneradorBoletas, GeneradorBoletas>();
         services.AddScoped<IRepositorioEnlaces, RepositorioEnlaces>();
         services.AddScoped<IConsultasTutor, ConsultasTutor>();
+        services.AddScoped<IRepositorioAvisos, RepositorioAvisos>();
+        services.AddScoped<IAvisosDelTutor, AvisosDelTutor>();
         AgregarIa(services, configuration);
+        AgregarCanales(services, configuration);
 
         AgregarCorreo(services, configuration);
         AgregarTrabajos(services, configuration);
@@ -94,6 +99,52 @@ public static class DependencyInjection
         {
             services.AddSingleton<BuzonCorreo>();
             services.AddSingleton<IEnvioCorreo>(sp => sp.GetRequiredService<BuzonCorreo>());
+        }
+    }
+
+    /// <summary>SPEC-07: push y WhatsApp reales solo con credenciales en variables de entorno; si no, simulados.</summary>
+    private static void AgregarCanales(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<OpcionesPush>()
+            .Bind(configuration.GetSection(OpcionesPush.Seccion))
+            .ValidateDataAnnotations()
+            .Validate(
+                o => o.Proveedor != OpcionesPush.ProveedorVapid
+                    || (!string.IsNullOrWhiteSpace(o.ClavePublica) && !string.IsNullOrWhiteSpace(o.ClavePrivada)),
+                "Faltan Push__ClavePublica y Push__ClavePrivada.")
+            .ValidateOnStart();
+        if ((configuration.GetSection(OpcionesPush.Seccion)[nameof(OpcionesPush.Proveedor)] ?? OpcionesPush.ProveedorSimulado)
+            == OpcionesPush.ProveedorVapid)
+        {
+            services.AddHttpClient<ICanalPush, CanalPushVapid>(http => http.Timeout = TimeSpan.FromSeconds(15));
+        }
+        else
+        {
+            services.AddSingleton<CanalPushSimulado>();
+            services.AddSingleton<ICanalPush>(sp => sp.GetRequiredService<CanalPushSimulado>());
+        }
+
+        services.AddOptions<OpcionesWhatsapp>()
+            .Bind(configuration.GetSection(OpcionesWhatsapp.Seccion))
+            .ValidateDataAnnotations()
+            .Validate(
+                o => o.Proveedor != OpcionesWhatsapp.ProveedorMeta
+                    || (!string.IsNullOrWhiteSpace(o.Token) && !string.IsNullOrWhiteSpace(o.IdNumero) && !string.IsNullOrWhiteSpace(o.SecretoApp)),
+                "Faltan Whatsapp__Token, Whatsapp__IdNumero y Whatsapp__SecretoApp.")
+            .ValidateOnStart();
+        if ((configuration.GetSection(OpcionesWhatsapp.Seccion)[nameof(OpcionesWhatsapp.Proveedor)] ?? OpcionesWhatsapp.ProveedorSimulado)
+            == OpcionesWhatsapp.ProveedorMeta)
+        {
+            services.AddHttpClient<ICanalWhatsapp, CanalWhatsappMeta>(http =>
+            {
+                http.BaseAddress = new Uri("https://graph.facebook.com/");
+                http.Timeout = TimeSpan.FromSeconds(15);
+            });
+        }
+        else
+        {
+            services.AddSingleton<CanalWhatsappSimulado>();
+            services.AddSingleton<ICanalWhatsapp>(sp => sp.GetRequiredService<CanalWhatsappSimulado>());
         }
     }
 

@@ -3,6 +3,7 @@ using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Grupos;
 using AulaLista.Domain.Comun;
+using AulaLista.Domain.Grupos;
 using AulaLista.Domain.Tutores;
 using Microsoft.Extensions.Options;
 
@@ -35,8 +36,8 @@ public static class AccionesAuditoriaTutores
 /// <see cref="EnviarEnlace.Regenerar"/> antes revoca todos los enlaces del tutor y cierra sus sesiones.
 /// </summary>
 public sealed class EnviarEnlaceCasoUso(
-    IRepositorioGrupos grupos, IRepositorioEnlaces enlaces, IContextoUsuario usuario, IAuditoria auditoria, IUnidadDeTrabajo unidad,
-    IOptions<OpcionesTutores> opciones, IOptions<OpcionesCuentas> cuentas, TimeProvider reloj)
+    IRepositorioGrupos grupos, IRepositorioEnlaces enlaces, EmisionEnlaces emision, IContextoUsuario usuario, IAuditoria auditoria,
+    IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<EnlaceDto>?> EjecutarAsync(Guid alumnoId, Guid tutorId, EnviarEnlace comando, CancellationToken ct)
     {
@@ -62,20 +63,39 @@ public sealed class EnviarEnlaceCasoUso(
             }
         }
 
-        var ciclo = await grupos.CicloAsync(grupo.CicloEscolarId, ct);
-        var expira = Vencimiento(ciclo?.Fin, ahora);
-        var (token, hash) = TokensSeguros.Generar();
-        var enlace = new EnlaceTutor(tutorId, alumnoId, alumno.DocenteId, hash, expira, ahora);
-        enlaces.Agregar(enlace);
+        var (enlace, dto) = await emision.EmitirAsync(tutorId, alumno, grupo, null, ct);
         auditoria.Registrar(
             comando.Regenerar ? AccionesAuditoriaTutores.EnlaceRegenerado : AccionesAuditoriaTutores.EnlaceEnviado,
             "enlace_tutor", enlace.Id, usuario.DocenteId);
         await unidad.GuardarAsync(ct);
-        return Resultado.Exito(new EnlaceDto(UrlDelPortal(cuentas.Value.UrlWeb, token), expira));
+        return Resultado.Exito(dto);
+    }
+}
+
+/// <summary>
+/// Crea un enlace personal del tutor (RN-060) para la ficha, un aviso o una boleta. Lo agrega a la unidad de trabajo;
+/// quien lo pide guarda. El token solo existe en la URL que se devuelve.
+/// </summary>
+public sealed class EmisionEnlaces(
+    IRepositorioGrupos grupos, IRepositorioEnlaces enlaces, IOptions<OpcionesTutores> opciones, IOptions<OpcionesCuentas> cuentas,
+    TimeProvider reloj)
+{
+    /// <param name="destino">Consulta para abrir el portal en un lugar, por ejemplo <c>alumno=…&amp;ver=avisos</c>.</param>
+    public async Task<(EnlaceTutor Enlace, EnlaceDto Dto)> EmitirAsync(
+        Guid tutorId, Alumno alumno, Grupo grupo, string? destino, CancellationToken ct)
+    {
+        var ahora = reloj.GetUtcNow();
+        var ciclo = await grupos.CicloAsync(grupo.CicloEscolarId, ct);
+        var expira = Vencimiento(ciclo?.Fin, ahora);
+        var (token, hash) = TokensSeguros.Generar();
+        var enlace = new EnlaceTutor(tutorId, alumno.Id, alumno.DocenteId, hash, expira, ahora);
+        enlaces.Agregar(enlace);
+        return (enlace, new EnlaceDto(UrlDelPortal(cuentas.Value.UrlWeb, token, destino), expira));
     }
 
     /// <summary>El token va en el fragmento: el navegador no lo manda al servidor, así no queda en bitácoras.</summary>
-    public static string UrlDelPortal(string urlWeb, string token) => $"{urlWeb.TrimEnd('/')}/tutor#{token}";
+    public static string UrlDelPortal(string urlWeb, string token, string? destino = null) =>
+        $"{urlWeb.TrimEnd('/')}/tutor{(string.IsNullOrEmpty(destino) ? string.Empty : "?" + destino)}#{token}";
 
     /// <summary>RN-062: fin del ciclo más la gracia; si el ciclo ya terminó, cuenta la gracia desde hoy.</summary>
     private DateTimeOffset Vencimiento(DateOnly? finCiclo, DateTimeOffset ahora)

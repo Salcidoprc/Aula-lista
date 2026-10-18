@@ -16,8 +16,9 @@ public sealed record ConteosBoletasDto(int SinAprobar, int SinBoleta, int Prepar
 
 /// <summary>
 /// La boleta vigente de un alumno activo. <see cref="Desactualizada"/>: sus datos de hoy ya no son los de la foto (sin
-/// publicar se vuelve a generar; publicada se corrige con una versión nueva). <see cref="TutoresWhatsapp"/> y
-/// <see cref="TutoresCorreo"/> alimentan el resumen previo a publicar (RN-054).
+/// publicar se vuelve a generar; publicada se corrige con una versión nueva). <see cref="TutoresWhatsapp"/>,
+/// <see cref="TutoresCorreo"/>, <see cref="TutoresPush"/> y <see cref="TutoresPorCompartir"/> (sin ningún canal, ya sin
+/// WhatsApp en el periodo) alimentan el resumen previo a publicar (RN-054).
 /// </summary>
 public sealed record BoletaAlumnoDto(
     Guid AlumnoId,
@@ -33,7 +34,9 @@ public sealed record BoletaAlumnoDto(
     bool Desactualizada,
     bool FalloPdf,
     int TutoresWhatsapp,
-    int TutoresCorreo);
+    int TutoresCorreo,
+    int TutoresPush,
+    int TutoresPorCompartir);
 
 public sealed record BoletasDto(
     Guid PeriodoId,
@@ -43,6 +46,9 @@ public sealed record BoletasDto(
     int DecimalesFinal,
     ConteosBoletasDto Conteos,
     IReadOnlyList<BoletaAlumnoDto> Alumnos);
+
+/// <summary>Lo publicado y, si a algún tutor no le llega el aviso por ningún canal, la lista para compartirlo (RN-054).</summary>
+public sealed record PublicacionDto(BoletasDto Boletas, IReadOnlyList<Avisos.TutorPorCompartirDto> PorCompartir);
 
 /// <summary>Para quiénes: todos o solo los indicados (RF-052: por grupo o por alumno).</summary>
 public sealed record SeleccionAlumnos(IReadOnlyList<Guid>? AlumnoIds);
@@ -127,7 +133,7 @@ internal static class ReglasBoletas
 }
 
 /// <summary>El estado de las boletas del periodo, alumno por alumno (pantalla "Boletas y envío").</summary>
-public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas repositorio, IRepositorioGrupos grupos)
+public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas repositorio, IRepositorioGrupos grupos, Avisos.AvisoBoletas avisos)
 {
     public async Task<BoletasDto?> LeerAsync(Guid periodoId, CancellationToken ct)
     {
@@ -138,6 +144,7 @@ public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas re
 
         var vigentes = ReglasBoletas.Vigentes(await repositorio.BoletasAsync(periodoId, ct));
         var vinculos = (await grupos.VinculosAsync(periodo.Alumnos.Select(a => a.Alumno.Id).ToList(), ct)).ToLookup(v => v.AlumnoId);
+        var canales = await avisos.CanalesAsync(periodo.Periodo, periodo.Alumnos.Select(a => a.Alumno).ToList(), ct);
         var alumnos = periodo.Alumnos.Select(a =>
         {
             var boleta = vigentes.GetValueOrDefault(a.Alumno.Id);
@@ -158,7 +165,8 @@ public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas re
             return new BoletaAlumnoDto(
                 a.Alumno.Id, a.Alumno.NumeroLista, a.Alumno.Nombres, a.Alumno.Apellidos, a.Calificacion, estado, a.Observacion?.Id,
                 boleta?.Id, boleta?.Version, boleta?.PublicadaEn, boleta is not null && ReglasBoletas.Desactualizada(boleta, a),
-                boleta?.FalloPdf ?? false, tutores.Count, tutores.Count(t => t.Correo is not null));
+                boleta?.FalloPdf ?? false, tutores.Count, tutores.Count(t => t.Correo is not null), canales[a.Alumno.Id].Push,
+                canales[a.Alumno.Id].PorCompartir);
         }).ToList();
 
         var cuenta = alumnos.CountBy(a => a.Estado).ToDictionary();
@@ -234,14 +242,14 @@ public sealed class GenerarBoletasCasoUso(
 
 /// <summary>
 /// RF-052, RN-053: publica las boletas listas (todas o las elegidas), marca sus observaciones como publicadas y lo deja
-/// en auditoría (RNF-005). Los avisos a tutores (RN-054) llegan con SPEC-07 en H5. RN-048: con todas publicadas, la
-/// unidad se cierra.
+/// en auditoría (RNF-005). RN-054: avisa a los tutores en un trabajo y regresa a quiénes no les llegará por ningún
+/// canal. RN-048: con todas publicadas, la unidad se cierra.
 /// </summary>
 public sealed class PublicarBoletasCasoUso(
-    ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, IAuditoria auditoria, IContextoUsuario usuario,
-    IUnidadDeTrabajo unidad, TimeProvider reloj)
+    ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, Avisos.AvisoBoletas avisos, IColaTrabajos cola,
+    IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
-    public async Task<Resultado<BoletasDto>?> EjecutarAsync(Guid periodoId, SeleccionAlumnos comando, CancellationToken ct)
+    public async Task<Resultado<PublicacionDto>?> EjecutarAsync(Guid periodoId, SeleccionAlumnos comando, CancellationToken ct)
     {
         if (await armado.ArmarAsync(periodoId, ct) is not { } periodo)
         {
@@ -250,7 +258,7 @@ public sealed class PublicarBoletasCasoUso(
 
         if (ReglasBoletas.PuedeEmitir(periodo.Periodo) is { } bloqueo)
         {
-            return Resultado.Fallo<BoletasDto>(bloqueo);
+            return Resultado.Fallo<PublicacionDto>(bloqueo);
         }
 
         var pedidos = comando.AlumnoIds?.ToHashSet();
@@ -262,12 +270,12 @@ public sealed class PublicarBoletasCasoUso(
             .ToList();
         if (porPublicar.Count == 0)
         {
-            return Resultado.Fallo<BoletasDto>(ErroresBoletas.SinBoletasPorPublicar);
+            return Resultado.Fallo<PublicacionDto>(ErroresBoletas.SinBoletasPorPublicar);
         }
 
         if (porPublicar.Any(x => ReglasBoletas.Desactualizada(x.Boleta!, x.Alumno)))
         {
-            return Resultado.Fallo<BoletasDto>(ErroresBoletas.BoletasDesactualizadas);
+            return Resultado.Fallo<PublicacionDto>(ErroresBoletas.BoletasDesactualizadas);
         }
 
         var ahora = reloj.GetUtcNow();
@@ -275,7 +283,7 @@ public sealed class PublicarBoletasCasoUso(
         {
             if (boleta!.Publicar(ahora) is { EsFallo: true } fallo)
             {
-                return Resultado.Fallo<BoletasDto>(fallo.Error);
+                return Resultado.Fallo<PublicacionDto>(fallo.Error);
             }
 
             alumno.Observacion!.MarcarPublicada(ahora);
@@ -284,8 +292,10 @@ public sealed class PublicarBoletasCasoUso(
         var docente = usuario.DocenteId;
         auditoria.Registrar(AccionAuditoria.BoletasPublicadas, "periodo", periodoId, docente, porPublicar.Count);
         CerrarSiTodasPublicadas(periodo, vigentes, ahora, auditoria, docente);
+        var porCompartir = await avisos.PlanearAsync(periodo.Periodo, porPublicar.Select(x => (x.Alumno.Alumno, x.Boleta!)).ToList(), ct);
         await unidad.GuardarAsync(ct);
-        return Resultado.Exito((await consulta.LeerAsync(periodoId, ct))!);
+        cola.EncolarAvisoBoletas(periodo.Periodo.Grupo.DocenteId, periodoId, porPublicar.Select(x => x.Boleta!.Id).ToList());
+        return Resultado.Exito(new PublicacionDto((await consulta.LeerAsync(periodoId, ct))!, porCompartir));
     }
 
     /// <summary>RN-048: cada alumno activo tiene su boleta vigente publicada y al día.</summary>

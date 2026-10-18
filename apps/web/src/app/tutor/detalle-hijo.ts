@@ -10,9 +10,11 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
+import { AvisoTutorDto } from '../api/models/aviso-tutor-dto';
 import { DetalleHijoDto } from '../api/models/detalle-hijo-dto';
 import { HijoDto } from '../api/models/hijo-dto';
 import { claveGrado } from '../shared/grados';
+import { forma } from '../shared/plural';
 import { controlarPortada } from '../shared/portada/portada.service';
 import {
   calificacion,
@@ -28,11 +30,12 @@ import {
 } from './portal';
 import { PortalService } from './portal.service';
 
-type Vista = 'boletas' | 'calificaciones';
-const VISTAS: readonly Vista[] = ['boletas', 'calificaciones'];
+type Vista = 'boletas' | 'calificaciones' | 'avisos';
+const VISTAS: readonly Vista[] = ['boletas', 'calificaciones', 'avisos'];
 
 /**
- * Detalle del hijo (SPEC-06, pantalla 2): pestañas Boletas y Calificaciones, solo con lo publicado (RN-064). Con
+ * Detalle del hijo (SPEC-06, pantalla 2): pestañas Boletas y Calificaciones, solo con lo publicado (RN-064), y
+ * Avisos del grupo (SPEC-07, RF-063): abrirla los marca leídos (RN-075). Con
  * varios hijos, arriba se cambia de hijo; la marca del elegido se desliza con la transición de pantalla (catálogo:
  * "cambiar entre hijos"). La portada toma el color y el número de su grado.
  */
@@ -99,6 +102,14 @@ const VISTAS: readonly Vista[] = ['boletas', 'calificaciones'];
                 (keydown)="mover($event)"
               >
                 {{ t(v) }}
+                @if (v === 'avisos' && sinLeer() > 0) {
+                  <span class="sin-leer cifras">
+                    <span aria-hidden="true">{{ sinLeer() }}</span>
+                    <span class="solo-lector">{{
+                      t('avisosSinLeer.' + forma(sinLeer()), { n: sinLeer() })
+                    }}</span>
+                  </span>
+                }
               </button>
             }
             <span class="indicador" aria-hidden="true"></span>
@@ -137,6 +148,57 @@ const VISTAS: readonly Vista[] = ['boletas', 'calificaciones'];
                 </ul>
               } @else {
                 <p class="vacio">{{ t('sinBoletasDetalle') }}</p>
+              }
+            </div>
+          } @else if (vista() === 'avisos') {
+            <div id="panel-avisos" class="panel" role="tabpanel" aria-labelledby="pestana-avisos">
+              @switch (estadoAvisos()) {
+                @case ('cargando') {
+                  <div class="esqueletos" role="status" [attr.aria-label]="t('cargando')">
+                    <span class="esqueleto tarjeta-esqueleto"></span>
+                  </div>
+                }
+                @case ('error') {
+                  <div class="aviso aviso--error" role="alert">
+                    <p>{{ t('errorRed') }}</p>
+                    <button class="boton boton--secundario" type="button" (click)="cargarAvisos()">
+                      {{ t('reintentar') }}
+                    </button>
+                  </div>
+                }
+                @default {
+                  @if (avisos().length) {
+                    <ul class="filas avisos-hijo">
+                      @for (a of avisos(); track a.id) {
+                        <li>
+                          <article [attr.aria-labelledby]="'aviso-' + a.id">
+                            <div class="aviso-cabeza">
+                              @if (a.urgente) {
+                                <span class="etiqueta-urgente">{{ t('urgente') }}</span>
+                              }
+                              @if (!a.leidoEn) {
+                                <span class="nuevo">{{ t('nuevo') }}</span>
+                              }
+                            </div>
+                            <h2 class="aviso-titulo" [id]="'aviso-' + a.id">{{ a.titulo }}</h2>
+                            <p class="etiqueta cifras">
+                              {{ fecha(a.creadoEn) }}
+                              @if (a.docente) {
+                                · {{ a.docente }}
+                              }
+                            </p>
+                            <p class="aviso-cuerpo">{{ a.cuerpo }}</p>
+                          </article>
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="vacio">{{ t('sinAvisos') }}</p>
+                  }
+                  <a class="enlace enlace--solo notificaciones" routerLink="/tutor/notificaciones">
+                    {{ t('notificaciones.enlace') }}
+                  </a>
+                }
               }
             </div>
           } @else {
@@ -286,7 +348,7 @@ const VISTAS: readonly Vista[] = ['boletas', 'calificaciones'];
       position: absolute;
       inset-block-end: -1px;
       inset-inline-start: 0;
-      width: 50%;
+      width: calc(100% / 3);
       height: 3px;
       border-radius: var(--radio-sm) var(--radio-sm) 0 0;
       background: var(--grado);
@@ -419,6 +481,73 @@ const VISTAS: readonly Vista[] = ['boletas', 'calificaciones'];
       color: var(--color-texto-suave);
     }
 
+    .sin-leer {
+      display: inline-grid;
+      place-items: center;
+      min-inline-size: 1.25rem;
+      block-size: 1.25rem;
+      margin-inline-start: var(--espacio-1);
+      padding-inline: 0.3rem;
+      border-radius: var(--radio-pleno);
+      background: var(--grado);
+      color: var(--color-sobre-grado);
+      font-size: var(--texto-xs);
+      font-weight: var(--peso-fuerte);
+    }
+
+    .avisos-hijo > li {
+      padding-block: var(--espacio-4);
+    }
+
+    .avisos-hijo article {
+      display: grid;
+      gap: var(--espacio-1);
+    }
+
+    .aviso-cabeza {
+      display: flex;
+      gap: var(--espacio-2);
+    }
+
+    .aviso-cabeza:empty {
+      display: none;
+    }
+
+    .etiqueta-urgente,
+    .nuevo {
+      padding: 0.125rem var(--espacio-2);
+      border-radius: var(--radio-sm);
+      font-size: var(--texto-xs);
+      font-weight: var(--peso-fuerte);
+    }
+
+    .etiqueta-urgente {
+      background: var(--color-aviso-tinte);
+      color: var(--color-aviso-tinta);
+    }
+
+    .nuevo {
+      background: var(--grado-tinte);
+      color: var(--grado-tinta);
+    }
+
+    .aviso-titulo {
+      font-size: var(--texto-lg);
+      overflow-wrap: anywhere;
+    }
+
+    /* Son cortos y se leen completos: con los saltos de línea del docente. */
+    .aviso-cuerpo {
+      margin-block-start: var(--espacio-1);
+      line-height: var(--interlineado);
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .notificaciones {
+      margin-block-start: var(--espacio-2);
+    }
+
     .esqueletos {
       display: grid;
       gap: var(--espacio-3);
@@ -457,6 +586,8 @@ export class DetalleHijo {
   private readonly portada = controlarPortada();
 
   readonly id = input.required<string>();
+  /** `?ver=avisos`: el push y el enlace del aviso abren directo en la pestaña Avisos. */
+  readonly ver = input<string>();
 
   protected readonly vistas = VISTAS;
   protected readonly vista = signal<Vista>('boletas');
@@ -465,6 +596,12 @@ export class DetalleHijo {
   protected readonly hermanos = signal<readonly HijoDto[]>([]);
   protected readonly estado = signal<'cargando' | 'error' | 'listo'>('cargando');
   protected readonly ciclo = computed(() => enOrdenDelCiclo(this.detalle()?.boletas ?? []));
+  protected readonly avisos = signal<readonly AvisoTutorDto[]>([]);
+  protected readonly estadoAvisos = signal<'cargando' | 'error' | 'listo'>('cargando');
+  private avisosDe: string | null = null;
+  /** El número de la pestaña: se apaga al abrirla, aunque cada aviso conserve su "Nuevo" mientras se lee. */
+  protected readonly sinLeer = signal(0);
+  protected readonly forma = forma;
 
   protected readonly nombre = nombreCompleto;
   protected readonly grupo = grupoDelHijo;
@@ -481,6 +618,11 @@ export class DetalleHijo {
       const id = this.id();
       untracked(() => void this.cargar(id));
     });
+    effect(() => {
+      if (this.vista() === 'avisos' && this.estado() === 'listo') {
+        untracked(() => void this.cargarAvisos());
+      }
+    });
   }
 
   protected etiqueta(hijo: HijoDto): string {
@@ -488,7 +630,10 @@ export class DetalleHijo {
   }
 
   protected async cargar(id: string): Promise<void> {
-    this.vista.set('boletas');
+    this.vista.set(this.ver() === 'avisos' ? 'avisos' : 'boletas');
+    this.avisosDe = null;
+    this.avisos.set([]);
+    this.estadoAvisos.set('cargando');
     if (this.detalle()?.hijo.id !== id) {
       this.estado.set('cargando');
     }
@@ -499,6 +644,7 @@ export class DetalleHijo {
       }
       this.hermanos.set(hijos.hijos);
       this.detalle.set(detalle);
+      this.sinLeer.set(Number(detalle.hijo.avisosSinLeer));
       const h = detalle.hijo;
       // Como en la app del docente: la portada es el grupo (su color y su número) y el título, la persona.
       this.portada({
@@ -511,6 +657,40 @@ export class DetalleHijo {
     } catch (error) {
       if (!this.portal.manejarSinSesion(error)) {
         this.estado.set('error');
+      }
+    }
+  }
+
+  protected async cargarAvisos(): Promise<void> {
+    const id = this.id();
+    if (this.avisosDe === id) {
+      return;
+    }
+    this.avisosDe = id;
+    this.estadoAvisos.set('cargando');
+    try {
+      const avisos = await this.portal.avisos(id);
+      if (id !== this.id()) {
+        return;
+      }
+      this.avisos.set(avisos);
+      this.estadoAvisos.set('listo');
+    } catch (error) {
+      if (id === this.id()) {
+        this.avisosDe = null;
+        if (!this.portal.manejarSinSesion(error)) {
+          this.estadoAvisos.set('error');
+        }
+      }
+      return;
+    }
+    if (this.avisos().some((a) => !a.leidoEn)) {
+      try {
+        await this.portal.leerAvisos(id);
+        this.sinLeer.set(0);
+      } catch (error) {
+        // Ya los leyó en pantalla; la próxima vez que abra la pestaña se vuelve a marcar.
+        this.portal.manejarSinSesion(error);
       }
     }
   }

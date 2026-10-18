@@ -71,17 +71,17 @@ test.describe('SPEC-05: boletas y envío', () => {
 
     // Selección por alumnos: el botón dice cuántas elegidas se publican.
     await page.getByRole('checkbox', { name: `Elegir la boleta de ${NOMBRES[0]}` }).check();
-    await expect(visible(page, 'Publicar las elegidas (1)')).toBeVisible();
+    await expect(visible(page, 'Publicar las elegidas y avisar (1)')).toBeVisible();
     await page.getByRole('checkbox', { name: `Elegir la boleta de ${NOMBRES[0]}` }).uncheck();
 
     // RF-052: resumen previo con tutores por WhatsApp, por correo y alumnos sin contacto.
-    await visible(page, `Publicar boletas (${NOMBRES.length})`).click();
+    await visible(page, `Publicar y avisar a tutores (${NOMBRES.length})`).click();
     const hoja = page.getByRole('dialog', { name: `Vas a publicar ${NOMBRES.length} boletas` });
     await expect(hoja).toBeVisible();
     await expect(hoja.getByText('Alumnos sin tutor registrado')).toBeVisible();
     await expect(hoja.getByText('No es un documento oficial.')).toBeVisible();
     await accesible(page);
-    await hoja.getByRole('button', { name: 'Publicar', exact: true }).click();
+    await hoja.getByRole('button', { name: 'Publicar y avisar', exact: true }).click();
     await expect(page.getByText(`${NOMBRES.length} boletas publicadas`)).toBeVisible();
     await expect(page.locator('.fila[data-estado="publicada"]')).toHaveCount(NOMBRES.length);
     await expect(page.locator('.sello').locator('visible=true')).toBeVisible();
@@ -105,9 +105,9 @@ test.describe('SPEC-05: boletas y envío', () => {
 
     // Se publica solo la del primer alumno: las demás quedan pendientes y la unidad sigue en cierre.
     await page.getByRole('checkbox', { name: `Elegir la boleta de ${NOMBRES[0]}` }).check();
-    await visible(page, 'Publicar las elegidas (1)').click();
+    await visible(page, 'Publicar las elegidas y avisar (1)').click();
     const hoja = page.getByRole('dialog', { name: 'Vas a publicar 1 boleta' });
-    await hoja.getByRole('button', { name: 'Publicar', exact: true }).click();
+    await hoja.getByRole('button', { name: 'Publicar y avisar', exact: true }).click();
     await expect(page.getByText('1 boleta publicada')).toBeVisible();
     await expect(page.locator('.fila[data-estado="publicada"]')).toHaveCount(1);
 

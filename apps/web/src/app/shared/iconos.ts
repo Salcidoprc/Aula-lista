@@ -23,7 +23,9 @@ export type NombreIcono =
   | 'nota'
   | 'enlace'
   | 'enlaceRoto'
-  | 'mensaje';
+  | 'mensaje'
+  | 'campana'
+  | 'correo';
 
 const TRAZOS: Record<NombreIcono, string> = {
   volver: 'M10 3.5 5.5 8l4.5 4.5',
@@ -60,6 +62,9 @@ const TRAZOS: Record<NombreIcono, string> = {
     'M9.5 4.25 10.25 3.5a2.5 2.5 0 0 1 3.54 3.54l-1.29 1.29M6.5 11.75l-.75.75a2.5 2.5 0 0 1-3.54-3.54L3.5 7.67M5.25 1.75v1.5M1.75 5.25h1.5M10.75 14.25v-1.5M14.25 10.75h-1.5',
   mensaje:
     'M8 2.75c-2.9 0-5.25 2-5.25 4.5 0 1.3.65 2.5 1.7 3.3L4 13.25l2.65-1.35c.43.07.88.1 1.35.1 2.9 0 5.25-2 5.25-4.5S10.9 2.75 8 2.75Z',
+  correo: 'M2.75 3.75h10.5v8.5H2.75zM2.75 4.25 8 8.5l5.25-4.25',
+  campana:
+    'M4.25 6.5a3.75 3.75 0 0 1 7.5 0c0 2.5.75 3.75 1.5 4.5H2.75c.75-.75 1.5-2 1.5-4.5ZM6.5 13.25a1.6 1.6 0 0 0 3 0',
 };
 
 @Component({

@@ -23,6 +23,242 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AulaLista.Domain.Avisos.Aviso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("BorradoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("borrado_en");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Cuerpo")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("cuerpo");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<Guid>("GrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_id");
+
+                    b.Property<bool>("ParaTodos")
+                        .HasColumnType("boolean")
+                        .HasColumnName("para_todos");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("titulo");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<bool>("Urgente")
+                        .HasColumnType("boolean")
+                        .HasColumnName("urgente");
+
+                    b.HasKey("Id")
+                        .HasName("pk_aviso");
+
+                    b.HasIndex("GrupoId", "CreatedAt")
+                        .HasDatabaseName("ix_aviso_grupo_id_created_at");
+
+                    b.ToTable("aviso", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.EntregaAviso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AvisoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("aviso_id");
+
+                    b.Property<DateTimeOffset?>("CompartidoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("compartido_en");
+
+                    b.Property<bool>("Correo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("correo");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateTimeOffset?>("LeidoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("leido_en");
+
+                    b.Property<bool>("Push")
+                        .HasColumnType("boolean")
+                        .HasColumnName("push");
+
+                    b.Property<bool>("SinSaldoWhatsapp")
+                        .HasColumnType("boolean")
+                        .HasColumnName("sin_saldo_whatsapp");
+
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tutor_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<bool>("Whatsapp")
+                        .HasColumnType("boolean")
+                        .HasColumnName("whatsapp");
+
+                    b.HasKey("Id")
+                        .HasName("pk_entrega_aviso");
+
+                    b.HasIndex("TutorId")
+                        .HasDatabaseName("ix_entrega_aviso_tutor_id");
+
+                    b.HasIndex("AvisoId", "TutorId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_entrega_aviso_aviso_id_tutor_id");
+
+                    b.ToTable("entrega_aviso", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.MensajeWhatsapp", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("CostoEstimado")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)")
+                        .HasColumnName("costo_estimado");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<Guid>("GrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_id");
+
+                    b.Property<string>("IdMeta")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("id_meta");
+
+                    b.Property<string>("Plantilla")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("plantilla");
+
+                    b.Property<Guid>("ReferenciaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("referencia_id");
+
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tutor_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mensaje_whatsapp");
+
+                    b.HasIndex("IdMeta")
+                        .IsUnique()
+                        .HasDatabaseName("ix_mensaje_whatsapp_id_meta")
+                        .HasFilter("id_meta IS NOT NULL");
+
+                    b.HasIndex("ReferenciaId")
+                        .HasDatabaseName("ix_mensaje_whatsapp_referencia_id");
+
+                    b.HasIndex("TutorId")
+                        .HasDatabaseName("ix_mensaje_whatsapp_tutor_id");
+
+                    b.HasIndex("GrupoId", "Plantilla", "TutorId", "CreatedAt")
+                        .HasDatabaseName("ix_mensaje_whatsapp_grupo_id_plantilla_tutor_id_created_at");
+
+                    b.ToTable("mensaje_whatsapp", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.SuscripcionPush", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("auth");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("endpoint");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("p256dh");
+
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tutor_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_suscripcion_push");
+
+                    b.HasIndex("TutorId", "Endpoint")
+                        .IsUnique()
+                        .HasDatabaseName("ix_suscripcion_push_tutor_id_endpoint");
+
+                    b.ToTable("suscripcion_push", (string)null);
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Boletas.Boleta", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2055,6 +2291,60 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasDatabaseName("ix_sesion_tutor_enlace_id_created_at");
 
                     b.ToTable("sesion_tutor", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.Aviso", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_aviso_grupos_grupo_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.EntregaAviso", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Avisos.Aviso", null)
+                        .WithMany()
+                        .HasForeignKey("AvisoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_entrega_aviso_aviso_aviso_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Tutor", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_entrega_aviso_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.MensajeWhatsapp", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mensaje_whatsapp_grupo_grupo_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Tutor", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mensaje_whatsapp_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Avisos.SuscripcionPush", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Tutor", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_suscripcion_push_tutor_tutor_id");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Boletas.Boleta", b =>

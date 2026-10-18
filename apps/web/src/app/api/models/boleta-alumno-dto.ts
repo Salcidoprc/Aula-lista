@@ -14,6 +14,8 @@ export interface BoletaAlumnoDto {
   observacionId: (string | null);
   publicadaEn: (string | null);
   tutoresCorreo: (number | string);
+  tutoresPorCompartir: (number | string);
+  tutoresPush: (number | string);
   tutoresWhatsapp: (number | string);
   version: (number | string | null);
 }

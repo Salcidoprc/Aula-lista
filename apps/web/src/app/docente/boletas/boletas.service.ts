@@ -9,6 +9,7 @@ import { publicarBoletas } from '../../api/fn/boletas/publicar-boletas';
 import { cerrarPeriodo } from '../../api/fn/cierre/cerrar-periodo';
 import { reabrirPeriodo } from '../../api/fn/cierre/reabrir-periodo';
 import { BoletasDto } from '../../api/models/boletas-dto';
+import { PublicacionDto } from '../../api/models/publicacion-dto';
 import { ColaSincronizacion } from '../../core/sincronizacion/cola-sincronizacion';
 import { descargarArchivo } from '../../shared/descarga';
 
@@ -32,8 +33,8 @@ export class BoletasService {
     });
   }
 
-  /** Sin alumnos, todas las listas (RF-052). */
-  publicar(periodoId: string, alumnoIds?: string[]): Promise<BoletasDto> {
+  /** Sin alumnos, todas las listas (RF-052); avisa a los tutores y dice a quién compartírsela a mano (RN-054). */
+  publicar(periodoId: string, alumnoIds?: string[]): Promise<PublicacionDto> {
     return this.api.invoke(publicarBoletas, {
       id: periodoId,
       body: { alumnoIds: alumnoIds ?? null },

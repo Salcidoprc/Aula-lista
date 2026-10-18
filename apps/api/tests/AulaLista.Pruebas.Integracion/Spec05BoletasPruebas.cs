@@ -350,7 +350,7 @@ public sealed partial class Spec05BoletasPruebas(BaseDeDatosFixture baseDeDatos)
     {
         var respuesta = await g.Cliente.PostAsJsonAsync($"/api/v1/periodos/{g.PeriodoId}/boletas/publicar", new { alumnoIds = alumnos });
         Assert.True(respuesta.StatusCode == HttpStatusCode.OK, await respuesta.Content.ReadAsStringAsync());
-        return await respuesta.Content.ReadFromJsonAsync<JsonElement>();
+        return (await respuesta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("boletas");
     }
 
     private static Task<JsonElement> BoletasAsync(Grupo g) =>

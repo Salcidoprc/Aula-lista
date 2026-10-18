@@ -45,6 +45,14 @@ services:
       Ia__Proveedor: ${IA_PROVEEDOR:-simulado}
       Ia__Modelo: ${IA_MODELO:-claude-haiku-5-5}
       Ia__ApiKey: ${IA_API_KEY:-}
+      Push__Proveedor: ${PUSH_PROVEEDOR:-simulado}
+      Push__ClavePublica: ${PUSH_CLAVE_PUBLICA:-}
+      Push__ClavePrivada: ${PUSH_CLAVE_PRIVADA:-}
+      Whatsapp__Proveedor: ${WHATSAPP_PROVEEDOR:-simulado}
+      Whatsapp__Token: ${WHATSAPP_TOKEN:-}
+      Whatsapp__IdNumero: ${WHATSAPP_ID_NUMERO:-}
+      Whatsapp__SecretoApp: ${WHATSAPP_SECRETO_APP:-}
+      Whatsapp__TokenVerificacion: ${WHATSAPP_TOKEN_VERIFICACION:-}
       Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
       Correo__BrevoApiKey: ${BREVO_API_KEY:-}
       Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulalista.mx}

@@ -8,6 +8,18 @@ export function tokenDelFragmento(fragmento: string | null | undefined): string 
   return /^[A-Za-z0-9_-]{20,}$/.test(token) ? token : null;
 }
 
+/** `?alumno=<id>&ver=avisos` del enlace de un aviso o boleta; nada que no sea un id y una pestaña conocida. */
+export function destinoDelEnlace(
+  busqueda: string,
+): { alumno: string; ver: 'avisos' | null } | null {
+  const params = new URLSearchParams(busqueda);
+  const alumno = params.get('alumno') ?? '';
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(alumno)) {
+    return null;
+  }
+  return { alumno, ver: params.get('ver') === 'avisos' ? 'avisos' : null };
+}
+
 /** "Laura Treviño" se saluda "Laura". */
 export function primerNombre(nombre: string | null | undefined): string | null {
   const primero = (nombre ?? '').trim().split(/\s+/)[0];
@@ -76,4 +88,34 @@ export function etiquetaHijo(hijo: HijoDto, todos: readonly HijoDto[]): string {
 /** La API manda los enteros como `number | string`; una versión mayor a 1 es una boleta corregida (RN-052). */
 export function esCorregida(version: number | string): boolean {
   return Number(version) > 1;
+}
+
+export type EstadoPush = 'sinSoporte' | 'agregarInicio' | 'denegado' | 'activado' | 'apagado';
+
+/**
+ * RF-064, RN-066: qué puede hacer este navegador con las notificaciones. En iPhone solo hay push con Aula Lista
+ * agregada a la pantalla de inicio; si el permiso se negó, solo el navegador puede volver a darlo.
+ */
+export function estadoPush(entorno: {
+  readonly soportado: boolean;
+  readonly ios: boolean;
+  readonly instalada: boolean;
+  readonly permiso: NotificationPermission | null;
+  readonly suscrito: boolean;
+}): EstadoPush {
+  if (entorno.ios && !entorno.instalada) {
+    return 'agregarInicio';
+  }
+  if (!entorno.soportado || entorno.permiso === null) {
+    return 'sinSoporte';
+  }
+  if (entorno.permiso === 'denied') {
+    return 'denegado';
+  }
+  return entorno.suscrito && entorno.permiso === 'granted' ? 'activado' : 'apagado';
+}
+
+/** iPhone o iPad (que en iPadOS se presenta como Mac con pantalla táctil). */
+export function esIos(agente: string, plataforma: string, toques: number): boolean {
+  return /iPad|iPhone|iPod/.test(agente) || (plataforma === 'MacIntel' && toques > 1);
 }

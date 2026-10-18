@@ -7,7 +7,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { BoletasDto } from '../../models/boletas-dto';
+import { PublicacionDto } from '../../models/publicacion-dto';
 import { SeleccionAlumnos } from '../../models/seleccion-alumnos';
 
 export interface PublicarBoletas$Params {
@@ -15,7 +15,7 @@ export interface PublicarBoletas$Params {
       body?: (null | SeleccionAlumnos)
 }
 
-export function publicarBoletas(http: HttpClient, rootUrl: string, params: PublicarBoletas$Params, context?: HttpContext): Observable<StrictHttpResponse<BoletasDto>> {
+export function publicarBoletas(http: HttpClient, rootUrl: string, params: PublicarBoletas$Params, context?: HttpContext): Observable<StrictHttpResponse<PublicacionDto>> {
   const rb = new RequestBuilder(rootUrl, publicarBoletas.PATH, 'post');
   if (params) {
     rb.path('id', params.id, {});
@@ -27,7 +27,7 @@ export function publicarBoletas(http: HttpClient, rootUrl: string, params: Publi
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<BoletasDto>;
+      return r as StrictHttpResponse<PublicacionDto>;
     })
   );
 }

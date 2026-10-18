@@ -29,6 +29,10 @@ public static class DependencyInjection
         services.AddScoped<Boletas.ConsultaBoletas>();
         services.AddScoped<Tutores.ValidacionSesionTutor>();
         services.AddScoped<Tutores.EstadoEnlaces>();
+        services.AddScoped<Tutores.EmisionEnlaces>();
+        services.AddScoped<Avisos.PlanEntregas>();
+        services.AddScoped<Avisos.EnviosATutores>();
+        services.AddScoped<Avisos.AvisoBoletas>();
         return services;
     }
 }
