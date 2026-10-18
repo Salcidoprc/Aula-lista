@@ -8,6 +8,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
+  ActivatedRouteSnapshot,
   TitleStrategy,
   provideRouter,
   withComponentInputBinding,
@@ -25,7 +26,18 @@ registerLocaleData(localeEsMx);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      // Cambiar solo la consulta (?fecha=, ?unidad=) es pasar de día o de unidad: se repite y no se anima.
+      withViewTransitions({
+        onViewTransitionCreated: ({ transition, from, to }) => {
+          if (mismaPantalla(from, to)) {
+            transition.skipTransition();
+          }
+        },
+      }),
+    ),
     provideHttpClient(withFetch(), withInterceptors([autenticacionInterceptor])),
     { provide: LOCALE_ID, useValue: 'es-MX' },
     { provide: TitleStrategy, useClass: TituloTraducido },
@@ -44,3 +56,12 @@ export const appConfig: ApplicationConfig = {
     }),
   ],
 };
+
+function hoja(ruta: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
+  return ruta.firstChild ? hoja(ruta.firstChild) : ruta;
+}
+
+function mismaPantalla(a: ActivatedRouteSnapshot, b: ActivatedRouteSnapshot): boolean {
+  const [x, y] = [hoja(a), hoja(b)];
+  return x.routeConfig === y.routeConfig && JSON.stringify(x.params) === JSON.stringify(y.params);
+}

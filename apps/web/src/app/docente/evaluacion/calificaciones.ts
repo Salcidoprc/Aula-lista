@@ -375,6 +375,12 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
       border-top: 1px solid var(--color-divisoria);
     }
 
+    .asistencia .enlace {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: var(--tactil-minimo);
+    }
+
     .asistencia {
       display: flex;
       flex-wrap: wrap;

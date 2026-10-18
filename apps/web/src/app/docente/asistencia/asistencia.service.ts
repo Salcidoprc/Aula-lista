@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import { Api } from '../../api/api';
 import { borrarAsistencia } from '../../api/fn/asistencia/borrar-asistencia';
 import { listarAsistencias } from '../../api/fn/asistencia/listar-asistencias';
@@ -22,6 +22,7 @@ export class AsistenciaService {
   private readonly api = inject(Api);
   private readonly cola = inject(ColaSincronizacion);
   private readonly evaluacion = inject(EvaluacionService);
+  readonly enLinea = computed(() => this.cola.estado() !== 'sin_conexion');
 
   grupo(id: string) {
     return this.evaluacion.grupo(id);

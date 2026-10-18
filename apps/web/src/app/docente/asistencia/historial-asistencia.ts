@@ -101,7 +101,7 @@ interface RenglonHistorial {
           <a class="boton" [routerLink]="['/grupos', id(), 'asistencia']">{{ t('pasarLista') }}</a>
         </section>
       } @else {
-        <p class="dato-suave leyenda">{{ t('leyenda') }}</p>
+        <p class="dato-suave leyenda solo-escritorio">{{ t('leyenda') }}</p>
 
         <div class="marco solo-escritorio" tabindex="0" [attr.aria-label]="t('historialTitulo')">
           <table>
@@ -123,8 +123,8 @@ interface RenglonHistorial {
                       class="cifras"
                       [routerLink]="['/grupos', id(), 'asistencia']"
                       [queryParams]="{ fecha: toma.fecha }"
-                      [attr.aria-label]="t('abrirDia', { dia: largo(toma.fecha) })"
-                      >{{ corto(toma.fecha) }}</a
+                      >{{ corto(toma.fecha)
+                      }}<span class="solo-lector">, {{ largo(toma.fecha) }}</span></a
                     >
                   </th>
                 }
@@ -137,7 +137,11 @@ interface RenglonHistorial {
                   <th scope="row" class="fija">
                     <span class="quien">
                       <span class="numero cifras">{{ r.alumno.numeroLista }}</span>
-                      <span class="nombre">{{ r.alumno.apellidos }} {{ r.alumno.nombres }}</span>
+                      <span
+                        class="nombre"
+                        [attr.title]="r.alumno.apellidos + ' ' + r.alumno.nombres"
+                        >{{ r.alumno.apellidos }} {{ r.alumno.nombres }}</span
+                      >
                     </span>
                   </th>
                   @for (e of r.estados; track $index) {

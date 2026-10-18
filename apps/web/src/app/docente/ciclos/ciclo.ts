@@ -255,7 +255,7 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
 
           @if (error(); as codigo) {
             @if (codigo === 'tomas_fuera_de_unidad') {
-              <div class="aviso aviso--pendiente" role="alert">
+              <div class="aviso aviso--pendiente" role="alert" tabindex="-1" id="aviso-tomas">
                 <p>{{ texto('errores.' + codigo) }} {{ t('tomasFuera.texto') }}</p>
                 <button
                   class="boton boton--secundario"
@@ -527,6 +527,9 @@ export class Ciclo implements OnInit {
       await this.router.navigateByUrl(this.regreso());
     } catch (e) {
       this.error.set(codigoDeError(e));
+      if (this.error() === 'tomas_fuera_de_unidad') {
+        this.enfocar('#aviso-tomas'); // en el celular queda bajo la barra fija: se lleva a la vista
+      }
     } finally {
       this.guardando.set(false);
       this.confirmarTomas.set(false);

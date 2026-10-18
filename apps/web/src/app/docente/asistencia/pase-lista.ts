@@ -23,6 +23,7 @@ import { EstadoAsistencia } from '../../core/calculo/calculo';
 import { codigoDeError } from '../../core/errores/problema';
 import { AsistenciaEnCola } from '../../core/sincronizacion/almacen-local';
 import { AvisosService } from '../../shared/avisos/avisos.service';
+import { crearEnfoque } from '../../shared/foco';
 import { claveGrado } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
@@ -242,8 +243,8 @@ interface FilaLista {
           [queryParams]="{ unidad: unidad()?.id }"
           >{{ t('historial') }}</a
         >
-        @if (tomaServidor() && !soloLectura()) {
-          <button class="enlace peligro" type="button" (click)="dialogoBorrar.showModal()">
+        @if (puedeBorrar()) {
+          <button class="enlace peligro" type="button" (click)="abrirBorrar()">
             {{ t('borrar.accion') }}
           </button>
         }
@@ -274,6 +275,11 @@ interface FilaLista {
     </div>
   `,
   styles: `
+    :host {
+      display: block;
+      container-type: inline-size;
+    }
+
     .dia {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto auto;
@@ -328,6 +334,23 @@ interface FilaLista {
     @media (min-width: 48rem) {
       .dia {
         max-inline-size: 36rem;
+      }
+    }
+
+    /* Angosto o con texto grande: la fecha arriba a todo lo ancho y los botones debajo. */
+    @container (max-width: 24rem) {
+      .dia {
+        grid-template-columns: auto auto 1fr auto;
+      }
+
+      .fecha {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+
+      .elegir {
+        grid-column: 4;
+        justify-self: end;
       }
     }
 
@@ -478,7 +501,7 @@ interface FilaLista {
 
     .conteo {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(4.75rem, 1fr));
       gap: var(--espacio-2);
       margin: 0;
     }
@@ -511,6 +534,12 @@ interface FilaLista {
       display: grid;
       justify-items: start;
       gap: var(--espacio-3);
+    }
+
+    .enlace {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: var(--tactil-minimo);
     }
 
     button.enlace {
@@ -551,6 +580,8 @@ export class PaseLista implements OnInit {
   private readonly avisos = inject(AvisosService);
   private readonly anfitrion = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly pintarPortada = controlarPortada();
+  private readonly enfocar = crearEnfoque();
+  protected readonly enLinea = this.servicio.enLinea;
   private leyendo: string | null = null;
   protected readonly moverDia = moverDia;
   protected readonly estados = ESTADOS;
@@ -611,6 +642,14 @@ export class PaseLista implements OnInit {
     )[0];
   });
   protected readonly hayToma = computed(() => !!this.toma());
+  /** Solo en línea, y sin marcas del día por enviar: la cola volvería a crear la lista borrada. */
+  protected readonly puedeBorrar = computed(
+    () =>
+      !!this.tomaServidor() &&
+      !this.soloLectura() &&
+      this.enLinea() &&
+      !this.pendientes().some((p) => p.fecha === this.dia()),
+  );
   /** Con toma, sus alumnos (RN-105); sin ella, los activos, en orden de lista. */
   protected readonly filas = computed<FilaLista[]>(() => {
     const toma = this.toma();
@@ -711,8 +750,15 @@ export class PaseLista implements OnInit {
     }
   }
 
-  protected todosPresentes(): Promise<void> {
-    return this.marcar([]);
+  /** El botón desaparece al crear la lista: el foco pasa al primer alumno. */
+  protected async todosPresentes(): Promise<void> {
+    await this.marcar([]);
+    this.enfocar('button.fila');
+  }
+
+  protected abrirBorrar(): void {
+    this.errorBorrar.set(null);
+    this.dialogoBorrar().nativeElement.showModal();
   }
 
   /** RN-101: el toque recorre el ciclo; sin toma, la crea con todos presentes y ese alumno en falta. */
@@ -792,6 +838,7 @@ export class PaseLista implements OnInit {
       await this.servicio.borrar(this.id(), dia);
       this.servidor.update((s) => s && { ...s, tomas: s.tomas.filter((t) => t.fecha !== dia) });
       this.dialogoBorrar().nativeElement.close();
+      this.enfocar('h1');
       this.avisos.mostrar(this.texto('asistencia.borrar.listo'));
     } catch (e) {
       this.errorBorrar.set(codigoDeError(e));

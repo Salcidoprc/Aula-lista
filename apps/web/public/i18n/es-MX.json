@@ -815,7 +815,6 @@
     "pasarLista": "Pasar lista",
     "leyenda": "P presente · F falta · R retardo · J justificada (no cuenta). Toca un día para corregirlo.",
     "alumno": "Alumno",
-    "abrirDia": "Abrir la lista del {{dia}}",
     "detalle": {
       "falta": { "uno": "1 falta", "otros": "{{n}} faltas" },
       "retardo": { "uno": "1 retardo", "otros": "{{n}} retardos" },
