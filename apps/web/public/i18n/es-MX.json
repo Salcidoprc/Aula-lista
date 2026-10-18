@@ -399,7 +399,11 @@
     "cierre": "Cierre de la unidad",
     "revisarObservacion": "Revisar observación",
     "estilo": "Estilo de las observaciones",
-    "boletas": "Boletas de la unidad"
+    "boletas": "Boletas de la unidad",
+    "misHijos": "Mis hijos",
+    "hijo": "Boletas de tu hija o hijo",
+    "boletaTutor": "Boleta",
+    "enlaceInvalido": "Enlace no válido"
   },
   "ciclo": {
     "volver": "Volver",
@@ -668,6 +672,24 @@
       "nombre": "Secciones de la ficha",
       "avance": "Avance",
       "datos": "Datos"
+    },
+    "enlace": {
+      "enviar": "Enviar enlace",
+      "titulo": "Enlace de {{nombre}}",
+      "texto": "Con este enlace ve las boletas publicadas, sin instalar nada ni crear cuenta. Funciona hasta el {{fecha}}.",
+      "whatsapp": "Enviar por WhatsApp",
+      "copiar": "Copiar enlace",
+      "copiado": "Enlace copiado",
+      "noCopiado": "No se pudo copiar. Mantén presionado el enlace para copiarlo.",
+      "mensaje": "Hola, {{tutor}}. Aquí puedes ver las boletas de {{alumno}}: {{url}}",
+      "regenerar": "Regenerar enlace",
+      "regenerarAccion": "Regenerar",
+      "regenerarTitulo": "¿Regenerar el enlace de {{nombre}}?",
+      "regenerarTexto": "El enlace anterior deja de funcionar y se cierra en los dispositivos donde ya estaba abierto. Tendrás que enviarle el nuevo.",
+      "regenerado": "Listo. El enlace anterior de {{nombre}} ya no funciona.",
+      "sospechoso": "Este enlace se abrió en más de 5 dispositivos en 30 días. Si no esperabas eso, regenéralo.",
+      "abrio": "Abrió su enlace el {{fecha}}",
+      "sinAbrir": "Aún no abre su enlace"
     }
   },
   "importar": {
@@ -1410,5 +1432,40 @@
       "confirmar": "Reabrir",
       "hecho": "Unidad reabierta"
     }
+  },
+  "portal": {
+    "misHijos": "Mis hijos",
+    "cargando": "Cargando",
+    "errorRed": "No pudimos cargar la información. Revisa tu conexión e inténtalo de nuevo.",
+    "reintentar": "Reintentar",
+    "sinHijos": "Aún no hay alumnos ligados a tu número.",
+    "dadoDeBaja": "Ya no está en el grupo",
+    "sinBoletas": "Aún no hay boletas",
+    "hola": "Hola, {{nombre}}",
+    "holaSinNombre": "Hola",
+    "cambiarHijo": "Cambiar de hija o hijo",
+    "dadoDeBajaDetalle": "Ya no está en este grupo. Puedes seguir viendo sus boletas publicadas.",
+    "secciones": "Secciones",
+    "boletas": "Boletas",
+    "calificaciones": "Calificaciones",
+    "ciclo": "Ciclo {{ciclo}}",
+    "publicada": "Publicada el {{fecha}}",
+    "versionCorregida": "Versión corregida el {{fecha}}",
+    "sinBoletasDetalle": "Cuando la maestra o el maestro publique la primera boleta, aparecerá aquí.",
+    "rubrosDe": "Cómo se calculó {{unidad}}",
+    "rubro": "Rubro",
+    "peso": "Peso",
+    "promedio": "Promedio",
+    "volverA": "Boletas de {{nombre}}",
+    "boletaNoEncontrada": "Esta boleta ya no está disponible.",
+    "calificacionFinal": "Calificación final",
+    "comoSeCalculo": "Cómo se calculó",
+    "observacion": "Observación",
+    "descargarPdf": "Descargar PDF",
+    "codigo": "Código de verificación",
+    "noOficial": "Reporte de evaluación del docente. No es un documento oficial.",
+    "invalidoTitulo": "Este enlace ya no funciona",
+    "invalidoTexto": "Pide a la maestra o al maestro un enlace nuevo.",
+    "invalidoNota": "Los enlaces vencen al terminar el ciclo escolar o cuando se genera uno nuevo."
   }
 }

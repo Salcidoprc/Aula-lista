@@ -159,6 +159,27 @@ main {
   animation: var(--dur-medium) var(--ease-out) both entrada-pantalla;
 }
 
+/*
+ * Portal del tutor (catálogo de la regla 07): la tarjeta del periodo se abre en la cabecera de su boleta y la
+ * pastilla del hijo activo se desliza al cambiar de hijo. Con movimiento reducido no se desplazan: solo funden.
+ */
+::view-transition-group(.boleta) {
+  animation-duration: var(--dur-large);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(hijo-activo) {
+  animation-duration: 240ms;
+  animation-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(.boleta),
+  ::view-transition-group(hijo-activo) {
+    animation: none;
+  }
+}
+
 @keyframes salida-pantalla {
   to {
     opacity: 0;

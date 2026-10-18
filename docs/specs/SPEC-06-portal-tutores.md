@@ -55,6 +55,19 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un tutor que abrió el enlace una vez, cuando vuelve a entrar a la app desde el mismo navegador dentro de 90 días, entonces entra sin el enlace.
 - Dado el portal en un Android de gama baja con 4G, entonces "Mis hijos" carga en menos de 4 segundos.
 
+## Decisiones de implementación (H5.1)
+
+- **Partido en dos entregas:** H5.1 trae el enlace, la sesión, Mis hijos, el detalle con Boletas y Calificaciones, la boleta en HTML y el envío del enlace desde la ficha. La pestaña Avisos, el "último aviso" de la tarjeta y la pantalla Notificaciones (con `GET .../avisos` y `PUT /tutor/contacto`) llegan en H5.2 junto con SPEC-07: sin avisos serían pantallas vacías.
+- **El token viaja en el fragmento:** el enlace es `{UrlWeb}/tutor#<token>`; el fragmento no llega a bitácoras ni a cabeceras `Referer`. La web lo canjea con `POST /tutor/sesion` y lo borra de la barra de direcciones. Token de 256 bits en base64url; se guarda su SHA-256.
+- **Reenviar crea un enlace nuevo** sin revocar los anteriores: el token original no se puede recuperar porque solo se guarda el hash. **Regenerar** revoca todos los enlaces y sesiones del tutor y queda en auditoría (`enlace_tutor_regenerado`; también `enlace_tutor_enviado` y `enlace_tutor_sospechoso`).
+- **Vigencia (RN-062):** el enlace vence 30 días después del fin del ciclo del alumno, o 30 días desde hoy si eso es más tarde. La sesión es la cookie `aula_lista_tutor` (`HttpOnly`, `Secure`, `SameSite=Strict`, ruta `/api/v1`) de 90 días; se renueva con el uso, a lo más una escritura al día. Abrir el enlace en un navegador que ya tiene sesión del mismo tutor la reutiliza.
+- **Sospechoso (RN-065):** más de 5 sesiones nuevas de un enlace en 30 días lo marcan una sola vez, se audita y se avisa por correo al docente que lo creó, sin nombres, con liga a la ficha. La ficha muestra el aviso y "Regenerar enlace". El canje tiene límite de 10 por minuto por IP (`Tutores:CanjesPorMinuto`).
+- **Respuestas:** token alterado, vencido o revocado responden igual, 401 `enlace_invalido`, y la web lleva a "Este enlace ya no funciona". Un alumno o boleta no vinculado responde 404. El PDF de la boleta es el mismo endpoint del docente y acepta cualquiera de las dos sesiones.
+- **Aislamiento (RNF-001):** `enlace_tutor` y `sesion_tutor` tienen RLS forzado. Antes de conocer al tutor, las funciones `tutor_del_enlace(hash)` y `tutor_de_la_sesion(hash)` (invoker) fijan `app.token_hash` solo dentro de la búsqueda. Con `app.tutor_id` fijo, políticas de lectura del tutor en `vinculo_tutor`, `alumno`, `grupo`, `docente`, `boleta` (solo publicadas y vigentes), `periodo` y `unidad`.
+- **Configuración:** sección `Tutores` (`DiasSesion` 90, `DiasGraciaEnlace` 30, `DispositivosPorEnlace` 5, `DiasVentanaDispositivos` 30, `CanjesPorMinuto` 10).
+- **Lo que ve el tutor (RN-064):** la boleta vigente publicada con su final, el promedio y peso de cada rubro y la observación; nunca actividades individuales, notas ni borradores. La versión corregida dice "Versión corregida el dd/mm/aaaa" (RN-052).
+- **Texto del WhatsApp:** el docente lo manda desde su propio WhatsApp con `wa.me` y el mensaje prellenado; el servidor no envía nada en H5.1.
+
 ## Fuera de alcance
 
 Mensajes del tutor al docente, pagos, justificantes, acceso del alumno.

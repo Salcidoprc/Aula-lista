@@ -9,11 +9,14 @@ import { Router } from '@angular/router';
 import { catchError, from, switchMap, throwError } from 'rxjs';
 import { SIN_RENOVAR, SesionService } from './sesion.service';
 
-/** Agrega el token de acceso a las llamadas a la API y, si vence, renueva la sesión y reintenta una vez. */
+/**
+ * Agrega el token de acceso a las llamadas a la API y, si vence, renueva la sesión y reintenta una vez. El portal
+ * del tutor (SPEC-06) va con su propia cookie: ni lleva el token del docente ni un 401 suyo lo manda a entrar.
+ */
 export const autenticacionInterceptor: HttpInterceptorFn = (solicitud, siguiente) => {
   const sesion = inject(SesionService);
   const router = inject(Router);
-  if (!solicitud.url.startsWith('/api/')) {
+  if (!solicitud.url.startsWith('/api/') || solicitud.url.startsWith('/api/v1/tutor/')) {
     return siguiente(solicitud);
   }
 

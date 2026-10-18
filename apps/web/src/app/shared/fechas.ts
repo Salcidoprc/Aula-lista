@@ -10,3 +10,14 @@ const MES_CORTO = new Intl.DateTimeFormat('es-MX', { month: 'short', timeZone: '
 export function mesCorto(fecha: string): string {
   return MES_CORTO.format(new Date(`${fecha.slice(0, 10)}T00:00:00Z`)).replace('.', '');
 }
+
+const FECHA_LARGA = new Intl.DateTimeFormat('es-MX', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/** "3 de octubre de 2026" para un instante (no una fecha del calendario), en la zona del dispositivo. */
+export function fechaLarga(instante: string): string {
+  return FECHA_LARGA.format(new Date(instante));
+}
