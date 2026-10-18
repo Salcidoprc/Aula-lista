@@ -49,7 +49,7 @@ async function navegadorDelTutor(browser: Browser): Promise<Page> {
 }
 
 test.describe('SPEC-06: portal de tutores', () => {
-  test('RF-060 a RF-065: el tutor abre su enlace, ve a sus dos hijos, su boleta y vuelve sin el enlace; regenerar cierra su sesión', async ({
+  test('RF-060, RF-061, RF-062 y RF-065: el tutor abre su enlace, ve a sus dos hijos, su boleta y vuelve sin el enlace; regenerar cierra su sesión', async ({
     page,
     request,
     browser,
