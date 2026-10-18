@@ -12,7 +12,8 @@ public sealed class RegistroAuditoria : Entidad
         string entidad,
         Guid? entidadId,
         string? ip,
-        DateTimeOffset ahora)
+        DateTimeOffset ahora,
+        int? cantidad = null)
         : base(ahora)
     {
         ActorTipo = actorTipo;
@@ -22,6 +23,7 @@ public sealed class RegistroAuditoria : Entidad
         EntidadId = entidadId;
         Ip = ip;
         Fecha = ahora;
+        Cantidad = cantidad;
     }
 
     private RegistroAuditoria()
@@ -41,6 +43,9 @@ public sealed class RegistroAuditoria : Entidad
     public string? Ip { get; private set; }
 
     public DateTimeOffset Fecha { get; private set; }
+
+    /// <summary>Cuántos registros tocó la acción, por ejemplo las boletas publicadas (SPEC-05).</summary>
+    public int? Cantidad { get; private set; }
 }
 
 public static class AccionAuditoria
@@ -50,4 +55,9 @@ public static class AccionAuditoria
     public const string ExportacionSolicitada = "exportacion_solicitada";
     public const string EliminacionSolicitada = "eliminacion_cuenta_solicitada";
     public const string ContrasenaRestablecida = "contrasena_restablecida";
+    public const string BoletasPublicadas = "boletas_publicadas";
+    public const string BoletaCorregida = "boleta_corregida";
+    public const string CalificacionesExportadas = "calificaciones_exportadas";
+    public const string PeriodoCerrado = "periodo_cerrado";
+    public const string PeriodoReabierto = "periodo_reabierto";
 }

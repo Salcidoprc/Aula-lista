@@ -124,13 +124,13 @@ erDiagram
 | `observacion` | alumno_id, docente_id, periodo_id, estado (sin_generar, generando, borrador, aprobada, publicada), texto, borrador_ia, texto_final, instruccion, regeneraciones (0 a 5), modelo, version_prompt, tokens_entrada, tokens_salida, fallo (rechazo, longitud, error), datos_cambiaron, aprobada_en | Una por alumno y periodo; `borrador_ia` es la primera versión (RN-045) |
 | `estilo_observaciones` | docente_id (llave), longitud (breve, normal, detallada), persona (segunda, tercera), ejemplos (text[], hasta 3 de 800 caracteres) | Sin fila, el estilo por defecto (normal, tercera) |
 | `llamada_ia` | docente_id, grupo_id, modelo, version_prompt, tokens_entrada, tokens_salida, tokens_cache_leidos, duracion_ms, resultado | Una por llamada, sin contenido; base del límite por hora y de `consumo_mensual` |
-| `boleta` | alumno_id, periodo_id, version, datos (jsonb con la foto de calificaciones), pdf_ruta, publicada_en, reemplazada_por | Las versiones no se borran |
+| `boleta` | alumno_id, docente_id, periodo_id, version, datos (jsonb con la foto de calificaciones), codigo (8 caracteres, único), emitida_en, pdf_ruta, fallo_pdf, publicada_en, reemplazada_por | Las versiones no se borran; RLS por docente |
 | `aviso` | grupo_id, docente_id, titulo, cuerpo, urgente, destinatarios (todos o lista) | |
 | `entrega_aviso` | aviso_id, tutor_id, canal (push, correo, whatsapp, compartido), estado, leido_en | |
 | `mensaje_whatsapp` | grupo_id, tutor_id, plantilla, categoria, id_meta, estado, costo_estimado | Base del límite mensual |
 | `consumo_mensual` | grupo_id, mes, mensajes_whatsapp, tokens_ia_entrada, tokens_ia_salida | |
 | `suscripcion` | docente_id, proveedor, modalidad (tarjeta, prepago_oxxo), id_externo, estado, grupos_pro, periodo_actual_fin, pagado_hasta, gracia_hasta | |
-| `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
+| `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, cantidad, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
 | `evento_producto` | docente_id, nombre, propiedades (jsonb), fecha | Para métricas; sin datos personales |
 
 ## Aislamiento de datos (RNF-001)

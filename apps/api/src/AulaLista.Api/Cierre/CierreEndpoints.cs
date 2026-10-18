@@ -15,6 +15,10 @@ internal static class CierreEndpoints
             .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
         periodos.MapGet("/{id:guid}/cierre", Obtener).WithName("ObtenerCierre")
             .Produces<CierreDto>().Produces(StatusCodes.Status404NotFound);
+        periodos.MapPost("/{id:guid}/cierre/cerrar", Cerrar).WithName("CerrarPeriodo")
+            .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict);
+        periodos.MapPost("/{id:guid}/cierre/reabrir", Reabrir).WithName("ReabrirPeriodo")
+            .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict);
         periodos.MapPost("/{id:guid}/observaciones/generar", Generar).WithName("GenerarObservaciones")
             .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status429TooManyRequests);
         periodos.MapGet("/{id:guid}/observaciones", Listar).WithName("ListarObservaciones")
@@ -27,7 +31,7 @@ internal static class CierreEndpoints
             .Produces<ObservacionDto>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status429TooManyRequests);
         observaciones.MapPost("/{id:guid}/aprobar", Aprobar).WithName("AprobarObservacion")
             .Produces<ObservacionDto>().ProducesProblem(StatusCodes.Status409Conflict);
-        observaciones.MapPost("/{id:guid}/reabrir", Reabrir).WithName("ReabrirObservacion")
+        observaciones.MapPost("/{id:guid}/reabrir", ReabrirObservacion).WithName("ReabrirObservacion")
             .Produces<ObservacionDto>().ProducesProblem(StatusCodes.Status409Conflict);
 
         var estilo = api.MapGroup("/docente").WithTags("Cierre");
@@ -38,6 +42,12 @@ internal static class CierreEndpoints
     }
 
     private static async Task<IResult> Iniciar(Guid id, IniciarCierreCasoUso caso, CancellationToken ct) =>
+        Respuesta(await caso.EjecutarAsync(id, ct));
+
+    private static async Task<IResult> Cerrar(Guid id, CerrarPeriodoCasoUso caso, CancellationToken ct) =>
+        Respuesta(await caso.EjecutarAsync(id, ct));
+
+    private static async Task<IResult> Reabrir(Guid id, ReabrirPeriodoCasoUso caso, CancellationToken ct) =>
         Respuesta(await caso.EjecutarAsync(id, ct));
 
     private static async Task<IResult> Obtener(Guid id, ObtenerCierreCasoUso caso, CancellationToken ct) =>
@@ -67,7 +77,7 @@ internal static class CierreEndpoints
         return await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct));
     }
 
-    private static async Task<IResult> Reabrir(Guid id, ReabrirObservacionCasoUso caso, CancellationToken ct) =>
+    private static async Task<IResult> ReabrirObservacion(Guid id, ReabrirObservacionCasoUso caso, CancellationToken ct) =>
         Respuesta(await caso.EjecutarAsync(id, ct));
 
     private static Task<EstiloDto> ObtenerEstilo(ObtenerEstiloCasoUso caso, CancellationToken ct) => caso.EjecutarAsync(ct);

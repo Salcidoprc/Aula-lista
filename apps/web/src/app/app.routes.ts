@@ -85,6 +85,12 @@ export const routes: Routes = [
           import('./docente/cierre/revisar-observacion').then((m) => m.RevisarObservacion),
       },
       {
+        path: ':id/periodos/:periodoId/boletas',
+        title: 'titulos.boletas',
+        loadComponent: () =>
+          import('./docente/boletas/boletas-periodo').then((m) => m.BoletasPeriodo),
+      },
+      {
         path: ':id/periodos/:periodoId/tabla',
         title: 'titulos.tabla',
         loadComponent: () => import('./docente/evaluacion/tabla').then((m) => m.Tabla),

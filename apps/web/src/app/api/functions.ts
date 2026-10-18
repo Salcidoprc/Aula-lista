@@ -127,6 +127,10 @@ export type { ObtenerCierre$Params as ObtenerCierre$Params } from './fn/cierre/o
 export { obtenerCierre as obtenerCierre } from './fn/cierre/obtener-cierre';
 export type { IniciarCierre$Params as IniciarCierre$Params } from './fn/cierre/iniciar-cierre';
 export { iniciarCierre as iniciarCierre } from './fn/cierre/iniciar-cierre';
+export type { CerrarPeriodo$Params as CerrarPeriodo$Params } from './fn/cierre/cerrar-periodo';
+export { cerrarPeriodo as cerrarPeriodo } from './fn/cierre/cerrar-periodo';
+export type { ReabrirPeriodo$Params as ReabrirPeriodo$Params } from './fn/cierre/reabrir-periodo';
+export { reabrirPeriodo as reabrirPeriodo } from './fn/cierre/reabrir-periodo';
 export type { GenerarObservaciones$Params as GenerarObservaciones$Params } from './fn/cierre/generar-observaciones';
 export { generarObservaciones as generarObservaciones } from './fn/cierre/generar-observaciones';
 export type { ListarObservaciones$Params as ListarObservaciones$Params } from './fn/cierre/listar-observaciones';
@@ -143,3 +147,17 @@ export type { ObtenerEstiloObservaciones$Params as ObtenerEstiloObservaciones$Pa
 export { obtenerEstiloObservaciones as obtenerEstiloObservaciones } from './fn/cierre/obtener-estilo-observaciones';
 export type { GuardarEstiloObservaciones$Params as GuardarEstiloObservaciones$Params } from './fn/cierre/guardar-estilo-observaciones';
 export { guardarEstiloObservaciones as guardarEstiloObservaciones } from './fn/cierre/guardar-estilo-observaciones';
+export type { ListarBoletas$Params as ListarBoletas$Params } from './fn/boletas/listar-boletas';
+export { listarBoletas as listarBoletas } from './fn/boletas/listar-boletas';
+export type { GenerarBoletas$Params as GenerarBoletas$Params } from './fn/boletas/generar-boletas';
+export { generarBoletas as generarBoletas } from './fn/boletas/generar-boletas';
+export type { PublicarBoletas$Params as PublicarBoletas$Params } from './fn/boletas/publicar-boletas';
+export { publicarBoletas as publicarBoletas } from './fn/boletas/publicar-boletas';
+export type { DescargarBoletasDelGrupo$Params as DescargarBoletasDelGrupo$Params } from './fn/boletas/descargar-boletas-del-grupo';
+export { descargarBoletasDelGrupo as descargarBoletasDelGrupo } from './fn/boletas/descargar-boletas-del-grupo';
+export type { ExportarPeriodo$Params as ExportarPeriodo$Params } from './fn/boletas/exportar-periodo';
+export { exportarPeriodo as exportarPeriodo } from './fn/boletas/exportar-periodo';
+export type { DescargarBoleta$Params as DescargarBoleta$Params } from './fn/boletas/descargar-boleta';
+export { descargarBoleta as descargarBoleta } from './fn/boletas/descargar-boleta';
+export type { CorregirBoleta$Params as CorregirBoleta$Params } from './fn/boletas/corregir-boleta';
+export { corregirBoleta as corregirBoleta } from './fn/boletas/corregir-boleta';

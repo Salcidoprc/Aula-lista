@@ -326,7 +326,15 @@
     "observacion_vacia": "Escribe la observación antes de aprobarla.",
     "observacion_larga": "La observación es muy larga: el máximo es de 1,500 caracteres.",
     "instruccion_invalida": "La instrucción es muy larga: el máximo es de 200 caracteres.",
-    "estilo_invalido": "Revisa el estilo: hasta 3 ejemplos de máximo 800 caracteres cada uno."
+    "estilo_invalido": "Revisa el estilo: hasta 3 ejemplos de máximo 800 caracteres cada uno.",
+    "boleta_publicada": "La boleta ya se publicó. Para cambiarla, emite una versión corregida.",
+    "boleta_no_corregible": "Solo se corrige la versión vigente de una boleta publicada.",
+    "boleta_sin_cambios": "La boleta ya tiene los datos actuales; no hay nada que corregir.",
+    "boleta_preparando": "La boleta todavía se está preparando. Espera unos segundos.",
+    "observacion_sin_aprobar": "Aprueba la observación del alumno antes de emitir su boleta.",
+    "sin_boletas_por_publicar": "No hay boletas listas para publicar. Genera las boletas primero.",
+    "boletas_desactualizadas": "Algunas boletas ya no coinciden con los datos actuales. Vuelve a generarlas antes de publicar.",
+    "sin_boletas": "Todavía no hay boletas. Genera las boletas primero."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -390,7 +398,8 @@
     "historialAsistencia": "Historial de asistencia",
     "cierre": "Cierre de la unidad",
     "revisarObservacion": "Revisar observación",
-    "estilo": "Estilo de las observaciones"
+    "estilo": "Estilo de las observaciones",
+    "boletas": "Boletas de la unidad"
   },
   "ciclo": {
     "volver": "Volver",
@@ -838,9 +847,18 @@
     "leyenda": "P presente · F falta · R retardo · J justificada (no cuenta). Toca un día para corregirlo.",
     "alumno": "Alumno",
     "detalle": {
-      "falta": { "uno": "1 falta", "otros": "{{n}} faltas" },
-      "retardo": { "uno": "1 retardo", "otros": "{{n}} retardos" },
-      "justificada": { "uno": "1 justificada", "otros": "{{n}} justificadas" },
+      "falta": {
+        "uno": "1 falta",
+        "otros": "{{n}} faltas"
+      },
+      "retardo": {
+        "uno": "1 retardo",
+        "otros": "{{n}} retardos"
+      },
+      "justificada": {
+        "uno": "1 justificada",
+        "otros": "{{n}} justificadas"
+      },
       "nada": "Sin faltas"
     },
     "diasConLista": "Días con lista",
@@ -901,7 +919,8 @@
       "abierto": "Cerrar la unidad",
       "en_cierre": "Revisar observaciones",
       "cerrado": "Ver observaciones"
-    }
+    },
+    "boletas": "Ver boletas"
   },
   "rubros": {
     "volver": "Calificaciones",
@@ -1196,7 +1215,12 @@
     "generar": "Generar observaciones ({{cantidad}})",
     "terminado": "Terminó la generación: todas tienen borrador.",
     "terminadoConFallas": "Terminó la generación, pero {{fallidas}} no se pudieron generar. Ábrelas para intentar de nuevo o escribirlas.",
-    "estilo": "Estilo de las observaciones"
+    "estilo": "Estilo de las observaciones",
+    "boletas": {
+      "uno": "Ir a boletas (1 aprobada)",
+      "otros": "Ir a boletas ({{cantidad}} aprobadas)"
+    },
+    "boletasCerrada": "Ver boletas"
   },
   "revisar": {
     "volver": "Lista del cierre",
@@ -1287,5 +1311,104 @@
     },
     "guardar": "Guardar estilo",
     "guardado": "Estilo guardado."
+  },
+  "boletas": {
+    "volver": "Cierre de la unidad",
+    "titulo": "Boletas",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando las boletas",
+    "sinConexion": "Sin conexión: las boletas necesitan internet. Lo que ves puede no estar al día.",
+    "archivado": "Este grupo está archivado: las boletas son de solo lectura.",
+    "cerrada": "Esta unidad está cerrada: todo es de solo lectura. Para corregir algo, reábrela.",
+    "sinCierre": "Las boletas salen de las observaciones aprobadas.",
+    "irAlCierre": "Ir al cierre de la unidad",
+    "lista": "Boletas por alumno",
+    "calificacion": "Calificación final",
+    "estados": {
+      "sin_aprobar": "Falta aprobar la observación",
+      "sin_boleta": "Sin boleta",
+      "preparando": "Preparando",
+      "lista": "Lista",
+      "publicada": "Publicada"
+    },
+    "version": "Versión {{version}}",
+    "desactualizada": "Desactualizada",
+    "cambioDespues": "Cambió después de publicar",
+    "noSePreparo": "No se pudo preparar",
+    "verPdf": "Ver la boleta de {{nombre}}",
+    "elegir": "Elegir la boleta de {{nombre}}",
+    "elegirTodas": "Elegir todas las listas",
+    "elegidas": {
+      "uno": "1 elegida",
+      "otros": "{{cantidad}} elegidas"
+    },
+    "resumenTitulo": "Resumen",
+    "publicadas": "{{publicadas}} de {{total}} publicadas",
+    "sello": "Publicadas",
+    "preparandoAvance": "Preparando {{listas}} de {{total}}",
+    "preparandoEtiqueta": "Avance de la preparación de boletas",
+    "conteos": {
+      "publicada": "Publicadas",
+      "lista": "Listas",
+      "pendiente": "Sin boleta",
+      "sin_aprobar": "Sin aprobar"
+    },
+    "generar": "Generar boletas ({{cantidad}})",
+    "publicar": "Publicar boletas ({{cantidad}})",
+    "publicarElegidas": "Publicar las elegidas ({{cantidad}})",
+    "pdfGrupo": "Descargar PDF del grupo",
+    "excel": "Exportar a Excel",
+    "terminado": {
+      "uno": "Terminó la preparación: 1 boleta lista.",
+      "otros": "Terminó la preparación: {{cantidad}} boletas listas."
+    },
+    "terminadoConFallas": {
+      "uno": "Terminó la preparación, pero 1 no se pudo preparar. Vuelve a generar para intentarlo de nuevo.",
+      "otros": "Terminó la preparación, pero {{fallidas}} no se pudieron preparar. Vuelve a generar para intentarlo de nuevo."
+    },
+    "publicadasAviso": {
+      "uno": "1 boleta publicada",
+      "otros": "{{cantidad}} boletas publicadas"
+    },
+    "cancelar": "Cancelar",
+    "confirmar": {
+      "titulo": {
+        "uno": "Vas a publicar 1 boleta",
+        "otros": "Vas a publicar {{cantidad}} boletas"
+      },
+      "whatsapp": "Tutores con WhatsApp",
+      "correo": "Tutores con correo",
+      "sinContacto": "Alumnos sin tutor registrado",
+      "quienes": "Ver quiénes",
+      "avisos": "Por ahora la boleta queda publicada y lista para el tutor; el aviso por WhatsApp o correo se activa en una próxima versión.",
+      "leyenda": "Cada boleta dice: Reporte de evaluación del docente. No es un documento oficial.",
+      "accion": "Publicar"
+    },
+    "corregir": {
+      "accion": "Emitir versión corregida",
+      "titulo": "Emitir versión corregida",
+      "texto": "La boleta de {{nombre}} cambió después de publicarse. Se emite la versión {{nueva}} con los datos actuales y se publica; la versión {{version}} queda reemplazada y el tutor verá la leyenda \"Versión corregida\".",
+      "confirmar": "Emitir y publicar",
+      "hecho": "Versión {{version}} de {{nombre}} publicada"
+    },
+    "cerrar": {
+      "accion": "Dar por cerrada la unidad",
+      "titulo": "¿Dar por cerrada la unidad?",
+      "texto": "Todas las boletas están publicadas. Al cerrarla, calificaciones, observaciones y boletas quedan de solo lectura. Puedes reabrirla después.",
+      "conPendientes": {
+        "uno": "Queda 1 alumno sin boleta publicada. Al cerrarla, calificaciones, observaciones y boletas quedan de solo lectura. Puedes reabrirla después.",
+        "otros": "Quedan {{cantidad}} alumnos sin boleta publicada. Al cerrarla, calificaciones, observaciones y boletas quedan de solo lectura. Puedes reabrirla después."
+      },
+      "confirmar": "Cerrar la unidad",
+      "hecho": "Unidad cerrada"
+    },
+    "reabrir": {
+      "accion": "Reabrir la unidad",
+      "titulo": "¿Reabrir la unidad?",
+      "texto": "Podrás corregir calificaciones y observaciones. Las boletas publicadas siguen a la vista del tutor hasta que emitas su versión corregida.",
+      "registro": "La reapertura queda registrada en tu historial.",
+      "confirmar": "Reabrir",
+      "hecho": "Unidad reabierta"
+    }
   }
 }

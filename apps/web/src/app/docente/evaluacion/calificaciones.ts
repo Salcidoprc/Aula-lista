@@ -241,6 +241,15 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
             <app-icono nombre="nota" />
             {{ t('cierre.' + m.estado) }}
           </a>
+          @if (m.estado === 'cerrado') {
+            <a
+              class="boton boton--secundario"
+              [routerLink]="['/grupos', id(), 'periodos', m.periodoId, 'boletas']"
+            >
+              <app-icono nombre="archivo" />
+              {{ t('boletas') }}
+            </a>
+          }
         }
       </ng-template>
 

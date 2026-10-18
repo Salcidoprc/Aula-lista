@@ -2288,6 +2288,88 @@
         }
       }
     },
+    "/api/v1/periodos/{id}/cierre/cerrar": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "CerrarPeriodo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CierreDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/cierre/reabrir": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "ReabrirPeriodo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CierreDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/periodos/{id}/observaciones/generar": {
       "post": {
         "tags": [
@@ -2665,6 +2747,290 @@
           }
         }
       }
+    },
+    "/api/v1/periodos/{id}/boletas": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "ListarBoletas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoletasDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/boletas/generar": {
+      "post": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "GenerarBoletas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SeleccionAlumnos"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoletasDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/boletas/publicar": {
+      "post": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "PublicarBoletas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SeleccionAlumnos"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoletasDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/boletas/pdf": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "DescargarBoletasDelGrupo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/exportacion.xlsx": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "ExportarPeriodo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/boletas/{id}/pdf": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "DescargarBoleta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/boletas/{id}/corregir": {
+      "post": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "CorregirBoleta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoletasDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2945,6 +3311,154 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          }
+        }
+      },
+      "BoletaAlumnoDto": {
+        "required": [
+          "alumnoId",
+          "numeroLista",
+          "nombres",
+          "apellidos",
+          "calificacion",
+          "estado",
+          "observacionId",
+          "boletaId",
+          "version",
+          "publicadaEn",
+          "desactualizada",
+          "falloPdf",
+          "tutoresWhatsapp",
+          "tutoresCorreo"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numeroLista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "calificacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "observacionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "boletaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "publicadaEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "desactualizada": {
+            "type": "boolean"
+          },
+          "falloPdf": {
+            "type": "boolean"
+          },
+          "tutoresWhatsapp": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tutoresCorreo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "BoletasDto": {
+        "required": [
+          "periodoId",
+          "grupoId",
+          "estado",
+          "soloLectura",
+          "decimalesFinal",
+          "conteos",
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "soloLectura": {
+            "type": "boolean"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "conteos": {
+            "$ref": "#/components/schemas/ConteosBoletasDto"
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoletaAlumnoDto"
             }
           }
         }
@@ -3299,6 +3813,67 @@
             "items": {
               "$ref": "#/components/schemas/FilaImportacion"
             }
+          }
+        }
+      },
+      "ConteosBoletasDto": {
+        "required": [
+          "sinAprobar",
+          "sinBoleta",
+          "preparando",
+          "lista",
+          "publicada",
+          "desactualizadas"
+        ],
+        "type": "object",
+        "properties": {
+          "sinAprobar": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "sinBoleta": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "preparando": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "publicada": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "desactualizadas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -5162,6 +5737,24 @@
           }
         }
       },
+      "SeleccionAlumnos": {
+        "required": [
+          "alumnoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "SincronizarCambios": {
         "required": [
           "cambios"
@@ -5537,6 +6130,9 @@
     },
     {
       "name": "Cierre"
+    },
+    {
+      "name": "Boletas"
     }
   ]
 }

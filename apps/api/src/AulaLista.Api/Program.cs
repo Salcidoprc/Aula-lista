@@ -1,5 +1,6 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using AulaLista.Api.Boletas;
 using AulaLista.Api.Cierre;
 using AulaLista.Api.Comun;
 using AulaLista.Api.Cuentas;
@@ -150,6 +151,7 @@ api.MapDocente();
 api.MapGrupos();
 api.MapEvaluacion();
 api.MapCierre();
+api.MapBoletas();
 if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is { } esquemas
     && await esquemas.GetSchemeAsync(GoogleEndpoints.EsquemaGoogle) is not null)
 {
