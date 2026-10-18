@@ -28,6 +28,8 @@ public static class ErroresEvaluacion
     public static readonly ErrorNegocio CeldaInexistente = new("celda_inexistente", "Esa actividad o ese alumno ya no están en el grupo.");
     public static readonly ErrorNegocio EquiposInvalidos = new("equipos_invalidos", "Cada equipo lleva un nombre distinto de hasta 40 caracteres y cada alumno va en un solo equipo.");
     public static readonly ErrorNegocio NotaInvalida = new("nota_invalida", "La nota lleva texto de hasta 1,000 caracteres y una etiqueta válida.");
+    public static readonly ErrorNegocio AsistenciaDuplicada = new("asistencia_duplicada", "Solo puede haber un rubro de asistencia por unidad.");
+    public static readonly ErrorNegocio AsistenciaInvalida = new("asistencia_invalida", "Cada alumno va como presente, retardo, falta o justificada.");
     public static readonly ErrorNegocio GrupoConCalificaciones = new("grupo_con_calificaciones", "El grupo ya tiene calificaciones; archívalo en lugar de borrarlo.");
 
     public static ErrorNegocio CalificacionesMenoresAMinima(int cantidad) =>
@@ -40,6 +42,7 @@ public static class ErroresEvaluacion
         PesosNoSuman100, PesosCriteriosNoSuman100, RubrosInvalidos, CriteriosInvalidos, TipoRubroInvalido, FormaInvalida,
         MinimaInvalida, FormaConCalificaciones, BorradoRequiereConfirmacion, PeriodoEnCierre, PeriodoCerrado, PeriodoConRubros,
         ActividadInvalida, FechaFueraDeUnidad, RubroSinActividades, CalificacionFueraDeRango, CalificacionInvalida,
-        CalificacionMenorAMinima, MarcaInvalida, CriterioInexistente, CeldaInexistente, EquiposInvalidos, NotaInvalida, GrupoConCalificaciones, CalificacionesMenoresAMinima(2),
+        CalificacionMenorAMinima, MarcaInvalida, CriterioInexistente, CeldaInexistente, EquiposInvalidos, NotaInvalida, AsistenciaDuplicada, AsistenciaInvalida,
+        GrupoConCalificaciones, CalificacionesMenoresAMinima(2),
     ];
 }

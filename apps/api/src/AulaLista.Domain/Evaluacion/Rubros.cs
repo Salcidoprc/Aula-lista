@@ -206,6 +206,12 @@ public static class ReglasRubros
             return ErroresEvaluacion.RubrosInvalidos;
         }
 
+        // RN-104: un solo rubro de asistencia por unidad y grupo.
+        if (rubros.Count(r => tipos.TryGetValue(r.TipoRubroId, out var t) && t.Comportamiento == Comportamiento.Asistencia) > 1)
+        {
+            return ErroresEvaluacion.AsistenciaDuplicada;
+        }
+
         foreach (var rubro in rubros)
         {
             if (string.IsNullOrWhiteSpace(rubro.Nombre) || rubro.Nombre.Trim().Length > Rubro.LongitudNombre

@@ -170,6 +170,75 @@
         }
       ],
       "esperado": { "rubros": { "exposicion": "7.75" }, "periodo": "7.75", "final": "7.75", "sinDatos": [] }
+    },
+    {
+      "nombre": "SPEC-10: 20 tomas con 18 presentes, 1 falta y 1 justificada dan 18/19 = 94.74% y 9.47 en asistencia",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "asistencia", "peso": "100", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "falta", "justificada"]
+        }
+      ],
+      "esperado": { "rubros": { "asistencia": "9.47" }, "periodo": "9.47", "final": "9.47", "sinDatos": [] }
+    },
+    {
+      "nombre": "SPEC-10: con retardo = 0.5, 9 presentes y 1 retardo en 10 tomas dan 95% y 9.50",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano", "valorRetardo": "0.5" },
+      "rubros": [
+        {
+          "id": "asistencia", "peso": "100", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "retardo"]
+        }
+      ],
+      "esperado": { "rubros": { "asistencia": "9.50" }, "periodo": "9.50", "final": "9.50", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-102: con retardo = 0, 2 presentes y 2 retardos dan 50% y 5.00",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano", "valorRetardo": "0" },
+      "rubros": [
+        {
+          "id": "asistencia", "peso": "100", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["presente", "retardo", "retardo", "presente"]
+        }
+      ],
+      "esperado": { "rubros": { "asistencia": "5.00" }, "periodo": "5.00", "final": "5.00", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-102: sin configurar, el retardo vale 1",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        {
+          "id": "asistencia", "peso": "100", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["presente", "retardo", "falta", "presente"]
+        }
+      ],
+      "esperado": { "rubros": { "asistencia": "7.50" }, "periodo": "7.50", "final": "7.50", "sinDatos": [] }
+    },
+    {
+      "nombre": "SPEC-10: Actividades 30% (8.00), Examen 60% (7) y Asistencia 10% (18 de 20 = 9.00) dan 7.50",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "actividades", "peso": "30", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8" }, { "valor": "9" }, { "valor": "7" }] },
+        { "id": "examen", "peso": "60", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "7" }] },
+        {
+          "id": "asistencia", "peso": "10", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "presente", "falta", "falta"]
+        }
+      ],
+      "esperado": { "rubros": { "actividades": "8.00", "examen": "7.00", "asistencia": "9.00" }, "periodo": "7.50", "final": "7.50", "sinDatos": [] }
+    },
+    {
+      "nombre": "RN-103: con solo justificadas el rubro de asistencia no tiene datos y reparte su peso",
+      "configuracion": { "califMinima": "5", "decimalesFinal": 2, "redondeo": "cercano" },
+      "rubros": [
+        { "id": "examen", "peso": "90", "forma": "numerica", "califMinima": "5", "celdas": [{ "valor": "8" }] },
+        {
+          "id": "asistencia", "peso": "10", "comportamiento": "asistencia", "forma": "numerica", "califMinima": "5", "celdas": [],
+          "tomas": ["justificada", "justificada"]
+        }
+      ],
+      "esperado": { "rubros": { "examen": "8.00", "asistencia": null }, "periodo": "8.00", "final": "8.00", "sinDatos": ["asistencia"] }
     }
   ]
 }

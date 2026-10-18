@@ -62,12 +62,13 @@ export function celdaVacia(celda: CeldaDto | undefined): boolean {
   );
 }
 
-/** RN-033 a RN-035 para un alumno, con lo que hay en la matriz (incluidos cambios sin enviar). */
+/** RN-033 a RN-035 para un alumno, con lo que hay en la matriz (incluidos cambios sin enviar y su asistencia). */
 export function resultadoAlumno(
   matriz: MatrizCalificacionesDto,
   indice: IndiceMatriz,
   alumnoId: string,
 ): ResultadoPeriodo {
+  const tomas = matriz.asistencia?.find((a) => a.alumnoId === alumnoId)?.estados ?? [];
   return calcularPeriodo(
     matriz.rubros.map(({ rubro, actividades }) => ({
       id: rubro.id,
@@ -77,11 +78,13 @@ export function resultadoAlumno(
       califMinima: rubro.califMinima,
       criterios: rubro.criterios.map((c) => ({ ...c, forma: c.forma as Forma })),
       celdas: actividades.map((a) => aCalculo(indice.celdas.get(`${a.id}:${alumnoId}`))),
+      tomas,
     })),
     {
       califMinima: matriz.configuracion.califMinima,
       decimalesFinal: Number(matriz.configuracion.decimalesFinal),
       redondeo: matriz.configuracion.redondeo as Sentido,
+      valorRetardo: matriz.configuracion.valorRetardo ?? 1,
     },
   );
 }

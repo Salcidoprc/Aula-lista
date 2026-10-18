@@ -28,11 +28,16 @@ public sealed record ResultadoAlumnoDto(
 
 public sealed record RubroMatrizDto(RubroDto Rubro, IReadOnlyList<ActividadDto> Actividades);
 
-public sealed record ConfiguracionMatrizDto(decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo);
+public sealed record ConfiguracionMatrizDto(decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo, decimal ValorRetardo);
+
+/// <summary>El estado del alumno en cada toma de la unidad, en orden de fecha (RN-103).</summary>
+public sealed record AsistenciaAlumnoDto(Guid AlumnoId, IReadOnlyList<string> Estados);
 
 /// <summary>
 /// Todo lo que la captura y la tabla necesitan del periodo, también para guardarlo sin conexión. <see cref="Equipos"/>
 /// son los de hoy; <see cref="Composiciones"/>, los guardados de cada actividad ya calificada por equipo (RN-116).
+/// <see cref="Asistencia"/> trae las tomas de la unidad para el rubro de asistencia (RN-104) y <see cref="Tomas"/>
+/// cuántas hay.
 /// </summary>
 public sealed record MatrizCalificacionesDto(
     Guid PeriodoId,
@@ -46,7 +51,9 @@ public sealed record MatrizCalificacionesDto(
     IReadOnlyList<CeldaDto> Celdas,
     IReadOnlyList<ResultadoAlumnoDto> Resultados,
     IReadOnlyList<EquipoDto> Equipos,
-    IReadOnlyList<ComposicionDto> Composiciones);
+    IReadOnlyList<ComposicionDto> Composiciones,
+    int Tomas,
+    IReadOnlyList<AsistenciaAlumnoDto> Asistencia);
 
 /// <summary>RF-033, RF-034: matriz del periodo. Alumnos activos y, de solo lectura, las bajas con calificaciones.</summary>
 public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, ConsultaRubros consulta)
@@ -74,28 +81,32 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
         var equipos = await repositorio.EquiposAsync(grupo.Id, ct);
         var composiciones = await repositorio.ComposicionesAsync(
             actividades.Where(a => a.Modo == ModoActividad.PorEquipo).Select(a => a.Id).ToList(), ct);
+        var tomas = await repositorio.TomasAsync(grupo.Id, periodo.Unidad.Inicio, periodo.Unidad.Fin, ct);
+        var asistencia = ReglasAsistencia.PorAlumno(tomas);
         return new MatrizCalificacionesDto(
             periodo.Periodo.Id,
             grupo.Id,
             periodo.Periodo.Estado,
             ReglasPeriodo.PuedeCapturar(periodo) is not null,
-            new ConfiguracionMatrizDto(grupo.CalifMinima, grupo.CalifAprobatoria, grupo.DecimalesFinal, grupo.Redondeo),
+            new ConfiguracionMatrizDto(grupo.CalifMinima, grupo.CalifAprobatoria, grupo.DecimalesFinal, grupo.Redondeo, grupo.ValorRetardo),
             rubros.SumaPesos,
             rubros.Rubros.Select(r => new RubroMatrizDto(
                 r, porRubro[r.Id].OrderBy(a => a.Orden).Select(a => ActividadDto.De(a, capturadas.GetValueOrDefault(a.Id))).ToList())).ToList(),
             alumnos.Select(a => new AlumnoMatrizDto(a.Id, a.NumeroLista, a.Nombres, a.Apellidos, !a.EstaActivo)).ToList(),
             celdas.Select(CeldaDto.De).ToList(),
-            Calcular(rubros.Rubros, porRubro, celdas, alumnos, ReglasPeriodo.Configuracion(grupo)),
+            Calcular(rubros.Rubros, porRubro, celdas, asistencia, alumnos, ReglasPeriodo.Configuracion(grupo)),
             equipos.Select(EquipoDto.De).ToList(),
             composiciones
                 .GroupBy(c => (c.ActividadId, c.EquipoId))
                 .Select(g => new ComposicionDto(g.Key.ActividadId, g.Key.EquipoId, g.First().NombreEquipo, g.Select(c => c.AlumnoId).ToList()))
-                .ToList());
+                .ToList(),
+            tomas.Count,
+            alumnos.Where(a => asistencia.ContainsKey(a.Id)).Select(a => new AsistenciaAlumnoDto(a.Id, asistencia[a.Id])).ToList());
     }
 
     private static List<ResultadoAlumnoDto> Calcular(
         IReadOnlyList<RubroDto> rubros, ILookup<Guid, Actividad> porRubro, IReadOnlyList<Calificacion> celdas,
-        IReadOnlyList<Alumno> alumnos, ConfiguracionCalculo configuracion)
+        IReadOnlyDictionary<Guid, IReadOnlyList<string>> asistencia, IReadOnlyList<Alumno> alumnos, ConfiguracionCalculo configuracion)
     {
         var porCelda = celdas.ToDictionary(c => (c.ActividadId, c.AlumnoId));
         return alumnos.Select(alumno =>
@@ -103,7 +114,8 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
             var entrada = rubros.Select(r => new RubroCalculo(
                 r.Id, r.Peso, r.Comportamiento, r.Forma, r.CalifMinima,
                 r.Criterios.Select(c => new CriterioCalculo(c.Id, c.Peso, c.Forma, c.CalifMinima)).ToList(),
-                porRubro[r.Id].Select(a => porCelda.TryGetValue((a.Id, alumno.Id), out var c) ? c.ACalculo() : CeldaCalculo.Vacia).ToList()))
+                porRubro[r.Id].Select(a => porCelda.TryGetValue((a.Id, alumno.Id), out var c) ? c.ACalculo() : CeldaCalculo.Vacia).ToList(),
+                asistencia.GetValueOrDefault(alumno.Id)))
                 .ToList();
             var resultado = Calculo.Periodo(entrada, configuracion);
             return new ResultadoAlumnoDto(

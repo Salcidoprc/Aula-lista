@@ -6,7 +6,7 @@ using static AulaLista.Api.Comun.Respuestas;
 
 namespace AulaLista.Api.Evaluacion;
 
-/// <summary>SPEC-03: tipos de rubro, rubros y criterios, actividades, calificaciones, equipos, notas y la cola sin conexión.</summary>
+/// <summary>SPEC-03 y SPEC-10: tipos de rubro, rubros y criterios, actividades, calificaciones, equipos, notas, asistencia y la cola sin conexión.</summary>
 internal static class EvaluacionEndpoints
 {
     public static RouteGroupBuilder MapEvaluacion(this RouteGroupBuilder api)
@@ -46,6 +46,14 @@ internal static class EvaluacionEndpoints
             .Produces<IReadOnlyList<EquipoDto>>().Produces(StatusCodes.Status404NotFound);
         grupos.MapPut("/{id:guid}/equipos", ReemplazarEquipos).WithName("ReemplazarEquipos")
             .Produces<IReadOnlyList<EquipoDto>>().ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        var asistencias = api.MapGroup("/grupos").WithTags("Asistencia");
+        asistencias.MapGet("/{id:guid}/asistencias", ListarAsistencias).WithName("ListarAsistencias")
+            .Produces<IReadOnlyList<TomaAsistenciaDto>>().Produces(StatusCodes.Status404NotFound);
+        asistencias.MapPut("/{id:guid}/asistencias/{fecha}", GuardarAsistencia).WithName("GuardarAsistencia")
+            .Produces<ResultadoAsistencia>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        asistencias.MapDelete("/{id:guid}/asistencias/{fecha}", BorrarAsistencia).WithName("BorrarAsistencia")
+            .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status409Conflict);
 
         var alumnos = api.MapGroup("/alumnos").WithTags("Notas");
         alumnos.MapGet("/{id:guid}/notas", ListarNotas).WithName("ListarNotas")
@@ -107,4 +115,21 @@ internal static class EvaluacionEndpoints
     private static async Task<IResult> CrearNota(
         Guid id, CrearNota cuerpo, IValidator<CrearNota> validador, CrearNotaCasoUso caso, CancellationToken ct) =>
         await validador.ValidarAsync(cuerpo, ct) ?? Creado(await caso.EjecutarAsync(id, cuerpo, ct), n => $"/api/v1/alumnos/{n.AlumnoId}/notas");
+
+    private static async Task<IResult> ListarAsistencias(
+        Guid id, DateOnly? desde, DateOnly? hasta, ListarAsistenciasCasoUso caso, CancellationToken ct) =>
+        await caso.EjecutarAsync(id, desde, hasta, ct) is { } lista ? TypedResults.Ok(lista) : TypedResults.NotFound();
+
+    private static async Task<IResult> GuardarAsistencia(
+        Guid id,
+        DateOnly fecha,
+        GuardarAsistencia cuerpo,
+        [FromHeader(Name = "Idempotency-Key")] Guid? claveIdempotencia,
+        IValidator<GuardarAsistencia> validador,
+        GuardarAsistenciaCasoUso caso,
+        CancellationToken ct) =>
+        await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, fecha, cuerpo, claveIdempotencia, ct));
+
+    private static async Task<IResult> BorrarAsistencia(Guid id, DateOnly fecha, BorrarAsistenciaCasoUso caso, CancellationToken ct) =>
+        SinContenido(await caso.EjecutarAsync(id, fecha, ct));
 }

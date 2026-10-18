@@ -215,3 +215,33 @@ internal sealed class NotaConfiguracion : IEntityTypeConfiguration<Nota>
         builder.HasOne<Periodo>().WithMany().HasForeignKey(n => n.PeriodoId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class TomaAsistenciaConfiguracion : IEntityTypeConfiguration<TomaAsistencia>
+{
+    public void Configure(EntityTypeBuilder<TomaAsistencia> builder)
+    {
+        builder.ToTable("toma_asistencia");
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).ValueGeneratedNever();
+        builder.HasIndex(t => new { t.GrupoId, t.Fecha }).IsUnique(); // RN-100: una toma por grupo y fecha
+        builder.HasIndex(t => t.DocenteId);
+        builder.HasOne<Grupo>().WithMany().HasForeignKey(t => t.GrupoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(t => t.Alumnos).WithOne().HasForeignKey(a => a.TomaAsistenciaId).OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(t => t.Alumnos).HasField("_alumnos").UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+}
+
+internal sealed class AsistenciaConfiguracion : IEntityTypeConfiguration<Asistencia>
+{
+    public void Configure(EntityTypeBuilder<Asistencia> builder)
+    {
+        builder.ToTable("asistencia", t => t.HasCheckConstraint("ck_asistencia_estado", "estado IN ('presente', 'falta', 'retardo', 'justificada')"));
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.Id).ValueGeneratedNever();
+        builder.Property(a => a.Estado).HasMaxLength(20).IsRequired();
+        builder.HasIndex(a => new { a.TomaAsistenciaId, a.AlumnoId }).IsUnique();
+        builder.HasIndex(a => a.AlumnoId);
+        builder.HasIndex(a => a.DocenteId);
+        builder.HasOne<Alumno>().WithMany().HasForeignKey(a => a.AlumnoId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

@@ -28,7 +28,8 @@ public static class Comportamiento
     public const string Asistencia = "asistencia";
 }
 
-public sealed record ConfiguracionCalculo(decimal CalifMinima, int DecimalesFinal, string Redondeo);
+/// <summary>Configuración del grupo para calcular; <see cref="ValorRetardo"/> es lo que vale un retardo (RN-102).</summary>
+public sealed record ConfiguracionCalculo(decimal CalifMinima, int DecimalesFinal, string Redondeo, decimal ValorRetardo = Grupos.ValorRetardo.PorDefecto);
 
 public sealed record CriterioCalculo(Guid Id, decimal Peso, string Forma, decimal CalifMinima);
 
@@ -40,6 +41,10 @@ public sealed record CeldaCalculo(decimal? Valor, string Marca, IReadOnlyList<Ce
     public static readonly CeldaCalculo Vacia = new(null, MarcaCalificacion.Ninguna, []);
 }
 
+/// <summary>
+/// Un rubro con lo capturado para un alumno: sus celdas o, si es de asistencia, el estado del alumno en cada toma
+/// de la unidad (<see cref="Tomas"/>).
+/// </summary>
 public sealed record RubroCalculo(
     Guid Id,
     decimal Peso,
@@ -47,7 +52,8 @@ public sealed record RubroCalculo(
     string Forma,
     decimal CalifMinima,
     IReadOnlyList<CriterioCalculo> Criterios,
-    IReadOnlyList<CeldaCalculo> Celdas);
+    IReadOnlyList<CeldaCalculo> Celdas,
+    IReadOnlyList<string>? Tomas = null);
 
 public sealed record ResultadoRubro(Guid RubroId, decimal? Promedio);
 
@@ -59,7 +65,7 @@ public sealed record ResultadoPeriodo(
     IReadOnlyList<ResultadoRubro> Rubros, decimal? Exacto, decimal? Periodo, decimal? Final, IReadOnlyList<Guid> RubrosSinDatos);
 
 /// <summary>
-/// Cálculo de calificaciones (RN-032 a RN-035, RN-112, RN-118, RN-119). Decimales exactos sin redondeos
+/// Cálculo de calificaciones (RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118, RN-119). Decimales exactos sin redondeos
 /// intermedios; su gemelo en el frontend (<c>core/calculo</c>) pasa los mismos vectores de prueba (RN-036).
 /// </summary>
 public static class Calculo
@@ -119,6 +125,33 @@ public static class Calculo
         return cuenta == 0 ? null : suma / cuenta;
     }
 
+    /// <summary>
+    /// RN-102 a RN-104: presente vale 1, falta 0, retardo lo que diga el grupo y justificada no cuenta. El porcentaje
+    /// por 10 da el promedio (95% = 9.5); sin tomas que cuenten, el rubro no tiene datos.
+    /// </summary>
+    public static decimal? PromedioAsistencia(IEnumerable<string> tomas, decimal valorRetardo)
+    {
+        decimal suma = 0m;
+        var cuenta = 0;
+        foreach (var estado in tomas)
+        {
+            decimal? valor = estado switch
+            {
+                EstadoAsistencia.Presente => 1m,
+                EstadoAsistencia.Falta => 0m,
+                EstadoAsistencia.Retardo => valorRetardo,
+                _ => null,
+            };
+            if (valor is { } v)
+            {
+                suma += v;
+                cuenta++;
+            }
+        }
+
+        return cuenta == 0 ? null : suma * 10m / cuenta;
+    }
+
     /// <summary>RN-033 y RN-034: rubros con datos ponderados por su peso; los sin datos reparten el suyo.</summary>
     public static ResultadoPeriodo Periodo(IReadOnlyList<RubroCalculo> rubros, ConfiguracionCalculo configuracion)
     {
@@ -127,7 +160,12 @@ public static class Calculo
         decimal suma = 0m, pesos = 0m;
         foreach (var rubro in rubros)
         {
-            var promedio = rubro.Comportamiento == Comportamiento.Actividades ? PromedioRubro(rubro) : null;
+            var promedio = rubro.Comportamiento switch
+            {
+                Comportamiento.Actividades => PromedioRubro(rubro),
+                Comportamiento.Asistencia => PromedioAsistencia(rubro.Tomas ?? [], configuracion.ValorRetardo),
+                _ => null,
+            };
             resultados.Add(new ResultadoRubro(rubro.Id, promedio));
             if (promedio is { } p && rubro.Peso > 0m)
             {

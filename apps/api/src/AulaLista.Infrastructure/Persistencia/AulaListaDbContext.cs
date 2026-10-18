@@ -56,6 +56,10 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<Nota> Notas => Set<Nota>();
 
+    public DbSet<TomaAsistencia> TomasAsistencia => Set<TomaAsistencia>();
+
+    public DbSet<Asistencia> Asistencias => Set<Asistencia>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -97,5 +101,7 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<EquipoAlumno>().HasQueryFilter(e => e.DocenteId == DocenteActual);
         modelBuilder.Entity<ActividadEquipo>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<Nota>().HasQueryFilter(n => n.DocenteId == DocenteActual);
+        modelBuilder.Entity<TomaAsistencia>().HasQueryFilter(t => t.DocenteId == DocenteActual);
+        modelBuilder.Entity<Asistencia>().HasQueryFilter(a => a.DocenteId == DocenteActual);
     }
 }

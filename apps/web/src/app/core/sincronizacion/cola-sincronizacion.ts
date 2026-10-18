@@ -1,14 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from '../../api/api';
+import { guardarAsistencia } from '../../api/fn/asistencia/guardar-asistencia';
 import { sincronizar } from '../../api/fn/calificaciones/sincronizar';
 import { crearNota } from '../../api/fn/notas/crear-nota';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CrearNota } from '../../api/models/crear-nota';
+import { EstadoAlumno } from '../../api/models/estado-alumno';
+import { TomaAsistenciaDto } from '../../api/models/toma-asistencia-dto';
 import { CeldaDto } from '../../api/models/celda-dto';
 import { CeldaRechazada } from '../../api/models/celda-rechazada';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
-import { ALMACEN_LOCAL, CambioEnCola, NotaEnCola } from './almacen-local';
+import { ALMACEN_LOCAL, AsistenciaEnCola, CambioEnCola, NotaEnCola } from './almacen-local';
 import { conCambios, conCeldas, llaveCelda, llavesDeCambio } from './celdas';
 
 /** 02-arquitectura: lotes de hasta 100 cambios. */
@@ -27,7 +30,17 @@ export interface ResultadoLote {
 }
 
 /**
- * Cola de salida sin conexión (RF-037, reglas/02). Cada captura se guarda primero en el dispositivo junto con
+ * Lo que respondió el servidor a una asistencia de la cola: la toma vigente o, si se descartó (fecha fuera de
+ * unidad, unidad cerrada, grupo ajeno), el código del motivo.
+ */
+export interface AsistenciaEnviada {
+  readonly pendiente: AsistenciaEnCola;
+  readonly toma: TomaAsistenciaDto | null;
+  readonly codigo: string | null;
+}
+
+/**
+ * Cola de salida sin conexión (RF-037, RF-103, reglas/02). Cada captura se guarda primero en el dispositivo junto con
  * su cambio y un UUID; la cola los manda en orden a `POST /sincronizacion` cuando hay red. El servidor ignora
  * los UUID que ya aplicó, así que reenviar nunca duplica. Una celda rechazada no detiene la cola.
  */
@@ -37,6 +50,7 @@ export class ColaSincronizacion {
   private readonly almacen = inject(ALMACEN_LOCAL);
   private readonly oyentes = new Set<(resultado: ResultadoLote) => void>();
   private readonly oyentesNotas = new Set<(alumnoId: string) => void>();
+  private readonly oyentesAsistencia = new Set<(enviada: AsistenciaEnviada) => void>();
   private envio: Promise<void> | null = null;
   private otraVez = false;
   private reintento: ReturnType<typeof setTimeout> | null = null;
@@ -168,6 +182,34 @@ export class ColaSincronizacion {
     return () => this.oyentesNotas.delete(oyente);
   }
 
+  /**
+   * Pasar lista (SPEC-10): los estados se guardan en el dispositivo y la cola los manda en orden con su id como
+   * `Idempotency-Key`. Por alumno gana la última escritura, así que reenviar no cambia nada.
+   */
+  async guardarAsistencia(
+    grupoId: string,
+    fecha: string,
+    alumnos: readonly EstadoAlumno[],
+    id: string = crypto.randomUUID(),
+  ): Promise<AsistenciaEnCola> {
+    const pendiente: AsistenciaEnCola = { id, grupoId, fecha, creado: Date.now(), alumnos };
+    await this.almacen.encolarAsistencia(pendiente);
+    await this.contar();
+    void this.enviar();
+    return pendiente;
+  }
+
+  /** Las asistencias del grupo que todavía no llegan al servidor, en orden. */
+  async asistenciasPendientes(grupoId: string): Promise<readonly AsistenciaEnCola[]> {
+    return this.almacen.asistenciasPendientes(grupoId).catch(() => []);
+  }
+
+  /** Avisa de cada asistencia que llegó al servidor (o se descartó). Devuelve cómo dejar de escuchar. */
+  alEnviarAsistencia(oyente: (enviada: AsistenciaEnviada) => void): () => void {
+    this.oyentesAsistencia.add(oyente);
+    return () => this.oyentesAsistencia.delete(oyente);
+  }
+
   async matrizGuardada(periodoId: string): Promise<MatrizCalificacionesDto | null> {
     return (await this.almacen.leerMatriz(periodoId))?.matriz ?? null;
   }
@@ -245,6 +287,46 @@ export class ColaSincronizacion {
   private async enviarLotes(): Promise<void> {
     await this.enviarCeldas();
     await this.enviarNotas();
+    await this.enviarAsistencias();
+  }
+
+  /** Una por una y en orden. Un 4xx (fecha fuera de unidad, unidad cerrada) la descarta con su motivo. */
+  private async enviarAsistencias(): Promise<void> {
+    for (const pendiente of await this.almacen.asistenciasPendientes()) {
+      if (!this.conexion()) {
+        return;
+      }
+      this.mandando.set(true);
+      let enviada: AsistenciaEnviada;
+      try {
+        const respuesta = await this.api.invoke(guardarAsistencia, {
+          id: pendiente.grupoId,
+          fecha: pendiente.fecha,
+          'Idempotency-Key': pendiente.id,
+          body: { alumnos: [...pendiente.alumnos] },
+        });
+        enviada = { pendiente, toma: respuesta.toma, codigo: null };
+      } catch (error) {
+        const estado = error instanceof HttpErrorResponse ? error.status : 0;
+        if (estado === 0) {
+          this.conexion.set(false);
+        }
+        if (estado === 0 || estado === 401 || estado >= 500) {
+          if (estado !== 401) {
+            this.programarReintento();
+          }
+          return;
+        }
+        const cuerpo =
+          error instanceof HttpErrorResponse ? (error.error as { codigo?: string }) : null;
+        enviada = { pendiente, toma: null, codigo: cuerpo?.codigo ?? 'desconocido' };
+      }
+      await this.almacen.quitarAsistencia(pendiente.id);
+      await this.contar();
+      for (const oyente of this.oyentesAsistencia) {
+        oyente(enviada);
+      }
+    }
   }
 
   /** Las notas, una por una y en orden. Un 4xx (alumno o periodo que ya no admite notas) la descarta. */

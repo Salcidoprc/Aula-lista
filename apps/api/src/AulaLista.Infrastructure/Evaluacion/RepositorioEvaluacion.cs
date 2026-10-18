@@ -93,6 +93,23 @@ internal sealed class RepositorioEvaluacion(AulaListaDbContext db) : IRepositori
 
     public void Agregar(Nota nota) => db.Notas.Add(nota);
 
+    public async Task<IReadOnlyList<TomaAsistencia>> TomasAsync(Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken) =>
+        await db.TomasAsistencia.Include(t => t.Alumnos).Where(t => t.GrupoId == grupoId && t.Fecha >= desde && t.Fecha <= hasta)
+            .OrderBy(t => t.Fecha).AsSplitQuery().ToListAsync(cancellationToken);
+
+    public Task<TomaAsistencia?> TomaAsync(Guid grupoId, DateOnly fecha, CancellationToken cancellationToken) =>
+        db.TomasAsistencia.Include(t => t.Alumnos).SingleOrDefaultAsync(t => t.GrupoId == grupoId && t.Fecha == fecha, cancellationToken);
+
+    public void Agregar(TomaAsistencia toma) => db.TomasAsistencia.Add(toma);
+
+    public void Borrar(TomaAsistencia toma) => db.TomasAsistencia.Remove(toma);
+
+    public async Task<IReadOnlyList<DateOnly>> FechasDeTomasAsync(Guid cicloId, CancellationToken cancellationToken) =>
+        await db.TomasAsistencia
+            .Join(db.Grupos.Where(g => g.CicloEscolarId == cicloId), t => t.GrupoId, g => g.Id, (t, _) => t.Fecha)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlySet<Guid>> UnidadesConDatosAsync(Guid cicloId, CancellationToken cancellationToken) =>
         (await db.Rubros
             .Join(db.Periodos, r => r.PeriodoId, p => p.Id, (r, p) => p.UnidadId)

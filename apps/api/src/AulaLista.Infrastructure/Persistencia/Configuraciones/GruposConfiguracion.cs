@@ -47,6 +47,7 @@ internal sealed class GrupoConfiguracion : IEntityTypeConfiguration<Grupo>
             t.HasCheckConstraint("ck_grupo_calificaciones", "calif_minima BETWEEN 0 AND 10 AND calif_aprobatoria BETWEEN calif_minima AND 10");
             t.HasCheckConstraint("ck_grupo_decimales_final", "decimales_final BETWEEN 0 AND 2");
             t.HasCheckConstraint("ck_grupo_redondeo", "redondeo IN ('arriba', 'abajo', 'cercano')");
+            t.HasCheckConstraint("ck_grupo_valor_retardo", "valor_retardo IN (0, 0.5, 1)");
         });
         builder.HasKey(g => g.Id);
         builder.Property(g => g.Id).ValueGeneratedNever();
@@ -57,6 +58,7 @@ internal sealed class GrupoConfiguracion : IEntityTypeConfiguration<Grupo>
         builder.Property(g => g.CalifMinima).HasPrecision(4, 2);
         builder.Property(g => g.CalifAprobatoria).HasPrecision(4, 2);
         builder.Property(g => g.Redondeo).HasMaxLength(10).IsRequired();
+        builder.Property(g => g.ValorRetardo).HasPrecision(3, 2).HasDefaultValue(ValorRetardo.PorDefecto);
         builder.Ignore(g => g.EstaArchivado);
         builder.Ignore(g => g.Configuracion);
         builder.HasIndex(g => g.DocenteId);

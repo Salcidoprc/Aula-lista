@@ -313,7 +313,7 @@ Número de lista (`texto-suave`, `.cifras`), nombre del alumno y la celda de cal
 - **Botones rápidos** (10, 9, 8, 7, 6, "No entregó"): fondo `superficie-hundida`, 700, 44 px, `--radio-lg`, `scale(0.97)` al presionar. Pasar al siguiente alumno no se anima.
 
 ### Pestañas del grupo (`app-pestanas-grupo`)
-Bajo "Mis grupos": Calificaciones (abre primero) y Alumnos, como navegación con `aria-current`, no como pestañas ARIA. La activa lleva texto `--grado-tinta` y una raya inferior de 3 px `--grado`; la configuración queda a la derecha (solo ícono bajo 30 rem).
+Bajo "Mis grupos": Calificaciones (abre primero), Alumnos y Asistencia, como navegación con `aria-current`, no como pestañas ARIA. La activa lleva texto `--grado-tinta` y una raya inferior de 3 px `--grado`; la configuración queda a la derecha (solo ícono bajo 30 rem).
 
 ### Calificaciones de la unidad
 Chips de unidad (la elegida con fondo `--grado`), la barra "Pesos: n de 100" en `--grado-tinte` (en `aviso-tinte` si no suman 100) y los rubros como secciones con su peso en `--grado-tinta`; cada actividad es una fila con fecha y avance (capturadas/activos y barra de 6 px). En escritorio, el resumen de la unidad, "Nueva actividad", "Ver tabla" y "Editar rubros" van en el panel lateral.
@@ -338,6 +338,12 @@ La fila del equipo lleva el ícono de equipo, su nombre y la celda; debajo, sus 
 
 ### Ficha del alumno
 Dos vistas con la misma pestaña subrayada en `--grado` que el grupo: Avance (abre) y Datos. Avance: chips de unidad, el promedio de la unidad en `texto-2xl` y `--grado-tinta`, rubros en desplegables con peso, promedio y una barra de proporción (promedio sobre 10), y Notas: área de texto con la pista de dictado del teclado, contador visible desde 800 caracteres, etiqueta única (Ninguna, Fortaleza, Área de mejora, Conducta) y la lista de la más nueva a la más vieja; una nota sin enviar dice "Por enviar" en `aviso-tinta`. El texto fijo "Solo tú ves estas notas" recuerda que nunca llegan a tutores.
+
+### Pase de lista
+Barra del día en `superficie-hundida`: día anterior, la fecha larga ("Hoy, sábado 17 de octubre") con su unidad debajo, día siguiente y el selector nativo de fecha. Sin lista ese día, un aviso en `--grado-tinte` y "Todos presentes" como acción principal (pie fijo en celular, panel lateral en escritorio); tocar a un alumno también crea la lista. La fila entera es el botón: número, nombre y la etiqueta del estado con la palabra completa. Presente: etiqueta en `--grado-tinte`; Falta, Retardo y Justificada tiñen la fila (`peligro-tinte`, `aviso-tinte`, `superficie-hundida`) y su etiqueta va en `superficie` con la tinta del estado. Cada toque recorre presente, falta, retardo y justificada; con teclado, flechas entre filas y P, F, R o J. Solo el fondo de la fila cambia, en 160 ms. Con lista, el resumen del día (presentes, faltas, retardos, justificadas), "Historial de la unidad" y "Borrar lista de este día" con confirmación.
+
+### Historial de asistencia
+Chips de unidad. En escritorio, tabla de alumnos por días con la letra (P, F, R, J) sobre el tinte de su estado y la columna "%" fija a la derecha en `--grado-tinta`; encabezado y nombres fijos, y cada fecha abre ese día. En celular, una fila por alumno con su porcentaje y solo lo que tuvo ("2 faltas · 1 retardo" o "Sin faltas"), y abajo "Días con lista" del más nuevo al más viejo.
 
 ### Indicador de sincronización
 En la navegación de la portada: ícono y texto ("Guardado", "Por enviar: n", "Enviando…", "Sin conexión: guardado aquí"). El ícono entra con fundido y desenfoque de 2 px en 200 ms; el de "Enviando" gira, salvo con movimiento reducido.

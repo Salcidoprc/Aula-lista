@@ -87,7 +87,8 @@ public sealed class EditarCicloCasoUso(IRepositorioGrupos repositorio, IUnidadDe
     }
 }
 
-public sealed record ReemplazarUnidades(IReadOnlyList<UnidadEditada> Unidades);
+/// <summary>Con <see cref="ConfirmarTomasFuera"/>, se guarda aunque alguna toma de asistencia quede fuera de toda unidad.</summary>
+public sealed record ReemplazarUnidades(IReadOnlyList<UnidadEditada> Unidades, bool ConfirmarTomasFuera = false);
 
 public sealed record UnidadEditada(Guid? Id, string Nombre, DateOnly Inicio, DateOnly Fin);
 
@@ -102,7 +103,9 @@ internal sealed class ReemplazarUnidadesValidador : AbstractValidator<Reemplazar
 
 /// <summary>
 /// Reemplaza las unidades del ciclo (RN-023, RN-026, RN-027). El cambio aplica a todos los grupos del ciclo
-/// porque los periodos toman nombre y fechas de su unidad; cada unidad nueva crea su periodo en cada grupo.
+/// porque los periodos toman nombre y fechas de su unidad; cada unidad nueva crea su periodo en cada grupo. Una
+/// toma de asistencia pasa a contar en la unidad que ahora contenga su fecha; si ninguna la contiene, se pide
+/// confirmar antes de guardar (SPEC-10, casos borde).
 /// </summary>
 public sealed class ReemplazarUnidadesCasoUso(
     IRepositorioGrupos repositorio, IDatosDeEvaluacion evaluacion, IUnidadDeTrabajo unidad, TimeProvider reloj)
@@ -122,6 +125,12 @@ public sealed class ReemplazarUnidadesCasoUso(
         if (resultado.EsFallo)
         {
             return Resultado.Fallo<CicloDto>(resultado.Error);
+        }
+
+        if (!comando.ConfirmarTomasFuera
+            && (await evaluacion.FechasDeTomasAsync(cicloId, ct)).Any(f => !ciclo.Unidades.Any(u => u.Inicio <= f && f <= u.Fin)))
+        {
+            return Resultado.Fallo<CicloDto>(ErroresGrupos.TomasFueraDeUnidad);
         }
 
         if (resultado.Valor.Count > 0)

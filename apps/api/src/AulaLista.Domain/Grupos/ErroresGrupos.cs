@@ -15,6 +15,7 @@ public static class ErroresGrupos
     public static readonly ErrorNegocio UnidadesTraslapadas = new("unidades_traslapadas", "Dos unidades no pueden compartir fechas.");
     public static readonly ErrorNegocio UnidadCerrada = new("unidad_cerrada", "Esa unidad ya está cerrada en algún grupo; sus fechas no se pueden cambiar.");
     public static readonly ErrorNegocio UnidadConDatos = new("unidad_con_datos", "Esa unidad ya tiene rubros en algún grupo; no se puede borrar.");
+    public static readonly ErrorNegocio TomasFueraDeUnidad = new("tomas_fuera_de_unidad", "Hay tomas de asistencia que quedarían fuera de toda unidad. Confirma para guardar de todos modos.");
     public static readonly ErrorNegocio UnidadInexistente = new("unidad_inexistente", "Esa unidad no es de este ciclo.");
 
     public static readonly ErrorNegocio CicloInexistente = new("ciclo_inexistente", "Elige uno de tus ciclos escolares.");
@@ -39,7 +40,7 @@ public static class ErroresGrupos
     public static readonly IReadOnlyList<ErrorNegocio> Todos =
     [
         CicloFechasInvalidas, CicloMuyLargo, CicloDuplicado, TipoUnidadInvalido, CantidadUnidadesInvalida,
-        UnidadFechasInvalidas, UnidadFueraDeCiclo, UnidadesTraslapadas, UnidadCerrada, UnidadConDatos, UnidadInexistente,
+        UnidadFechasInvalidas, UnidadFueraDeCiclo, UnidadesTraslapadas, UnidadCerrada, UnidadConDatos, TomasFueraDeUnidad, UnidadInexistente,
         CicloInexistente, GradoInvalido, GrupoDuplicado, LoteInvalido, ConfiguracionCalificacionInvalida,
         GrupoArchivado, CorreoNoVerificado, LimiteAlumnosGrupo, NumeroListaInvalido, TratoInvalido,
         AlumnoDadoDeBaja, TelefonoInvalido, LimiteTutoresAlumno, TutorYaVinculado, ArchivoInvalido,

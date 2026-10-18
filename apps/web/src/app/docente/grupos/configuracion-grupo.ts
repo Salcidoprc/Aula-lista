@@ -222,6 +222,21 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                 {{ t('ejemplo') }}
                 <span class="cifras">7.456 → {{ ejemplo() }}</span>
               </p>
+              <fieldset class="eleccion en-columna" [disabled]="!!g.archivadoEn">
+                <legend>{{ t('retardo') }}</legend>
+                @for (r of retardos; track r) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="retardo"
+                      [value]="r"
+                      [checked]="retardo() === r"
+                      (change)="retardo.set(r)"
+                    />
+                    {{ t('retardos.' + r.replace('.', '_')) }}
+                  </label>
+                }
+              </fieldset>
             </section>
 
             @if (error(); as codigo) {
@@ -414,6 +429,9 @@ export class ConfiguracionGrupo implements OnInit {
   protected readonly aprobatoria = signal('6');
   protected readonly decimales = signal(2);
   protected readonly redondeo = signal<Redondeo>('cercano');
+  /** RN-102: cuánto vale un retardo en el promedio de asistencia. */
+  protected readonly retardos = ['1', '0.5', '0'] as const;
+  protected readonly retardo = signal<string>('1');
   protected readonly intento = signal(false);
   protected readonly guardando = signal(false);
   protected readonly ocupado = signal(false);
@@ -475,6 +493,7 @@ export class ConfiguracionGrupo implements OnInit {
           califAprobatoria: leerCalificacion(this.aprobatoria())!,
           decimalesFinal: this.decimales(),
           redondeo: this.redondeo(),
+          valorRetardo: this.retardo(),
         },
       });
       this.servicio.recordar(grupo);
@@ -534,5 +553,6 @@ export class ConfiguracionGrupo implements OnInit {
     this.aprobatoria.set(String(Number(grupo.califAprobatoria)));
     this.decimales.set(Number(grupo.decimalesFinal));
     this.redondeo.set(grupo.redondeo as Redondeo);
+    this.retardo.set(String(Number(grupo.valorRetardo)));
   }
 }

@@ -5,7 +5,7 @@ import { Icono } from '../../shared/iconos';
 import { ClaveGrado } from '../../shared/portada/portada';
 
 /**
- * Las dos vistas del grupo: Calificaciones (la que abre, por decisión del docente) y Alumnos. Son páginas, no
+ * Las vistas del grupo: Calificaciones (la que abre, por decisión del docente), Alumnos y Asistencia. Son páginas, no
  * paneles: van como navegación con `aria-current`, no como pestañas ARIA. La configuración queda a la derecha.
  */
 @Component({
@@ -19,6 +19,8 @@ import { ClaveGrado } from '../../shared/portada/portada';
         <a
           [routerLink]="['/grupos', id()]"
           routerLinkActive="activa"
+          #v1
+          (isActiveChange)="aLaVista($event, v1)"
           [routerLinkActiveOptions]="soloRuta"
           ariaCurrentWhenActive="page"
           >{{ t('calificaciones') }}</a
@@ -26,8 +28,18 @@ import { ClaveGrado } from '../../shared/portada/portada';
         <a
           [routerLink]="['/grupos', id(), 'alumnos']"
           routerLinkActive="activa"
+          #v2
+          (isActiveChange)="aLaVista($event, v2)"
           ariaCurrentWhenActive="page"
           >{{ t('alumnos') }}</a
+        >
+        <a
+          [routerLink]="['/grupos', id(), 'asistencia']"
+          routerLinkActive="activa"
+          #v3
+          (isActiveChange)="aLaVista($event, v3)"
+          ariaCurrentWhenActive="page"
+          >{{ t('asistencia') }}</a
         >
       </nav>
       <a class="ajustes" [routerLink]="['/grupos', id(), 'ajustes']">
@@ -45,10 +57,24 @@ import { ClaveGrado } from '../../shared/portada/portada';
       border-bottom: 1px solid var(--color-divisoria);
     }
 
+    /* Con tres vistas, en 320 px o con texto grande la fila se desliza sola; la página no se desborda. */
     .vistas {
       display: flex;
       gap: var(--espacio-1);
       min-width: 0;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+
+    .ajustes {
+      flex: none;
+    }
+
+    @media (max-width: 29.99rem) {
+      .vistas a {
+        padding: 0 var(--espacio-2);
+      }
     }
 
     .vistas a {
@@ -59,6 +85,7 @@ import { ClaveGrado } from '../../shared/portada/portada';
       border-radius: var(--radio-md) var(--radio-md) 0 0;
       color: var(--color-texto-suave);
       font-weight: var(--peso-medio);
+      flex: none;
       text-decoration: none;
       box-shadow: inset 0 -3px 0 transparent;
     }
@@ -134,4 +161,11 @@ export class PestanasGrupo {
   readonly id = input.required<string>();
   /** Color del grado para la pestaña activa. */
   readonly grado = input<ClaveGrado>();
+
+  /** Si la fila se desliza (320 px o texto grande), la vista activa queda a la vista. */
+  protected aLaVista(activa: boolean, enlace: HTMLElement): void {
+    if (activa) {
+      requestAnimationFrame(() => enlace.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+    }
+  }
 }

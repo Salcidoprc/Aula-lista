@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter, skip } from 'rxjs';
+import { filter } from 'rxjs';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
 import { IndicadorSincronizacion } from './core/sincronizacion/indicador-sincronizacion';
@@ -159,10 +159,17 @@ export class App {
     const host = inject<ElementRef<HTMLElement>>(ElementRef);
     // Al cambiar de pantalla, el foco va al contenido nuevo para que teclado y lector de pantalla no
     // se queden en un elemento que ya no existe (WCAG 2.4.3). La primera carga no se toca.
+    // Si solo cambia la consulta (otro día, otra unidad), la pantalla es la misma y el foco se queda donde está.
+    let ruta = '';
+    const sinConsulta = (url: string) => url.split(/[?#]/)[0];
     inject(Router)
       .events.pipe(
         filter((e) => e instanceof NavigationEnd),
-        skip(1),
+        filter((e) => {
+          const anterior = ruta;
+          ruta = sinConsulta(e.urlAfterRedirects);
+          return anterior !== '' && anterior !== ruta;
+        }),
         takeUntilDestroyed(),
       )
       .subscribe(() =>

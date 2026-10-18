@@ -2,7 +2,7 @@ using AulaLista.Domain.Evaluacion;
 
 namespace AulaLista.Application.Evaluacion;
 
-/// <summary>Rubros, criterios, actividades y calificaciones: tablas con RLS por docente (SPEC-03).</summary>
+/// <summary>Rubros, criterios, actividades, calificaciones, equipos, notas y asistencia: tablas con RLS por docente (SPEC-03, SPEC-10).</summary>
 public interface IRepositorioEvaluacion
 {
     Task<IReadOnlyList<TipoRubro>> TiposRubroAsync(CancellationToken cancellationToken);
@@ -61,4 +61,13 @@ public interface IRepositorioEvaluacion
     Task<Nota?> NotaAsync(Guid id, CancellationToken cancellationToken);
 
     void Agregar(Nota nota);
+
+    /// <summary>Tomas del grupo con fecha en el rango (inclusive), con el estado de cada alumno (RN-100).</summary>
+    Task<IReadOnlyList<TomaAsistencia>> TomasAsync(Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken);
+
+    Task<TomaAsistencia?> TomaAsync(Guid grupoId, DateOnly fecha, CancellationToken cancellationToken);
+
+    void Agregar(TomaAsistencia toma);
+
+    void Borrar(TomaAsistencia toma);
 }

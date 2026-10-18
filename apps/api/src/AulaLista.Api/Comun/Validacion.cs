@@ -39,7 +39,7 @@ internal static class Validacion
             _ when error == ErroresGrupos.CicloDuplicado || error == ErroresGrupos.GrupoDuplicado
                 || error == ErroresGrupos.TutorYaVinculado || error == ErroresGrupos.ImportacionConfirmada
                 || error == ErroresGrupos.GrupoArchivado || error == ErroresGrupos.UnidadCerrada
-                || error == ErroresGrupos.UnidadConDatos
+                || error == ErroresGrupos.UnidadConDatos || error == ErroresGrupos.TomasFueraDeUnidad
                 => StatusCodes.Status409Conflict,
             _ when error == ErroresEvaluacion.BorradoRequiereConfirmacion || error == ErroresEvaluacion.PeriodoEnCierre
                 || error == ErroresEvaluacion.PeriodoCerrado || error == ErroresEvaluacion.PeriodoConRubros

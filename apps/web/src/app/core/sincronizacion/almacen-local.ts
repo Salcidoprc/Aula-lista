@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 import Dexie, { Table } from 'dexie';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CrearNota } from '../../api/models/crear-nota';
+import { EstadoAlumno } from '../../api/models/estado-alumno';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
 
 /** Un cambio de la cola de salida con su UUID de idempotencia (RF-037, 02-arquitectura). */
@@ -19,6 +20,19 @@ export interface NotaEnCola {
   readonly alumnoId: string;
   readonly creado: number;
   readonly nota: CrearNota;
+}
+
+/**
+ * Estados de una toma de asistencia por enviar (SPEC-10). Su id va como `Idempotency-Key`. Sin alumnos, solo crea
+ * la toma con todos presentes (RN-101).
+ */
+export interface AsistenciaEnCola {
+  readonly id: string;
+  readonly grupoId: string;
+  /** "2026-10-17". */
+  readonly fecha: string;
+  readonly creado: number;
+  readonly alumnos: readonly EstadoAlumno[];
 }
 
 /** La matriz del periodo como se vio por última vez, con los cambios locales ya encima. */
@@ -41,13 +55,17 @@ export interface AlmacenLocal {
   pendientes(limite?: number): Promise<CambioEnCola[]>;
   pendientesDe(periodoId: string): Promise<CambioEnCola[]>;
   quitar(ids: readonly string[]): Promise<void>;
-  /** Calificaciones y notas por enviar. */
+  /** Calificaciones, notas y asistencias por enviar. */
   contar(): Promise<number>;
   masAntiguo(): Promise<number | null>;
   encolarNota(nota: NotaEnCola): Promise<void>;
   /** Las más antiguas primero; con alumno, solo las suyas. */
   notasPendientes(alumnoId?: string): Promise<NotaEnCola[]>;
   quitarNota(id: string): Promise<void>;
+  encolarAsistencia(asistencia: AsistenciaEnCola): Promise<void>;
+  /** Las más antiguas primero; con grupo, solo las suyas. */
+  asistenciasPendientes(grupoId?: string): Promise<AsistenciaEnCola[]>;
+  quitarAsistencia(id: string): Promise<void>;
   /** Lo demás que la captura necesita sin red: el grupo y sus periodos. */
   leerDato<T>(clave: string): Promise<T | undefined>;
   guardarDato(clave: string, valor: unknown): Promise<void>;
@@ -64,6 +82,7 @@ class BaseLocal extends Dexie {
   cola!: Table<CambioEnCola, string>;
   datos!: Table<Dato, string>;
   notas!: Table<NotaEnCola, string>;
+  asistencias!: Table<AsistenciaEnCola, string>;
 
   constructor() {
     super('aula-lista');
@@ -73,6 +92,7 @@ class BaseLocal extends Dexie {
       datos: 'clave',
     });
     this.version(2).stores({ notas: 'id, creado, alumnoId' });
+    this.version(3).stores({ asistencias: 'id, creado, grupoId' });
   }
 }
 
@@ -118,16 +138,23 @@ export class AlmacenDexie implements AlmacenLocal {
   }
 
   async contar(): Promise<number> {
-    const [celdas, notas] = await Promise.all([this.db.cola.count(), this.db.notas.count()]);
-    return celdas + notas;
+    const [celdas, notas, asistencias] = await Promise.all([
+      this.db.cola.count(),
+      this.db.notas.count(),
+      this.db.asistencias.count(),
+    ]);
+    return celdas + notas + asistencias;
   }
 
   async masAntiguo(): Promise<number | null> {
-    const [celda, nota] = await Promise.all([
+    const [celda, nota, asistencia] = await Promise.all([
       this.db.cola.orderBy('creado').first(),
       this.db.notas.orderBy('creado').first(),
+      this.db.asistencias.orderBy('creado').first(),
     ]);
-    const fechas = [celda?.creado, nota?.creado].filter((f): f is number => f !== undefined);
+    const fechas = [celda?.creado, nota?.creado, asistencia?.creado].filter(
+      (f): f is number => f !== undefined,
+    );
     return fechas.length ? Math.min(...fechas) : null;
   }
 
@@ -147,6 +174,22 @@ export class AlmacenDexie implements AlmacenLocal {
     await this.db.notas.delete(id);
   }
 
+  async encolarAsistencia(asistencia: AsistenciaEnCola): Promise<void> {
+    await this.db.asistencias.put(asistencia);
+  }
+
+  async asistenciasPendientes(grupoId?: string): Promise<AsistenciaEnCola[]> {
+    const lista =
+      grupoId === undefined
+        ? await this.db.asistencias.toArray()
+        : await this.db.asistencias.where('grupoId').equals(grupoId).toArray();
+    return lista.sort((a, b) => a.creado - b.creado);
+  }
+
+  async quitarAsistencia(id: string): Promise<void> {
+    await this.db.asistencias.delete(id);
+  }
+
   async leerDato<T>(clave: string): Promise<T | undefined> {
     return (await this.db.datos.get(clave))?.valor as T | undefined;
   }
@@ -158,12 +201,13 @@ export class AlmacenDexie implements AlmacenLocal {
   async borrarTodo(): Promise<void> {
     await this.db.transaction(
       'rw',
-      [this.db.matrices, this.db.cola, this.db.datos, this.db.notas],
+      [this.db.matrices, this.db.cola, this.db.datos, this.db.notas, this.db.asistencias],
       async () => {
         await this.db.matrices.clear();
         await this.db.cola.clear();
         await this.db.datos.clear();
         await this.db.notas.clear();
+        await this.db.asistencias.clear();
       },
     );
   }

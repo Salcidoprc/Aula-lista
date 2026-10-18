@@ -42,13 +42,16 @@ public sealed class CalculoPruebas
                 c.TryGetProperty("criterios", out var ccs)
                     ? ccs.EnumerateArray().Select(cc => new CeldaCriterio(Id(cc.GetProperty("id").GetString()!), Numero(cc, "valor"), Texto(cc, "marca"))).ToList()
                     : [])).ToList();
+            var comportamiento = r.TryGetProperty("comportamiento", out var cp) ? cp.GetString()! : Comportamiento.Actividades;
+            var tomas = r.TryGetProperty("tomas", out var ts) ? ts.EnumerateArray().Select(t => t.GetString()!).ToList() : null;
             return new RubroCalculo(
-                Id(r.GetProperty("id").GetString()!), Numero(r, "peso")!.Value, Comportamiento.Actividades, r.GetProperty("forma").GetString()!,
-                Numero(r, "califMinima")!.Value, criterios, celdas);
+                Id(r.GetProperty("id").GetString()!), Numero(r, "peso")!.Value, comportamiento, r.GetProperty("forma").GetString()!,
+                Numero(r, "califMinima")!.Value, criterios, celdas, tomas);
         }).ToList();
 
         var resultado = Calculo.Periodo(rubros, new ConfiguracionCalculo(
-            Numero(configuracion, "califMinima")!.Value, configuracion.GetProperty("decimalesFinal").GetInt32(), configuracion.GetProperty("redondeo").GetString()!));
+            Numero(configuracion, "califMinima")!.Value, configuracion.GetProperty("decimalesFinal").GetInt32(), configuracion.GetProperty("redondeo").GetString()!,
+            Numero(configuracion, "valorRetardo") ?? 1m));
 
         var esperado = caso.GetProperty("esperado");
         foreach (var rubro in esperado.GetProperty("rubros").EnumerateObject())

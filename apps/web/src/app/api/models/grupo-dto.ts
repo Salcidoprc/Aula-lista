@@ -16,4 +16,5 @@ export interface GrupoDto {
   nombre: string;
   plan: string;
   redondeo: string;
+  valorRetardo: (number | string);
 }

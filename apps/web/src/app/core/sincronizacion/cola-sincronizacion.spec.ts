@@ -3,11 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { Api } from '../../api/api';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CrearNota } from '../../api/models/crear-nota';
+import { GuardarAsistencia } from '../../api/models/guardar-asistencia';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
 import { SincronizarCambios } from '../../api/models/sincronizar-cambios';
 import {
   ALMACEN_LOCAL,
   AlmacenLocal,
+  AsistenciaEnCola,
   CambioEnCola,
   MatrizGuardada,
   NotaEnCola,
@@ -48,7 +50,7 @@ class AlmacenMemoria implements AlmacenLocal {
   }
   notas: NotaEnCola[] = [];
   async contar() {
-    return this.cola.length + this.notas.length;
+    return this.cola.length + this.notas.length + this.asistencias.length;
   }
   async encolarNota(nota: NotaEnCola) {
     this.notas = [...this.notas.filter((n) => n.id !== nota.id), nota];
@@ -58,6 +60,16 @@ class AlmacenMemoria implements AlmacenLocal {
   }
   async quitarNota(id: string) {
     this.notas = this.notas.filter((n) => n.id !== id);
+  }
+  asistencias: AsistenciaEnCola[] = [];
+  async encolarAsistencia(a: AsistenciaEnCola) {
+    this.asistencias = [...this.asistencias.filter((x) => x.id !== a.id), a];
+  }
+  async asistenciasPendientes(grupoId?: string) {
+    return this.asistencias.filter((a) => grupoId === undefined || a.grupoId === grupoId);
+  }
+  async quitarAsistencia(id: string) {
+    this.asistencias = this.asistencias.filter((a) => a.id !== id);
   }
   async masAntiguo() {
     return this.cola[0]?.creado ?? null;
@@ -74,6 +86,7 @@ class AlmacenMemoria implements AlmacenLocal {
     this.matrices.clear();
     this.cola = [];
     this.notas = [];
+    this.asistencias = [];
   }
 }
 
@@ -84,10 +97,38 @@ class ServidorFalso {
   sinRed = false;
 
   readonly notas = new Map<string, number>();
+  /** La toma de cada fecha por alumno y las claves ya aplicadas, como `cambio_sincronizado`. */
+  readonly tomas = new Map<string, Map<string, string>>();
+  readonly claves = new Set<string>();
 
-  async invoke(_fn: unknown, params: { body: SincronizarCambios | CrearNota }) {
+  async invoke(
+    _fn: unknown,
+    params: {
+      body: SincronizarCambios | CrearNota | GuardarAsistencia;
+      fecha?: string;
+      'Idempotency-Key'?: string;
+    },
+  ) {
     if (this.sinRed) {
       throw new HttpErrorResponse({ status: 0 });
+    }
+    if ('alumnos' in params.body) {
+      // PUT /grupos/{id}/asistencias/{fecha}: la toma nace con todos presentes y una clave repetida no se aplica.
+      const toma =
+        this.tomas.get(params.fecha!) ??
+        new Map([
+          ['al1', 'presente'],
+          ['al2', 'presente'],
+        ]);
+      if (!this.claves.has(params['Idempotency-Key']!)) {
+        this.claves.add(params['Idempotency-Key']!);
+        for (const a of params.body.alumnos) {
+          toma.set(a.alumnoId, a.estado);
+        }
+      }
+      this.tomas.set(params.fecha!, toma);
+      const alumnos = [...toma].map(([alumnoId, estado]) => ({ alumnoId, estado, version: 1 }));
+      return { toma: { fecha: params.fecha, alumnos }, omitidos: [] };
     }
     if (!('cambios' in params.body)) {
       // POST /alumnos/{id}/notas: la misma nota con el mismo id no se duplica.
@@ -228,6 +269,33 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
     expect(cola.pendientes()).toBe(0);
     expect(servidor.notas.get('n1')).toBe(1);
     expect(enviadas).toEqual(['al1']);
+  });
+
+  it('SPEC-10: pasar lista sin conexión llega al volver la red, sin duplicados aunque se reenvíe', async () => {
+    servidor.sinRed = true;
+    await cola.guardarAsistencia('g1', '2026-10-19', []); // Todos presentes
+    await cola.guardarAsistencia('g1', '2026-10-19', [{ alumnoId: 'al2', estado: 'falta' }]);
+    await cola.enviar();
+    expect(cola.pendientes()).toBe(2);
+    expect(await cola.asistenciasPendientes('g1')).toHaveLength(2);
+
+    // La app se cierra con la cola en el dispositivo; al volver la red se envía y luego se reenvía entera.
+    const copia = [...almacen.asistencias];
+    const enviadas: (string | null)[] = [];
+    cola.alEnviarAsistencia((e) => enviadas.push(e.codigo));
+    servidor.sinRed = false;
+    window.dispatchEvent(new Event('online'));
+    await cola.enviar();
+    // Otro dispositivo justifica la falta; después llega el reenvío viejo de este.
+    servidor.tomas.get('2026-10-19')!.set('al2', 'justificada');
+    almacen.asistencias = copia;
+    await cola.enviar();
+
+    expect(cola.pendientes()).toBe(0);
+    expect(enviadas).toEqual([null, null, null, null]);
+    expect(servidor.tomas.size).toBe(1);
+    expect(servidor.claves.size).toBe(2);
+    expect(servidor.tomas.get('2026-10-19')!.get('al2')).toBe('justificada');
   });
 
   it('al cerrar sesión no deja calificaciones en el dispositivo', async () => {

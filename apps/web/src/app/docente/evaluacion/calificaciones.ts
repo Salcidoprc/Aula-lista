@@ -145,7 +145,14 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
                       }
                     </p>
                   </header>
-                  @if (r.actividades.length === 0) {
+                  @if (r.rubro.comportamiento === 'asistencia') {
+                    <p class="sin-actividades asistencia cifras">
+                      <span class="dato-suave">{{ t('asistencia', { tomas: m.tomas }) }}</span>
+                      <a class="enlace" [routerLink]="['/grupos', id(), 'asistencia']">{{
+                        t('pasarLista')
+                      }}</a>
+                    </p>
+                  } @else if (r.actividades.length === 0) {
                     <p class="dato-suave sin-actividades">{{ t('sinActividades') }}</p>
                   } @else {
                     <ol class="filas">
@@ -366,6 +373,20 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
     .sin-actividades {
       padding-block: var(--espacio-2);
       border-top: 1px solid var(--color-divisoria);
+    }
+
+    .asistencia .enlace {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: var(--tactil-minimo);
+    }
+
+    .asistencia {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacio-2);
     }
 
     .filas {
