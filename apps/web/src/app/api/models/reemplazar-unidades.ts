@@ -3,5 +3,6 @@
 
 import { UnidadEditada } from '../models/unidad-editada';
 export interface ReemplazarUnidades {
+  confirmarTomasFuera?: boolean;
   unidades: Array<UnidadEditada>;
 }

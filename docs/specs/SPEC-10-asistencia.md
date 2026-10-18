@@ -33,6 +33,9 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md`. Pasar lista es
 - **Pasar lista (celular):** fecha de hoy por defecto; lista de alumnos con su número; un toque cambia el estado en el orden presente → falta → retardo → justificada. Botón "Todos presentes" al crear la toma.
 - **Historial de la unidad:** tabla de alumnos por fechas con el estado en cada toma y el porcentaje del alumno.
 - Guarda al tocar, en IndexedDB primero y luego en el servidor, con la misma cola sin conexión que las calificaciones.
+- Sin toma ese día, tocar a un alumno también la crea: todos presentes y ese alumno en falta. Con teclado, flechas entre filas y P, F, R o J ponen el estado.
+- En escritorio, el historial es una tabla con la letra de cada estado; en celular, una fila por alumno con su porcentaje y la lista de días para abrir uno y corregirlo.
+- El valor del retardo se elige en la configuración del grupo. Borrar la toma de un día requiere conexión.
 
 ## API
 

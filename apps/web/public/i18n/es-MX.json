@@ -293,6 +293,9 @@
     "periodo_con_rubros": "Esta unidad ya tiene rubros. Quítalos antes de copiar otros.",
     "actividad_invalida": "La actividad necesita un nombre de hasta 60 caracteres.",
     "fecha_fuera_de_unidad": "La fecha debe caer dentro de la unidad.",
+    "asistencia_invalida": "El estado de asistencia no es válido: usa presente, falta, retardo o justificada.",
+    "asistencia_duplicada": "Solo puede haber un rubro de asistencia por unidad.",
+    "tomas_fuera_de_unidad": "Con estas fechas, algunos días con lista quedarían fuera de toda unidad.",
     "rubro_sin_actividades": "Este rubro se calcula solo; no lleva actividades.",
     "calificacion_fuera_de_rango": "La calificación va de 0 a 10.",
     "calificacion_invalida": "Usa números con hasta dos decimales, o NE (no entregó) y EX (exento).",
@@ -364,7 +367,9 @@
     "rubros": "Rubros de la unidad",
     "captura": "Captura de calificaciones",
     "tabla": "Tabla de calificaciones",
-    "equipos": "Equipos"
+    "equipos": "Equipos",
+    "asistencia": "Pasar lista",
+    "historialAsistencia": "Historial de asistencia"
   },
   "ciclo": {
     "volver": "Volver",
@@ -397,7 +402,11 @@
     "agregar": "Agregar unidad al final",
     "guardar": "Guardar ciclo",
     "guardarCambios": "Guardar cambios",
-    "guardado": "Ciclo guardado."
+    "guardado": "Ciclo guardado.",
+    "tomasFuera": {
+      "texto": "Esos días ya no contarán en el promedio de asistencia.",
+      "confirmar": "Guardar de todos modos"
+    }
   },
   "crearGrupo": {
     "misGrupos": "Mis grupos",
@@ -527,6 +536,12 @@
       "cercano": "Al más cercano",
       "arriba": "Hacia arriba",
       "abajo": "Hacia abajo"
+    },
+    "retardo": "En la asistencia, el retardo cuenta como",
+    "retardos": {
+      "1": "Asistencia completa",
+      "0_5": "Media asistencia",
+      "0": "Falta"
     },
     "ejemplo": "Por ejemplo:",
     "errores": {
@@ -723,7 +738,92 @@
     "nombre": "Vistas del grupo",
     "calificaciones": "Calificaciones",
     "alumnos": "Alumnos",
+    "asistencia": "Asistencia",
     "configuracion": "Configuración"
+  },
+  "asistencia": {
+    "misGrupos": "Mis grupos",
+    "titulo": "Pasar lista",
+    "hoy": "Hoy, {{dia}}",
+    "diaAnterior": "Día anterior",
+    "diaSiguiente": "Día siguiente",
+    "elegirFecha": "Elegir fecha",
+    "irAHoy": "Ir a hoy",
+    "estado": {
+      "en_cierre": "En cierre",
+      "cerrado": "Cerrada"
+    },
+    "archivado": "El grupo está archivado: la asistencia es de solo lectura.",
+    "cerrada": "La unidad está cerrada: la lista de este día es de solo lectura.",
+    "fueraDeUnidad": {
+      "corto": "Fuera del ciclo escolar",
+      "titulo": "Este día no cae en ninguna unidad",
+      "texto": "La lista se pasa en días dentro de las unidades del ciclo escolar."
+    },
+    "cargando": "Cargando la lista",
+    "reintentar": "Reintentar",
+    "sinAlumnos": {
+      "titulo": "Todavía no hay alumnos",
+      "texto": "Agrega a tus alumnos para pasar lista.",
+      "accion": "Agregar alumnos"
+    },
+    "sinToma": {
+      "hoy": "Todavía no pasas lista hoy.",
+      "otroDia": "No hay lista de este día.",
+      "ayuda": "Toca \"Todos presentes\" o toca a quien faltó: los demás quedan presentes."
+    },
+    "lista": "Alumnos",
+    "sinMarcar": "Sin lista",
+    "ayudaFila": "Cada toque cambia entre presente, falta, retardo y justificada. Con teclado: P, F, R o J.",
+    "estados": {
+      "presente": "Presente",
+      "falta": "Falta",
+      "retardo": "Retardo",
+      "justificada": "Justificada"
+    },
+    "plural": {
+      "presente": "Presentes",
+      "falta": "Faltas",
+      "retardo": "Retardos",
+      "justificada": "Justificadas"
+    },
+    "letras": {
+      "presente": "P",
+      "falta": "F",
+      "retardo": "R",
+      "justificada": "J"
+    },
+    "todosPresentes": "Todos presentes",
+    "resumen": "Resumen del día",
+    "historial": "Historial de la unidad",
+    "sinGuardar": "No se pudo guardar en este dispositivo. Intenta de nuevo.",
+    "cancelar": "Cancelar",
+    "borrar": {
+      "accion": "Borrar lista de este día",
+      "titulo": "¿Borrar la lista del {{dia}}?",
+      "texto": "Se quita ese día del historial y del promedio de asistencia. No se puede deshacer.",
+      "confirmar": "Borrar lista",
+      "listo": "Lista borrada."
+    },
+    "historialTitulo": "Historial de asistencia",
+    "dias": "Días con lista: {{cantidad}}",
+    "unidades": "Unidades",
+    "sinDias": {
+      "titulo": "Sin listas en esta unidad",
+      "texto": "Cuando pases lista, aquí verás cada día y el porcentaje de cada alumno."
+    },
+    "pasarLista": "Pasar lista",
+    "leyenda": "P presente · F falta · R retardo · J justificada (no cuenta). Toca un día para corregirlo.",
+    "alumno": "Alumno",
+    "abrirDia": "Abrir la lista del {{dia}}",
+    "detalle": {
+      "falta": { "uno": "1 falta", "otros": "{{n}} faltas" },
+      "retardo": { "uno": "1 retardo", "otros": "{{n}} retardos" },
+      "justificada": { "uno": "1 justificada", "otros": "{{n}} justificadas" },
+      "nada": "Sin faltas"
+    },
+    "diasConLista": "Días con lista",
+    "detalleDia": "Presentes: {{presentes}} · Faltas: {{faltas}}"
   },
   "calificaciones": {
     "misGrupos": "Mis grupos",
@@ -761,6 +861,8 @@
     },
     "criterios": "{{cantidad}} criterios",
     "sinActividades": "Sin actividades todavía.",
+    "asistencia": "Se calcula con la lista del grupo. Días con lista: {{tomas}}.",
+    "pasarLista": "Pasar lista",
     "avance": "Capturadas:",
     "nueva": {
       "titulo": "Nueva actividad",

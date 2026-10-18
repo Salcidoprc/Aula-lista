@@ -33,9 +33,9 @@ Se le vende al docente, no a la dirección: lo adopta solo, sin esperar a la esc
 
 ## Capabilities and Constraints
 
-- MVP: cuenta del docente (correo o Google), grupos y alumnos con importación, rubros libres y captura de calificaciones con hasta 2 decimales, notas por alumno, cierre con observaciones de IA, boletas PDF, portal de tutores, avisos, planes de pago (Gratis, Prueba Pro, Pro por grupo).
+- MVP: cuenta del docente (correo o Google), grupos y alumnos con importación, rubros libres y captura de calificaciones con hasta 2 decimales, pase de lista sin conexión (la asistencia puede valer un porcentaje de la unidad), notas por alumno, cierre con observaciones de IA, boletas PDF, portal de tutores, avisos, planes de pago (Gratis, Prueba Pro, Pro por grupo).
 - Primaria y secundaria desde el MVP. Varios grupos por docente; máximo 50 alumnos por grupo.
-- Fuera del MVP: libros digitales, chat, exámenes en línea, cuentas de alumno, planeación con IA, asistencia, panel del director, cobros de colegiaturas, app nativa, boleta oficial SEP, facturación.
+- Fuera del MVP: libros digitales, chat, exámenes en línea, cuentas de alumno, planeación con IA, asistencia visible para tutores, panel del director, cobros de colegiaturas, app nativa, boleta oficial SEP, facturación.
 - Datos de menores: mínimos, seudonimizados ante la IA, nunca en logs.
 - Español de México, fechas dd/mm/aaaa, zona America/Mexico_City por defecto.
 - Rendimiento: carga en menos de 4 s en Android de gama baja con 4G; bundle inicial máximo 250 KB comprimido.

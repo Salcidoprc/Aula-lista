@@ -1,5 +1,5 @@
 import vectores from '../../../../../api/tests/vectores-calculo.json';
-import { RubroCalculo, calcularPeriodo, valorConCriterios } from './calculo';
+import { RubroCalculo, calcularPeriodo, promedioAsistencia, valorConCriterios } from './calculo';
 import { formatear, fraccion, redondear } from './decimal';
 
 interface Caso {
@@ -8,6 +8,7 @@ interface Caso {
     califMinima: string;
     decimalesFinal: number;
     redondeo: 'arriba' | 'abajo' | 'cercano';
+    valorRetardo?: string;
   };
   rubros: RubroCalculo[];
   esperado: {
@@ -68,6 +69,12 @@ describe('Cálculo de calificaciones con los vectores compartidos (RN-036)', () 
       { criterioId: 'c', valor: 10 },
     ]);
     expect(formatear(valor!, 2)).toBe('9.00');
+  });
+
+  it('SPEC-10: 18 presentes, 1 falta y 1 justificada dan 9.47', () => {
+    const tomas = [...Array<string>(18).fill('presente'), 'falta', 'justificada'];
+    expect(formatear(promedioAsistencia(tomas)!, 2)).toBe('9.47');
+    expect(promedioAsistencia(['justificada'])).toBeNull();
   });
 
   it('RN-035: lee los números por su texto, sin errores binarios', () => {

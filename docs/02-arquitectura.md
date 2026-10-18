@@ -157,10 +157,11 @@ Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen ant
 
 ## Sincronización sin conexión (RF-037, RNF-014)
 
-1. Al abrir un grupo, la PWA guarda en IndexedDB (Dexie, solo desde `core/sincronizacion`) el grupo, sus unidades, el catálogo de tipos de rubro y la matriz de la unidad que se abre (rubros, actividades, alumnos y calificaciones). Las tomas de asistencia y las notas se agregan en H3.2 y H3.3. Todo se borra al cerrar sesión.
+1. Al abrir un grupo, la PWA guarda en IndexedDB (Dexie, solo desde `core/sincronizacion`) el grupo, sus unidades, el catálogo de tipos de rubro y la matriz de la unidad que se abre (rubros, actividades, alumnos y calificaciones). Las notas (H3.2) y las tomas de asistencia de la unidad (H3.3, con los alumnos sin datos de tutores) usan la misma copia. Todo se borra al cerrar sesión.
 2. Cada cambio local se guarda en IndexedDB y en una cola de salida con un UUID de idempotencia y la `version` conocida del registro.
 3. Al haber conexión, la cola se envía en orden a `POST /api/v1/sincronizacion` en lotes de hasta 100 cambios.
-4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; las notas nunca chocan porque cada nota es un registro nuevo. El cliente recibe la versión vigente y actualiza su copia.
+   La asistencia va aparte, una toma por envío, a `PUT /api/v1/grupos/{id}/asistencias/{fecha}` con su UUID en `Idempotency-Key`.
+4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; en la asistencia gana la última escritura por alumno; las notas nunca chocan porque cada nota es un registro nuevo. El cliente recibe la versión vigente y actualiza su copia.
 5. La UI muestra siempre el estado en la portada: "Guardado", "Por enviar: n", "Enviando" o "Sin conexión"; a partir del día 3 sin enviar avisa cuántos días lleva. Una celda rechazada (por ejemplo `celda_inexistente`) sale de la cola, el servidor manda su valor vigente y la pantalla marca el error en esa celda.
 6. Lo que no funciona sin conexión: generar observaciones, publicar boletas, enviar avisos y pagos.
 

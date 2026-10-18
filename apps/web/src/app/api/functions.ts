@@ -113,6 +113,12 @@ export type { ListarEquipos$Params as ListarEquipos$Params } from './fn/equipos/
 export { listarEquipos as listarEquipos } from './fn/equipos/listar-equipos';
 export type { ReemplazarEquipos$Params as ReemplazarEquipos$Params } from './fn/equipos/reemplazar-equipos';
 export { reemplazarEquipos as reemplazarEquipos } from './fn/equipos/reemplazar-equipos';
+export type { ListarAsistencias$Params as ListarAsistencias$Params } from './fn/asistencia/listar-asistencias';
+export { listarAsistencias as listarAsistencias } from './fn/asistencia/listar-asistencias';
+export type { GuardarAsistencia$Params as GuardarAsistencia$Params } from './fn/asistencia/guardar-asistencia';
+export { guardarAsistencia as guardarAsistencia } from './fn/asistencia/guardar-asistencia';
+export type { BorrarAsistencia$Params as BorrarAsistencia$Params } from './fn/asistencia/borrar-asistencia';
+export { borrarAsistencia as borrarAsistencia } from './fn/asistencia/borrar-asistencia';
 export type { ListarNotas$Params as ListarNotas$Params } from './fn/notas/listar-notas';
 export { listarNotas as listarNotas } from './fn/notas/listar-notas';
 export type { CrearNota$Params as CrearNota$Params } from './fn/notas/crear-nota';

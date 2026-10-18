@@ -46,6 +46,17 @@ export const routes: Routes = [
         loadComponent: () => import('./docente/grupos/grupo').then((m) => m.Grupo),
       },
       {
+        path: ':id/asistencia',
+        title: 'titulos.asistencia',
+        loadComponent: () => import('./docente/asistencia/pase-lista').then((m) => m.PaseLista),
+      },
+      {
+        path: ':id/asistencia/historial',
+        title: 'titulos.historialAsistencia',
+        loadComponent: () =>
+          import('./docente/asistencia/historial-asistencia').then((m) => m.HistorialAsistencia),
+      },
+      {
         path: ':id/equipos',
         title: 'titulos.equipos',
         canDeactivate: [confirmarSalida],

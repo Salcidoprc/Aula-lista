@@ -254,7 +254,21 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
           </section>
 
           @if (error(); as codigo) {
-            <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+            @if (codigo === 'tomas_fuera_de_unidad') {
+              <div class="aviso aviso--pendiente" role="alert">
+                <p>{{ texto('errores.' + codigo) }} {{ t('tomasFuera.texto') }}</p>
+                <button
+                  class="boton boton--secundario"
+                  type="button"
+                  [appOcupado]="guardando()"
+                  (click)="confirmarTomas.set(true); guardar()"
+                >
+                  {{ t('tomasFuera.confirmar') }}
+                </button>
+              </div>
+            } @else {
+              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+            }
           }
 
           <div class="pie-accion">
@@ -396,6 +410,8 @@ export class Ciclo implements OnInit {
   protected readonly cargando = signal(false);
   protected readonly intento = signal(false);
   protected readonly guardando = signal(false);
+  /** RN-100: el docente aceptó que unos días con lista queden fuera de las unidades. */
+  protected readonly confirmarTomas = signal(false);
   protected readonly error = signal<string | null>(null);
 
   protected readonly errorCiclo = computed(() => validarCiclo(this.inicio(), this.fin()));
@@ -513,6 +529,7 @@ export class Ciclo implements OnInit {
       this.error.set(codigoDeError(e));
     } finally {
       this.guardando.set(false);
+      this.confirmarTomas.set(false);
     }
   }
 
@@ -560,7 +577,10 @@ export class Ciclo implements OnInit {
     const crece = datos.inicio <= original.inicio && datos.fin >= original.fin;
     const ciclo = () => this.api.invoke(editarCiclo, { id, body: datos });
     const lista = () =>
-      this.api.invoke(reemplazarUnidades, { id, body: { unidades: [...unidades] } });
+      this.api.invoke(reemplazarUnidades, {
+        id,
+        body: { unidades: [...unidades], confirmarTomasFuera: this.confirmarTomas() },
+      });
     const pasos = crece
       ? [cambioCiclo && ciclo, cambioUnidades && lista]
       : [cambioUnidades && lista, cambioCiclo && ciclo];

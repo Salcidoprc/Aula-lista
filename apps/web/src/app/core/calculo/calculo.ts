@@ -11,12 +11,14 @@ import {
 } from './decimal';
 
 /**
- * Gemelo del cálculo del backend (`Domain/Evaluacion/Calculo.cs`): RN-032 a RN-035, RN-112, RN-118 y RN-119.
+ * Gemelo del cálculo del backend (`Domain/Evaluacion/Calculo.cs`): RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118
+ * y RN-119.
  * Sirve para mostrar promedios al capturar sin conexión. Pasa los mismos vectores de prueba (RN-036).
  */
 export type Forma = 'numerica' | 'cumplimiento';
 export type Marca = 'ninguna' | 'cumplio' | 'no_cumplio' | 'no_entrego' | 'exento';
 export type Numero = string | number;
+export type EstadoAsistencia = 'presente' | 'falta' | 'retardo' | 'justificada';
 
 export interface CriterioCalculo {
   readonly id: string;
@@ -45,12 +47,16 @@ export interface RubroCalculo {
   readonly califMinima: Numero;
   readonly criterios?: readonly CriterioCalculo[];
   readonly celdas: readonly CeldaCalculo[];
+  /** Rubro de asistencia: el estado del alumno en cada toma de la unidad. */
+  readonly tomas?: readonly string[];
 }
 
 export interface ConfiguracionCalculo {
   readonly califMinima: Numero;
   readonly decimalesFinal: number;
   readonly redondeo: Sentido;
+  /** Lo que vale un retardo (RN-102); por defecto 1. */
+  readonly valorRetardo?: Numero;
 }
 
 export interface ResultadoPeriodo {
@@ -114,6 +120,33 @@ export function promedioRubro(rubro: RubroCalculo): Fraccion | null {
   return cuenta === 0 ? null : dividir(suma, fraccion(cuenta));
 }
 
+/**
+ * RN-102 a RN-104: presente vale 1, falta 0, retardo lo que diga el grupo y justificada no cuenta; el porcentaje
+ * por 10 es el promedio. Sin tomas que cuenten, nulo.
+ */
+export function promedioAsistencia(
+  tomas: readonly string[],
+  valorRetardo: Numero = 1,
+): Fraccion | null {
+  let suma = CERO;
+  let cuenta = 0;
+  for (const estado of tomas) {
+    const valor =
+      estado === 'presente'
+        ? fraccion(1)
+        : estado === 'falta'
+          ? CERO
+          : estado === 'retardo'
+            ? fraccion(valorRetardo)
+            : null;
+    if (valor !== null) {
+      suma = sumar(suma, valor);
+      cuenta++;
+    }
+  }
+  return cuenta === 0 ? null : dividir(multiplicar(suma, DIEZ), fraccion(cuenta));
+}
+
 /** RN-033 a RN-035: rubros con datos por su peso; los sin datos reparten el suyo; nunca bajo la mínima. */
 export function calcularPeriodo(
   rubros: readonly RubroCalculo[],
@@ -124,8 +157,13 @@ export function calcularPeriodo(
   let suma = CERO;
   let pesos = CERO;
   for (const rubro of rubros) {
+    const comportamiento = rubro.comportamiento ?? 'actividades';
     const promedio =
-      (rubro.comportamiento ?? 'actividades') === 'actividades' ? promedioRubro(rubro) : null;
+      comportamiento === 'actividades'
+        ? promedioRubro(rubro)
+        : comportamiento === 'asistencia'
+          ? promedioAsistencia(rubro.tomas ?? [], configuracion.valorRetardo)
+          : null;
     promedios.set(rubro.id, promedio);
     const peso = fraccion(rubro.peso);
     if (promedio !== null && peso.n > 0n) {
