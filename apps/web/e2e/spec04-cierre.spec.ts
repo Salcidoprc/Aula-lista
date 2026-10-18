@@ -132,9 +132,12 @@ test.describe('SPEC-04: cierre de periodo y observaciones con IA', () => {
       page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
     ).toBeVisible();
 
-    await page.goto(cierre);
+    // "Guardado" puede seguir visible del guardado anterior mientras la cola sube el cambio: se recarga hasta verlo.
     const primera = page.locator('.fila').first();
-    await expect(primera).toHaveAttribute('data-estado', 'borrador');
+    await expect(async () => {
+      await page.goto(cierre);
+      await expect(primera).toHaveAttribute('data-estado', 'borrador', { timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
     await expect(primera.getByText('Datos cambiaron')).toBeVisible();
     await primera.click();
     await expect(page.getByText(/Datos cambiaron: sus calificaciones o notas/)).toBeVisible();
