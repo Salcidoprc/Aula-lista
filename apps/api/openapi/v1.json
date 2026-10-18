@@ -1491,6 +1491,26 @@
         }
       }
     },
+    "/api/v1/planes": {
+      "get": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "ObtenerPlanes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/cuentas/google/inicio": {
       "get": {
         "tags": [
@@ -2222,6 +2242,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/IniciarCierre"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -2245,6 +2281,16 @@
           },
           "422": {
             "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3625,6 +3671,302 @@
           }
         }
       }
+    },
+    "/api/v1/docente/suscripcion": {
+      "get": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "ObtenerSuscripcion",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuscripcionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/docente/suscripcion/checkout": {
+      "post": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "CrearCheckout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCheckout"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/docente/suscripcion/grupos": {
+      "put": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "CambiarGruposPro",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CambiarGruposPro"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuscripcionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/docente/suscripcion/portal": {
+      "post": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "PortalPagos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pagos-simulados/{id}": {
+      "get": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "ObtenerPagoSimulado",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesionSimuladaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/pagos-simulados/{id}/pagar": {
+      "post": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "PagarPagoSimulado",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesionSimuladaDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pagos-simulados/{id}/rechazar": {
+      "post": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "RechazarPagoSimulado",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesionSimuladaDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pagos-simulados/renovacion": {
+      "post": {
+        "tags": [
+          "Planes"
+        ],
+        "operationId": "RenovarPagoSimulado",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenovacionSimulada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3992,6 +4334,31 @@
           }
         }
       },
+      "AvisoPagoDto": {
+        "required": [
+          "tipo",
+          "fecha",
+          "dias"
+        ],
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dias": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "AvisoResumenDto": {
         "required": [
           "id",
@@ -4313,6 +4680,7 @@
           "grupoId",
           "estado",
           "soloLectura",
+          "plan",
           "decimalesFinal",
           "conteos",
           "alumnos"
@@ -4332,6 +4700,9 @@
           },
           "soloLectura": {
             "type": "boolean"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanGrupoDto"
           },
           "decimalesFinal": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -4367,6 +4738,24 @@
           },
           "nueva": {
             "type": "string"
+          }
+        }
+      },
+      "CambiarGruposPro": {
+        "required": [
+          "grupoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -4538,6 +4927,17 @@
           }
         }
       },
+      "CheckoutDto": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "CicloDto": {
         "required": [
           "id",
@@ -4581,6 +4981,7 @@
           "grupoId",
           "estado",
           "soloLectura",
+          "plan",
           "requisitos",
           "conteos",
           "alumnos"
@@ -4600,6 +5001,9 @@
           },
           "soloLectura": {
             "type": "boolean"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanGrupoDto"
           },
           "requisitos": {
             "$ref": "#/components/schemas/RequisitosCierreDto"
@@ -4881,6 +5285,41 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "CrearCheckout": {
+        "required": [
+          "grupoIds",
+          "modalidad",
+          "meses"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "modalidad": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "meses": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -5268,6 +5707,7 @@
         "required": [
           "grupoId",
           "soloLectura",
+          "urgentesDisponibles",
           "urgentesPorTutor",
           "tutores"
         ],
@@ -5278,6 +5718,9 @@
             "format": "uuid"
           },
           "soloLectura": {
+            "type": "boolean"
+          },
+          "urgentesDisponibles": {
             "type": "boolean"
           },
           "urgentesPorTutor": {
@@ -5915,6 +6358,100 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "planVigente": {
+            "type": "string"
+          },
+          "diasPrueba": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "GrupoPlanDto": {
+        "required": [
+          "grupoId",
+          "nombre",
+          "nivel",
+          "grado",
+          "materia",
+          "cicloNombre",
+          "alumnosActivos",
+          "enSuscripcion",
+          "plan"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cicloNombre": {
+            "type": "string"
+          },
+          "alumnosActivos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "enSuscripcion": {
+            "type": "boolean"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanGrupoDto"
+          }
+        }
+      },
+      "GrupoSimuladoDto": {
+        "required": [
+          "id",
+          "nombre",
+          "grado"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -6121,6 +6658,17 @@
           "string"
         ],
         "format": "binary"
+      },
+      "IniciarCierre": {
+        "required": [
+          "usarPrueba"
+        ],
+        "type": "object",
+        "properties": {
+          "usarPrueba": {
+            "type": "boolean"
+          }
+        }
       },
       "IniciarSesion": {
         "required": [
@@ -6366,6 +6914,81 @@
           }
         }
       },
+      "PagoDto": {
+        "required": [
+          "id",
+          "tipo",
+          "meses",
+          "monto",
+          "grupos",
+          "estado",
+          "creadoEn",
+          "venceEn",
+          "pagadoEn",
+          "urlFicha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "meses": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "monto": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "grupos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "creadoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "venceEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "pagadoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "urlFicha": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PerfilDocente": {
         "required": [
           "correo",
@@ -6487,6 +7110,169 @@
           }
         }
       },
+      "PlanesDto": {
+        "required": [
+          "precioPrimerGrupo",
+          "precioGrupoAdicional",
+          "moneda",
+          "diasPrueba",
+          "diasMaximoPrueba",
+          "diasGracia",
+          "mesesPrepago",
+          "oxxoHabilitado",
+          "montoMinimoOxxo",
+          "montoMaximoOxxo",
+          "urgentesPorTutorPorMes",
+          "boletasPorTutorPorPeriodo",
+          "pagoSimulado"
+        ],
+        "type": "object",
+        "properties": {
+          "precioPrimerGrupo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "precioGrupoAdicional": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "moneda": {
+            "type": "string"
+          },
+          "diasPrueba": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "diasMaximoPrueba": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "diasGracia": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "mesesPrepago": {
+            "type": "array",
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          "oxxoHabilitado": {
+            "type": "boolean"
+          },
+          "montoMinimoOxxo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "montoMaximoOxxo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "urgentesPorTutorPorMes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "boletasPorTutorPorPeriodo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pagoSimulado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlanGrupoDto": {
+        "required": [
+          "plan",
+          "proHasta",
+          "diasPrueba",
+          "pruebaHastaPublicar",
+          "pruebaDisponible"
+        ],
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "string"
+          },
+          "proHasta": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "diasPrueba": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pruebaHastaPublicar": {
+            "type": "boolean"
+          },
+          "pruebaDisponible": {
+            "type": "boolean"
+          },
+          "tienePro": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PortalDto": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -6544,6 +7330,44 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "PruebaDto": {
+        "required": [
+          "grupoId",
+          "grupoNombre",
+          "vigente",
+          "diasRestantes",
+          "hastaPublicar",
+          "fin"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoNombre": {
+            "type": "string"
+          },
+          "vigente": {
+            "type": "boolean"
+          },
+          "diasRestantes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hastaPublicar": {
+            "type": "boolean"
+          },
+          "fin": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6663,6 +7487,17 @@
             "type": "boolean"
           },
           "aceptaPrivacidad": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RenovacionSimulada": {
+        "required": [
+          "pagada"
+        ],
+        "type": "object",
+        "properties": {
+          "pagada": {
             "type": "boolean"
           }
         }
@@ -7165,6 +8000,66 @@
           }
         }
       },
+      "SesionSimuladaDto": {
+        "required": [
+          "id",
+          "tipo",
+          "monto",
+          "meses",
+          "oxxo",
+          "referencia",
+          "venceEn",
+          "estado",
+          "grupos"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "monto": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "meses": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "oxxo": {
+            "type": "boolean"
+          },
+          "referencia": {
+            "type": "string"
+          },
+          "venceEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "grupos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrupoSimuladoDto"
+            }
+          }
+        }
+      },
       "SincronizarCambios": {
         "required": [
           "cambios"
@@ -7251,6 +8146,120 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "SuscripcionDto": {
+        "required": [
+          "estado",
+          "modalidad",
+          "grupos",
+          "totalMensual",
+          "proximoCobro",
+          "pagadoHasta",
+          "graciaHasta",
+          "prueba",
+          "pruebaDisponible",
+          "aviso",
+          "puedeAdministrarTarjeta",
+          "renovarPrepago",
+          "agregarAPrepago",
+          "pagoPendiente",
+          "pagos"
+        ],
+        "type": "object",
+        "properties": {
+          "estado": {
+            "type": "string"
+          },
+          "modalidad": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "grupos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrupoPlanDto"
+            }
+          },
+          "totalMensual": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "proximoCobro": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "pagadoHasta": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "graciaHasta": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "prueba": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PruebaDto"
+              }
+            ]
+          },
+          "pruebaDisponible": {
+            "type": "boolean"
+          },
+          "aviso": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AvisoPagoDto"
+              }
+            ]
+          },
+          "puedeAdministrarTarjeta": {
+            "type": "boolean"
+          },
+          "renovarPrepago": {
+            "type": "boolean"
+          },
+          "agregarAPrepago": {
+            "type": "boolean"
+          },
+          "pagoPendiente": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PagoDto"
+              }
+            ]
+          },
+          "pagos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PagoDto"
+            }
           }
         }
       },
@@ -7606,6 +8615,9 @@
     },
     {
       "name": "Calificaciones"
+    },
+    {
+      "name": "Planes"
     },
     {
       "name": "Actividades"

@@ -1812,6 +1812,10 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("character varying(10)")
                         .HasColumnName("plan");
 
+                    b.Property<DateTimeOffset?>("ProHasta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("pro_hasta");
+
                     b.Property<string>("Redondeo")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -2174,6 +2178,232 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasDatabaseName("ix_auditoria_actor_id_fecha");
 
                     b.ToTable("auditoria", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.EventoPago", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("IdExterno")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("id_externo");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("tipo");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_evento_pago");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_evento_pago_docente_id");
+
+                    b.HasIndex("IdExterno")
+                        .IsUnique()
+                        .HasDatabaseName("ix_evento_pago_id_externo");
+
+                    b.ToTable("evento_pago", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.Pago", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.PrimitiveCollection<List<Guid>>("Grupos")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("grupos");
+
+                    b.Property<int>("Meses")
+                        .HasColumnType("integer")
+                        .HasColumnName("meses");
+
+                    b.Property<decimal>("Monto")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("monto");
+
+                    b.Property<DateTimeOffset?>("PagadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("pagado_en");
+
+                    b.Property<string>("SesionExterna")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("sesion_externa");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UrlFicha")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("url_ficha");
+
+                    b.Property<DateTimeOffset?>("VenceEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vence_en");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pago");
+
+                    b.HasIndex("SesionExterna")
+                        .IsUnique()
+                        .HasDatabaseName("ix_pago_sesion_externa");
+
+                    b.HasIndex("DocenteId", "CreatedAt")
+                        .HasDatabaseName("ix_pago_docente_id_created_at");
+
+                    b.ToTable("pago", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_pago_estado", "estado IN ('pendiente', 'pagado', 'vencido')");
+
+                            t.HasCheckConstraint("ck_pago_monto", "monto > 0");
+                        });
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.Suscripcion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int?>("AvisoVencimientoDias")
+                        .HasColumnType("integer")
+                        .HasColumnName("aviso_vencimiento_dias");
+
+                    b.Property<string>("ClienteExterno")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("cliente_externo");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTimeOffset?>("GraciaHasta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("gracia_hasta");
+
+                    b.PrimitiveCollection<List<Guid>>("GruposPro")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("grupos_pro");
+
+                    b.Property<string>("IdExterno")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("id_externo");
+
+                    b.Property<string>("Modalidad")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("modalidad");
+
+                    b.Property<DateTimeOffset?>("PagadoHasta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("pagado_hasta");
+
+                    b.Property<DateTimeOffset?>("PeriodoActualFin")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("periodo_actual_fin");
+
+                    b.Property<string>("Proveedor")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("proveedor");
+
+                    b.Property<Guid?>("PruebaGrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("prueba_grupo_id");
+
+                    b.Property<DateTimeOffset?>("PruebaInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("prueba_inicio");
+
+                    b.Property<Guid?>("PruebaPeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("prueba_periodo_id");
+
+                    b.Property<DateTimeOffset?>("PruebaPublicadaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("prueba_publicada_en");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_suscripcion");
+
+                    b.HasIndex("DocenteId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_suscripcion_docente_id");
+
+                    b.HasIndex("IdExterno")
+                        .IsUnique()
+                        .HasDatabaseName("ix_suscripcion_id_externo")
+                        .HasFilter("id_externo IS NOT NULL");
+
+                    b.ToTable("suscripcion", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_suscripcion_estado", "estado IN ('ninguna', 'activa', 'en_gracia', 'cancelada')");
+
+                            t.HasCheckConstraint("ck_suscripcion_modalidad", "modalidad IS NULL OR modalidad IN ('tarjeta', 'prepago_oxxo')");
+                        });
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Tutores.EnlaceTutor", b =>
@@ -2722,6 +2952,36 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_vinculo_tutor_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.EventoPago", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Cuentas.Docente", null)
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_evento_pago_docente_docente_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.Pago", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Cuentas.Docente", null)
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pago_docente_docente_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Planes.Suscripcion", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Cuentas.Docente", null)
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_suscripcion_docente_docente_id");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Tutores.EnlaceTutor", b =>

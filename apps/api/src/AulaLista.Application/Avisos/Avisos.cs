@@ -20,7 +20,9 @@ public sealed record AlumnoDeTutorDto(Guid Id, string Nombres, string Apellidos)
 public sealed record DestinatarioDto(
     Guid TutorId, string Nombre, string? Parentesco, IReadOnlyList<AlumnoDeTutorDto> Alumnos, bool Push, bool Correo, int UrgentesRestantes);
 
-public sealed record DestinatariosDto(Guid GrupoId, bool SoloLectura, int UrgentesPorTutor, IReadOnlyList<DestinatarioDto> Tutores);
+/// <summary><see cref="UrgentesDisponibles"/>: el grupo tiene Pro o la prueba Pro, así que puede mandar urgentes (SPEC-08).</summary>
+public sealed record DestinatariosDto(
+    Guid GrupoId, bool SoloLectura, bool UrgentesDisponibles, int UrgentesPorTutor, IReadOnlyList<DestinatarioDto> Tutores);
 
 /// <summary>RN-070, RN-071: sin <see cref="TutorIds"/> va a todos los tutores del grupo.</summary>
 public sealed record CrearAviso(string? Titulo, string? Cuerpo, bool Urgente, IReadOnlyList<Guid>? TutorIds);
@@ -78,7 +80,7 @@ public sealed class AvisosDelGrupoCasoUso(IRepositorioGrupos grupos, IRepositori
 }
 
 /// <summary>Para "Nuevo aviso": los tutores de los alumnos activos, sus canales y cuánto WhatsApp urgente les queda.</summary>
-public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEntregas plan)
+public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEntregas plan, Planes.AccesoPro acceso)
 {
     public async Task<DestinatariosDto?> EjecutarAsync(Guid grupoId, CancellationToken ct)
     {
@@ -88,10 +90,12 @@ public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEnt
         }
 
         var tutores = await plan.TutoresAsync((await grupos.AlumnosAsync(grupoId, ct)).Where(a => a.EstaActivo).ToList(), ct);
-        var restantes = await plan.UrgentesRestantesAsync(grupoId, ct);
+        var pro = await acceso.TieneProAsync(grupo, ct);
+        var restantes = pro ? await plan.UrgentesRestantesAsync(grupoId, ct) : _ => 0;
         return new DestinatariosDto(
             grupoId,
             grupo.EstaArchivado,
+            pro,
             plan.Opciones.UrgentesPorTutorPorMes,
             tutores.Select(t => new DestinatarioDto(
                 t.TutorId, t.Nombre, t.Parentesco, Alumnos(t.Alumnos), t.Push, t.Correo is not null, restantes(t.TutorId))).ToList());
@@ -103,11 +107,12 @@ public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEnt
 
 /// <summary>
 /// RF-070, RF-071: crea el aviso y decide por dónde le llega a cada tutor (RN-072). El envío sale en un trabajo al
-/// confirmarse; los WhatsApp quedan apartados desde ya para que dos avisos seguidos no pasen el límite (RN-086).
+/// confirmarse; los WhatsApp quedan apartados desde ya para que dos avisos seguidos no pasen el límite (RN-086). Los
+/// urgentes son de Pro (SPEC-08): llegan por WhatsApp del sistema.
 /// </summary>
 public sealed class CrearAvisoCasoUso(
     IRepositorioGrupos grupos, IRepositorioAvisos avisos, PlanEntregas plan, DetalleAvisoCasoUso detalle, IColaTrabajos cola,
-    IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IAuditoria auditoria, IContextoUsuario usuario, Planes.AccesoPro acceso, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<AvisoDto>?> EjecutarAsync(Guid grupoId, CrearAviso comando, CancellationToken ct)
     {
@@ -119,6 +124,11 @@ public sealed class CrearAvisoCasoUso(
         if (grupo.EstaArchivado)
         {
             return Resultado.Fallo<AvisoDto>(ErroresGrupos.GrupoArchivado);
+        }
+
+        if (comando.Urgente && !await acceso.TieneProAsync(grupo, ct))
+        {
+            return Resultado.Fallo<AvisoDto>(Domain.Planes.ErroresPlanes.WhatsappRequierePro);
         }
 
         var validado = Aviso.Validar(comando.Titulo, comando.Cuerpo);

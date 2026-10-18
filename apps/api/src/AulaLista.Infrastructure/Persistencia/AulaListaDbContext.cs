@@ -6,6 +6,7 @@ using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
 using AulaLista.Domain.Operacion;
+using AulaLista.Domain.Planes;
 using AulaLista.Domain.Tutores;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,6 +86,12 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<MensajeWhatsapp> MensajesWhatsapp => Set<MensajeWhatsapp>();
 
+    public DbSet<Suscripcion> Suscripciones => Set<Suscripcion>();
+
+    public DbSet<Pago> Pagos => Set<Pago>();
+
+    public DbSet<EventoPago> EventosPago => Set<EventoPago>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -135,5 +142,8 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<Aviso>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<EntregaAviso>().HasQueryFilter(e => e.DocenteId == DocenteActual);
         modelBuilder.Entity<MensajeWhatsapp>().HasQueryFilter(m => m.DocenteId == DocenteActual);
+        modelBuilder.Entity<Suscripcion>().HasQueryFilter(s => s.DocenteId == DocenteActual);
+        modelBuilder.Entity<Pago>().HasQueryFilter(p => p.DocenteId == DocenteActual);
+        modelBuilder.Entity<EventoPago>().HasQueryFilter(e => e.DocenteId == DocenteActual);
     }
 }

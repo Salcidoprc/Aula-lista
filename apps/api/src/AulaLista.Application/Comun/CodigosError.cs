@@ -4,6 +4,7 @@ using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Planes;
 using AulaLista.Domain.Tutores;
 
 namespace AulaLista.Application.Comun;
@@ -32,5 +33,6 @@ public static class CodigosError
         .. ErroresBoletas.Todos.Select(e => e.Codigo),
         .. ErroresTutores.Todos.Select(e => e.Codigo),
         .. ErroresAvisos.Todos.Select(e => e.Codigo),
+        .. ErroresPlanes.Todos.Select(e => e.Codigo),
     ];
 }

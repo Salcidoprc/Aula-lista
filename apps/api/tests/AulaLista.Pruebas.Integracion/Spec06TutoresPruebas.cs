@@ -278,6 +278,7 @@ public sealed class Spec06TutoresPruebas(BaseDeDatosFixture baseDeDatos) : IDisp
         {
             celdas = new[] { new { actividadId, alumnoId = alumno, valor = (decimal?)9.5m, marca = "ninguna", version = 0 } },
         })).EnsureSuccessStatusCode();
+        await cliente.ActivarProAsync(grupoId);
         (await cliente.PostAsync($"/api/v1/periodos/{periodo}/cierre", null)).EnsureSuccessStatusCode();
         (await cliente.PostAsJsonAsync($"/api/v1/periodos/{periodo}/observaciones/generar", new { })).EnsureSuccessStatusCode();
         var observacion = (await cliente.GetFromJsonAsync<JsonElement>($"/api/v1/periodos/{periodo}/cierre"))

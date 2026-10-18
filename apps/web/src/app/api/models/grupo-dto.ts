@@ -9,12 +9,14 @@ export interface GrupoDto {
   cicloId: string;
   cicloNombre: string;
   decimalesFinal: (number | string);
+  diasPrueba?: (number | string | null);
   grado: (number | string);
   id: string;
   materia: (string | null);
   nivel: string;
   nombre: string;
   plan: string;
+  planVigente?: string;
   redondeo: string;
   valorRetardo: (number | string);
 }

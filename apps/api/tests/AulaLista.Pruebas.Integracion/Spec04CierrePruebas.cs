@@ -258,17 +258,6 @@ public sealed class Spec04CierrePruebas(BaseDeDatosFixture baseDeDatos) : IDispo
         Assert.Equal("borrador", (await ObservacionDtoAsync(g, id)).GetProperty("estado").GetString());
     }
 
-    [Fact]
-    public async Task RN041_MientrasNoHayPlanes_UnGrupoGratisPuedeCerrar()
-    {
-        var g = await PrepararAsync(1);
-
-        var respuesta = await g.Cliente.PostAsync($"/api/v1/periodos/{g.PeriodoId}/cierre", null);
-
-        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
-        Assert.Equal("gratis", await EscalarAsync($"SELECT plan FROM grupo WHERE id = '{g.GrupoId}'"));
-    }
-
     private sealed record Grupo(HttpClient Cliente, Guid GrupoId, Guid PeriodoId, IReadOnlyList<Guid> Alumnos, JsonElement Tipos, Guid? Actividad)
     {
         public Guid Tipo(string nombre) =>
@@ -344,6 +333,7 @@ public sealed class Spec04CierrePruebas(BaseDeDatosFixture baseDeDatos) : IDispo
 
     private static async Task<JsonElement> IniciarAsync(Grupo g)
     {
+        await g.Cliente.ActivarProAsync(g.GrupoId);
         var respuesta = await g.Cliente.PostAsync($"/api/v1/periodos/{g.PeriodoId}/cierre", null);
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
         return await respuesta.Content.ReadFromJsonAsync<JsonElement>();

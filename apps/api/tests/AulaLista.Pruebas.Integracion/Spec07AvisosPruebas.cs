@@ -391,6 +391,7 @@ public sealed class Spec07AvisosPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
             ids.Add((await alta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid());
         }
 
+        await cliente.ActivarProAsync(grupoId);
         return new Grupo(cliente, docenteId, grupoId, periodo, ids);
     }
 

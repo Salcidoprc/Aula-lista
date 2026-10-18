@@ -5,6 +5,7 @@ using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Planes;
 using AulaLista.Domain.Tutores;
 using FluentValidation;
 
@@ -49,7 +50,13 @@ internal static class Validacion
                 || error == ErroresEvaluacion.PeriodoCerrado || error == ErroresEvaluacion.PeriodoConRubros
                 || error == ErroresEvaluacion.GrupoConCalificaciones || error == ErroresEvaluacion.FormaConCalificaciones
                 => StatusCodes.Status409Conflict,
-            _ when error == ErroresCierre.RequierePro => StatusCodes.Status403Forbidden,
+            _ when error == ErroresCierre.RequierePro || error == ErroresPlanes.BoletasRequierenPro
+                || error == ErroresPlanes.WhatsappRequierePro
+                => StatusCodes.Status403Forbidden,
+            _ when error == ErroresPlanes.PruebaUsada || error == ErroresPlanes.YaTieneTarjeta || error == ErroresPlanes.SinTarjeta
+                || error == ErroresPlanes.SinCambios || error == ErroresPlanes.PrepagoVigente || error == ErroresPlanes.AgregarRequierePago
+                || error == ErroresPlanes.PagoSimuladoTerminado
+                => StatusCodes.Status409Conflict,
             _ when error == ErroresCierre.LimiteIa => StatusCodes.Status429TooManyRequests,
             _ when error == ErroresCierre.PeriodoSinCierre || error == ErroresCierre.ObservacionAprobada
                 || error == ErroresCierre.ObservacionPublicada || error == ErroresCierre.EnGeneracion

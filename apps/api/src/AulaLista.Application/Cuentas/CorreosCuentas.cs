@@ -42,7 +42,7 @@ public static class CorreosCuentas
             "Los archivos están disponibles 24 horas y necesitas iniciar sesión para descargarlos.");
     }
 
-    private static CorreoSaliente Armar(string para, string asunto, string mensaje, string boton, string enlace, string nota)
+    internal static CorreoSaliente Armar(string para, string asunto, string mensaje, string boton, string enlace, string nota)
     {
         var e = WebUtility.HtmlEncode(enlace);
         var html = $"""

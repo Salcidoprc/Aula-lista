@@ -38,6 +38,13 @@ public sealed class Docente
 
     public DateTimeOffset UpdatedAt { get; private set; }
 
+    /// <summary>RN-081: la prueba Pro se usa una sola vez.</summary>
+    public void MarcarPruebaUsada(DateTimeOffset ahora)
+    {
+        PruebaProUsada = true;
+        UpdatedAt = ahora;
+    }
+
     public bool PerfilCompleto =>
         !string.IsNullOrWhiteSpace(Nombre)
         && Nivel is not null
