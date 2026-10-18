@@ -1940,6 +1940,123 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                     b.ToTable("auditoria", (string)null);
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Tutores.EnlaceTutor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<Guid>("CreadoPorDocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("creado_por_docente_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiraEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_en");
+
+                    b.Property<DateTimeOffset?>("RevocadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revocado_en");
+
+                    b.Property<DateTimeOffset?>("SospechosoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sospechoso_en");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tutor_id");
+
+                    b.Property<DateTimeOffset?>("UltimoUsoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultimo_uso_en");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_enlace_tutor");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_enlace_tutor_token_hash");
+
+                    b.HasIndex("TutorId")
+                        .HasDatabaseName("ix_enlace_tutor_tutor_id");
+
+                    b.ToTable("enlace_tutor", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Tutores.SesionTutor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EnlaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("enlace_id");
+
+                    b.Property<DateTimeOffset>("ExpiraEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_en");
+
+                    b.Property<DateTimeOffset?>("RevocadaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revocada_en");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tutor_id");
+
+                    b.Property<DateTimeOffset>("UltimoUsoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultimo_uso_en");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sesion_tutor");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_sesion_tutor_token_hash");
+
+                    b.HasIndex("TutorId")
+                        .HasDatabaseName("ix_sesion_tutor_tutor_id");
+
+                    b.HasIndex("EnlaceId", "CreatedAt")
+                        .HasDatabaseName("ix_sesion_tutor_enlace_id_created_at");
+
+                    b.ToTable("sesion_tutor", (string)null);
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Boletas.Boleta", b =>
                 {
                     b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
@@ -2315,6 +2432,33 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_vinculo_tutor_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Tutores.EnlaceTutor", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Tutor", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_enlace_tutor_tutor_tutor_id");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Tutores.SesionTutor", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Tutores.EnlaceTutor", null)
+                        .WithMany()
+                        .HasForeignKey("EnlaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sesion_tutor_enlace_tutor_enlace_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Tutor", null)
+                        .WithMany()
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sesion_tutor_tutor_tutor_id");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>

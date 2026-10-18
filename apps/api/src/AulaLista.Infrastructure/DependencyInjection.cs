@@ -5,6 +5,7 @@ using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Tutores;
 using AulaLista.Infrastructure.Boletas;
 using AulaLista.Infrastructure.Cierre;
 using AulaLista.Infrastructure.Comun;
@@ -14,6 +15,7 @@ using AulaLista.Infrastructure.Grupos;
 using AulaLista.Infrastructure.Ia;
 using AulaLista.Infrastructure.Persistencia;
 using AulaLista.Infrastructure.Trabajos;
+using AulaLista.Infrastructure.Tutores;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +51,7 @@ public static class DependencyInjection
         services.AddScoped<RepositorioEvaluacion>();
         services.AddScoped<IRepositorioEvaluacion>(sp => sp.GetRequiredService<RepositorioEvaluacion>());
         services.AddScoped<IDatosDeEvaluacion>(sp => sp.GetRequiredService<RepositorioEvaluacion>());
-        services.AddScoped<ITutores, Tutores>();
+        services.AddScoped<ITutores, Grupos.Tutores>();
         services.AddSingleton<IHojasDeCalculo, HojasDeCalculo>();
 
         services.AddOptions<OpcionesAlmacen>().Bind(configuration.GetSection(OpcionesAlmacen.Seccion)).ValidateDataAnnotations();
@@ -58,6 +60,8 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioCierre, RepositorioCierre>();
         services.AddScoped<IRepositorioBoletas, RepositorioBoletas>();
         services.AddSingleton<IGeneradorBoletas, GeneradorBoletas>();
+        services.AddScoped<IRepositorioEnlaces, RepositorioEnlaces>();
+        services.AddScoped<IConsultasTutor, ConsultasTutor>();
         AgregarIa(services, configuration);
 
         AgregarCorreo(services, configuration);

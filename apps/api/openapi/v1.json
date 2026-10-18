@@ -3031,6 +3031,152 @@
           }
         }
       }
+    },
+    "/api/v1/tutor/sesion": {
+      "post": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "CanjearEnlaceTutor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudCanje"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/alumnos": {
+      "get": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "ListarHijosTutor",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MisHijosDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/alumnos/{id}": {
+      "get": {
+        "tags": [
+          "Portal del tutor"
+        ],
+        "operationId": "ObtenerHijoTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetalleHijoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/alumnos/{id}/tutores/{tutorId}/enlace": {
+      "post": {
+        "tags": [
+          "Alumnos"
+        ],
+        "operationId": "EnviarEnlaceTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tutorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EnviarEnlace"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnlaceDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3415,6 +3561,81 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "BoletaPublicadaDto": {
+        "required": [
+          "id",
+          "unidad",
+          "ciclo",
+          "calificacion",
+          "decimalesFinal",
+          "rubros",
+          "observacion",
+          "version",
+          "codigo",
+          "publicadaEn",
+          "escuela"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unidad": {
+            "type": "string"
+          },
+          "ciclo": {
+            "type": "string"
+          },
+          "calificacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "rubros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RubroBoleta"
+            }
+          },
+          "observacion": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "publicadaEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "escuela": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -4274,6 +4495,24 @@
           }
         }
       },
+      "DetalleHijoDto": {
+        "required": [
+          "hijo",
+          "boletas"
+        ],
+        "type": "object",
+        "properties": {
+          "hijo": {
+            "$ref": "#/components/schemas/HijoDto"
+          },
+          "boletas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoletaPublicadaDto"
+            }
+          }
+        }
+      },
       "DocumentoPendiente": {
         "required": [
           "documento",
@@ -4444,6 +4683,33 @@
           }
         }
       },
+      "EnlaceDto": {
+        "required": [
+          "url",
+          "expiraEn"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "expiraEn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EnviarEnlace": {
+        "required": [
+          "regenerar"
+        ],
+        "type": "object",
+        "properties": {
+          "regenerar": {
+            "type": "boolean"
+          }
+        }
+      },
       "EquipoDto": {
         "required": [
           "id",
@@ -4526,6 +4792,25 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "EstadoEnlaceDto": {
+        "required": [
+          "ultimoAccesoEn",
+          "sospechoso"
+        ],
+        "type": "object",
+        "properties": {
+          "ultimoAccesoEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "sospechoso": {
+            "type": "boolean"
           }
         }
       },
@@ -4792,6 +5077,72 @@
           }
         }
       },
+      "HijoDto": {
+        "required": [
+          "id",
+          "nombres",
+          "apellidos",
+          "nivel",
+          "grado",
+          "grupo",
+          "materia",
+          "docente",
+          "dadoDeBaja",
+          "ultimaBoleta"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "grupo": {
+            "type": "string"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "docente": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dadoDeBaja": {
+            "type": "boolean"
+          },
+          "ultimaBoleta": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ResumenBoletaDto"
+              }
+            ]
+          }
+        }
+      },
       "HttpValidationProblemDetails": {
         "type": "object",
         "properties": {
@@ -4953,6 +5304,27 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AsistenciaAlumnoDto"
+            }
+          }
+        }
+      },
+      "MisHijosDto": {
+        "required": [
+          "nombre",
+          "hijos"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hijos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HijoDto"
             }
           }
         }
@@ -5564,6 +5936,76 @@
           }
         }
       },
+      "ResumenBoletaDto": {
+        "required": [
+          "id",
+          "unidad",
+          "calificacion",
+          "decimalesFinal",
+          "publicadaEn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unidad": {
+            "type": "string"
+          },
+          "calificacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "decimalesFinal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "publicadaEn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RubroBoleta": {
+        "required": [
+          "nombre",
+          "peso",
+          "promedio"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "peso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "promedio": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "RubroDto": {
         "required": [
           "id",
@@ -5783,6 +6225,17 @@
           }
         }
       },
+      "SolicitudCanje": {
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "SolicitudCorreo": {
         "required": [
           "correo"
@@ -5893,6 +6346,16 @@
             "type": [
               "null",
               "string"
+            ]
+          },
+          "enlace": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EstadoEnlaceDto"
+              }
             ]
           }
         }
@@ -6133,6 +6596,9 @@
     },
     {
       "name": "Boletas"
+    },
+    {
+      "name": "Portal del tutor"
     }
   ]
 }

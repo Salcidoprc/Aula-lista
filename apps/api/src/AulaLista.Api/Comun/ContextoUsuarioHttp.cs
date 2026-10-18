@@ -11,16 +11,19 @@ internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor) : IConte
     public const string ClaimFamiliaSesion = "sid";
 
     private Guid? _docenteAsumido;
+    private Guid? _tutorAsumido;
 
     public Guid? DocenteId => _docenteAsumido ?? Leer(ClaimDocente);
 
-    public Guid? TutorId => _docenteAsumido is null ? Leer(ClaimTutor) : null;
+    public Guid? TutorId => _tutorAsumido ?? (_docenteAsumido is null ? Leer(ClaimTutor) : null);
 
     public Guid? FamiliaSesionId => Leer(ClaimFamiliaSesion);
 
     public string? DireccionIp => accesor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
     public void AsumirDocente(Guid docenteId) => _docenteAsumido = docenteId;
+
+    public void AsumirTutor(Guid tutorId) => _tutorAsumido = tutorId;
 
     private Guid? Leer(string claim)
     {

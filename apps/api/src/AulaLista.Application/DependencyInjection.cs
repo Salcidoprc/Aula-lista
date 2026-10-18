@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<Cierre.AvisoDatosCambiaron>();
         services.AddScoped<Boletas.ArmadoBoletas>();
         services.AddScoped<Boletas.ConsultaBoletas>();
+        services.AddScoped<Tutores.ValidacionSesionTutor>();
+        services.AddScoped<Tutores.EstadoEnlaces>();
         return services;
     }
 }
