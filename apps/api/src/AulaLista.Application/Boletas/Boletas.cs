@@ -145,7 +145,13 @@ public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas re
             {
                 null => a.Datos is null ? EstadoBoleta.SinAprobar : EstadoBoleta.SinBoleta,
                 { EstaPublicada: true } => EstadoBoleta.Publicada,
-                { PdfRuta: null } => EstadoBoleta.Preparando,
+
+                // Sin publicar y con la observación reabierta: primero se aprueba de nuevo.
+                _ when a.Datos is null => EstadoBoleta.SinAprobar,
+                { PdfRuta: null, FalloPdf: false } => EstadoBoleta.Preparando,
+
+                // El PDF no salió tras los reintentos: vuelve a "sin boleta" con la marca de falla y generar lo reintenta.
+                { PdfRuta: null } => EstadoBoleta.SinBoleta,
                 _ => EstadoBoleta.Lista,
             };
             var tutores = vinculos[a.Alumno.Id].ToList();

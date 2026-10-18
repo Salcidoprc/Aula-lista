@@ -74,7 +74,9 @@ Que el docente cierre un grupo de 30 alumnos en menos de 1 hora: la IA escribe, 
 | `PUT /api/v1/observaciones/{id}` | Guarda texto editado |
 | `POST /api/v1/observaciones/{id}/regenerar` | Regenera con `instruccion` opcional |
 | `POST /api/v1/observaciones/{id}/aprobar` | Aprueba; con `texto` opcional guarda la última edición y aprueba en una llamada |
-| `POST /api/v1/observaciones/{id}/reabrir` | Reabre si la boleta no está publicada |
+| `POST /api/v1/observaciones/{id}/reabrir` | Reabre una aprobada o publicada; si ya tenía boleta publicada, se corrige con versión nueva (SPEC-05, RN-052) |
+| `POST /api/v1/periodos/{id}/cierre/cerrar` | Cierra la unidad a mano (RN-048); queda en auditoría |
+| `POST /api/v1/periodos/{id}/cierre/reabrir` | Reabre una unidad cerrada (RN-038); queda en auditoría |
 | `GET` / `PUT /api/v1/docente/estilo-observaciones` | Configuración de estilo (RF-043) |
 
 ## Decisiones de implementación (H4.1)

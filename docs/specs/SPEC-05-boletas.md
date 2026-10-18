@@ -37,7 +37,7 @@ Tamaño carta, legible al imprimir en blanco y negro, menos de 200 KB por alumno
 | `GET /api/v1/boletas/{id}/pdf` | PDF de un alumno (docente dueño o tutor vinculado) |
 | `GET /api/v1/periodos/{id}/boletas/pdf` | PDF combinado del grupo |
 | `POST /api/v1/periodos/{id}/boletas/publicar` | Publica y encola notificaciones |
-| `POST /api/v1/boletas/{id}/corregir` | Genera nueva versión con los datos actuales |
+| `POST /api/v1/boletas/{id}/corregir` | Genera nueva versión con los datos actuales y la publica |
 | `GET /api/v1/periodos/{id}/exportacion.xlsx` | Exportación a Excel |
 
 ## Pantalla
@@ -53,6 +53,17 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un alumno sin tutores, cuando se publica, entonces su boleta queda disponible para descarga del docente y el resumen lo marca "sin contacto".
 - Dada la exportación a Excel de un periodo, entonces los promedios coinciden con los de las boletas.
 - Dada una publicación, entonces queda registro en auditoría con docente, periodo y número de boletas.
+
+## Decisiones de implementación (H4.2)
+
+- **Avisos en H5** (decisión del usuario, 2026-10-18): publicar marca las boletas como publicadas, registra la auditoría y muestra el resumen de contactos, pero no envía WhatsApp, correo ni push. RN-054 llega con SPEC-07; mientras tanto el botón dice "Publicar boletas (n)" y la hoja de confirmación lo explica. Al activar los avisos el botón vuelve a "Publicar y avisar a tutores".
+- **Foto y PDF por separado:** generar guarda la foto (`boleta.datos`) al instante y encola el PDF en Hangfire (3 reintentos). Mientras el PDF no existe la boleta está "preparando"; si falla tras los reintentos vuelve a "sin boleta" con la marca "No se pudo preparar" y generar lo reintenta. La pantalla consulta cada 2 s mientras haya alguna preparándose y muestra el avance real de la tanda.
+- **Desactualizada:** una boleta sin publicar cuya foto ya no coincide con los datos actuales se marca "Desactualizada"; generar la rehace en la misma versión y publicar responde `boletas_desactualizadas` (409) hasta rehacerla. Si la observación se reabrió, la boleta sin publicar vuelve a "Falta aprobar la observación".
+- **Corregir una publicada (RN-052):** se reabre la observación (ahora también desde `publicada`) o se cambia una calificación con la unidad en cierre; la fila dice "Cambió después de publicar" y "Emitir versión corregida" crea la versión n+1 ya publicada. Corregir no está disponible con la unidad cerrada: primero se reabre (RN-038).
+- **Cierre de la unidad (RN-048):** se cierra sola cuando todas las boletas vigentes están publicadas; también a mano con "Dar por cerrada la unidad" (`POST /api/v1/periodos/{id}/cierre/cerrar`), con una confirmación que dice cuántos alumnos quedan sin boleta publicada. Reabrir (`.../cierre/reabrir`) pide confirmación y queda en auditoría; las boletas publicadas siguen a la vista hasta emitir su versión corregida.
+- **Auditoría (RNF-005):** `boletas_publicadas`, `boleta_corregida`, `calificaciones_exportadas`, `periodo_cerrado` y `periodo_reabierto`; la nueva columna `auditoria.cantidad` guarda el número de boletas o filas.
+- **PDF:** carta, solo tinta y grises; Lexend (estáticas generadas de la fuente variable) y "Aula Cifras" (dígitos tabulares de Figtree) embebidas, ambas OFL con su licencia junto a los archivos. El código de verificación son 8 caracteres en base 32 de Crockford. Fechas en la zona horaria del docente.
+- **Vista previa:** el PDF de un alumno se abre en una pestaña nueva del navegador (en Android, el visor de PDF); el del grupo y el Excel se descargan.
 
 ## Fuera de alcance
 

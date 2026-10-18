@@ -1,65 +1,7 @@
-import { Page, expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { sinFallasDeAccesibilidad } from './cuenta';
-import { crearCicloYGrupo, docenteVerificado } from './grupos';
-
-const NOMBRES = [
-  'Cruz Ortiz Leonardo',
-  'Flores Rojas Regina',
-  'García López Ana Sofía',
-  'Morales Reyes Renata',
-];
-
-const teclado = (page: Page) => page.getByRole('group', { name: 'Teclado rápido' });
-
-/**
- * Grupo "4° B" con 4 alumnos, un rubro de 100 % y una actividad calificada: listo para iniciar el cierre
- * (RN-040). Termina en Calificaciones y devuelve la ruta del grupo.
- */
-async function grupoCalificado(page: Page): Promise<string> {
-  await crearCicloYGrupo(page);
-  const grupo = new URL(page.url()).pathname.replace(/\/alumnos$/, '');
-  await page.goto(grupo + '/importar?origen=texto');
-  await page.getByLabel('Lista de alumnos').fill(NOMBRES.join('\n'));
-  await page.getByRole('button', { name: 'Ver cómo queda' }).click();
-  await page.getByRole('button', { name: `Importar ${NOMBRES.length} alumnos` }).click();
-  await expect(page.getByText(`Se importaron ${NOMBRES.length} alumnos.`)).toBeVisible();
-  await page.goto(grupo);
-  await page.getByRole('link', { name: 'Crear rubros' }).click();
-  await page.getByRole('button', { name: 'Agregar rubro' }).first().click();
-  const bloque = page.locator('section.bloque').first();
-  await bloque.getByLabel('Tipo').selectOption({ label: 'Actividades' });
-  await bloque.getByLabel('Peso', { exact: true }).fill('100');
-  await bloque.getByRole('radio', { name: 'Con número' }).check();
-  await page.getByRole('button', { name: 'Guardar rubros' }).click();
-  await expect(page).toHaveURL(new RegExp(`${grupo}\\?unidad=`));
-  await page.getByRole('button', { name: 'Nueva actividad' }).first().click();
-  await page.getByLabel('Rubro').selectOption({ label: 'Actividades' });
-  await page.getByRole('button', { name: 'Crear y capturar' }).click();
-  await expect(teclado(page)).toBeVisible();
-  for (const n of ['9', '8', '10', '7']) {
-    await teclado(page).getByRole('button', { name: n, exact: true }).click();
-  }
-  await expect(
-    page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
-  ).toBeVisible();
-  await page.goto(grupo);
-  await expect(page.getByRole('heading', { level: 1, name: 'Calificaciones' })).toBeVisible();
-  return grupo;
-}
-
-/** Inicia el cierre desde Calificaciones y genera todas las observaciones; termina en la lista del cierre. */
-async function cerrarYGenerar(page: Page): Promise<void> {
-  await page.getByRole('link', { name: 'Cerrar la unidad' }).locator('visible=true').click();
-  await expect(page.getByRole('heading', { name: 'Antes de iniciar' })).toBeVisible();
-  await page.getByRole('button', { name: 'Iniciar cierre' }).click();
-  await page
-    .getByRole('button', { name: `Generar observaciones (${NOMBRES.length})` })
-    .locator('visible=true')
-    .click();
-  await expect(page.locator('.fila[data-estado="borrador"]')).toHaveCount(NOMBRES.length, {
-    timeout: 60_000,
-  });
-}
+import { NOMBRES, cerrarYGenerar, grupoCalificado, teclado } from './cierre';
+import { docenteVerificado } from './grupos';
 
 test.describe('SPEC-04: cierre de periodo y observaciones con IA', () => {
   test('RF-040 a RF-042, RN-042, RN-043: iniciar, generar con avance, regenerar, aprobar y siguiente, escribir a mano', async ({

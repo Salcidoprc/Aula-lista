@@ -281,7 +281,7 @@ const LONGITUD_INSTRUCCION = 200;
               <app-icono nombre="guardado" />
               {{ t('aprobada') }}
             </span>
-            @if (editable() && observacion()?.estado === 'aprobada') {
+            @if (editable()) {
               <button
                 class="boton boton--secundario"
                 type="button"

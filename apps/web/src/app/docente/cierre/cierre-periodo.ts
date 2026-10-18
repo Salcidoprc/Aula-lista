@@ -21,6 +21,7 @@ import { crearEnfoque } from '../../shared/foco';
 import { claveGrado, nombreGrupo } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
+import { forma } from '../../shared/plural';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { EvaluacionService } from '../evaluacion/evaluacion.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
@@ -198,6 +199,9 @@ const CONSULTA_MS = 3000;
                 </div>
               }
               <div class="solo-celular">
+                <ng-container [ngTemplateOutlet]="boletas" />
+              </div>
+              <div class="solo-celular">
                 <ng-container [ngTemplateOutlet]="estilo" />
               </div>
             </div>
@@ -208,6 +212,7 @@ const CONSULTA_MS = 3000;
               @if (porGenerar() > 0 && !c.soloLectura) {
                 <ng-container [ngTemplateOutlet]="generar" />
               }
+              <ng-container [ngTemplateOutlet]="boletas" />
               <ng-container [ngTemplateOutlet]="estilo" />
             </aside>
           </div>
@@ -253,6 +258,25 @@ const CONSULTA_MS = 3000;
         >
           {{ t('generar', { cantidad: porGenerar() }) }}
         </button>
+      </ng-template>
+
+      <!-- SPEC-05: con observaciones aprobadas, la siguiente parada son las boletas. -->
+      <ng-template #boletas>
+        @if (cierre(); as c) {
+          @if (aprobadas() > 0 || c.estado === 'cerrado') {
+            <a
+              class="boton boton--ancho"
+              [class.boton--secundario]="aprobadas() < c.alumnos.length"
+              [routerLink]="['/grupos', id(), 'periodos', periodoId(), 'boletas']"
+            >
+              {{
+                c.estado === 'cerrado'
+                  ? t('boletasCerrada')
+                  : t('boletas.' + forma(aprobadas()), { cantidad: aprobadas() })
+              }}
+            </a>
+          }
+        }
       </ng-template>
 
       <ng-template #estilo>
@@ -568,6 +592,7 @@ export class CierrePeriodo implements OnInit {
   private readonly enfocar = crearEnfoque();
   protected readonly enLinea = this.servicio.enLinea;
   protected readonly calificacion = calificacion;
+  protected readonly forma = forma;
   private temporizador: ReturnType<typeof setTimeout> | null = null;
 
   readonly id = input.required<string>();
