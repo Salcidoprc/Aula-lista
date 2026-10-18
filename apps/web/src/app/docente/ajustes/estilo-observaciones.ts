@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { codigoDeError } from '../../core/errores/problema';
 import { AvisosService } from '../../shared/avisos/avisos.service';
+import { crearEnfoque } from '../../shared/foco';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
 import { CierreService } from '../cierre/cierre.service';
@@ -95,7 +96,12 @@ const LONGITUD_EJEMPLO = 800;
                   <label [for]="'ejemplo-' + i">{{
                     t('ejemplos.numero', { numero: i + 1 })
                   }}</label>
-                  <button class="enlace peligro" type="button" (click)="quitar(i)">
+                  <button
+                    class="enlace peligro"
+                    type="button"
+                    [attr.aria-label]="t('ejemplos.quitarNumero', { numero: i + 1 })"
+                    (click)="quitar(i)"
+                  >
                     {{ t('ejemplos.quitar') }}
                   </button>
                 </div>
@@ -112,7 +118,7 @@ const LONGITUD_EJEMPLO = 800;
               </div>
             }
             @if (ejemplos().length < maximoEjemplos) {
-              <button class="boton boton--secundario" type="button" (click)="agregar()">
+              <button class="boton boton--secundario agregar" type="button" (click)="agregar()">
                 <app-icono nombre="mas" />
                 {{ t('ejemplos.agregar') }}
               </button>
@@ -143,6 +149,13 @@ const LONGITUD_EJEMPLO = 800;
 
     .eleccion {
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+    }
+
+    /* Angosto o con texto grande: las opciones una debajo de otra, nunca dos y una. */
+    @media (max-width: 26rem) {
+      .eleccion {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .eleccion label {
@@ -212,6 +225,7 @@ export class EstiloObservaciones implements OnInit {
   private readonly i18n = inject(TranslocoService);
   private readonly avisos = inject(AvisosService);
   private readonly location = inject(Location);
+  private readonly enfocar = crearEnfoque();
   protected readonly enLinea = this.servicio.enLinea;
   protected readonly longitudes = LONGITUDES;
   protected readonly personas = PERSONAS;
@@ -255,12 +269,17 @@ export class EstiloObservaciones implements OnInit {
     }
   }
 
+  /** El foco va al ejemplo nuevo. */
   protected agregar(): void {
     this.ejemplos.update((l) => [...l, '']);
+    this.enfocar(`#ejemplo-${this.ejemplos().length - 1}`);
   }
 
+  /** El botón se va con su ejemplo: el foco pasa al ejemplo que queda en su lugar, o a "Agregar ejemplo". */
   protected quitar(i: number): void {
     this.ejemplos.update((l) => l.filter((_, j) => j !== i));
+    const quedan = this.ejemplos().length;
+    this.enfocar(quedan ? `#ejemplo-${Math.min(i, quedan - 1)}` : '.agregar');
   }
 
   protected cambiar(i: number, evento: Event): void {

@@ -642,6 +642,7 @@
       "editar": "Editar",
       "guardar": "Guardar",
       "quitar": "Quitar",
+      "quitarNumero": "Quitar el ejemplo {{numero}}",
       "quitarTitulo": "¿Quitar a {{nombre}}?",
       "quitarTexto": "Dejará de recibir las boletas y avisos de este alumno."
     },
@@ -1193,7 +1194,8 @@
     },
     "generandoAhora": "La IA está escribiendo {{cantidad}}…",
     "generar": "Generar observaciones ({{cantidad}})",
-    "terminado": "Terminó la generación. {{fallidas}} no se pudieron generar.",
+    "terminado": "Terminó la generación: todas tienen borrador.",
+    "terminadoConFallas": "Terminó la generación, pero {{fallidas}} no se pudieron generar. Ábrelas para intentar de nuevo o escribirlas.",
     "estilo": "Estilo de las observaciones"
   },
   "revisar": {
@@ -1218,6 +1220,7 @@
     "textoEtiqueta": "Texto de la observación",
     "placeholder": "Escribe la observación o genérala con la IA.",
     "palabras": "{{palabras}} palabras · {{longitud}}: {{minimo}} a {{maximo}}",
+    "fueraDeRango": "fuera del rango",
     "generar": "Generar observación",
     "aMano": "Escribir a mano",
     "regenerar": {

@@ -171,9 +171,9 @@ const LONGITUD_INSTRUCCION = 200;
                 rows="7"
                 [maxLength]="maximo"
                 [value]="borrador()"
-                [disabled]="!editable()"
+                [disabled]="!editable() || !enLinea()"
                 [placeholder]="t('placeholder')"
-                [attr.aria-describedby]="'conteo-palabras atajo'"
+                aria-describedby="conteo-palabras"
                 (input)="escribir($event)"
                 (blur)="guardar()"
                 (keydown)="atajo($event)"
@@ -193,6 +193,9 @@ const LONGITUD_INSTRUCCION = 200;
                   maximo: estilo()?.palabrasMaximas ?? 90,
                 })
               }}
+              @if (palabras() > 0 && !enRango()) {
+                · {{ t('fueraDeRango') }}
+              }
             </p>
 
             @if (!aprobada() && !generando() && editable()) {
@@ -274,7 +277,7 @@ const LONGITUD_INSTRUCCION = 200;
       <ng-template #aprobar>
         @if (aprobada()) {
           <div class="aprobada-fila">
-            <span class="sello" [class.recien]="recienAprobada()" role="status">
+            <span class="sello" [class.recien]="recienAprobada()">
               <app-icono nombre="guardado" />
               {{ t('aprobada') }}
             </span>
@@ -357,9 +360,19 @@ const LONGITUD_INSTRUCCION = 200;
 
     .cabeza {
       display: flex;
+      flex-wrap: wrap;
       align-items: end;
       justify-content: space-between;
       gap: var(--espacio-3);
+    }
+
+    .cabeza hgroup {
+      flex: 1 1 14rem;
+      min-inline-size: 0;
+    }
+
+    h1 {
+      overflow-wrap: break-word;
     }
 
     .posicion {
@@ -401,6 +414,7 @@ const LONGITUD_INSTRUCCION = 200;
 
     details.datos summary {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: var(--espacio-3);
       min-block-size: var(--tactil-minimo);
@@ -473,7 +487,7 @@ const LONGITUD_INSTRUCCION = 200;
     }
 
     .nombre-rubro {
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     .valor {
@@ -542,6 +556,7 @@ const LONGITUD_INSTRUCCION = 200;
 
     /* La observación se lee como texto de libro: sobre papel, con medida cómoda, no en una caja gris. */
     .papel {
+      scroll-margin-block-end: calc(var(--alto-pie-accion, 0px) + var(--espacio-4));
       inline-size: 100%;
       max-inline-size: 42rem;
       min-block-size: 12rem;
@@ -988,6 +1003,7 @@ export class RevisarObservacion implements OnInit {
       } else {
         this.recienAprobada.set(true);
         this.avisos.mostrar(this.texto('revisar.todas'), 'exito');
+        this.enfocar('.aprobada-fila .boton:last-child');
       }
     });
   }

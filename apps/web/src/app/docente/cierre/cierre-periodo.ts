@@ -217,7 +217,7 @@ const CONSULTA_MS = 3000;
       <ng-template #avance>
         @if (cierre(); as c) {
           <div class="avance">
-            <p class="cifras resumen">
+            <p class="cifras resumen" tabindex="-1">
               {{ t('aprobadas', { aprobadas: aprobadas(), total: c.alumnos.length }) }}
             </p>
             <span class="barra" aria-hidden="true">
@@ -336,7 +336,6 @@ const CONSULTA_MS = 3000;
 
     .barra span {
       block-size: 100%;
-      transition: inline-size var(--dur-small) var(--ease-out);
     }
 
     .barra [data-segmento='aprobada'] {
@@ -353,7 +352,7 @@ const CONSULTA_MS = 3000;
 
     .conteo {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
       gap: var(--espacio-2);
       margin: 0;
     }
@@ -456,7 +455,8 @@ const CONSULTA_MS = 3000;
     }
 
     .nombre {
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
+      min-inline-size: 0;
     }
 
     .apellidos {
@@ -533,11 +533,13 @@ const CONSULTA_MS = 3000;
     /* Angosto o con texto grande: calificación y estado bajan de renglón bajo el nombre. */
     @container (max-width: 30rem) {
       .fila {
-        grid-template-columns: 2ch minmax(0, 1fr) auto;
+        grid-template-columns: 2ch minmax(0, 1fr);
       }
 
+      .calificacion,
       .marcas {
-        grid-column: 2 / -1;
+        grid-column: 2;
+        justify-self: start;
         justify-content: start;
       }
     }
@@ -642,8 +644,10 @@ export class CierrePeriodo implements OnInit {
     this.enfocar('h1');
   }
 
-  protected generarTodas(): Promise<void> {
-    return this.accion(() => this.servicio.generar(this.periodoId()));
+  /** El botón desaparece cuando ya no queda nada por generar: el foco pasa al avance. */
+  protected async generarTodas(): Promise<void> {
+    await this.accion(() => this.servicio.generar(this.periodoId()));
+    this.enfocar('.resumen');
   }
 
   private async accion(llamar: () => Promise<CierreDto>): Promise<void> {
@@ -679,6 +683,11 @@ export class CierrePeriodo implements OnInit {
   }
 
   private async consultar(): Promise<void> {
+    // En una pestaña oculta no se consulta; se retoma al volver.
+    if (document.visibilityState === 'hidden') {
+      this.temporizador = setTimeout(() => void this.consultar(), CONSULTA_MS);
+      return;
+    }
     try {
       this.mostrar(await this.servicio.cierre(this.periodoId()));
     } catch {
@@ -690,10 +699,10 @@ export class CierrePeriodo implements OnInit {
   /** El lector de pantalla oye el resultado una vez, al terminar, no en cada consulta. */
   private anunciarFin(alumnos: readonly AlumnoCierreDto[]): void {
     const fallidas = alumnos.filter((a) => a.estado === 'sin_generar' && a.fallo).length;
-    const mensaje = this.texto('cierre.terminado', { fallidas });
-    this.anuncio.set(mensaje);
     if (fallidas > 0) {
-      this.avisos.mostrar(mensaje, 'error');
+      this.avisos.mostrar(this.texto('cierre.terminadoConFallas', { fallidas }), 'error');
+    } else {
+      this.anuncio.set(this.texto('cierre.terminado'));
     }
   }
 

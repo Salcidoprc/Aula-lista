@@ -130,7 +130,10 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
               </section>
             } @else {
               <div class="solo-celular">
-                <ng-container [ngTemplateOutlet]="pesos" />
+                <div class="pesos-celular">
+                  <ng-container [ngTemplateOutlet]="pesos" />
+                  <ng-container [ngTemplateOutlet]="cierre" />
+                </div>
               </div>
 
               @for (r of m.rubros; track r.rubro.id) {
@@ -187,12 +190,6 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
                   }
                 </section>
               }
-            }
-
-            @if (m.rubros.length) {
-              <div class="solo-celular">
-                <ng-container [ngTemplateOutlet]="cierre" />
-              </div>
             }
 
             @if (puedeCrear()) {
@@ -458,6 +455,15 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
         text-decoration: underline;
         text-underline-offset: 0.2em;
       }
+    }
+
+    .pesos-celular {
+      display: grid;
+      gap: var(--espacio-3);
+    }
+
+    .pesos-celular > a {
+      justify-self: start;
     }
 
     .pesos {
