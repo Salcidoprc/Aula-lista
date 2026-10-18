@@ -130,7 +130,10 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
               </section>
             } @else {
               <div class="solo-celular">
-                <ng-container [ngTemplateOutlet]="pesos" />
+                <div class="pesos-celular">
+                  <ng-container [ngTemplateOutlet]="pesos" />
+                  <ng-container [ngTemplateOutlet]="cierre" />
+                </div>
               </div>
 
               @for (r of m.rubros; track r.rubro.id) {
@@ -219,6 +222,7 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
                 <app-icono nombre="tabla" />
                 {{ t('verTabla') }}
               </a>
+              <ng-container [ngTemplateOutlet]="cierre" />
               @if (editable()) {
                 <a class="enlace" [routerLink]="rutaRubros()">{{ t('editarRubros') }}</a>
               }
@@ -226,6 +230,19 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
           }
         </div>
       }
+
+      <!-- SPEC-04: la entrada al cierre de la unidad; en cierre, la misma acción lleva a seguir revisando. -->
+      <ng-template #cierre>
+        @if (matriz(); as m) {
+          <a
+            class="boton boton--secundario"
+            [routerLink]="['/grupos', id(), 'periodos', m.periodoId, 'cierre']"
+          >
+            <app-icono nombre="nota" />
+            {{ t('cierre.' + m.estado) }}
+          </a>
+        }
+      </ng-template>
 
       <ng-template #pesos>
         @if (matriz(); as m) {
@@ -438,6 +455,15 @@ import { MODOS, Modo, hoy, numero, unidadDeHoy } from './matriz';
         text-decoration: underline;
         text-underline-offset: 0.2em;
       }
+    }
+
+    .pesos-celular {
+      display: grid;
+      gap: var(--espacio-3);
+    }
+
+    .pesos-celular > a {
+      justify-self: start;
     }
 
     .pesos {

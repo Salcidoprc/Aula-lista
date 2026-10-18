@@ -1,9 +1,13 @@
+using System.Collections.Concurrent;
+using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Infrastructure.Persistencia;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace AulaLista.Infrastructure.Trabajos;
 
@@ -25,6 +29,13 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
         _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(
             e => e.GenerarExportacionAsync(docenteId, exportacionId, null, CancellationToken.None)));
 
+    public void EncolarObservaciones(Guid docenteId, Guid periodoId, IReadOnlyList<Guid> observacionIds)
+    {
+        var ids = observacionIds.ToArray();
+        _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(
+            e => e.RedactarObservacionesAsync(docenteId, periodoId, ids, CancellationToken.None)));
+    }
+
     public void Despachar()
     {
         foreach (var pendiente in _pendientes)
@@ -40,7 +51,7 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
 /// Corre cada trabajo en su propio alcance, como el docente dueño y dentro de una transacción,
 /// para que RLS aplique igual que en una solicitud.
 /// </summary>
-public sealed class EjecutorTrabajos(IServiceScopeFactory alcances)
+public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, LimitadorIa limitador, ILogger<EjecutorTrabajos> registro)
 {
     public const int Reintentos = 3;
 
@@ -91,10 +102,95 @@ public sealed class EjecutorTrabajos(IServiceScopeFactory alcances)
         await transaccion.CommitAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// RF-041: redacta las observaciones de un periodo con la IA, a lo más <see cref="OpcionesIa.SimultaneasPorDocente"/>
+    /// a la vez por docente. Cada una se guarda al llegar para que la pantalla vea el avance. Los reintentos los hace
+    /// el cliente de la IA; si algo más falla, la observación queda "No se pudo generar" y Hangfire no repite.
+    /// </summary>
+    [AutomaticRetry(Attempts = 0)]
+    public async Task RedactarObservacionesAsync(Guid docenteId, Guid periodoId, Guid[] observacionIds, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<EncargoObservacion> encargos;
+        try
+        {
+            encargos = await EnAlcanceAsync(
+                docenteId, sp => sp.GetRequiredService<RedactarObservacionesTrabajo>().PrepararAsync(periodoId, observacionIds, cancellationToken), cancellationToken);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            FalloRedaccion(registro, ex, periodoId);
+            await MarcarObservacionesFallidasAsync(docenteId, observacionIds, cancellationToken);
+            return;
+        }
+
+        var semaforo = limitador.De(docenteId);
+        await Task.WhenAll(encargos.Select(async encargo =>
+        {
+            await semaforo.WaitAsync(cancellationToken);
+            try
+            {
+                ObservacionRedactada redactada;
+                await using (var alcance = alcances.CreateAsyncScope())
+                {
+                    redactada = await alcance.ServiceProvider.GetRequiredService<IRedactorObservaciones>()
+                        .RedactarAsync(encargo.Entrada, cancellationToken);
+                }
+
+                var terminado = RedactarObservacionesTrabajo.Terminar(encargo, redactada);
+                await EnAlcanceAsync(docenteId, async sp =>
+                {
+                    await sp.GetRequiredService<RedactarObservacionesTrabajo>().GuardarAsync(encargo, redactada, terminado, cancellationToken);
+                    return true;
+                }, cancellationToken);
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                FalloRedaccion(registro, ex, periodoId);
+                await MarcarObservacionesFallidasAsync(docenteId, [encargo.ObservacionId], cancellationToken);
+            }
+            finally
+            {
+                semaforo.Release();
+            }
+        }));
+    }
+
+    private async Task MarcarObservacionesFallidasAsync(Guid docenteId, IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken) =>
+        await EnAlcanceAsync(docenteId, async sp =>
+        {
+            await sp.GetRequiredService<RedactarObservacionesTrabajo>().MarcarFallidasAsync(ids, cancellationToken);
+            return true;
+        }, cancellationToken);
+
+    /// <summary>Un alcance como el docente, dentro de una transacción, para que RLS aplique.</summary>
+    private async Task<T> EnAlcanceAsync<T>(Guid docenteId, Func<IServiceProvider, Task<T>> trabajo, CancellationToken cancellationToken)
+    {
+        await using var alcance = alcances.CreateAsyncScope();
+        var sp = alcance.ServiceProvider;
+        sp.GetRequiredService<IContextoUsuario>().AsumirDocente(docenteId);
+        var db = sp.GetRequiredService<AulaListaDbContext>();
+        await using var transaccion = await db.Database.BeginTransactionAsync(cancellationToken);
+        var resultado = await trabajo(sp);
+        await transaccion.CommitAsync(cancellationToken);
+        return resultado;
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Falló la redacción de observaciones del periodo {PeriodoId}")]
+    private static partial void FalloRedaccion(ILogger registro, Exception ex, Guid periodoId);
+
     [AutomaticRetry(Attempts = Reintentos)]
     public async Task RetencionAsync(CancellationToken cancellationToken)
     {
         await using var alcance = alcances.CreateAsyncScope();
         await alcance.ServiceProvider.GetRequiredService<RetencionCuentasTrabajo>().EjecutarAsync(cancellationToken);
     }
+}
+
+/// <summary>RNF-004 y reglas/05-ia: máximo de solicitudes simultáneas a la IA por docente, en todo el proceso.</summary>
+public sealed class LimitadorIa(IOptions<OpcionesIa> opciones)
+{
+    private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _porDocente = new();
+
+    public SemaphoreSlim De(Guid docenteId) =>
+        _porDocente.GetOrAdd(docenteId, _ => new SemaphoreSlim(opciones.Value.SimultaneasPorDocente, opciones.Value.SimultaneasPorDocente));
 }

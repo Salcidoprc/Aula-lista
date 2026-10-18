@@ -74,6 +74,17 @@ export const routes: Routes = [
         loadComponent: () => import('./docente/evaluacion/captura').then((m) => m.Captura),
       },
       {
+        path: ':id/periodos/:periodoId/cierre',
+        title: 'titulos.cierre',
+        loadComponent: () => import('./docente/cierre/cierre-periodo').then((m) => m.CierrePeriodo),
+      },
+      {
+        path: ':id/periodos/:periodoId/cierre/:alumnoId',
+        title: 'titulos.revisarObservacion',
+        loadComponent: () =>
+          import('./docente/cierre/revisar-observacion').then((m) => m.RevisarObservacion),
+      },
+      {
         path: ':id/periodos/:periodoId/tabla',
         title: 'titulos.tabla',
         loadComponent: () => import('./docente/evaluacion/tabla').then((m) => m.Tabla),
@@ -111,6 +122,12 @@ export const routes: Routes = [
         path: '',
         title: 'titulos.ajustes',
         loadComponent: () => import('./docente/ajustes/ajustes').then((m) => m.Ajustes),
+      },
+      {
+        path: 'estilo',
+        title: 'titulos.estilo',
+        loadComponent: () =>
+          import('./docente/ajustes/estilo-observaciones').then((m) => m.EstiloObservaciones),
       },
       {
         path: 'exportaciones/:id',

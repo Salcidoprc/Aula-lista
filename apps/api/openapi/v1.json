@@ -2204,6 +2204,467 @@
           }
         }
       }
+    },
+    "/api/v1/periodos/{id}/cierre": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "IniciarCierre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CierreDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "ObtenerCierre",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CierreDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/observaciones/generar": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "GenerarObservaciones",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GenerarObservaciones"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CierreDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/periodos/{id}/observaciones": {
+      "get": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "ListarObservaciones",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ObservacionDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/observaciones/{id}": {
+      "put": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "EditarObservacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarObservacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservacionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/observaciones/{id}/regenerar": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "RegenerarObservacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegenerarObservacion"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservacionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/observaciones/{id}/aprobar": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "AprobarObservacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AprobarObservacion"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservacionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/observaciones/{id}/reabrir": {
+      "post": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "ReabrirObservacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservacionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/docente/estilo-observaciones": {
+      "get": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "ObtenerEstiloObservaciones",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstiloDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Cierre"
+        ],
+        "operationId": "GuardarEstiloObservaciones",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardarEstilo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstiloDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2307,6 +2768,68 @@
           }
         }
       },
+      "AlumnoCierreDto": {
+        "required": [
+          "alumnoId",
+          "numeroLista",
+          "nombres",
+          "apellidos",
+          "calificacion",
+          "estado",
+          "observacionId",
+          "datosCambiaron",
+          "fallo"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numeroLista": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nombres": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "calificacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "observacionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "datosCambiaron": {
+            "type": "boolean"
+          },
+          "fallo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "AlumnoDto": {
         "required": [
           "id",
@@ -2390,6 +2913,20 @@
           },
           "dadoDeBaja": {
             "type": "boolean"
+          }
+        }
+      },
+      "AprobarObservacion": {
+        "required": [
+          "texto"
+        ],
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -2635,6 +3172,46 @@
           }
         }
       },
+      "CierreDto": {
+        "required": [
+          "periodoId",
+          "grupoId",
+          "estado",
+          "soloLectura",
+          "requisitos",
+          "conteos",
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "soloLectura": {
+            "type": "boolean"
+          },
+          "requisitos": {
+            "$ref": "#/components/schemas/RequisitosCierreDto"
+          },
+          "conteos": {
+            "$ref": "#/components/schemas/ConteosCierreDto"
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlumnoCierreDto"
+            }
+          }
+        }
+      },
       "ComposicionDto": {
         "required": [
           "actividadId",
@@ -2722,6 +3299,58 @@
             "items": {
               "$ref": "#/components/schemas/FilaImportacion"
             }
+          }
+        }
+      },
+      "ConteosCierreDto": {
+        "required": [
+          "sinGenerar",
+          "generando",
+          "borrador",
+          "aprobada",
+          "publicada"
+        ],
+        "type": "object",
+        "properties": {
+          "sinGenerar": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "generando": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "borrador": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "aprobada": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "publicada": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -3204,6 +3833,17 @@
           }
         }
       },
+      "EditarObservacion": {
+        "required": [
+          "texto"
+        ],
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
       "EditarTutor": {
         "required": [
           "nombre",
@@ -3314,6 +3954,46 @@
           }
         }
       },
+      "EstiloDto": {
+        "required": [
+          "longitud",
+          "persona",
+          "ejemplos",
+          "palabrasMinimas",
+          "palabrasMaximas"
+        ],
+        "type": "object",
+        "properties": {
+          "longitud": {
+            "type": "string"
+          },
+          "persona": {
+            "type": "string"
+          },
+          "ejemplos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "palabrasMinimas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "palabrasMaximas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "FilaImportacion": {
         "required": [
           "nombres",
@@ -3360,6 +4040,24 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "GenerarObservaciones": {
+        "required": [
+          "alumnoIds"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -3493,6 +4191,28 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CambioCelda"
+            }
+          }
+        }
+      },
+      "GuardarEstilo": {
+        "required": [
+          "longitud",
+          "persona",
+          "ejemplos"
+        ],
+        "type": "object",
+        "properties": {
+          "longitud": {
+            "type": "string"
+          },
+          "persona": {
+            "type": "string"
+          },
+          "ejemplos": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }
@@ -3694,6 +4414,83 @@
           "fecha": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "ObservacionDto": {
+        "required": [
+          "id",
+          "alumnoId",
+          "periodoId",
+          "estado",
+          "texto",
+          "instruccion",
+          "regeneraciones",
+          "regeneracionesRestantes",
+          "datosCambiaron",
+          "fallo",
+          "aprobadaEn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "texto": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instruccion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "regeneraciones": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "regeneracionesRestantes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "datosCambiaron": {
+            "type": "boolean"
+          },
+          "fallo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "aprobadaEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -3928,6 +4725,20 @@
           }
         }
       },
+      "RegenerarObservacion": {
+        "required": [
+          "instruccion"
+        ],
+        "type": "object",
+        "properties": {
+          "instruccion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "RegistrarAceptacion": {
         "required": [
           "documento",
@@ -3962,6 +4773,30 @@
             "type": "boolean"
           },
           "aceptaPrivacidad": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RequisitosCierreDto": {
+        "required": [
+          "sumaPesos",
+          "rubrosSuman100",
+          "hayCalificaciones"
+        ],
+        "type": "object",
+        "properties": {
+          "sumaPesos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "rubrosSuman100": {
+            "type": "boolean"
+          },
+          "hayCalificaciones": {
             "type": "boolean"
           }
         }
@@ -4699,6 +5534,9 @@
     },
     {
       "name": "Notas"
+    },
+    {
+      "name": "Cierre"
     }
   ]
 }

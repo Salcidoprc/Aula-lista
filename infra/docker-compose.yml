@@ -42,6 +42,9 @@ services:
       ConnectionStrings__AulaLista: Host=db;Database=aula_lista;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
       Jwt__ClaveFirma: ${JWT_CLAVE_FIRMA:?Define JWT_CLAVE_FIRMA}
       Cuentas__UrlWeb: ${URL_WEB:-http://localhost:8080}
+      Ia__Proveedor: ${IA_PROVEEDOR:-simulado}
+      Ia__Modelo: ${IA_MODELO:-claude-haiku-5-5}
+      Ia__ApiKey: ${IA_API_KEY:-}
       Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
       Correo__BrevoApiKey: ${BREVO_API_KEY:-}
       Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulalista.mx}

@@ -44,6 +44,7 @@ Requisitos: .NET SDK 10, Node 24 y Docker.
 | Regenerar el cliente de la API | `cd apps/api && dotnet build` y luego `cd apps/web && npm run api:generar` |
 | Lint, unitarias y build | `cd apps/web && npm run lint && npm test && npm run build && npm run bundle:verificar` |
 | End-to-end | `cd apps/web && npx playwright test` (con la app en :8080, o `BASE_URL=...`) |
+| Evaluación de calidad de la IA (cuesta dinero; `--simulado` no) | `cd apps/api && Ia__ApiKey=... Ia__Modelo=claude-haiku-5-5 dotnet run --project tests/Ia/AulaLista.EvaluacionIa` |
 | Detector de Impeccable | `.claude/skills/impeccable/scripts/impeccable detect --json apps/web/src` |
 
 Los skills de diseño y animación están instalados en `.claude/skills/` (versiones en `skills-lock.json`). `PRODUCT.md` y `DESIGN.md` están en la raíz; los tokens en `apps/web/src/styles/tokens.css`.

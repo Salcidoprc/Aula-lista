@@ -116,7 +116,8 @@ public sealed class EditarActividadCasoUso(
 }
 
 /// <summary>SPEC-03: borrar una actividad con calificaciones pide confirmación; los promedios se recalculan solos.</summary>
-public sealed class BorrarActividadCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad)
+public sealed class BorrarActividadCasoUso(
+    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad, Cierre.AvisoDatosCambiaron aviso)
 {
     public async Task<Resultado?> EjecutarAsync(Guid id, bool confirmar, CancellationToken ct)
     {
@@ -132,11 +133,13 @@ public sealed class BorrarActividadCasoUso(IRepositorioGrupos grupos, IRepositor
             return Resultado.Fallo(bloqueo);
         }
 
-        if (!confirmar && (await repositorio.CalificacionesAsync([id], ct)).Any(c => !c.EstaVacia))
+        var calificados = (await repositorio.CalificacionesAsync([id], ct)).Where(c => !c.EstaVacia).Select(c => c.AlumnoId).ToList();
+        if (!confirmar && calificados.Count > 0)
         {
             return Resultado.Fallo(ErroresEvaluacion.BorradoRequiereConfirmacion);
         }
 
+        await aviso.AvisarAsync(periodo.Periodo.Id, calificados, ct); // RN-044
         repositorio.Borrar(actividad);
         await unidad.GuardarAsync(ct);
         return Resultado.Exito();

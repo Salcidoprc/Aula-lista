@@ -345,6 +345,15 @@ Barra del día en `superficie-hundida`: día anterior, la fecha larga ("Hoy, sá
 ### Historial de asistencia
 Chips de unidad. En escritorio, tabla de alumnos por días con la letra (P, F, R, J) sobre el tinte de su estado y la columna "%" fija a la derecha en `--grado-tinta`; encabezado y nombres fijos, y cada fecha abre ese día. En celular, una fila por alumno con su porcentaje y solo lo que tuvo ("2 faltas · 1 retardo" o "Sin faltas"), y abajo "Días con lista" del más nuevo al más viejo.
 
+### Cierre de la unidad
+Sin iniciar: qué cambia al cerrar y los dos requisitos de RN-040 como renglones con check en `exito-tinte` o pendiente en `aviso-tinte`, cada pendiente con su enlace para resolverlo; "Iniciar cierre" solo cuando ambos se cumplen. Iniciado: "n de m aprobadas", una barra segmentada (aprobadas en `exito`, por revisar en `--grado`, sin texto en la pista hundida) y el conteo de cada segmento con su filete del mismo color. La lista es la de asistencia: número, nombre, calificación con 2 decimales y la etiqueta del estado con palabra completa (Sin generar hundido, Generando en `aviso-tinte` con ícono que gira, Borrador en `--grado-tinte`, Aprobada en `exito-tinte` con check); "Datos cambiaron" (`aviso-tinte`) y "No se pudo generar" (`peligro-tinte`) se suman a la etiqueta. "Generar observaciones (n)" va en el pie fijo del celular y en el panel lateral del escritorio. La consulta cada 3 s solo corre mientras hay alumnos generando; la etiqueta que llega entra con fundido y 4 px de subida en 240 ms, escalonada 40 ms (con movimiento reducido, solo el fundido).
+
+### Revisar observación
+"3 de 15" sobre el nombre, con anterior y siguiente como botones de ícono. Los datos (calificación de la unidad en `texto-xl`, promedio por rubro y notas de la unidad con su etiqueta) van en un desplegable hundido en celular y en el panel izquierdo fijo en escritorio. La observación se lee como texto de libro: papel en `superficie` con borde `divisoria` y renglón inferior, 18 px, medida máxima de 42 rem, y el campo crece con el texto. Debajo, el conteo "72 palabras · Normal: 60 a 90", en `aviso-tinta` si sale del rango. "Pedir otra versión" es un bloque hundido con las sugerencias como chips (la elegida en `--grado`), la instrucción libre y "Te quedan n". "Aprobar y siguiente" es la acción principal (pie fijo en celular) y no se anima; aprobar la última muestra el sello "Aprobada" que se descubre de izquierda a derecha con `clip-path` en 280 ms, con "Reabrir" y "Siguiente por revisar" al lado. Ctrl + Enter aprueba y sigue.
+
+### Estilo de las observaciones
+En Ajustes. Longitud y persona como elección de tres y dos opciones con su rango o un ejemplo de frase debajo; hasta tres ejemplos en áreas de texto con contador; el aviso de no poner nombres va en `aviso-tinte` antes de los ejemplos.
+
 ### Indicador de sincronización
 En la navegación de la portada: ícono y texto ("Guardado", "Por enviar: n", "Enviando…", "Sin conexión: guardado aquí"). El ícono entra con fundido y desenfoque de 2 px en 200 ms; el de "Enviando" gira, salvo con movimiento reducido.
 

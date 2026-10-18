@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Api } from '../../api/api';
@@ -29,7 +29,10 @@ import { Ocupado } from '../../shared/ocupado';
 
 const LONGITUD_MINIMA = 10;
 
-/** SPEC-01, pantalla 3: perfil, correo, contraseña, sesiones, exportar datos (RF-007) y eliminar la cuenta (RF-008). */
+/**
+ * SPEC-01, pantalla 3: perfil, correo, contraseña, sesiones, exportar datos (RF-007) y eliminar la cuenta (RF-008).
+ * También la entrada al estilo de las observaciones (SPEC-04, RF-043).
+ */
 @Component({
   selector: 'app-ajustes',
   imports: [
@@ -39,6 +42,7 @@ const LONGITUD_MINIMA = 10;
     FormularioPerfil,
     ReenviarVerificacion,
     Ocupado,
+    RouterLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -150,6 +154,14 @@ const LONGITUD_MINIMA = 10;
                   {{ t('sesiones.cerrarTodas') }}
                 </button>
               </div>
+            </section>
+
+            <section aria-labelledby="ajustes-observaciones">
+              <h2 id="ajustes-observaciones">{{ t('observaciones.titulo') }}</h2>
+              <p class="nota">{{ t('observaciones.nota') }}</p>
+              <a class="boton boton--secundario" routerLink="/ajustes/estilo">
+                {{ t('observaciones.accion') }}
+              </a>
             </section>
 
             <section aria-labelledby="ajustes-datos">

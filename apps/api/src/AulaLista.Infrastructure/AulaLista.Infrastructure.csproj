@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.58.0" />
     <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
@@ -25,10 +26,12 @@
   <ItemGroup>
     <InternalsVisibleTo Include="AulaLista.Pruebas.Integracion" />
     <InternalsVisibleTo Include="AulaLista.Pruebas.Unit" />
+    <InternalsVisibleTo Include="AulaLista.EvaluacionIa" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Cuentas\contrasenas-comunes.txt" LogicalName="AulaLista.Infrastructure.Cuentas.contrasenas-comunes.txt" />
+    <EmbeddedResource Include="Ia\Prompts\*.md" LogicalName="AulaLista.Infrastructure.Ia.Prompts.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

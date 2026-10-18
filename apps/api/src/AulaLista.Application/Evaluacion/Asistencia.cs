@@ -62,7 +62,12 @@ public sealed class ListarAsistenciasCasoUso(IRepositorioGrupos grupos, IReposit
 /// última escritura; con <c>Idempotency-Key</c> repetida responde la toma vigente sin volver a aplicar.
 /// </summary>
 public sealed class GuardarAsistenciaCasoUso(
-    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos,
+    IRepositorioEvaluacion repositorio,
+    IContextoUsuario usuario,
+    IUnidadDeTrabajo unidad,
+    Cierre.AvisoDatosCambiaron aviso,
+    TimeProvider reloj)
 {
     public async Task<Resultado<ResultadoAsistencia>?> EjecutarAsync(
         Guid grupoId, DateOnly fecha, GuardarAsistencia comando, Guid? claveIdempotencia, CancellationToken ct)
@@ -115,6 +120,11 @@ public sealed class GuardarAsistenciaCasoUso(
             repositorio.Agregar(CambioSincronizado.Registrar(nueva, Docente, ahora));
         }
 
+        if (await ReglasAsistencia.CuentaEnElPromedioAsync(repositorio, periodo, ct))
+        {
+            await aviso.AvisarAsync(periodo.Periodo.Id, comando.Alumnos.Select(a => a.AlumnoId).Except(omitidos).ToList(), ct); // RN-044
+        }
+
         await unidad.GuardarAsync(ct);
         return Resultado.Exito(new ResultadoAsistencia(TomaAsistenciaDto.De(toma), omitidos));
     }
@@ -123,7 +133,8 @@ public sealed class GuardarAsistenciaCasoUso(
 }
 
 /// <summary>Borra la toma de una fecha; en una unidad cerrada no se puede (RN-106).</summary>
-public sealed class BorrarAsistenciaCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad)
+public sealed class BorrarAsistenciaCasoUso(
+    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad, Cierre.AvisoDatosCambiaron aviso)
 {
     public async Task<Resultado?> EjecutarAsync(Guid grupoId, DateOnly fecha, CancellationToken ct)
     {
@@ -137,9 +148,15 @@ public sealed class BorrarAsistenciaCasoUso(IRepositorioGrupos grupos, IReposito
             return Resultado.Fallo(ErroresGrupos.GrupoArchivado);
         }
 
-        if (await ReglasAsistencia.PeriodoDeAsync(grupos, grupo, fecha, ct) is { } periodo && ReglasPeriodo.PuedeCapturar(periodo) is { } bloqueo)
+        var periodo = await ReglasAsistencia.PeriodoDeAsync(grupos, grupo, fecha, ct);
+        if (periodo is not null && ReglasPeriodo.PuedeCapturar(periodo) is { } bloqueo)
         {
             return Resultado.Fallo(bloqueo);
+        }
+
+        if (periodo is not null && await ReglasAsistencia.CuentaEnElPromedioAsync(repositorio, periodo, ct))
+        {
+            await aviso.AvisarAsync(periodo.Periodo.Id, null, ct); // RN-044
         }
 
         repositorio.Borrar(toma);
@@ -150,6 +167,13 @@ public sealed class BorrarAsistenciaCasoUso(IRepositorioGrupos grupos, IReposito
 
 internal static class ReglasAsistencia
 {
+    /// <summary>Si el periodo tiene rubro de asistencia, pasar lista cambia la calificación (RN-104).</summary>
+    public static async Task<bool> CuentaEnElPromedioAsync(IRepositorioEvaluacion repositorio, PeriodoCompleto periodo, CancellationToken ct)
+    {
+        var asistencia = (await repositorio.TiposRubroAsync(ct)).Where(t => t.Comportamiento == Comportamiento.Asistencia).Select(t => t.Id).ToHashSet();
+        return (await repositorio.RubrosAsync(periodo.Periodo.Id, ct)).Any(r => asistencia.Contains(r.TipoRubroId));
+    }
+
     /// <summary>El periodo del grupo cuya unidad contiene la fecha (RN-023), o nulo si ninguna la contiene.</summary>
     public static async Task<PeriodoCompleto?> PeriodoDeAsync(IRepositorioGrupos grupos, Grupo grupo, DateOnly fecha, CancellationToken ct) =>
         (await grupos.PeriodosAsync(grupo.Id, ct)).FirstOrDefault(p => p.Unidad.Inicio <= fecha && fecha <= p.Unidad.Fin) is { } p

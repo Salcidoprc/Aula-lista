@@ -1,3 +1,4 @@
+using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
@@ -24,5 +25,6 @@ public static class CodigosError
         .. ErroresCuentas.Todos.Select(e => e.Codigo),
         .. ErroresGrupos.Todos.Select(e => e.Codigo),
         .. ErroresEvaluacion.Todos.Select(e => e.Codigo),
+        .. ErroresCierre.Todos.Select(e => e.Codigo),
     ];
 }

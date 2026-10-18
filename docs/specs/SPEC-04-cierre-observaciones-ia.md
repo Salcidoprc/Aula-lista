@@ -69,13 +69,22 @@ Que el docente cierre un grupo de 30 alumnos en menos de 1 hora: la IA escribe, 
 | --- | --- |
 | `POST /api/v1/periodos/{id}/cierre` | Inicia el cierre (RN-040) |
 | `GET /api/v1/periodos/{id}/cierre` | Estado del cierre: conteos y estado por alumno |
-| `POST /api/v1/periodos/{id}/observaciones/generar` | Encola generación para todos o para `alumnoIds` |
+| `POST /api/v1/periodos/{id}/observaciones/generar` | Encola generación para los alumnos sin texto, o solo para `alumnoIds`; responde el estado del cierre |
 | `GET /api/v1/periodos/{id}/observaciones` | Lista de observaciones con estado |
 | `PUT /api/v1/observaciones/{id}` | Guarda texto editado |
 | `POST /api/v1/observaciones/{id}/regenerar` | Regenera con `instruccion` opcional |
-| `POST /api/v1/observaciones/{id}/aprobar` | Aprueba |
+| `POST /api/v1/observaciones/{id}/aprobar` | Aprueba; con `texto` opcional guarda la última edición y aprueba en una llamada |
 | `POST /api/v1/observaciones/{id}/reabrir` | Reabre si la boleta no está publicada |
 | `GET` / `PUT /api/v1/docente/estilo-observaciones` | Configuración de estilo (RF-043) |
+
+## Decisiones de implementación (H4.1)
+
+- **RN-041 diferida a H6** (decisión del usuario, 2026-10-18): mientras no existan los planes de pago, cualquier docente puede cerrar. La revisión del plan vive solo en `ReglasCierre.PlanPermiteCierre`, que H6 completa para responder `requiere_pro`.
+- **Tolerancia de longitud:** el modelo no cuenta palabras con exactitud, así que el servidor acepta de 2/3 del mínimo a 5/4 del máximo del rango (por ejemplo, normal: 40 a 112 palabras); fuera de eso es falla `longitud`. La pantalla muestra el rango exacto y marca el conteo si sale de él. El texto escrito a mano no tiene rango, solo el tope de 1,500 caracteres.
+- **Seudonimización de lo que escribe el docente:** las notas, la instrucción y los ejemplos de estilo se limpian antes de enviarse: nombres y apellidos del alumno se cambian por su seudónimo, los de sus compañeros por "otro alumno", los de sus tutores por "su familia", y teléfonos y correos por `[teléfono]` y `[correo]`. Los ejemplos de estilo solo pueden limpiarse con los alumnos del grupo que se cierra; por eso la pantalla de estilo pide no poner nombres.
+- **Generación atorada:** una observación que lleva más de 10 minutos en `generando` se muestra como `sin_generar` con falla, y puede pedirse de nuevo.
+- **Límite por hora (RNF-004):** cuentan las llamadas registradas en la última hora más las que están en generación; si el pedido lo rebasa, se rechaza completo con `limite_ia`.
+- **Registro de llamadas:** cada llamada guarda en `llamada_ia` modelo, versión del prompt, tokens (incluidos los leídos de caché), duración y resultado, sin contenido (reglas/05-ia).
 
 ## Pantallas
 
@@ -84,6 +93,8 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - **Cierre de periodo:** barra de avance (sin generar, borrador, aprobadas), botón "Generar observaciones", lista de alumnos con su estado y calificación.
 - **Revisar observación:** calificaciones y notas del alumno arriba, texto editable abajo; botones Aprobar y siguiente, Regenerar (con sugerencias rápidas: más breve, más positiva, más específica), Escribir a mano.
 - **Estilo:** longitud, persona gramatical y hasta 3 ejemplos.
+
+Rutas: `grupos/:id/periodos/:periodoId/cierre`, `.../cierre/:alumnoId` y `ajustes/estilo`. Se entra desde Calificaciones ("Cerrar la unidad" o "Revisar observaciones"). El detalle visual está en `DESIGN.md`.
 
 ## Criterios de aceptación
 

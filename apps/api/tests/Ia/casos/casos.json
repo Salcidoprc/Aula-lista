@@ -1,0 +1,1443 @@
+[
+  {
+    "id": "caso-01",
+    "descripcion": "primaria 1°, calificación alta, notas positivas, trato ella",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 1,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-10",
+          "etiqueta": "fortaleza",
+          "texto": "Explicó a su equipo cómo resolver las fracciones con dibujos"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-02",
+    "descripcion": "primaria 2°, calificación media, notas positivas, trato el",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 2,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-11",
+          "etiqueta": "fortaleza",
+          "texto": "Leyó en voz alta con buena entonación frente al grupo"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-03",
+    "descripcion": "primaria 3°, calificación baja, notas negativas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 3,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-03",
+          "etiqueta": "mejora",
+          "texto": "Olvida traer el material de trabajo"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-04",
+    "descripcion": "primaria 4°, calificación limite, notas negativas, trato ella",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 4,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-04",
+          "etiqueta": "mejora",
+          "texto": "Habla mientras otros exponen"
+        },
+        {
+          "fecha": "2026-10-15",
+          "etiqueta": "conducta",
+          "texto": "Llegó tarde varias veces en la semana"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-05",
+    "descripcion": "primaria 5°, calificación alta, notas mixtas, trato el",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 5,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-14",
+          "etiqueta": "fortaleza",
+          "texto": "Ayudó a otro alumno a terminar su maqueta"
+        },
+        {
+          "fecha": "2026-10-05",
+          "etiqueta": "mejora",
+          "texto": "Deja incompletos los ejercicios de escritura"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-06",
+    "descripcion": "primaria 6°, calificación alta, notas mixtas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 6,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-15",
+          "etiqueta": "fortaleza",
+          "texto": "Explicó a su equipo cómo resolver las fracciones con dibujos"
+        },
+        {
+          "fecha": "2026-10-06",
+          "etiqueta": "mejora",
+          "texto": "Entrega tarde las tareas de matemáticas"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-07",
+    "descripcion": "primaria 1°, calificación media, notas sin, trato ella",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 1,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": "más breve"
+    }
+  },
+  {
+    "id": "caso-08",
+    "descripcion": "primaria 2°, calificación baja, notas sin, trato el",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 2,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-09",
+    "descripcion": "primaria 3°, calificación limite, notas positivas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 3,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-18",
+          "etiqueta": "fortaleza",
+          "texto": "Propuso una idea original para el periódico mural"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-10",
+    "descripcion": "primaria 4°, calificación alta, notas positivas, trato ella",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 4,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-19",
+          "etiqueta": "fortaleza",
+          "texto": "Ayudó a otro alumno a terminar su maqueta"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-11",
+    "descripcion": "primaria 5°, calificación alta, notas negativas, trato el",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 5,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-11",
+          "etiqueta": "mejora",
+          "texto": "Entrega tarde las tareas de matemáticas"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-12",
+    "descripcion": "primaria 6°, calificación media, notas negativas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 6,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-12",
+          "etiqueta": "mejora",
+          "texto": "Le cuesta trabajo concentrarse después del recreo"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-13",
+    "descripcion": "primaria 1°, calificación baja, notas mixtas, trato ella",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 1,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-22",
+          "etiqueta": "fortaleza",
+          "texto": "Organizó los materiales del proyecto de ciencias"
+        },
+        {
+          "fecha": "2026-10-13",
+          "etiqueta": "mejora",
+          "texto": "Olvida traer el material de trabajo"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-14",
+    "descripcion": "primaria 2°, calificación limite, notas mixtas, trato el",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 2,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-23",
+          "etiqueta": "fortaleza",
+          "texto": "Propuso una idea original para el periódico mural"
+        },
+        {
+          "fecha": "2026-10-14",
+          "etiqueta": "mejora",
+          "texto": "Habla mientras otros exponen"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": "más positiva"
+    }
+  },
+  {
+    "id": "caso-15",
+    "descripcion": "primaria 3°, calificación alta, notas sin, trato neutro",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 3,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-16",
+    "descripcion": "primaria 4°, calificación alta, notas sin, trato ella",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "ella",
+      "nivel": "primaria",
+      "grado": 4,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-17",
+    "descripcion": "primaria 5°, calificación media, notas positivas, trato el",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "el",
+      "nivel": "primaria",
+      "grado": 5,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-11",
+          "etiqueta": "fortaleza",
+          "texto": "Leyó en voz alta con buena entonación frente al grupo"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-18",
+    "descripcion": "primaria 6°, calificación baja, notas positivas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "neutro",
+      "nivel": "primaria",
+      "grado": 6,
+      "materia": null,
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-12",
+          "etiqueta": "fortaleza",
+          "texto": "Organizó los materiales del proyecto de ciencias"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-19",
+    "descripcion": "secundaria 1°, calificación limite, notas negativas, trato ella",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "ella",
+      "nivel": "secundaria",
+      "grado": 1,
+      "materia": "Matemáticas",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-19",
+          "etiqueta": "mejora",
+          "texto": "Habla mientras otros exponen"
+        },
+        {
+          "fecha": "2026-10-15",
+          "etiqueta": "conducta",
+          "texto": "Se molestó con un compañero en el recreo y después se disculpó"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-20",
+    "descripcion": "secundaria 2°, calificación alta, notas negativas, trato el",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "el",
+      "nivel": "secundaria",
+      "grado": 2,
+      "materia": "Español",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-20",
+          "etiqueta": "mejora",
+          "texto": "Deja incompletos los ejercicios de escritura"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "segunda",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-21",
+    "descripcion": "secundaria 3°, calificación alta, notas mixtas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "neutro",
+      "nivel": "secundaria",
+      "grado": 3,
+      "materia": "Ciencias",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-15",
+          "etiqueta": "fortaleza",
+          "texto": "Explicó a su equipo cómo resolver las fracciones con dibujos"
+        },
+        {
+          "fecha": "2026-10-01",
+          "etiqueta": "mejora",
+          "texto": "Entrega tarde las tareas de matemáticas"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": "menciona su avance en lectura"
+    }
+  },
+  {
+    "id": "caso-22",
+    "descripcion": "secundaria 1°, calificación media, notas mixtas, trato ella",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "ella",
+      "nivel": "secundaria",
+      "grado": 1,
+      "materia": "Matemáticas",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-16",
+          "etiqueta": "fortaleza",
+          "texto": "Leyó en voz alta con buena entonación frente al grupo"
+        },
+        {
+          "fecha": "2026-10-02",
+          "etiqueta": "mejora",
+          "texto": "Le cuesta trabajo concentrarse después del recreo"
+        }
+      ],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-23",
+    "descripcion": "secundaria 2°, calificación baja, notas sin, trato el",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "el",
+      "nivel": "secundaria",
+      "grado": 2,
+      "materia": "Español",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-24",
+    "descripcion": "secundaria 3°, calificación limite, notas sin, trato neutro",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "neutro",
+      "nivel": "secundaria",
+      "grado": 3,
+      "materia": "Ciencias",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [],
+      "estilo": {
+        "longitud": "normal",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-25",
+    "descripcion": "secundaria 1°, calificación alta, notas positivas, trato ella",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "ella",
+      "nivel": "secundaria",
+      "grado": 1,
+      "materia": "Matemáticas",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-19",
+          "etiqueta": "fortaleza",
+          "texto": "Ayudó a otro alumno a terminar su maqueta"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-26",
+    "descripcion": "secundaria 2°, calificación alta, notas positivas, trato el",
+    "entrada": {
+      "alumno": "Alumno 7F3K",
+      "trato": "el",
+      "nivel": "secundaria",
+      "grado": 2,
+      "materia": "Español",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 9.4,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.6,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 9.2,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 9.5,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-20",
+          "etiqueta": "fortaleza",
+          "texto": "Explicó a su equipo cómo resolver las fracciones con dibujos"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-27",
+    "descripcion": "secundaria 3°, calificación media, notas negativas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno Q2M8",
+      "trato": "neutro",
+      "nivel": "secundaria",
+      "grado": 3,
+      "materia": "Ciencias",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 7.8,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 8.5,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 7.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 7.9,
+          "no_entrego": 2
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-07",
+          "etiqueta": "mejora",
+          "texto": "Le cuesta trabajo concentrarse después del recreo"
+        }
+      ],
+      "estilo": {
+        "longitud": "detallada",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-28",
+    "descripcion": "secundaria 1°, calificación baja, notas negativas, trato ella",
+    "entrada": {
+      "alumno": "Alumno B9XT",
+      "trato": "ella",
+      "nivel": "secundaria",
+      "grado": 1,
+      "materia": "Matemáticas",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 5.6,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 3
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 4.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.2,
+          "no_entrego": 1
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-10-08",
+          "etiqueta": "mejora",
+          "texto": "Olvida traer el material de trabajo"
+        },
+        {
+          "fecha": "2026-10-15",
+          "etiqueta": "conducta",
+          "texto": "Llegó tarde varias veces en la semana"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "segunda",
+        "ejemplos": []
+      },
+      "instruccion_extra": "más breve"
+    }
+  },
+  {
+    "id": "caso-29",
+    "descripcion": "secundaria 2°, calificación limite, notas mixtas, trato el",
+    "entrada": {
+      "alumno": "Alumno R4LP",
+      "trato": "el",
+      "nivel": "secundaria",
+      "grado": 2,
+      "materia": "Español",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 6.1,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 6.5,
+          "no_entrego": 2
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 5.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 6.0,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-23",
+          "etiqueta": "fortaleza",
+          "texto": "Propuso una idea original para el periódico mural"
+        },
+        {
+          "fecha": "2026-10-09",
+          "etiqueta": "mejora",
+          "texto": "Habla mientras otros exponen"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": []
+      },
+      "instruccion_extra": null
+    }
+  },
+  {
+    "id": "caso-30",
+    "descripcion": "secundaria 3°, calificación alta, notas mixtas, trato neutro",
+    "entrada": {
+      "alumno": "Alumno H6ZD",
+      "trato": "neutro",
+      "nivel": "secundaria",
+      "grado": 3,
+      "materia": "Ciencias",
+      "periodo": "Trimestre 1",
+      "calificacion_periodo": 8.9,
+      "minima_aprobatoria": 6,
+      "rubros": [
+        {
+          "nombre": "Tareas",
+          "peso": 30,
+          "promedio": 9.0,
+          "no_entrego": 0
+        },
+        {
+          "nombre": "Proyecto",
+          "peso": 40,
+          "promedio": 8.8,
+          "no_entrego": 1
+        },
+        {
+          "nombre": "Examen",
+          "peso": 30,
+          "promedio": 8.9,
+          "no_entrego": 0
+        }
+      ],
+      "notas": [
+        {
+          "fecha": "2026-09-24",
+          "etiqueta": "fortaleza",
+          "texto": "Ayudó a otro alumno a terminar su maqueta"
+        },
+        {
+          "fecha": "2026-10-10",
+          "etiqueta": "mejora",
+          "texto": "Deja incompletos los ejercicios de escritura"
+        }
+      ],
+      "estilo": {
+        "longitud": "breve",
+        "persona": "tercera",
+        "ejemplos": [
+          "Este trimestre mostró constancia en sus tareas y participó con entusiasmo en clase. Para el siguiente, conviene repasar en casa las tablas de multiplicar unos minutos al día."
+        ]
+      },
+      "instruccion_extra": null
+    }
+  }
+]

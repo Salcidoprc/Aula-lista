@@ -40,7 +40,7 @@ public sealed class ListarNotasCasoUso(IRepositorioGrupos grupos, IRepositorioEv
 /// alumno que todavía admite captura. Son privadas del docente.
 /// </summary>
 public sealed class CrearNotaCasoUso(
-    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IUnidadDeTrabajo unidad, Cierre.AvisoDatosCambiaron aviso, TimeProvider reloj)
 {
     public async Task<Resultado<NotaDto>?> EjecutarAsync(Guid alumnoId, CrearNota comando, CancellationToken ct)
     {
@@ -74,6 +74,7 @@ public sealed class CrearNotaCasoUso(
         }
 
         repositorio.Agregar(creada.Valor);
+        await aviso.AvisarAsync(periodo.Periodo.Id, [alumno.Id], ct); // RN-044
         await unidad.GuardarAsync(ct);
         return Resultado.Exito(NotaDto.De(creada.Valor));
     }
