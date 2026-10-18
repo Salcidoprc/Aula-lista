@@ -20,6 +20,10 @@ import { Icono } from '../../shared/iconos';
 import { Tapa } from '../../shared/tapa';
 import { ReenviarVerificacion } from '../cuenta/reenviar-verificacion';
 import { GruposService } from '../grupos/grupos.service';
+import { BandaPago } from '../planes/banda-pago';
+import { EtiquetaPlan } from '../planes/etiqueta-plan';
+import { PlanesService } from '../planes/planes.service';
+import { AvisoPagoDto } from '../../api/models/aviso-pago-dto';
 
 interface CicloConGrupos {
   readonly ciclo: CicloDto;
@@ -32,7 +36,15 @@ interface CicloConGrupos {
  */
 @Component({
   selector: 'app-inicio',
-  imports: [TranslocoDirective, RouterLink, ReenviarVerificacion, Tapa, Icono],
+  imports: [
+    TranslocoDirective,
+    RouterLink,
+    ReenviarVerificacion,
+    Tapa,
+    Icono,
+    BandaPago,
+    EtiquetaPlan,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="pantalla pantalla--ancha" *transloco="let t; prefix: 'inicio'">
@@ -59,6 +71,10 @@ interface CicloConGrupos {
           </p>
           <app-reenviar-verificacion />
         </div>
+      }
+
+      @if (avisoPago(); as aviso) {
+        <app-banda-pago [aviso]="aviso" />
       }
 
       @switch (estado()) {
@@ -126,7 +142,12 @@ interface CicloConGrupos {
                       <a class="fila-grupo" [routerLink]="['/grupos', grupo.id]">
                         <app-tapa [nivel]="grupo.nivel" [grado]="grupo.grado" />
                         <span class="texto">
-                          <span class="nombre">{{ nombre(grupo) }}</span>
+                          <span class="nombre-plan">
+                            <span class="nombre">{{ nombre(grupo) }}</span>
+                            @if (grupo.planVigente; as plan) {
+                              <app-etiqueta-plan [plan]="plan" [detalle]="false" />
+                            }
+                          </span>
                           <span class="dato-suave detalle">
                             <span class="materia">{{
                               grupo.materia ?? t('nivel.' + grupo.nivel)
@@ -243,6 +264,14 @@ interface CicloConGrupos {
     .texto {
       display: grid;
       gap: var(--espacio-1);
+      min-width: 0;
+    }
+
+    .nombre-plan {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--espacio-1) var(--espacio-2);
       min-width: 0;
     }
 
@@ -421,6 +450,9 @@ export class Inicio implements OnInit {
   protected readonly grupos = signal<readonly GrupoDto[] | null>(null);
   protected readonly archivados = signal<readonly GrupoDto[] | null>(null);
   protected readonly error = signal<string | null>(null);
+  /** RN-085, RN-089: la banda de pago; si no se puede leer, Inicio sigue sin ella. */
+  protected readonly avisoPago = signal<AvisoPagoDto | null>(null);
+  private readonly planes = inject(PlanesService);
   protected readonly ciclos = computed(() => this.servicio.ciclos() ?? []);
 
   protected readonly estado = computed(() => {
@@ -447,7 +479,16 @@ export class Inicio implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    void this.cargarAvisoPago();
     await this.cargar();
+  }
+
+  private async cargarAvisoPago(): Promise<void> {
+    try {
+      this.avisoPago.set((await this.planes.suscripcion()).aviso);
+    } catch {
+      // Sin la banda la lista de grupos sigue sirviendo.
+    }
   }
 
   protected async cargar(): Promise<void> {

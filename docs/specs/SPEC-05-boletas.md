@@ -64,6 +64,7 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - **Auditoría (RNF-005):** `boletas_publicadas`, `boleta_corregida`, `calificaciones_exportadas`, `periodo_cerrado` y `periodo_reabierto`; la nueva columna `auditoria.cantidad` guarda el número de boletas o filas.
 - **PDF:** carta, solo tinta y grises; Lexend (estáticas generadas de la fuente variable) y "Aula Cifras" (dígitos tabulares de Figtree) embebidas, ambas OFL con su licencia junto a los archivos. El código de verificación son 8 caracteres en base 32 de Crockford. Fechas en la zona horaria del docente.
 - **Vista previa:** el PDF de un alumno se abre en una pestaña nueva del navegador (en Android, el visor de PDF); el del grupo y el Excel se descargan.
+- **Boletas de Pro desde H6.1** (RN-041): generar, publicar y corregir piden Pro o la prueba Pro vigente en el grupo; sin ella responden 403 `boletas_requieren_pro` y la pantalla muestra el candado. Lo ya publicado sigue visible para los tutores. Publicar las boletas del periodo de la prueba fija su fin (RN-081).
 
 ## Fuera de alcance
 

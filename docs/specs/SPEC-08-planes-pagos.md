@@ -51,6 +51,16 @@ Los precios viven en configuración (y en el catálogo de Stripe), nunca en el c
 | `PUT /api/v1/docente/suscripcion/grupos` | Cambia los grupos Pro (prorrateo) |
 | `POST /api/v1/docente/suscripcion/portal` | Enlace al portal de clientes |
 | `POST /api/v1/webhooks/pagos` | Webhooks del proveedor (firma verificada) |
+| `GET /api/v1/pagos-simulados/{id}`, `POST …/{id}/pagar`, `POST …/{id}/rechazar`, `POST /api/v1/pagos-simulados/renovacion` | Solo sin Stripe (`Pagos__Proveedor=simulado`): la página "Pago de prueba" y el cobro mensual simulado. Una sesión ajena responde 404 |
+
+`POST /api/v1/periodos/{id}/cierre/iniciar` acepta `{ "usarPrueba": true }` para activar la prueba en ese grupo (RN-081).
+
+## Pantallas
+
+- **Plan (`/plan`):** el estado en una frase ("Pro en 3 grupos con tarjeta. Próximo cobro: 137 MXN el …", "Prueba Pro en 4° B: quedan 9 días.", "Pro en 2 grupos, pagado con OXXO hasta el …" o "Todos tus grupos están en Gratis."), la banda de pago si aplica, los grupos con su tapa y una casilla, el total al mes en vivo con su desglose ("79 primer grupo + 2 × 29"), la forma de pago (tarjeta cada mes, OXXO 3 o 6 meses con su monto) y una sola acción. Con tarjeta: "Guardar cambios" y "Tarjeta y facturas" (portal). Durante un prepago: agregar grupos se paga hasta `pagado_hasta` y quitar no reembolsa. Abajo, qué incluye Gratis contra Pro y el historial de pagos. En celular la acción va fija abajo; en escritorio, en el panel lateral. `?grupo=` llega desde un candado con ese grupo marcado.
+- **Candados:** en el cierre de un grupo Gratis, "El cierre con observaciones es de Pro" con "Usar mi prueba Pro en este grupo" (si no la ha usado) o "Activar Pro en este grupo"; en las boletas, "Las boletas son de Pro"; en un aviso nuevo, el interruptor Urgente apagado con "Con Pro, los urgentes también llegan por WhatsApp". El grupo de la prueba lleva "Prueba Pro · quedan n días" en el cierre y en las boletas, y "Pro" o "Prueba Pro" en Mis grupos.
+- **Banda de pago** (Inicio y Plan): prepago por vencer en tinte de aviso (7 y 1 días antes); cobro fallido o prepago vencido, con los días de gracia que quedan, en tinte de peligro.
+- **Pago de prueba (`/plan/pago-simulado/{id}`):** página propia de Aula Lista, sin imitar a Stripe. Tarjeta: "Pagar" o "Simular tarjeta rechazada". OXXO: la ficha con su referencia y "Simular pago en tienda" o "Dejar vencer la ficha".
 
 ## Criterios de aceptación
 
@@ -63,6 +73,17 @@ Los precios viven en configuración (y en el catálogo de Stripe), nunca en el c
 - Dado un cobro fallido, cuando pasan 7 días sin pago, entonces sus grupos pasan a Gratis y los tutores siguen viendo lo publicado.
 - Dado el mismo webhook recibido dos veces, entonces el estado cambia una sola vez.
 - Dado un grupo Pro que llegó al límite de WhatsApp del mes, cuando el docente publica boletas, entonces no se envían WhatsApp del sistema y se muestra la lista para compartir manualmente.
+
+## Decisiones de implementación (H6.1)
+
+- **La prueba se elige en el cierre** (decisión del usuario, 2026-10-18): no hay pantalla aparte; el candado del cierre la ofrece en ese grupo.
+- **Webhook en línea:** el evento se verifica (firma `Stripe-Signature`, tolerancia de 300 s), se traduce a un evento propio y se aplica en la misma solicitud con `app.docente_id` del docente del evento. `evento_pago.id_externo` único lo vuelve idempotente (RN-087); un evento repetido responde 200 sin cambiar nada.
+- **Pasarela simulada:** sin claves de Stripe (`Pagos__Proveedor=simulado`, el valor por omisión) el Checkout lleva a "Pago de prueba", que produce los mismos eventos que Stripe y los aplica en la solicitud. Así se prueba todo el flujo, incluida la gracia, sin cobrar.
+- **Revisión diaria** (06:00, hora del centro de México): vence prepagos y pone la gracia, manda el correo de 7 y 1 días antes, termina la gracia y pasa a Gratis los grupos cuyo `pro_hasta` ya pasó. Lo publicado no se toca (RN-085).
+- **Quitar grupos** con tarjeta los deja en Pro hasta el siguiente corte (`grupo.pro_hasta`); en prepago, hasta `pagado_hasta`. No hay reembolsos.
+- **Agregar grupos a un prepago** (RN-089): diferencia del total mensual × días que faltan ÷ 30, en centavos, con tarjeta u OXXO en un pago único.
+- **Consumo** (RN-088): `consumo_mensual` por grupo y mes lo suman triggers en `llamada_ia` y `mensaje_whatsapp`, no la aplicación.
+- **Configuración:** precios, días de prueba y gracia, meses de prepago, avisos, vigencia de la ficha, montos de OXXO y si OXXO está habilitado viven en `Planes`; proveedor, claves y precios de Stripe en `Pagos` (variables `PAGOS_PROVEEDOR`, `STRIPE_*`, `OXXO_HABILITADO`).
 
 ## Fuera de alcance
 

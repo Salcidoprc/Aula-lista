@@ -1,43 +1,8 @@
 import { APIRequestContext, Browser, Page, expect, test } from '@playwright/test';
-import { NOMBRES } from './cierre';
 import { sinFallasDeAccesibilidad } from './cuenta';
-import { crearCicloYGrupo, docenteVerificado } from './grupos';
-
-/** Un WhatsApp distinto en cada corrida: la base local se comparte entre pruebas (RN-015 vincula por número). */
-const telefonoNuevo = () =>
-  `66${Math.floor(Math.random() * 1e8)
-    .toString()
-    .padStart(8, '0')}`;
-
-async function grupoConAlumnos(page: Page): Promise<string> {
-  await crearCicloYGrupo(page);
-  const grupo = new URL(page.url()).pathname.replace(/\/alumnos$/, '');
-  await page.goto(grupo + '/importar?origen=texto');
-  await page.getByLabel('Lista de alumnos').fill(NOMBRES.join('\n'));
-  await page.getByRole('button', { name: 'Ver cómo queda' }).click();
-  await page.getByRole('button', { name: `Importar ${NOMBRES.length} alumnos` }).click();
-  await expect(page.getByText(`Se importaron ${NOMBRES.length} alumnos.`)).toBeVisible();
-  return grupo;
-}
-
-async function agregarTutor(
-  page: Page,
-  grupo: string,
-  alumno: RegExp,
-  nombre: string,
-  correo?: string,
-): Promise<void> {
-  await page.goto(grupo + '/alumnos');
-  await page.getByRole('link', { name: alumno }).click();
-  await page.getByRole('link', { name: 'Datos' }).click();
-  await page.getByLabel('Nombre del tutor').fill(nombre);
-  await page.getByLabel('WhatsApp').fill(telefonoNuevo());
-  if (correo) {
-    await page.getByLabel('Correo (opcional)').fill(correo);
-  }
-  await page.getByRole('button', { name: 'Agregar tutor' }).click();
-  await expect(page.getByText(`${nombre} quedó como tutor.`)).toBeVisible();
-}
+import { agregarTutor, grupoConAlumnos } from './avisos';
+import { docenteVerificado } from './grupos';
+import { activarPro } from './planes';
 
 /** El tutor en su propio navegador: sin la sesión del docente. */
 async function navegadorDelTutor(browser: Browser): Promise<Page> {
@@ -81,6 +46,8 @@ test.describe('SPEC-07: avisos a tutores', () => {
     const correoLuis = `tutor-${Date.now()}@prueba.mx`;
     await agregarTutor(page, grupo, /Cruz Ortiz/, 'Rosa Vega');
     await agregarTutor(page, grupo, /Flores Rojas/, 'Luis Paz', correoLuis);
+    // RN-086: los urgentes por WhatsApp son de Pro.
+    await activarPro(page, grupo);
 
     // La pestaña nueva del grupo, vacía al principio.
     await page.goto(grupo + '/avisos');

@@ -159,6 +159,22 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'plan',
+    canActivate: [requiereSesion, requierePerfilCompleto],
+    children: [
+      {
+        path: '',
+        title: 'titulos.plan',
+        loadComponent: () => import('./docente/planes/plan').then((m) => m.Plan),
+      },
+      {
+        path: 'pago-simulado/:id',
+        title: 'titulos.pagoSimulado',
+        loadComponent: () => import('./docente/planes/pago-simulado').then((m) => m.PagoSimulado),
+      },
+    ],
+  },
+  {
     path: 'cuenta',
     children: [
       {

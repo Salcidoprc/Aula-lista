@@ -212,11 +212,16 @@ type Para = 'todos' | 'elegir';
                   type="checkbox"
                   role="switch"
                   [checked]="urgente()"
-                  [disabled]="sinSaldoTodos()"
+                  [disabled]="sinPro() || sinSaldoTodos()"
                   (change)="urgente.set(marcado($event))"
                   aria-describedby="urgente-ayuda"
                 />
               </label>
+              @if (sinPro()) {
+                <a class="enlace enlace--solo" routerLink="/plan" [queryParams]="{ grupo: id() }">{{
+                  t('urgenteVerPlanes')
+                }}</a>
+              }
             </div>
 
             <section class="llegada" aria-labelledby="llegada-titulo">
@@ -499,7 +504,11 @@ export class NuevoAviso implements OnInit {
     const elegidos = this.elegidos();
     return todos.filter((t) => elegidos.has(t.tutorId));
   });
-  protected readonly canales = computed(() => canalesPrevios(this.destinatarios(), this.urgente()));
+  protected readonly canales = computed(() =>
+    canalesPrevios(this.destinatarios(), this.urgente() && !this.sinPro()),
+  );
+  /** RN-086: el WhatsApp de los urgentes es de Pro; en Gratis el interruptor se apaga y dice por qué. */
+  protected readonly sinPro = computed(() => this.datos()?.urgentesDisponibles === false);
   /** Sin saldo para nadie del grupo, el interruptor se apaga con su razón. */
   protected readonly sinSaldoTodos = computed(() => {
     const todos = this.tutores();
@@ -507,6 +516,9 @@ export class NuevoAviso implements OnInit {
   });
   protected readonly ayudaUrgente = computed(() => {
     const limite = Number(this.datos()?.urgentesPorTutor ?? 0);
+    if (this.sinPro()) {
+      return this.i18n.translate('avisos.urgenteSinPro');
+    }
     if (this.sinSaldoTodos()) {
       return this.i18n.translate('avisos.urgenteSinSaldo', { n: limite });
     }
@@ -582,7 +594,7 @@ export class NuevoAviso implements OnInit {
       const aviso = await this.servicio.crear(this.id(), {
         titulo: this.titulo().trim(),
         cuerpo: this.cuerpo().trim(),
-        urgente: this.urgente() && !this.sinSaldoTodos(),
+        urgente: this.urgente() && !this.sinPro() && !this.sinSaldoTodos(),
         tutorIds: elegir ? [...this.elegidos()] : null,
       });
       this.avisos.mostrar(

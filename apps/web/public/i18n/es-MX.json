@@ -215,6 +215,11 @@
       "titulo": "Observaciones",
       "nota": "Elige qué tan largas son y en qué persona se escriben. Puedes dar ejemplos para que suenen como tú.",
       "accion": "Estilo de las observaciones"
+    },
+    "plan": {
+      "titulo": "Tu plan",
+      "nota": "Gratis para capturar y calcular. Pro por grupo para cerrar con observaciones, publicar boletas y avisar por WhatsApp.",
+      "accion": "Ver mi plan"
     }
   },
   "legal": {
@@ -339,7 +344,22 @@
     "aviso_cuerpo_invalido": "Escribe el aviso; puede tener hasta 1,000 caracteres.",
     "aviso_sin_destinatarios": "Elige al menos un tutor del grupo.",
     "suscripcion_push_invalida": "Este navegador no pudo activar las notificaciones.",
-    "correo_tutor_invalido": "Revisa el correo; parece incompleto."
+    "correo_tutor_invalido": "Revisa el correo; parece incompleto.",
+    "prueba_usada": "Ya usaste tu prueba Pro. Activa Pro en este grupo para cerrar con observaciones.",
+    "sin_grupos_pro": "Elige al menos un grupo para Pro.",
+    "grupo_no_disponible": "Uno de los grupos ya no existe o está archivado. Recarga la página.",
+    "modalidad_invalida": "Elige tarjeta, u OXXO por 3 o 6 meses.",
+    "oxxo_no_disponible": "El pago en OXXO no está disponible por ahora. Paga con tarjeta.",
+    "monto_fuera_de_rango": "El pago en OXXO debe ser de 10 a 10,000 MXN. Cambia los grupos o los meses.",
+    "ya_tiene_tarjeta": "Ya pagas con tarjeta. Cambia tus grupos Pro sin volver a pagar.",
+    "sin_tarjeta": "Para cambiar los grupos Pro así, primero paga con tarjeta.",
+    "sin_cambios_plan": "Esos ya son tus grupos Pro.",
+    "prepago_vigente": "Tu prepago OXXO sigue vigente. Podrás pasar a tarjeta cuando venza.",
+    "whatsapp_requiere_pro": "Los avisos urgentes por WhatsApp son de Pro. Envíalo sin urgente o activa Pro en este grupo.",
+    "boletas_requieren_pro": "Las boletas son de Pro. Activa Pro en este grupo para generarlas y publicarlas.",
+    "agregar_requiere_pago": "Para agregar grupos a tu prepago, paga esos grupos hasta el fin de tu prepago.",
+    "pago_simulado_no_disponible": "El pago de prueba solo existe mientras no hay Stripe configurado.",
+    "pago_simulado_terminado": "Este pago de prueba ya terminó."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -412,7 +432,9 @@
     "avisos": "Avisos del grupo",
     "nuevoAviso": "Nuevo aviso",
     "aviso": "Aviso",
-    "notificaciones": "Notificaciones"
+    "notificaciones": "Notificaciones",
+    "plan": "Tu plan",
+    "pagoSimulado": "Pago de prueba"
   },
   "ciclo": {
     "volver": "Volver",
@@ -1629,6 +1651,213 @@
       "confirmar": "Borrar",
       "hecho": "Aviso borrado"
     },
-    "cancelar": "Cancelar"
+    "cancelar": "Cancelar",
+    "urgenteSinPro": "Con Pro, los urgentes también llegan por WhatsApp.",
+    "urgenteVerPlanes": "Ver planes"
+  },
+  "plan": {
+    "titulo": "Tu plan",
+    "cargando": "Cargando tu plan",
+    "reintentar": "Intentar de nuevo",
+    "modoPrueba": "Modo de prueba: no hay Stripe configurado, así que ningún pago cobra dinero.",
+    "simulado": {
+      "volver": "Tu plan",
+      "titulo": "Pago de prueba",
+      "entrada": "Sin Stripe configurado, este pago no cobra nada. Sirve para probar lo que pasa al pagar.",
+      "cargando": "Cargando el pago",
+      "irAlPlan": "Volver a tu plan",
+      "tarjeta": "Pago con tarjeta",
+      "ficha": "Ficha OXXO",
+      "concepto": {
+        "suscripcion": "Aula Lista Pro, cada mes",
+        "prepago": "Aula Lista Pro por {{meses}} meses",
+        "agregar": "Grupos agregados a tu prepago"
+      },
+      "referencia": "Referencia",
+      "vence": "Vence",
+      "notaTarjeta": "Con Stripe, aquí escribirías tu tarjeta en su página segura.",
+      "notaOxxo": "Con Stripe, llevarías esta ficha a un OXXO y pagarías en efectivo.",
+      "pagar": "Pagar {{monto}} {{moneda}}",
+      "rechazar": "Simular tarjeta rechazada",
+      "pagarEnTienda": "Simular pago en tienda",
+      "vencer": "Dejar vencer la ficha",
+      "resultado": {
+        "pagada": "Pago confirmado.",
+        "pagadaOxxo": "Pago en tienda confirmado.",
+        "rechazada": "La tarjeta fue rechazada. No se cobró nada y tus grupos siguen como estaban.",
+        "rechazadaOxxo": "La ficha venció sin pago. Tus grupos siguen como estaban."
+      }
+    },
+    "regreso": {
+      "listo": "Listo, recibimos tu pago. Tus grupos pasan a Pro en cuanto se confirma.",
+      "cancelado": "No se hizo ningún cobro. Tus grupos siguen como estaban.",
+      "portalSimulado": "Sin Stripe no hay tarjeta guardada que administrar. Con Stripe, aquí cambias tu tarjeta y ves tus facturas."
+    },
+    "estado": {
+      "titulo": "Estado de tu plan",
+      "gratis": "Todos tus grupos están en Gratis.",
+      "tarjeta": {
+        "uno": "Pro en 1 grupo con tarjeta. Próximo cobro: {{monto}} {{moneda}} el {{fecha}}.",
+        "otros": "Pro en {{n}} grupos con tarjeta. Próximo cobro: {{monto}} {{moneda}} el {{fecha}}."
+      },
+      "prepago": {
+        "uno": "Pro en 1 grupo, pagado con OXXO hasta el {{fecha}}.",
+        "otros": "Pro en {{n}} grupos, pagado con OXXO hasta el {{fecha}}."
+      },
+      "pro": {
+        "uno": "Pro en 1 grupo.",
+        "otros": "Pro en {{n}} grupos."
+      },
+      "prueba": {
+        "uno": "Prueba Pro en {{grupo}}: queda 1 día.",
+        "otros": "Prueba Pro en {{grupo}}: quedan {{dias}} días."
+      },
+      "pruebaHastaPublicar": "Prueba Pro en {{grupo}}: sigue hasta que publiques las boletas, máximo {{dias}} días más.",
+      "fichaPendiente": "Tienes una ficha OXXO de {{monto}} {{moneda}} por pagar. Vence el {{fecha}}.",
+      "verFicha": "Ver ficha"
+    },
+    "tarjetaYFacturas": "Tarjeta y facturas",
+    "grupos": {
+      "titulo": "Grupos en Pro",
+      "vacio": "Todavía no tienes grupos. Crea uno para activarle Pro.",
+      "nota": {
+        "contratar": "Marca los grupos que quieres en Pro. Los demás siguen en Gratis, con todo lo que ya tienen.",
+        "tarjeta": "Marca o desmarca grupos y guarda. Tu cobro mensual cambia solo.",
+        "agregar": "Puedes agregar grupos a tu prepago pagando solo hasta su fin, o quitar los que ya no uses."
+      }
+    },
+    "total": {
+      "titulo": "Total",
+      "alMes": "{{moneda}} al mes",
+      "ninguno": "Elige al menos un grupo",
+      "primero": "{{precio}} primer grupo",
+      "adicionales": "{{n}} × {{precio}}"
+    },
+    "forma": {
+      "titulo": "Cómo pagas",
+      "tarjeta": "Tarjeta, cada mes",
+      "oxxo3": "OXXO, 3 meses",
+      "oxxo6": "OXXO, 6 meses",
+      "detalleTarjeta": "{{monto}} {{moneda}} al mes, se cobra solo",
+      "detalleOxxo": "{{monto}} {{moneda}} en un solo pago",
+      "notaOxxo": "Pagas en cualquier OXXO con la referencia de tu ficha. Tus grupos pasan a Pro cuando se confirma el pago.",
+      "tarjetaAlVencer": "Podrás pasar a tarjeta cuando venza tu prepago, el {{fecha}}. Mientras, renueva con OXXO.",
+      "fueraDeRango": "Un pago en OXXO va de {{minimo}} a {{maximo}} {{moneda}}; con estos grupos alguna opción queda fuera.",
+      "agregarTitulo": "Cómo pagas los grupos nuevos hasta el {{fecha}}",
+      "agregar": {
+        "tarjeta": "Tarjeta, un solo pago",
+        "oxxo": "OXXO, un solo pago"
+      }
+    },
+    "accion": {
+      "elige": "Elige al menos un grupo",
+      "tarjeta": "Pagar {{monto}} {{moneda}} al mes",
+      "oxxo": "Generar ficha OXXO de {{monto}} {{moneda}}",
+      "guardar": "Guardar cambios",
+      "agregar": {
+        "uno": "Pagar 1 grupo más",
+        "otros": "Pagar {{n}} grupos más"
+      }
+    },
+    "nota": {
+      "tarjeta": "Pagas en la página segura de Stripe; Aula Lista nunca ve tu tarjeta. Cancelas cuando quieras.",
+      "prorrateo": "Lo que agregues se cobra hoy solo por los días que faltan del mes.",
+      "alCorte": "Lo que quites sigue en Pro hasta el {{fecha}} y ya no se cobra después.",
+      "cancelar": "Para dejar de pagar Pro, cancela en Tarjeta y facturas.",
+      "agregar": "Pagas solo los días que faltan hasta el {{fecha}}; el monto exacto aparece antes de pagar.",
+      "quitarPrepago": "Lo que quites sigue en Pro hasta el {{fecha}}; OXXO no tiene reembolsos."
+    },
+    "guardado": "Guardamos tus grupos Pro.",
+    "incluye": {
+      "titulo": "Qué incluye cada plan, por grupo",
+      "funcion": "Función",
+      "gratis": "Gratis",
+      "pro": "Pro",
+      "si": "Incluido",
+      "no": "No incluido",
+      "filas": {
+        "captura": "Captura, promedios, notas y asistencia",
+        "excel": "Exportar a Excel",
+        "avisos": "Avisos por notificación y correo",
+        "cierre": "Cierre con observaciones redactadas por IA",
+        "boletas": "Boletas en PDF en el portal de tutores",
+        "whatsapp": "WhatsApp del sistema: boletas y hasta {{urgentes}} urgentes por tutor al mes"
+      },
+      "precio": "Pro: {{primero}} {{moneda}} al mes el primer grupo y {{adicional}} {{moneda}} cada grupo adicional, IVA incluido."
+    },
+    "pagos": {
+      "titulo": "Historial de pagos",
+      "prepago": {
+        "uno": "Prepago de {{meses}} meses · 1 grupo",
+        "otros": "Prepago de {{meses}} meses · {{n}} grupos"
+      },
+      "agregar": {
+        "uno": "Grupo agregado al prepago",
+        "otros": "{{n}} grupos agregados al prepago"
+      },
+      "estados": {
+        "pendiente": "Por pagar",
+        "pagado": "Pagado",
+        "vencido": "Vencido"
+      }
+    },
+    "pruebas": {
+      "titulo": "Probar el cobro mensual",
+      "nota": "Solo en modo de prueba: simula el cobro del siguiente mes con tarjeta.",
+      "pagado": "Simular cobro pagado",
+      "rechazado": "Simular tarjeta rechazada"
+    },
+    "banda": {
+      "prepago_por_vencer": {
+        "titulo": "Tu prepago OXXO vence pronto.",
+        "texto": {
+          "uno": "Vence mañana, el {{fecha}}. Renuévalo para que tus grupos sigan en Pro.",
+          "otros": "Vence en {{dias}} días, el {{fecha}}. Renuévalo para que tus grupos sigan en Pro."
+        },
+        "accion": "Renovar mi plan"
+      },
+      "cobro_fallido": {
+        "titulo": "No pudimos cobrar tu tarjeta.",
+        "texto": {
+          "uno": "Actualízala hoy: mañana, el {{fecha}}, tus grupos pasan a Gratis. No se borra nada.",
+          "otros": "Tienes {{dias}} días para actualizarla; el {{fecha}} tus grupos pasan a Gratis. No se borra nada."
+        },
+        "accion": "Actualizar mi tarjeta",
+        "tarjeta": "Actualizar tarjeta"
+      },
+      "prepago_vencido": {
+        "titulo": "Tu prepago OXXO venció.",
+        "texto": {
+          "uno": "Renuévalo hoy: mañana, el {{fecha}}, tus grupos pasan a Gratis. No se borra nada.",
+          "otros": "Tienes {{dias}} días para renovarlo; el {{fecha}} tus grupos pasan a Gratis. No se borra nada."
+        },
+        "accion": "Renovar mi plan"
+      }
+    },
+    "etiqueta": {
+      "pro": "Pro",
+      "prueba": "Prueba Pro",
+      "pruebaDias": {
+        "uno": "Prueba Pro · queda 1 día",
+        "otros": "Prueba Pro · quedan {{dias}} días"
+      },
+      "pruebaHastaPublicar": "Prueba Pro · hasta publicar boletas"
+    },
+    "candado": {
+      "cierre": {
+        "titulo": "El cierre con observaciones es de Pro",
+        "texto": "Con Pro, la IA redacta una observación por alumno, tú la apruebas y publicas boletas en PDF que los tutores ven en su portal y reciben por WhatsApp."
+      },
+      "boletas": {
+        "titulo": "Las boletas son de Pro",
+        "texto": "Con Pro generas las boletas en PDF, las publicas en el portal de tutores y les avisas por WhatsApp. Lo que ya publicaste sigue visible."
+      },
+      "prueba": "Tienes una prueba Pro gratis para un grupo: dura {{dias}} días o hasta que publiques sus boletas, lo que pase después. Se usa una sola vez.",
+      "usarPrueba": "Usar mi prueba Pro en este grupo",
+      "verPlanes": "Ver planes",
+      "activar": "Activar Pro en este grupo",
+      "precio": "{{primero}} {{moneda}} al mes el primer grupo y {{adicional}} {{moneda}} cada grupo adicional.",
+      "pruebaEnCierre": "Tu prueba Pro gratis empieza en el cierre de la unidad."
+    }
   }
 }

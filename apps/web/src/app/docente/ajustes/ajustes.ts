@@ -156,6 +156,12 @@ const LONGITUD_MINIMA = 10;
               </div>
             </section>
 
+            <section aria-labelledby="ajustes-plan">
+              <h2 id="ajustes-plan">{{ t('plan.titulo') }}</h2>
+              <p class="nota">{{ t('plan.nota') }}</p>
+              <a class="boton boton--secundario" routerLink="/plan">{{ t('plan.accion') }}</a>
+            </section>
+
             <section aria-labelledby="ajustes-observaciones">
               <h2 id="ajustes-observaciones">{{ t('observaciones.titulo') }}</h2>
               <p class="nota">{{ t('observaciones.nota') }}</p>

@@ -25,6 +25,9 @@ import { forma } from '../../shared/plural';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { EvaluacionService } from '../evaluacion/evaluacion.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
+import { CandadoPro } from '../planes/candado-pro';
+import { EtiquetaPlan } from '../planes/etiqueta-plan';
+import { tienePro } from '../planes/planes';
 import { CierreService } from './cierre.service';
 import { calificacion, segmentos } from './cierre';
 
@@ -38,7 +41,15 @@ const CONSULTA_MS = 3000;
  */
 @Component({
   selector: 'app-cierre-periodo',
-  imports: [TranslocoDirective, RouterLink, NgTemplateOutlet, Icono, Ocupado],
+  imports: [
+    TranslocoDirective,
+    RouterLink,
+    NgTemplateOutlet,
+    Icono,
+    Ocupado,
+    CandadoPro,
+    EtiquetaPlan,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -58,6 +69,13 @@ const CONSULTA_MS = 3000;
             <p class="dato-suave">{{ nombre() }} · {{ p.nombre }}</p>
           }
         </hgroup>
+        @if (cierre(); as c) {
+          <app-etiqueta-plan
+            [plan]="c.plan.plan"
+            [diasPrueba]="c.plan.diasPrueba"
+            [hastaPublicar]="c.plan.pruebaHastaPublicar"
+          />
+        }
       </div>
 
       @if (!enLinea()) {
@@ -125,17 +143,32 @@ const CONSULTA_MS = 3000;
             @if (errorAccion(); as codigo) {
               <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
             }
-            <button
-              class="boton"
-              type="button"
-              [disabled]="!puedeIniciar()"
-              [appOcupado]="trabajando()"
-              (click)="iniciar()"
-            >
-              {{ t('iniciar.accion') }}
-            </button>
+            @if (conPro()) {
+              <button
+                class="boton"
+                type="button"
+                [disabled]="!puedeIniciar()"
+                [appOcupado]="trabajando()"
+                (click)="iniciar()"
+              >
+                {{ t('iniciar.accion') }}
+              </button>
+            }
           </section>
+          @if (!conPro()) {
+            <app-candado-pro
+              funcion="cierre"
+              [plan]="c.plan"
+              [grupoId]="id()"
+              [puedeUsarPrueba]="puedeIniciar()"
+              [ocupado]="trabajando()"
+              (activarPrueba)="iniciar(true)"
+            />
+          }
         } @else {
+          @if (!conPro() && !c.soloLectura) {
+            <app-candado-pro funcion="cierre" [plan]="c.plan" [grupoId]="id()" />
+          }
           <div class="columnas">
             <div class="principal">
               <div class="solo-celular">
@@ -623,6 +656,7 @@ export class CierrePeriodo implements OnInit {
   protected readonly aprobadas = computed(() => this.barra()[0]?.cantidad ?? 0);
   protected readonly generando = computed(() => Number(this.cierre()?.conteos.generando ?? 0));
   protected readonly porGenerar = computed(() => Number(this.cierre()?.conteos.sinGenerar ?? 0));
+  protected readonly conPro = computed(() => tienePro(this.cierre()?.plan));
   protected readonly puedeIniciar = computed(() => {
     const c = this.cierre();
     return (
@@ -664,8 +698,8 @@ export class CierrePeriodo implements OnInit {
     return this.i18n.translate(clave, datos);
   }
 
-  protected async iniciar(): Promise<void> {
-    await this.accion(() => this.servicio.iniciar(this.periodoId()));
+  protected async iniciar(usarPrueba = false): Promise<void> {
+    await this.accion(() => this.servicio.iniciar(this.periodoId(), usarPrueba));
     this.enfocar('h1');
   }
 

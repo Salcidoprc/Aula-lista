@@ -100,7 +100,7 @@ erDiagram
 | `exportacion` | docente_id, estado (pendiente, lista, fallida), ruta_excel, ruta_pdf, expira_en | Archivos en `IAlmacenArchivos` durante 24 h (RF-008) |
 | `ciclo_escolar` | docente_id, nombre (ej. 2026-2027), inicio, fin, tipo_unidad (bimestre, trimestre, cuatrimestre, semestre, mensual, personalizada) | Del docente (RN-022); máximo 13 meses |
 | `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
-| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
+| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), pro_hasta, calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
 | `periodo` | grupo_id, unidad_id, estado (abierto, en_cierre, cerrado) | Uno por grupo y unidad (RN-025); nombre y fechas vienen de la unidad |
 | `tipo_rubro` | nombre, descripcion, icono, comportamiento (actividades, asistencia), forma_sugerida (numerica, cumplimiento), nombres_sugeridos (text[]), orden, activo | Catálogo global sin `docente_id`; lo edita solo `admin` (ADR-0012) |
 | `auditoria_admin` | admin_id, accion, entidad, entidad_id, antes (jsonb), despues (jsonb), fecha | Inmutable |
@@ -130,8 +130,10 @@ erDiagram
 | `entrega_aviso` | aviso_id, tutor_id, push, correo, whatsapp, sin_saldo_whatsapp, compartido_en, leido_en | Una por aviso y tutor; los canales se fijan al enviar. RLS por docente; el tutor lee las suyas y solo actualiza `leido_en` |
 | `suscripcion_push` | tutor_id, endpoint, p256dh, auth | Única por tutor y endpoint; solo servicios de push conocidos (contra SSRF). RLS forzado: la escribe su tutor; el docente con vínculo la lee para enviar y borra las vencidas |
 | `mensaje_whatsapp` | grupo_id, docente_id, tutor_id, plantilla, referencia_id (aviso o periodo), id_meta, estado (pendiente, enviado, entregado, leido, fallido), costo_estimado | Base del límite (RN-086): se aparta al decidir el envío y los fallidos no cuentan. El webhook solo hace avanzar el estado |
-| `consumo_mensual` | grupo_id, mes, mensajes_whatsapp, tokens_ia_entrada, tokens_ia_salida | |
-| `suscripcion` | docente_id, proveedor, modalidad (tarjeta, prepago_oxxo), id_externo, estado, grupos_pro, periodo_actual_fin, pagado_hasta, gracia_hasta | |
+| `consumo_mensual` | grupo_id, mes, mensajes_whatsapp, tokens_ia_entrada, tokens_ia_salida | Llave (grupo_id, mes). La suman los triggers `sumar_consumo_ia` (en `llamada_ia`) y `sumar_consumo_whatsapp` (en `mensaje_whatsapp`), nunca la app (RN-088) |
+| `suscripcion` | docente_id, proveedor, modalidad (tarjeta, prepago_oxxo), cliente_externo, id_externo, estado (ninguna, activa, en_gracia, cancelada), grupos_pro (uuid[]), periodo_actual_fin, pagado_hasta, gracia_hasta, aviso_vencimiento_dias, prueba_grupo_id, prueba_periodo_id, prueba_inicio, prueba_publicada_en | Una por docente. Solo la cambian los eventos verificados del proveedor (RN-087) y la revisión diaria. La prueba Pro (RN-081) vive aquí |
+| `pago` | docente_id, tipo (prepago, agregar_grupos), meses, monto (numeric 10,2), grupos (uuid[]), sesion_externa, url_ficha, estado (pendiente, pagado, vencido), vence_en, pagado_en | Pagos únicos: OXXO y grupos agregados a un prepago; es el historial sin portal |
+| `evento_pago` | docente_id, id_externo, tipo | Un evento del proveedor ya aplicado: el `id_externo` único vuelve idempotente el webhook (RN-087) |
 | `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, cantidad, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
 | `evento_producto` | docente_id, nombre, propiedades (jsonb), fecha | Para métricas; sin datos personales |
 
@@ -144,6 +146,8 @@ erDiagram
 5. Las pruebas de integración intentan leer datos de otro docente y de otro tutor en cada endpoint y deben fallar.
 
 Portal del tutor: el enlace y la cookie se buscan por hash con las funciones `tutor_del_enlace` y `tutor_de_la_sesion`, que fijan `app.token_hash` solo durante la búsqueda; con el tutor conocido se fija `app.tutor_id` y las políticas de lectura del tutor limitan `vinculo_tutor`, `alumno`, `grupo`, `docente`, `boleta` (publicadas y vigentes), `periodo` y `unidad` a sus vínculos (SPEC-06).
+
+Pagos (SPEC-08): `suscripcion`, `pago`, `evento_pago` y `consumo_mensual` tienen RLS por docente. El webhook del proveedor llega sin sesión: se verifica la firma, se fija `app.docente_id` del docente del evento y se aplica en una transacción. La revisión diaria lista a los docentes con plan con la función `docentes_con_plan()` (`SECURITY DEFINER`, solo devuelve ids; el rol de migraciones solo tiene políticas de lectura para ella) y revisa a cada uno con su propio `app.docente_id`.
 
 Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen antes de conocer al docente (inicio de sesión, tokens). Solo las usan los casos de uso de `Cuentas` y se buscan por hash del token o correo normalizado (ADR-0013).
 
@@ -182,7 +186,8 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | Generar observaciones de un grupo | El docente lo pide en el cierre | 3, con espera exponencial |
 | Generar boletas PDF | Al publicar | 3 |
 | Enviar notificaciones (push, correo, WhatsApp) | Al publicar boletas o avisos | 0 (un reintento duplicaría mensajes; las fallas se cuentan en la bitácora sin datos personales) |
-| Procesar webhooks de pagos y de WhatsApp | Webhook recibido | 5 |
+| Procesar webhooks de WhatsApp | Webhook recibido | 5 |
+| Revisar suscripciones (RN-085, RN-089): vence prepagos, avisa 7 y 1 días antes, termina la gracia y pasa a Gratis lo vencido | Diario a las 06:00, hora del centro de México; una transacción por docente | 3 |
 | Generar exportación de datos (RF-008) | El docente la pide | 3 |
 | Limpieza por retención (RNF-009) | Diario a las 03:00, hora del centro de México | 3 |
 | Respaldo de la base | Diario, desde el contenedor de respaldos | Alerta si falla |
@@ -195,7 +200,7 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | WhatsApp Cloud API | Plantillas de boleta disponible y aviso urgente; simulado hasta tener credenciales (`Whatsapp__Proveedor`) | `ICanalWhatsapp` |
 | Correo (Brevo, ADR-0008) | Verificación, recuperación, avisos | `IEnvioCorreo` |
 | Web Push (VAPID) | Avisos y boletas; simulado hasta tener claves (`Push__Proveedor`) | `ICanalPush` |
-| Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009) | `IPasarelaPagos` |
+| Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009); simulado con la página "Pago de prueba" hasta tener claves (`Pagos__Proveedor`) | `IPasarelaPagos` |
 | QuestPDF | Boletas | `IGeneradorBoletas` |
 | Almacenamiento de objetos | PDFs, exportaciones y respaldos; en el piloto, disco del servidor en un volumen (ADR-0013) | `IAlmacenArchivos` |
 
