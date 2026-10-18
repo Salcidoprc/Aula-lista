@@ -46,11 +46,14 @@ export async function grupoCalificado(page: Page): Promise<string> {
   return grupo;
 }
 
-/** Inicia el cierre desde Calificaciones y genera todas las observaciones; termina en la lista del cierre. */
+/**
+ * Inicia el cierre desde Calificaciones con la prueba Pro del docente (RN-081) y genera todas las observaciones;
+ * termina en la lista del cierre.
+ */
 export async function cerrarYGenerar(page: Page): Promise<void> {
   await page.getByRole('link', { name: 'Cerrar la unidad' }).locator('visible=true').click();
   await expect(page.getByRole('heading', { name: 'Antes de iniciar' })).toBeVisible();
-  await page.getByRole('button', { name: 'Iniciar cierre' }).click();
+  await page.getByRole('button', { name: 'Usar mi prueba Pro en este grupo' }).click();
   await page
     .getByRole('button', { name: `Generar observaciones (${NOMBRES.length})` })
     .locator('visible=true')

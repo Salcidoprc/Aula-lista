@@ -6,6 +6,7 @@ using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Planes;
 using AulaLista.Application.Tutores;
 using AulaLista.Infrastructure.Avisos;
 using AulaLista.Infrastructure.Boletas;
@@ -16,6 +17,7 @@ using AulaLista.Infrastructure.Evaluacion;
 using AulaLista.Infrastructure.Grupos;
 using AulaLista.Infrastructure.Ia;
 using AulaLista.Infrastructure.Persistencia;
+using AulaLista.Infrastructure.Planes;
 using AulaLista.Infrastructure.Trabajos;
 using AulaLista.Infrastructure.Tutores;
 using Hangfire;
@@ -68,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IAvisosDelTutor, AvisosDelTutor>();
         AgregarIa(services, configuration);
         AgregarCanales(services, configuration);
+        AgregarPagos(services, configuration);
 
         AgregarCorreo(services, configuration);
         AgregarTrabajos(services, configuration);
@@ -145,6 +148,41 @@ public static class DependencyInjection
         {
             services.AddSingleton<CanalWhatsappSimulado>();
             services.AddSingleton<ICanalWhatsapp>(sp => sp.GetRequiredService<CanalWhatsappSimulado>());
+        }
+    }
+
+    /// <summary>SPEC-08: Stripe solo con sus claves en variables de entorno; si no, la pasarela simulada.</summary>
+    private static void AgregarPagos(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<OpcionesPlanes>()
+            .Bind(configuration.GetSection(OpcionesPlanes.Seccion))
+            .ValidateDataAnnotations()
+            .Validate(o => o.DiasMaximoPrueba >= o.DiasPrueba, "Planes__DiasMaximoPrueba debe ser mayor o igual a Planes__DiasPrueba.")
+            .Validate(o => o.MontoMaximoOxxo > o.MontoMinimoOxxo, "Planes__MontoMaximoOxxo debe ser mayor que Planes__MontoMinimoOxxo.")
+            .ValidateOnStart();
+        services.AddOptions<OpcionesPagos>()
+            .Bind(configuration.GetSection(OpcionesPagos.Seccion))
+            .ValidateDataAnnotations()
+            .Validate(
+                o => o.Proveedor != OpcionesPagos.ProveedorStripe
+                    || (!string.IsNullOrWhiteSpace(o.ClaveSecreta) && !string.IsNullOrWhiteSpace(o.SecretoWebhook)
+                        && !string.IsNullOrWhiteSpace(o.PrecioPrimerGrupoId) && !string.IsNullOrWhiteSpace(o.PrecioGrupoAdicionalId)),
+                "Faltan Pagos__ClaveSecreta, Pagos__SecretoWebhook, Pagos__PrecioPrimerGrupoId y Pagos__PrecioGrupoAdicionalId.")
+            .ValidateOnStart();
+        services.AddScoped<IRepositorioPlanes, RepositorioPlanes>();
+        if ((configuration.GetSection(OpcionesPagos.Seccion)[nameof(OpcionesPagos.Proveedor)] ?? OpcionesPagos.ProveedorSimulado)
+            == OpcionesPagos.ProveedorStripe)
+        {
+            services.AddHttpClient<IPasarelaPagos, PasarelaStripe>(http =>
+            {
+                http.BaseAddress = new Uri("https://api.stripe.com/");
+                http.Timeout = TimeSpan.FromSeconds(20);
+            });
+        }
+        else
+        {
+            services.AddSingleton<SesionesPagoSimuladas>();
+            services.AddScoped<IPasarelaPagos, PasarelaSimulada>();
         }
     }
 

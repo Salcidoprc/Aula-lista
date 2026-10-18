@@ -3,6 +3,7 @@ using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Planes;
 using AulaLista.Domain.Boletas;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Comun;
@@ -43,6 +44,7 @@ public sealed record BoletasDto(
     Guid GrupoId,
     string Estado,
     bool SoloLectura,
+    PlanGrupoDto Plan,
     int DecimalesFinal,
     ConteosBoletasDto Conteos,
     IReadOnlyList<BoletaAlumnoDto> Alumnos);
@@ -105,12 +107,16 @@ public sealed class ArmadoBoletas(
 /// <summary>Qué permite la pantalla de boletas según el periodo y su grupo.</summary>
 internal static class ReglasBoletas
 {
-    /// <summary>Generar, publicar y corregir: con el periodo en cierre y el grupo sin archivar (RN-048, RN-038).</summary>
-    public static ErrorNegocio? PuedeEmitir(PeriodoCompleto periodo) => periodo.Periodo.Estado switch
+    /// <summary>
+    /// Generar, publicar y corregir: con el periodo en cierre, el grupo sin archivar (RN-048, RN-038) y Pro o la prueba
+    /// Pro en el grupo (RF-080). El PDF y el Excel de lo ya emitido siguen disponibles sin Pro.
+    /// </summary>
+    public static ErrorNegocio? PuedeEmitir(PeriodoCompleto periodo, bool tienePro) => periodo.Periodo.Estado switch
     {
         _ when periodo.Grupo.EstaArchivado => ErroresGrupos.GrupoArchivado,
         EstadoPeriodo.Abierto => ErroresCierre.PeriodoSinCierre,
         EstadoPeriodo.Cerrado => Domain.Evaluacion.ErroresEvaluacion.PeriodoCerrado,
+        _ when !tienePro => Domain.Planes.ErroresPlanes.BoletasRequierenPro,
         _ => null,
     };
 
@@ -133,7 +139,8 @@ internal static class ReglasBoletas
 }
 
 /// <summary>El estado de las boletas del periodo, alumno por alumno (pantalla "Boletas y envío").</summary>
-public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas repositorio, IRepositorioGrupos grupos, Avisos.AvisoBoletas avisos)
+public sealed class ConsultaBoletas(
+    ArmadoBoletas armado, IRepositorioBoletas repositorio, IRepositorioGrupos grupos, Avisos.AvisoBoletas avisos, AccesoPro acceso)
 {
     public async Task<BoletasDto?> LeerAsync(Guid periodoId, CancellationToken ct)
     {
@@ -171,11 +178,13 @@ public sealed class ConsultaBoletas(ArmadoBoletas armado, IRepositorioBoletas re
 
         var cuenta = alumnos.CountBy(a => a.Estado).ToDictionary();
         var p = periodo.Periodo;
+        var plan = await acceso.PlanAsync(p.Grupo, ct);
         return new BoletasDto(
             periodoId,
             p.Grupo.Id,
             p.Periodo.Estado,
-            ReglasBoletas.PuedeEmitir(p) is not null,
+            ReglasBoletas.PuedeEmitir(p, plan.TienePro) is not null,
+            plan,
             p.Grupo.DecimalesFinal,
             new ConteosBoletasDto(
                 cuenta.GetValueOrDefault(EstadoBoleta.SinAprobar), cuenta.GetValueOrDefault(EstadoBoleta.SinBoleta),
@@ -196,7 +205,7 @@ public sealed class ObtenerBoletasCasoUso(ConsultaBoletas consulta)
 /// </summary>
 public sealed class GenerarBoletasCasoUso(
     ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, IColaTrabajos cola, IContextoUsuario usuario,
-    IUnidadDeTrabajo unidad, TimeProvider reloj)
+    AccesoPro acceso, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<BoletasDto>?> EjecutarAsync(Guid periodoId, SeleccionAlumnos comando, CancellationToken ct)
     {
@@ -205,7 +214,7 @@ public sealed class GenerarBoletasCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<BoletasDto>(bloqueo);
         }
@@ -247,7 +256,7 @@ public sealed class GenerarBoletasCasoUso(
 /// </summary>
 public sealed class PublicarBoletasCasoUso(
     ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, Avisos.AvisoBoletas avisos, IColaTrabajos cola,
-    IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IAuditoria auditoria, IContextoUsuario usuario, AccesoPro acceso, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<PublicacionDto>?> EjecutarAsync(Guid periodoId, SeleccionAlumnos comando, CancellationToken ct)
     {
@@ -256,7 +265,7 @@ public sealed class PublicarBoletasCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<PublicacionDto>(bloqueo);
         }
@@ -291,15 +300,19 @@ public sealed class PublicarBoletasCasoUso(
 
         var docente = usuario.DocenteId;
         auditoria.Registrar(AccionAuditoria.BoletasPublicadas, "periodo", periodoId, docente, porPublicar.Count);
-        CerrarSiTodasPublicadas(periodo, vigentes, ahora, auditoria, docente);
+        if (CerrarSiTodasPublicadas(periodo, vigentes, ahora, auditoria, docente))
+        {
+            await acceso.PeriodoCerradoAsync(periodoId, ct);
+        }
+
         var porCompartir = await avisos.PlanearAsync(periodo.Periodo, porPublicar.Select(x => (x.Alumno.Alumno, x.Boleta!)).ToList(), ct);
         await unidad.GuardarAsync(ct);
         cola.EncolarAvisoBoletas(periodo.Periodo.Grupo.DocenteId, periodoId, porPublicar.Select(x => x.Boleta!.Id).ToList());
         return Resultado.Exito(new PublicacionDto((await consulta.LeerAsync(periodoId, ct))!, porCompartir));
     }
 
-    /// <summary>RN-048: cada alumno activo tiene su boleta vigente publicada y al día.</summary>
-    internal static void CerrarSiTodasPublicadas(
+    /// <summary>RN-048: cada alumno activo tiene su boleta vigente publicada y al día. Verdadero si cerró.</summary>
+    internal static bool CerrarSiTodasPublicadas(
         PeriodoArmado periodo, IReadOnlyDictionary<Guid, Boleta> vigentes, DateTimeOffset ahora, IAuditoria auditoria, Guid? docente)
     {
         var todas = periodo.Alumnos.Count > 0 && periodo.Alumnos.All(a =>
@@ -309,6 +322,8 @@ public sealed class PublicarBoletasCasoUso(
             periodo.Periodo.Periodo.Cerrar(ahora);
             auditoria.Registrar(AccionAuditoria.PeriodoCerrado, "periodo", periodo.Periodo.Periodo.Id, docente);
         }
+
+        return todas;
     }
 }
 
@@ -318,7 +333,7 @@ public sealed class PublicarBoletasCasoUso(
 /// </summary>
 public sealed class CorregirBoletaCasoUso(
     ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, IColaTrabajos cola, IAuditoria auditoria,
-    IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IContextoUsuario usuario, AccesoPro acceso, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<BoletasDto>?> EjecutarAsync(Guid boletaId, CancellationToken ct)
     {
@@ -327,7 +342,7 @@ public sealed class CorregirBoletaCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<BoletasDto>(bloqueo);
         }
@@ -355,7 +370,11 @@ public sealed class CorregirBoletaCasoUso(
         auditoria.Registrar(AccionAuditoria.BoletaCorregida, "boleta", corregida.Valor.Id, docente, 1);
         var vigentes = ReglasBoletas.Vigentes(await repositorio.BoletasAsync(boleta.PeriodoId, ct));
         vigentes[boleta.AlumnoId] = corregida.Valor;
-        PublicarBoletasCasoUso.CerrarSiTodasPublicadas(periodo, vigentes, ahora, auditoria, docente);
+        if (PublicarBoletasCasoUso.CerrarSiTodasPublicadas(periodo, vigentes, ahora, auditoria, docente))
+        {
+            await acceso.PeriodoCerradoAsync(boleta.PeriodoId, ct);
+        }
+
         await unidad.GuardarAsync(ct);
         cola.EncolarBoletas(docente ?? throw new InvalidOperationException("Corregir requiere un docente."), [corregida.Valor.Id]);
         return Resultado.Exito((await consulta.LeerAsync(boleta.PeriodoId, ct))!);

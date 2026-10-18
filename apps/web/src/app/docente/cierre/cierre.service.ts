@@ -30,8 +30,9 @@ export class CierreService {
     return this.api.invoke(obtenerCierre, { id: periodoId });
   }
 
-  iniciar(periodoId: string): Promise<CierreDto> {
-    return this.api.invoke(iniciarCierre, { id: periodoId });
+  /** En un grupo Gratis, `usarPrueba` activa la prueba Pro del docente en este grupo (RN-081). */
+  iniciar(periodoId: string, usarPrueba = false): Promise<CierreDto> {
+    return this.api.invoke(iniciarCierre, { id: periodoId, body: { usarPrueba } });
   }
 
   /** Sin alumnos, todos los que no tienen texto (RF-041). */

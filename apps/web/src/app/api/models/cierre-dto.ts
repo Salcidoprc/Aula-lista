@@ -3,6 +3,7 @@
 
 import { AlumnoCierreDto } from '../models/alumno-cierre-dto';
 import { ConteosCierreDto } from '../models/conteos-cierre-dto';
+import { PlanGrupoDto } from '../models/plan-grupo-dto';
 import { RequisitosCierreDto } from '../models/requisitos-cierre-dto';
 export interface CierreDto {
   alumnos: Array<AlumnoCierreDto>;
@@ -10,6 +11,7 @@ export interface CierreDto {
   estado: string;
   grupoId: string;
   periodoId: string;
+  plan: PlanGrupoDto;
   requisitos: RequisitosCierreDto;
   soloLectura: boolean;
 }

@@ -4,6 +4,7 @@ using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
+using AulaLista.Application.Planes;
 using AulaLista.Infrastructure.Persistencia;
 using Hangfire;
 using Hangfire.Server;
@@ -250,6 +251,39 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Falló la redacción de observaciones del periodo {PeriodoId}")]
     private static partial void FalloRedaccion(ILogger registro, Exception ex, Guid periodoId);
+
+    /// <summary>
+    /// RN-085, RN-089: revisión diaria de prepagos, gracias y avisos de vencimiento, un docente a la vez y como él. Si
+    /// uno falla, los demás siguen; mañana se vuelve a intentar.
+    /// </summary>
+    [AutomaticRetry(Attempts = 0)]
+    public async Task RevisarSuscripcionesAsync(CancellationToken cancellationToken)
+    {
+        IReadOnlyList<Guid> docentes;
+        await using (var alcance = alcances.CreateAsyncScope())
+        {
+            docentes = await alcance.ServiceProvider.GetRequiredService<RevisarSuscripcionesTrabajo>().DocentesAsync(cancellationToken);
+        }
+
+        foreach (var docenteId in docentes)
+        {
+            try
+            {
+                await EnAlcanceAsync(docenteId, async sp =>
+                {
+                    await sp.GetRequiredService<RevisarSuscripcionDocenteTrabajo>().EjecutarAsync(docenteId, cancellationToken);
+                    return true;
+                }, cancellationToken);
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                FalloRevisionPlan(registro, ex, docenteId);
+            }
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Falló la revisión del plan del docente {DocenteId}")]
+    private static partial void FalloRevisionPlan(ILogger registro, Exception ex, Guid docenteId);
 
     [AutomaticRetry(Attempts = Reintentos)]
     public async Task RetencionAsync(CancellationToken cancellationToken)

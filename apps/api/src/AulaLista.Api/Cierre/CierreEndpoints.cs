@@ -12,7 +12,8 @@ internal static class CierreEndpoints
     {
         var periodos = api.MapGroup("/periodos").WithTags("Cierre");
         periodos.MapPost("/{id:guid}/cierre", Iniciar).WithName("IniciarCierre")
-            .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+            .Produces<CierreDto>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
         periodos.MapGet("/{id:guid}/cierre", Obtener).WithName("ObtenerCierre")
             .Produces<CierreDto>().Produces(StatusCodes.Status404NotFound);
         periodos.MapPost("/{id:guid}/cierre/cerrar", Cerrar).WithName("CerrarPeriodo")
@@ -41,8 +42,8 @@ internal static class CierreEndpoints
         return api;
     }
 
-    private static async Task<IResult> Iniciar(Guid id, IniciarCierreCasoUso caso, CancellationToken ct) =>
-        Respuesta(await caso.EjecutarAsync(id, ct));
+    private static async Task<IResult> Iniciar(Guid id, IniciarCierre? cuerpo, IniciarCierreCasoUso caso, CancellationToken ct) =>
+        Respuesta(await caso.EjecutarAsync(id, cuerpo ?? new IniciarCierre(false), ct));
 
     private static async Task<IResult> Cerrar(Guid id, CerrarPeriodoCasoUso caso, CancellationToken ct) =>
         Respuesta(await caso.EjecutarAsync(id, ct));

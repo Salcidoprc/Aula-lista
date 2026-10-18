@@ -46,6 +46,9 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
 
     public const string SecretoWebhook = "secreto-de-la-app-de-meta-de-pruebas";
 
+    /// <summary>Firma de los webhooks de pagos (SPEC-08), como el <c>whsec_…</c> de Stripe.</summary>
+    public const string SecretoPagos = "whsec_secreto-de-pagos-de-pruebas";
+
     /// <summary>La IA de las pruebas: guarda lo que se le envía y responde como el redactor simulado.</summary>
     public RedactorDePrueba Redactor => Services.GetRequiredService<RedactorDePrueba>();
 
@@ -63,6 +66,7 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         builder.UseSetting("Almacen:Ruta", _almacen);
         builder.UseSetting("Trabajos:Servidor", "false");
         builder.UseSetting("Whatsapp:SecretoApp", SecretoWebhook);
+        builder.UseSetting("Pagos:SecretoWebhook", SecretoPagos);
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<TimeProvider>();

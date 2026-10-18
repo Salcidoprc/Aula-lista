@@ -53,6 +53,12 @@ services:
       Whatsapp__IdNumero: ${WHATSAPP_ID_NUMERO:-}
       Whatsapp__SecretoApp: ${WHATSAPP_SECRETO_APP:-}
       Whatsapp__TokenVerificacion: ${WHATSAPP_TOKEN_VERIFICACION:-}
+      Pagos__Proveedor: ${PAGOS_PROVEEDOR:-simulado}
+      Pagos__ClaveSecreta: ${STRIPE_CLAVE_SECRETA:-}
+      Pagos__SecretoWebhook: ${STRIPE_SECRETO_WEBHOOK:-}
+      Pagos__PrecioPrimerGrupoId: ${STRIPE_PRECIO_PRIMER_GRUPO:-}
+      Pagos__PrecioGrupoAdicionalId: ${STRIPE_PRECIO_GRUPO_ADICIONAL:-}
+      Planes__OxxoHabilitado: ${OXXO_HABILITADO:-true}
       Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
       Correo__BrevoApiKey: ${BREVO_API_KEY:-}
       Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulalista.mx}

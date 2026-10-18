@@ -77,6 +77,7 @@ public sealed class AccionesObservacion(
     IColaTrabajos cola,
     IContextoUsuario usuario,
     IUnidadDeTrabajo unidad,
+    Planes.AccesoPro acceso,
     IOptions<OpcionesIa> opciones,
     TimeProvider reloj)
 {
@@ -121,7 +122,7 @@ public sealed class AccionesObservacion(
             return null;
         }
 
-        if (ReglasCierre.PuedeRevisar(periodo) is { } bloqueo)
+        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<ObservacionDto>(bloqueo);
         }

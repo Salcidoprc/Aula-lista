@@ -1,6 +1,7 @@
 using AulaLista.Application.Comun;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Planes;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Grupos;
@@ -20,11 +21,13 @@ public sealed record AlumnoCierreDto(
     Guid AlumnoId, int NumeroLista, string Nombres, string Apellidos, decimal? Calificacion, string Estado,
     Guid? ObservacionId, bool DatosCambiaron, string? Fallo);
 
+/// <summary><see cref="Plan"/>: si el grupo tiene Pro, la prueba o puede usarla (RN-041, RN-081).</summary>
 public sealed record CierreDto(
     Guid PeriodoId,
     Guid GrupoId,
     string Estado,
     bool SoloLectura,
+    PlanGrupoDto Plan,
     RequisitosCierreDto Requisitos,
     ConteosCierreDto Conteos,
     IReadOnlyList<AlumnoCierreDto> Alumnos);
@@ -33,23 +36,22 @@ public sealed record CierreDto(
 internal static class ReglasCierre
 {
     /// <summary>
-    /// RN-041: el cierre es de Pro o de la prueba Pro. Decisión del 2026-10-18: mientras no existan los planes (H6)
-    /// queda abierto para todos; H6 pone aquí la revisión y responde <see cref="ErroresCierre.RequierePro"/>.
+    /// Generar, editar, aprobar y cerrar: con el periodo en cierre, el grupo sin archivar y Pro o la prueba Pro en el
+    /// grupo (RN-041). Sin Pro lo hecho se ve pero no se cambia.
     /// </summary>
-    public static ErrorNegocio? PlanPermiteCierre(Grupo grupo) => null;
-
-    /// <summary>Generar, editar y aprobar: con el periodo en cierre y el grupo sin archivar.</summary>
-    public static ErrorNegocio? PuedeRevisar(PeriodoCompleto periodo) => periodo.Periodo.Estado switch
+    public static ErrorNegocio? PuedeRevisar(PeriodoCompleto periodo, bool tienePro) => periodo.Periodo.Estado switch
     {
         _ when periodo.Grupo.EstaArchivado => ErroresGrupos.GrupoArchivado,
         EstadoPeriodo.Abierto => ErroresCierre.PeriodoSinCierre,
         EstadoPeriodo.Cerrado => Domain.Evaluacion.ErroresEvaluacion.PeriodoCerrado,
-        _ => PlanPermiteCierre(periodo.Grupo),
+        _ when !tienePro => ErroresCierre.RequierePro,
+        _ => null,
     };
 }
 
 /// <summary>Arma el estado del cierre con el cálculo de la matriz (RN-033 a RN-035).</summary>
-public sealed class ConsultaCierre(IRepositorioGrupos grupos, IRepositorioCierre repositorio, MatrizCalificacionesCasoUso matriz, TimeProvider reloj)
+public sealed class ConsultaCierre(
+    IRepositorioGrupos grupos, IRepositorioCierre repositorio, MatrizCalificacionesCasoUso matriz, AccesoPro acceso, TimeProvider reloj)
 {
     public async Task<CierreDto?> LeerAsync(Guid periodoId, CancellationToken ct)
     {
@@ -72,11 +74,13 @@ public sealed class ConsultaCierre(IRepositorioGrupos grupos, IRepositorioCierre
         }).ToList();
 
         var cuenta = alumnos.CountBy(a => a.Estado).ToDictionary();
+        var plan = await acceso.PlanAsync(periodo.Grupo, ct);
         return new CierreDto(
             periodoId,
             periodo.Grupo.Id,
             periodo.Periodo.Estado,
-            ReglasCierre.PuedeRevisar(periodo) is not null && periodo.Periodo.Estado != EstadoPeriodo.Abierto,
+            ReglasCierre.PuedeRevisar(periodo, plan.TienePro) is not null && periodo.Periodo.Estado != EstadoPeriodo.Abierto,
+            plan,
             new RequisitosCierreDto(datos.SumaPesos, datos.SumaPesos == 100m, datos.Celdas.Count > 0 || datos.Tomas > 0),
             new ConteosCierreDto(
                 cuenta.GetValueOrDefault(EstadoObservacion.SinGenerar), cuenta.GetValueOrDefault(EstadoObservacion.Generando),
@@ -91,11 +95,18 @@ public sealed class ObtenerCierreCasoUso(ConsultaCierre consulta)
     public Task<CierreDto?> EjecutarAsync(Guid periodoId, CancellationToken ct) => consulta.LeerAsync(periodoId, ct);
 }
 
-/// <summary>RF-040, RN-040, RN-041: pasa el periodo a <c>en_cierre</c>. Repetirlo no cambia nada.</summary>
+/// <summary>RN-081: en un grupo sin Pro, <see cref="UsarPrueba"/> activa la prueba Pro del docente en él.</summary>
+public sealed record IniciarCierre(bool UsarPrueba);
+
+/// <summary>
+/// RF-040, RN-040, RN-041: pasa el periodo a <c>en_cierre</c>. Repetirlo no cambia nada. Sin Pro en el grupo pide
+/// usar la prueba (RN-081), que se activa aquí una sola vez por docente.
+/// </summary>
 public sealed class IniciarCierreCasoUso(
-    IRepositorioGrupos grupos, IRepositorioCierre repositorio, ConsultaCierre consulta, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos, IRepositorioCierre repositorio, ConsultaCierre consulta, AccesoPro acceso, IUnidadDeTrabajo unidad,
+    TimeProvider reloj)
 {
-    public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, CancellationToken ct)
+    public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, IniciarCierre comando, CancellationToken ct)
     {
         if (await grupos.PeriodoAsync(periodoId, ct) is not { } periodo || await consulta.LeerAsync(periodoId, ct) is not { } cierre)
         {
@@ -113,11 +124,17 @@ public sealed class IniciarCierreCasoUso(
             { Periodo.Estado: EstadoPeriodo.Cerrado } => Domain.Evaluacion.ErroresEvaluacion.PeriodoCerrado,
             _ when !cierre.Requisitos.RubrosSuman100 => ErroresCierre.RubrosNoSuman100,
             _ when !cierre.Requisitos.HayCalificaciones => ErroresCierre.SinCalificaciones,
-            _ => ReglasCierre.PlanPermiteCierre(periodo.Grupo),
+            _ when !cierre.Plan.TienePro && !comando.UsarPrueba => ErroresCierre.RequierePro,
+            _ => null,
         };
         if (bloqueo is not null)
         {
             return Resultado.Fallo<CierreDto>(bloqueo);
+        }
+
+        if (!cierre.Plan.TienePro && await acceso.IniciarPruebaAsync(periodo.Grupo, periodoId, ct) is { EsFallo: true } prueba)
+        {
+            return Resultado.Fallo<CierreDto>(prueba.Error);
         }
 
         // Cada alumno activo arranca con su observación vacía, para poder generarla o escribirla a mano.
@@ -148,6 +165,7 @@ public sealed class GenerarObservacionesCasoUso(
     IColaTrabajos cola,
     IContextoUsuario usuario,
     IUnidadDeTrabajo unidad,
+    AccesoPro acceso,
     IOptions<OpcionesIa> opciones,
     TimeProvider reloj)
 {
@@ -158,7 +176,7 @@ public sealed class GenerarObservacionesCasoUso(
             return null;
         }
 
-        if (ReglasCierre.PuedeRevisar(periodo) is { } bloqueo)
+        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<CierreDto>(bloqueo);
         }
@@ -209,7 +227,8 @@ public sealed class GenerarObservacionesCasoUso(
 
 /// <summary>RN-048: el docente cierra la unidad aunque falten boletas por publicar; queda de solo lectura y en auditoría.</summary>
 public sealed class CerrarPeriodoCasoUso(
-    IRepositorioGrupos grupos, ConsultaCierre consulta, IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos, ConsultaCierre consulta, AccesoPro acceso, IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad,
+    TimeProvider reloj)
 {
     public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, CancellationToken ct)
     {
@@ -220,12 +239,13 @@ public sealed class CerrarPeriodoCasoUso(
 
         if (periodo.Periodo.Estado != EstadoPeriodo.Cerrado)
         {
-            if (ReglasCierre.PuedeRevisar(periodo) is { } bloqueo)
+            if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
             {
                 return Resultado.Fallo<CierreDto>(bloqueo);
             }
 
             periodo.Periodo.Cerrar(reloj.GetUtcNow());
+            await acceso.PeriodoCerradoAsync(periodoId, ct);
             auditoria.Registrar(AccionAuditoria.PeriodoCerrado, "periodo", periodoId, usuario.DocenteId);
             await unidad.GuardarAsync(ct);
         }

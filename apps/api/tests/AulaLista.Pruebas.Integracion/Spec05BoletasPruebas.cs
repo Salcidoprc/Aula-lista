@@ -310,6 +310,7 @@ public sealed partial class Spec05BoletasPruebas(BaseDeDatosFixture baseDeDatos)
             await GuardarAsync(g, alumno, 9.5m);
         }
 
+        await cliente.ActivarProAsync(grupoId);
         Assert.Equal(HttpStatusCode.OK, (await cliente.PostAsync($"/api/v1/periodos/{periodo}/cierre", null)).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await cliente.PostAsJsonAsync($"/api/v1/periodos/{periodo}/observaciones/generar", new { })).StatusCode);
         foreach (var alumno in ids.Take(aprobar ?? ids.Count))

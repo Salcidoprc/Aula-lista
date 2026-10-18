@@ -8,6 +8,7 @@ using AulaLista.Api.Cuentas;
 using AulaLista.Api.Evaluacion;
 using AulaLista.Api.Grupos;
 using AulaLista.Api.Operacion;
+using AulaLista.Api.Planes;
 using AulaLista.Api.Tutores;
 using AulaLista.Application;
 using AulaLista.Application.Comun;
@@ -176,6 +177,7 @@ api.MapCierre();
 api.MapBoletas();
 api.MapTutores();
 api.MapAvisos();
+api.MapPlanes(app.Configuration);
 if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is { } esquemas
     && await esquemas.GetSchemeAsync(GoogleEndpoints.EsquemaGoogle) is not null)
 {
@@ -196,6 +198,13 @@ if (app.Configuration.GetValue("Trabajos:Servidor", true)
         "retencion-cuentas",
         e => e.RetencionAsync(CancellationToken.None),
         "0 3 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById(Docente.ZonaHorariaPorDefecto) });
+
+    // RN-085, RN-089: vencimientos, gracia y avisos de pago, 06:00 hora del centro de México.
+    app.Services.GetRequiredService<IRecurringJobManager>().AddOrUpdate<EjecutorTrabajos>(
+        "revisar-suscripciones",
+        e => e.RevisarSuscripcionesAsync(CancellationToken.None),
+        "0 6 * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById(Docente.ZonaHorariaPorDefecto) });
 }
 

@@ -82,6 +82,12 @@ public sealed class Grupo : Entidad
 
     public string Plan { get; private set; } = PlanGrupo.Gratis;
 
+    /// <summary>
+    /// Pro termina en esta fecha aunque <see cref="Plan"/> diga Pro: un grupo quitado espera al siguiente corte
+    /// (RN-083), la gracia (RN-085) o el fin del prepago más su gracia (RN-089).
+    /// </summary>
+    public DateTimeOffset? ProHasta { get; private set; }
+
     public decimal CalifMinima { get; private set; } = ConfiguracionCalificacion.PorDefecto.CalifMinima;
 
     public decimal CalifAprobatoria { get; private set; } = ConfiguracionCalificacion.PorDefecto.CalifAprobatoria;
@@ -145,6 +151,38 @@ public sealed class Grupo : Entidad
         ValorRetardo = valorRetardo ?? ValorRetardo;
         MarcarActualizada(ahora);
         return Resultado.Exito();
+    }
+
+    /// <summary>SPEC-08: Pro pagado ahora mismo (sin contar la prueba).</summary>
+    public bool TieneProPagado(DateTimeOffset ahora) => Plan == PlanGrupo.Pro && (ProHasta is null || ahora < ProHasta);
+
+    /// <summary>Pro sin fecha de fin, o hasta <paramref name="hasta"/>.</summary>
+    public void ActivarPro(DateTimeOffset? hasta, DateTimeOffset ahora)
+    {
+        Plan = PlanGrupo.Pro;
+        ProHasta = hasta;
+        MarcarActualizada(ahora);
+    }
+
+    /// <summary>Sigue en Pro hasta esa fecha; si ya terminaba antes, no se alarga.</summary>
+    public void TerminarProEn(DateTimeOffset hasta, DateTimeOffset ahora)
+    {
+        if (Plan == PlanGrupo.Pro && (ProHasta is null || hasta < ProHasta))
+        {
+            ProHasta = hasta;
+            MarcarActualizada(ahora);
+        }
+    }
+
+    /// <summary>RN-085: pasa a Gratis sin borrar nada; lo publicado sigue visible para los tutores.</summary>
+    public void PasarAGratis(DateTimeOffset ahora)
+    {
+        if (Plan != PlanGrupo.Gratis || ProHasta is not null)
+        {
+            Plan = PlanGrupo.Gratis;
+            ProHasta = null;
+            MarcarActualizada(ahora);
+        }
     }
 
     /// <summary>RF-019. Archivar dos veces no cambia la fecha.</summary>

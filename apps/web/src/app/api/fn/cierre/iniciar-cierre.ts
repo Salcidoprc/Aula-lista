@@ -8,15 +8,18 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 import { CierreDto } from '../../models/cierre-dto';
+import { IniciarCierre } from '../../models/iniciar-cierre';
 
 export interface IniciarCierre$Params {
   id: string;
+      body?: (null | IniciarCierre)
 }
 
 export function iniciarCierre(http: HttpClient, rootUrl: string, params: IniciarCierre$Params, context?: HttpContext): Observable<StrictHttpResponse<CierreDto>> {
   const rb = new RequestBuilder(rootUrl, iniciarCierre.PATH, 'post');
   if (params) {
     rb.path('id', params.id, {});
+    rb.body(params.body, 'application/json');
   }
 
   return http.request(

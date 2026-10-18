@@ -22,6 +22,14 @@ public sealed record GrupoDto(
     decimal ValorRetardo,
     DateTimeOffset? ArchivadoEn)
 {
+    /// <summary>SPEC-08: <c>gratis</c>, <c>pro</c> o <c>prueba</c> hoy (no solo lo guardado en <see cref="Plan"/>).</summary>
+    public string PlanVigente { get; init; } = Planes.PlanVigente.Gratis;
+
+    /// <summary>RN-081: días que le quedan a la prueba Pro, solo en su grupo.</summary>
+    public int? DiasPrueba { get; init; }
+
+    public GrupoDto ConPlan(Planes.PlanGrupoDto plan) => this with { PlanVigente = plan.Plan, DiasPrueba = plan.DiasPrueba };
+
     public static GrupoDto De(GrupoConConteo g) => new(
         g.Grupo.Id, g.Grupo.Nombre, g.Grupo.Nivel, g.Grupo.Grado, g.Grupo.Materia, g.Grupo.CicloEscolarId, g.CicloNombre,
         g.Grupo.Plan, g.AlumnosActivos, g.Grupo.CalifMinima, g.Grupo.CalifAprobatoria, g.Grupo.DecimalesFinal,
@@ -30,16 +38,26 @@ public sealed record GrupoDto(
 
 public sealed record PeriodoDto(Guid Id, Guid UnidadId, string Nombre, int Orden, DateOnly Inicio, DateOnly Fin, string Estado);
 
-public sealed class ListarGruposCasoUso(IRepositorioGrupos repositorio)
+public sealed class ListarGruposCasoUso(IRepositorioGrupos repositorio, Planes.AccesoPro acceso)
 {
-    public async Task<IReadOnlyList<GrupoDto>> EjecutarAsync(bool archivados, CancellationToken ct) =>
-        (await repositorio.GruposAsync(archivados, ct)).Select(GrupoDto.De).ToList();
+    public async Task<IReadOnlyList<GrupoDto>> EjecutarAsync(bool archivados, CancellationToken ct)
+    {
+        var lista = new List<GrupoDto>();
+        foreach (var g in await repositorio.GruposAsync(archivados, ct))
+        {
+            lista.Add(GrupoDto.De(g).ConPlan(await acceso.PlanAsync(g.Grupo, ct)));
+        }
+
+        return lista;
+    }
 }
 
-public sealed class ObtenerGrupoCasoUso(IRepositorioGrupos repositorio)
+public sealed class ObtenerGrupoCasoUso(IRepositorioGrupos repositorio, Planes.AccesoPro acceso)
 {
     public async Task<GrupoDto?> EjecutarAsync(Guid id, CancellationToken ct) =>
-        (await repositorio.GruposAsync(archivados: true, ct)).FirstOrDefault(g => g.Grupo.Id == id) is { } g ? GrupoDto.De(g) : null;
+        (await repositorio.GruposAsync(archivados: true, ct)).FirstOrDefault(g => g.Grupo.Id == id) is { } g
+            ? GrupoDto.De(g).ConPlan(await acceso.PlanAsync(g.Grupo, ct))
+            : null;
 }
 
 public sealed record CrearGrupo(string Nombre, string Nivel, int Grado, string? Materia, Guid CicloId);

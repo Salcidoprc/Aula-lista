@@ -32,6 +32,9 @@ import { urlWhatsApp } from '../alumnos/ficha-alumno';
 import { nombresAlumnos } from '../avisos/avisos';
 import { AvisosGrupoService } from '../avisos/avisos.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
+import { CandadoPro } from '../planes/candado-pro';
+import { EtiquetaPlan } from '../planes/etiqueta-plan';
+import { tienePro } from '../planes/planes';
 import { BoletasService } from './boletas.service';
 import {
   avancePreparacion,
@@ -58,7 +61,16 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
  */
 @Component({
   selector: 'app-boletas-periodo',
-  imports: [TranslocoDirective, RouterLink, NgTemplateOutlet, Icono, Ocupado, Hoja],
+  imports: [
+    TranslocoDirective,
+    RouterLink,
+    NgTemplateOutlet,
+    Icono,
+    Ocupado,
+    Hoja,
+    CandadoPro,
+    EtiquetaPlan,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -78,6 +90,13 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
             <p class="dato-suave">{{ nombre() }} · {{ p.nombre }}</p>
           }
         </hgroup>
+        @if (boletas(); as b) {
+          <app-etiqueta-plan
+            [plan]="b.plan.plan"
+            [diasPrueba]="b.plan.diasPrueba"
+            [hastaPublicar]="b.plan.pruebaHastaPublicar"
+          />
+        }
       </div>
 
       @if (!enLinea()) {
@@ -112,6 +131,9 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
           }
         </div>
       } @else if (boletas(); as b) {
+        @if (!conPro() && !b.soloLectura && b.estado !== 'abierto') {
+          <app-candado-pro funcion="boletas" [plan]="b.plan" [grupoId]="id()" />
+        }
         <div class="columnas">
           <div class="principal">
             <div class="solo-celular">
@@ -219,7 +241,7 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
             </ol>
             <p class="solo-lector" role="status">{{ anuncio() }}</p>
 
-            @if (!b.soloLectura && (aGenerar().length > 0 || aPublicar().length > 0)) {
+            @if (!b.soloLectura && conPro() && (aGenerar().length > 0 || aPublicar().length > 0)) {
               <div class="pie-accion solo-celular">
                 <ng-container [ngTemplateOutlet]="principal" />
               </div>
@@ -232,7 +254,7 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
           <aside class="lateral solo-escritorio" aria-labelledby="resumen-titulo">
             <h2 id="resumen-titulo">{{ t('resumenTitulo') }}</h2>
             <ng-container [ngTemplateOutlet]="resumen" />
-            @if (!b.soloLectura) {
+            @if (!b.soloLectura && conPro()) {
               <ng-container [ngTemplateOutlet]="principal" />
             }
             <ng-container [ngTemplateOutlet]="secundarias" />
@@ -1099,6 +1121,7 @@ export class BoletasPeriodo implements OnInit {
     return g ? nombreGrupo(g.grado, g.nombre) : '';
   });
   private readonly alumnos = computed(() => this.boletas()?.alumnos ?? []);
+  protected readonly conPro = computed(() => tienePro(this.boletas()?.plan));
   protected readonly aGenerar = computed(() => porGenerar(this.alumnos()));
   protected readonly elegibles = computed(() => publicables(this.alumnos()));
   protected readonly aPublicar = computed(() => {

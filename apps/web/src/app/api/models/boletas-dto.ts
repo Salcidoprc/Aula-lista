@@ -3,6 +3,7 @@
 
 import { BoletaAlumnoDto } from '../models/boleta-alumno-dto';
 import { ConteosBoletasDto } from '../models/conteos-boletas-dto';
+import { PlanGrupoDto } from '../models/plan-grupo-dto';
 export interface BoletasDto {
   alumnos: Array<BoletaAlumnoDto>;
   conteos: ConteosBoletasDto;
@@ -10,5 +11,6 @@ export interface BoletasDto {
   estado: string;
   grupoId: string;
   periodoId: string;
+  plan: PlanGrupoDto;
   soloLectura: boolean;
 }

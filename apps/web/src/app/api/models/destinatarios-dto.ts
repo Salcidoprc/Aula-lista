@@ -6,5 +6,6 @@ export interface DestinatariosDto {
   grupoId: string;
   soloLectura: boolean;
   tutores: Array<DestinatarioDto>;
+  urgentesDisponibles: boolean;
   urgentesPorTutor: (number | string);
 }
