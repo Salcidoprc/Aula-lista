@@ -200,7 +200,12 @@ internal sealed class SincronizarCambiosValidador : AbstractValidator<Sincroniza
 /// (RN-030, RN-118, RN-119). Un cambio cuyo UUID ya se aplicó no se aplica otra vez: responde la celda vigente.
 /// </summary>
 public sealed class GuardarCalificacionesCasoUso(
-    IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos,
+    IRepositorioEvaluacion repositorio,
+    IContextoUsuario usuario,
+    IUnidadDeTrabajo unidad,
+    Cierre.AvisoDatosCambiaron aviso,
+    TimeProvider reloj)
 {
     /// <summary>PUT /calificaciones: el lote entero usa la <c>Idempotency-Key</c> como su UUID.</summary>
     public async Task<ResultadoCalificaciones> EjecutarAsync(GuardarCalificaciones comando, Guid? claveIdempotencia, CancellationToken ct)
@@ -301,6 +306,12 @@ public sealed class GuardarCalificacionesCasoUso(
             individual.Aplicar(reglas, cambio.Valor, cambio.Marca, criterios, ahora, origen);
             Guardar(individual);
             aplicadas[(actividad.Id, cambio.AlumnoId)] = individual;
+        }
+
+        // RN-044: la observación aprobada de quien cambió vuelve a borrador.
+        foreach (var periodo in aplicadas.Keys.GroupBy(k => _rubros[_actividades[k.Item1]!.RubroId]!.Value.Periodo.Periodo.Id))
+        {
+            await aviso.AvisarAsync(periodo.Key, periodo.Select(k => k.Item2).Distinct().ToList(), ct);
         }
 
         return new ResultadoCalificaciones(aplicadas.Values.Select(CeldaDto.De).ToList(), rechazadas);

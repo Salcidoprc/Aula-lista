@@ -210,6 +210,11 @@
       "noDisponible": "Esta exportación ya no está disponible; los archivos duran 24 horas. Pide una nueva desde Ajustes.",
       "volver": "Volver a Ajustes",
       "lenta": "Sigue en proceso. Te avisamos por correo cuando tus archivos estén listos."
+    },
+    "observaciones": {
+      "titulo": "Observaciones",
+      "nota": "Elige qué tan largas son y en qué persona se escriben. Puedes dar ejemplos para que suenen como tú.",
+      "accion": "Estilo de las observaciones"
     }
   },
   "legal": {
@@ -308,7 +313,20 @@
     "unidad_con_datos": "Esa unidad ya tiene rubros o calificaciones; no se puede quitar.",
     "origen_sin_rubros": "Esa unidad no tiene rubros para copiar. Elige otra.",
     "equipos_invalidos": "Revisa los equipos: cada alumno va en uno solo y cada equipo necesita un nombre distinto.",
-    "nota_invalida": "La nota no se guardó: revisa el texto (hasta 1,000 caracteres)."
+    "nota_invalida": "La nota no se guardó: revisa el texto (hasta 1,000 caracteres).",
+    "rubros_no_suman_100": "Los rubros de la unidad deben sumar 100 % para iniciar el cierre.",
+    "sin_calificaciones": "Captura al menos una calificación antes de iniciar el cierre.",
+    "requiere_pro": "El cierre con observaciones es del plan Pro. Contrata Pro para este grupo para continuar.",
+    "periodo_sin_cierre": "Primero inicia el cierre de la unidad.",
+    "observacion_aprobada": "Esta observación ya está aprobada. Reábrela para cambiarla.",
+    "observacion_publicada": "La boleta ya se publicó: esta observación no cambia.",
+    "en_generacion": "La IA está escribiendo esta observación. Espera a que termine.",
+    "limite_regeneraciones": "Ya pediste 5 versiones de esta observación. Edítala o escríbela a mano.",
+    "limite_ia": "Llegaste al límite de observaciones por hora. Intenta más tarde o escríbelas a mano.",
+    "observacion_vacia": "Escribe la observación antes de aprobarla.",
+    "observacion_larga": "La observación es muy larga: el máximo es de 1,500 caracteres.",
+    "instruccion_invalida": "La instrucción es muy larga: el máximo es de 200 caracteres.",
+    "estilo_invalido": "Revisa el estilo: hasta 3 ejemplos de máximo 800 caracteres cada uno."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -369,7 +387,10 @@
     "tabla": "Tabla de calificaciones",
     "equipos": "Equipos",
     "asistencia": "Pasar lista",
-    "historialAsistencia": "Historial de asistencia"
+    "historialAsistencia": "Historial de asistencia",
+    "cierre": "Cierre de la unidad",
+    "revisarObservacion": "Revisar observación",
+    "estilo": "Estilo de las observaciones"
   },
   "ciclo": {
     "volver": "Volver",
@@ -874,7 +895,12 @@
     "resumen": "{{alumnos}} alumnos · {{actividades}} actividades",
     "editarRubros": "Editar rubros",
     "pesos": "Pesos: {{suma}} de 100",
-    "pesosIncompletos": "Ajusta los pesos para que sumen 100 antes de cerrar la unidad."
+    "pesosIncompletos": "Ajusta los pesos para que sumen 100 antes de cerrar la unidad.",
+    "cierre": {
+      "abierto": "Cerrar la unidad",
+      "en_cierre": "Revisar observaciones",
+      "cerrado": "Ver observaciones"
+    }
   },
   "rubros": {
     "volver": "Calificaciones",
@@ -1127,5 +1153,136 @@
       "conducta": "Conducta"
     },
     "sinCalificacion": "sin calificación"
+  },
+  "cierre": {
+    "volver": "Calificaciones",
+    "titulo": "Cierre de la unidad",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando el cierre",
+    "sinConexion": "Sin conexión: el cierre necesita internet. Lo que ves puede no estar al día.",
+    "archivado": "Este grupo está archivado: el cierre es de solo lectura.",
+    "cerrado": "Esta unidad ya está cerrada: las observaciones son de solo lectura.",
+    "iniciar": {
+      "titulo": "Antes de iniciar",
+      "texto": "Al iniciar el cierre los rubros y sus pesos quedan fijos; puedes seguir capturando calificaciones. Después la IA redacta una observación por alumno y tú decides cuál se aprueba.",
+      "rubros": "Los rubros suman 100 % (ahora {{suma}} %)",
+      "calificaciones": "Hay al menos una calificación capturada",
+      "listo": "listo",
+      "falta": "falta",
+      "resolverRubros": "Ajustar rubros",
+      "resolverCalificaciones": "Ir a capturar",
+      "accion": "Iniciar cierre"
+    },
+    "lista": "Alumnos y sus observaciones",
+    "calificacion": "Calificación de la unidad",
+    "estados": {
+      "sin_generar": "Sin generar",
+      "generando": "Generando",
+      "borrador": "Borrador",
+      "aprobada": "Aprobada",
+      "publicada": "Publicada"
+    },
+    "datosCambiaron": "Datos cambiaron",
+    "noSeGenero": "No se pudo generar",
+    "avance": "Avance",
+    "aprobadas": "{{aprobadas}} de {{total}} aprobadas",
+    "segmentos": {
+      "aprobada": "Aprobadas",
+      "borrador": "Por revisar",
+      "pendiente": "Sin texto"
+    },
+    "generandoAhora": "La IA está escribiendo {{cantidad}}…",
+    "generar": "Generar observaciones ({{cantidad}})",
+    "terminado": "Terminó la generación. {{fallidas}} no se pudieron generar.",
+    "estilo": "Estilo de las observaciones"
+  },
+  "revisar": {
+    "volver": "Lista del cierre",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando la observación",
+    "posicion": "{{posicion}} de {{total}}",
+    "navegar": "Otros alumnos",
+    "anterior": "Alumno anterior",
+    "siguiente": "Alumno siguiente",
+    "sinConexion": "Sin conexión: no puedes aprobar ni regenerar hasta que vuelva internet.",
+    "soloLectura": "La unidad ya no está en cierre: la observación es de solo lectura.",
+    "datos": "Calificaciones y notas",
+    "calificacion": "Calificación de la unidad",
+    "sinDatos": "Sin datos",
+    "notas": "Notas de la unidad",
+    "sinNotas": "Sin notas en esta unidad.",
+    "observacion": "Observación",
+    "datosCambiaron": "Datos cambiaron: sus calificaciones o notas son otras desde que la aprobaste. Revisa el texto.",
+    "fallo": "No se pudo generar, intenta de nuevo o escribe la observación.",
+    "generando": "La IA está escribiendo la observación…",
+    "textoEtiqueta": "Texto de la observación",
+    "placeholder": "Escribe la observación o genérala con la IA.",
+    "palabras": "{{palabras}} palabras · {{longitud}}: {{minimo}} a {{maximo}}",
+    "generar": "Generar observación",
+    "aMano": "Escribir a mano",
+    "regenerar": {
+      "titulo": "Pedir otra versión",
+      "sugerencias": {
+        "breve": "Más breve",
+        "positiva": "Más positiva",
+        "especifica": "Más específica"
+      },
+      "instrucciones": {
+        "breve": "más breve",
+        "positiva": "más positiva",
+        "especifica": "más específica"
+      },
+      "instruccion": "Instrucción (opcional)",
+      "ejemplo": "Por ejemplo: menciona su avance en lectura",
+      "sinNombres": "No escribas nombres: la instrucción se envía a la IA.",
+      "accion": "Regenerar",
+      "restantes": "Te quedan {{restantes}}"
+    },
+    "atajo": "Ctrl + Enter aprueba y pasa al siguiente.",
+    "aprobarYSiguiente": "Aprobar y siguiente",
+    "aprobarSolo": "Aprobar",
+    "aprobada": "Aprobada",
+    "reabrir": "Reabrir",
+    "irSiguiente": "Siguiente por revisar",
+    "volverLista": "Volver a la lista",
+    "todas": "Listo: todas las observaciones están aprobadas."
+  },
+  "estilo": {
+    "volver": "Ajustes",
+    "titulo": "Estilo de las observaciones",
+    "subtitulo": "Así redacta la IA las observaciones de todos tus grupos.",
+    "reintentar": "Intentar de nuevo",
+    "cargando": "Cargando el estilo",
+    "longitud": "Longitud",
+    "longitudes": {
+      "breve": "Breve",
+      "normal": "Normal",
+      "detallada": "Detallada"
+    },
+    "rangos": {
+      "breve": "30 a 50 palabras",
+      "normal": "60 a 90 palabras",
+      "detallada": "100 a 140 palabras"
+    },
+    "persona": "Persona",
+    "personas": {
+      "tercera": "Tercera persona",
+      "segunda": "Segunda persona"
+    },
+    "muestras": {
+      "tercera": "\"Logró avanzar en…\"",
+      "segunda": "\"Lograste avanzar en…\""
+    },
+    "ejemplos": {
+      "titulo": "Tus ejemplos",
+      "ayuda": "Hasta 3 observaciones que hayas escrito antes. La IA imita su tono, no su contenido.",
+      "sinNombres": "No pongas nombres, teléfonos ni correos: los ejemplos se envían a la IA.",
+      "numero": "Ejemplo {{numero}}",
+      "quitar": "Quitar",
+      "contador": "{{usados}} de {{maximo}}",
+      "agregar": "Agregar ejemplo"
+    },
+    "guardar": "Guardar estilo",
+    "guardado": "Estilo guardado."
   }
 }

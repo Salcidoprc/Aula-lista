@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- reglas/05-ia, Evaluación de calidad: se corre a mano, con costo; no es un proyecto de pruebas de CI. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\casos\casos.json" Link="casos\casos.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\AulaLista.Application\AulaLista.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\AulaLista.Infrastructure\AulaLista.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Infrastructure;
 using AulaLista.Infrastructure.Comun;
@@ -21,7 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AulaLista.Pruebas.Integracion;
 
-public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000)
+public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000, int solicitudesIaPorHora = 200)
     : WebApplicationFactory<Program>
 {
     public const string ContrasenaValida = "lapiz-azul-del-salon-4B";
@@ -36,6 +37,9 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
 
     public BuzonCorreo Buzon => Services.GetRequiredService<BuzonCorreo>();
 
+    /// <summary>La IA de las pruebas: guarda lo que se le envía y responde como el redactor simulado.</summary>
+    public RedactorDePrueba Redactor => Services.GetRequiredService<RedactorDePrueba>();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Pruebas");
@@ -46,6 +50,7 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         builder.UseSetting("Cuentas:UrlWeb", "https://aula-lista.test");
         builder.UseSetting("Cuentas:IntentosInicioSesionPorMinuto", intentosInicioSesionPorMinuto.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.UseSetting("Correo:Proveedor", OpcionesCorreo.ProveedorBuzon);
+        builder.UseSetting("Ia:SolicitudesPorHora", solicitudesIaPorHora.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.UseSetting("Almacen:Ruta", _almacen);
         builder.UseSetting("Trabajos:Servidor", "false");
         builder.ConfigureTestServices(services =>
@@ -54,6 +59,9 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
             services.AddSingleton<TimeProvider>(Reloj);
             services.RemoveAll<IColaTrabajos>();
             services.RemoveAll<IDespachoTrabajos>();
+            services.RemoveAll<IRedactorObservaciones>();
+            services.AddSingleton<RedactorDePrueba>();
+            services.AddSingleton<IRedactorObservaciones>(sp => sp.GetRequiredService<RedactorDePrueba>());
             services.AddScoped<ColaInmediata>();
             services.AddScoped<IColaTrabajos>(sp => sp.GetRequiredService<ColaInmediata>());
             services.AddScoped<IDespachoTrabajos>(sp => sp.GetRequiredService<ColaInmediata>());
@@ -136,15 +144,22 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
     /// <summary>Corre los trabajos al confirmarse la solicitud, con el mismo ejecutor que usa Hangfire.</summary>
     private sealed class ColaInmediata(EjecutorTrabajos ejecutor) : IColaTrabajos, IDespachoTrabajos
     {
-        private readonly List<(Guid Docente, Guid Exportacion)> _pendientes = [];
+        private readonly List<Func<Task>> _pendientes = [];
 
-        public void EncolarExportacion(Guid docenteId, Guid exportacionId) => _pendientes.Add((docenteId, exportacionId));
+        public void EncolarExportacion(Guid docenteId, Guid exportacionId) =>
+            _pendientes.Add(() => ejecutor.GenerarExportacionAsync(docenteId, exportacionId, null, CancellationToken.None));
+
+        public void EncolarObservaciones(Guid docenteId, Guid periodoId, IReadOnlyList<Guid> observacionIds)
+        {
+            var ids = observacionIds.ToArray();
+            _pendientes.Add(() => ejecutor.RedactarObservacionesAsync(docenteId, periodoId, ids, CancellationToken.None));
+        }
 
         public void Despachar()
         {
-            foreach (var (docente, exportacion) in _pendientes)
+            foreach (var pendiente in _pendientes)
             {
-                ejecutor.GenerarExportacionAsync(docente, exportacion, null, CancellationToken.None).GetAwaiter().GetResult();
+                pendiente().GetAwaiter().GetResult();
             }
 
             _pendientes.Clear();

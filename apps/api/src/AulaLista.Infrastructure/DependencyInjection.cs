@@ -1,11 +1,15 @@
+using Anthropic;
+using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Infrastructure.Cierre;
 using AulaLista.Infrastructure.Comun;
 using AulaLista.Infrastructure.Cuentas;
 using AulaLista.Infrastructure.Evaluacion;
 using AulaLista.Infrastructure.Grupos;
+using AulaLista.Infrastructure.Ia;
 using AulaLista.Infrastructure.Persistencia;
 using AulaLista.Infrastructure.Trabajos;
 using Hangfire;
@@ -49,6 +53,9 @@ public static class DependencyInjection
         services.AddOptions<OpcionesAlmacen>().Bind(configuration.GetSection(OpcionesAlmacen.Seccion)).ValidateDataAnnotations();
         services.AddSingleton<IAlmacenArchivos, AlmacenArchivosLocal>();
 
+        services.AddScoped<IRepositorioCierre, RepositorioCierre>();
+        AgregarIa(services, configuration);
+
         AgregarCorreo(services, configuration);
         AgregarTrabajos(services, configuration);
 
@@ -79,6 +86,34 @@ public static class DependencyInjection
         {
             services.AddSingleton<BuzonCorreo>();
             services.AddSingleton<IEnvioCorreo>(sp => sp.GetRequiredService<BuzonCorreo>());
+        }
+    }
+
+    /// <summary>reglas/05-ia: modelo y límites de configuración; la clave solo por variable de entorno.</summary>
+    private static void AgregarIa(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<OpcionesIa>()
+            .Bind(configuration.GetSection(OpcionesIa.Seccion))
+            .ValidateDataAnnotations()
+            .Validate(
+                o => o.Proveedor != OpcionesIa.ProveedorClaude || !string.IsNullOrWhiteSpace(o.ApiKey),
+                "Falta Ia__ApiKey.")
+            .ValidateOnStart();
+        services.AddSingleton<LimitadorIa>();
+
+        var proveedor = configuration.GetSection(OpcionesIa.Seccion)[nameof(OpcionesIa.Proveedor)] ?? OpcionesIa.ProveedorSimulado;
+        if (proveedor == OpcionesIa.ProveedorClaude)
+        {
+            services.AddSingleton(sp =>
+            {
+                var opciones = sp.GetRequiredService<IOptions<OpcionesIa>>().Value;
+                return new AnthropicClient { ApiKey = opciones.ApiKey!, MaxRetries = opciones.Reintentos };
+            });
+            services.AddSingleton<IRedactorObservaciones, RedactorClaude>();
+        }
+        else
+        {
+            services.AddSingleton<IRedactorObservaciones, RedactorSimulado>();
         }
     }
 

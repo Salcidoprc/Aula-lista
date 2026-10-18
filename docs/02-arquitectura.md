@@ -79,6 +79,8 @@ erDiagram
   ALUMNO ||--o{ CALIFICACION : recibe
   ALUMNO ||--o{ NOTA : tiene
   ALUMNO ||--o{ OBSERVACION : "una por periodo"
+  DOCENTE ||--o| ESTILO_OBSERVACIONES : configura
+  GRUPO ||--o{ LLAMADA_IA : registra
   ALUMNO ||--o{ BOLETA : "versiones por periodo"
   ALUMNO }o--o{ TUTOR : "vinculo_tutor"
   TUTOR ||--o{ ENLACE_TUTOR : usa
@@ -119,7 +121,9 @@ erDiagram
 | `importacion` | grupo_id, docente_id, origen (excel, csv, texto), confirmada_en | Solo metadatos; el archivo no se guarda (ADR-0014) |
 | `enlace_tutor` | tutor_id, token_hash, creado_por_docente_id, expira_en, revocado_en, ultimo_uso_en | |
 | `nota` | alumno_id, periodo_id, texto, etiqueta (fortaleza, mejora, conducta, ninguna), fecha | |
-| `observacion` | alumno_id, periodo_id, estado (sin_generar, generando, borrador, aprobada, publicada), borrador_ia, texto_final, instrucciones, modelo, tokens_entrada, tokens_salida, aprobada_en | Una por alumno y periodo |
+| `observacion` | alumno_id, docente_id, periodo_id, estado (sin_generar, generando, borrador, aprobada, publicada), texto, borrador_ia, texto_final, instruccion, regeneraciones (0 a 5), modelo, version_prompt, tokens_entrada, tokens_salida, fallo (rechazo, longitud, error), datos_cambiaron, aprobada_en | Una por alumno y periodo; `borrador_ia` es la primera versión (RN-045) |
+| `estilo_observaciones` | docente_id (llave), longitud (breve, normal, detallada), persona (segunda, tercera), ejemplos (text[], hasta 3 de 800 caracteres) | Sin fila, el estilo por defecto (normal, tercera) |
+| `llamada_ia` | docente_id, grupo_id, modelo, version_prompt, tokens_entrada, tokens_salida, tokens_cache_leidos, duracion_ms, resultado | Una por llamada, sin contenido; base del límite por hora y de `consumo_mensual` |
 | `boleta` | alumno_id, periodo_id, version, datos (jsonb con la foto de calificaciones), pdf_ruta, publicada_en, reemplazada_por | Las versiones no se borran |
 | `aviso` | grupo_id, docente_id, titulo, cuerpo, urgente, destinatarios (todos o lista) | |
 | `entrega_aviso` | aviso_id, tutor_id, canal (push, correo, whatsapp, compartido), estado, leido_en | |

@@ -89,6 +89,9 @@ internal sealed class RepositorioEvaluacion(AulaListaDbContext db) : IRepositori
         await db.Notas.Where(n => n.AlumnoId == alumnoId).OrderByDescending(n => n.Fecha).ThenByDescending(n => n.CreatedAt)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<Nota>> NotasDelPeriodoAsync(Guid periodoId, CancellationToken cancellationToken) =>
+        await db.Notas.Where(n => n.PeriodoId == periodoId).OrderBy(n => n.Fecha).ThenBy(n => n.CreatedAt).ToListAsync(cancellationToken);
+
     public Task<Nota?> NotaAsync(Guid id, CancellationToken cancellationToken) => db.Notas.SingleOrDefaultAsync(n => n.Id == id, cancellationToken);
 
     public void Agregar(Nota nota) => db.Notas.Add(nota);

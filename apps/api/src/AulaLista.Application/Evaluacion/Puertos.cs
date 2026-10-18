@@ -58,6 +58,9 @@ public interface IRepositorioEvaluacion
 
     Task<IReadOnlyList<Nota>> NotasAsync(Guid alumnoId, CancellationToken cancellationToken);
 
+    /// <summary>Las notas de todos los alumnos del periodo, de la más vieja a la más nueva.</summary>
+    Task<IReadOnlyList<Nota>> NotasDelPeriodoAsync(Guid periodoId, CancellationToken cancellationToken);
+
     Task<Nota?> NotaAsync(Guid id, CancellationToken cancellationToken);
 
     void Agregar(Nota nota);

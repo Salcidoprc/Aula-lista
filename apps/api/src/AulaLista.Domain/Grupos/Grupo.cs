@@ -201,4 +201,14 @@ public sealed class Periodo : Entidad
     public Guid DocenteId { get; private set; }
 
     public string Estado { get; private set; } = EstadoPeriodo.Abierto;
+
+    /// <summary>RN-040 y RF-040: los pesos quedan fijos; la captura sigue (RN-037). Los requisitos los revisa el caso de uso.</summary>
+    public void IniciarCierre(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoPeriodo.Abierto)
+        {
+            Estado = EstadoPeriodo.EnCierre;
+            MarcarActualizada(ahora);
+        }
+    }
 }
