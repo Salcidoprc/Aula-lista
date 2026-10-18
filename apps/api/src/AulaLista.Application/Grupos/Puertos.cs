@@ -65,6 +65,9 @@ public interface IDatosDeEvaluacion
     /// <summary>Unidades del ciclo con rubros en algún grupo (RN-027: no se pueden borrar).</summary>
     Task<IReadOnlySet<Guid>> UnidadesConDatosAsync(Guid cicloId, CancellationToken cancellationToken);
 
+    /// <summary>Fechas con toma de asistencia en algún grupo del ciclo (SPEC-10, casos borde).</summary>
+    Task<IReadOnlyList<DateOnly>> FechasDeTomasAsync(Guid cicloId, CancellationToken cancellationToken);
+
     /// <summary>Si el grupo tiene alguna calificación capturada (SPEC-02: entonces no se borra).</summary>
     Task<bool> GrupoTieneCalificacionesAsync(Guid grupoId, CancellationToken cancellationToken);
 }

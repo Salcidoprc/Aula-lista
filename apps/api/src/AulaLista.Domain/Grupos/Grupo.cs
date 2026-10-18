@@ -13,6 +13,16 @@ public static class Redondeo
     public static readonly IReadOnlyList<string> Todos = [Arriba, Abajo, Cercano];
 }
 
+/// <summary>Cuánto vale un retardo para el promedio (RN-102): 1, 0.5 o 0; por defecto 1.</summary>
+public static class ValorRetardo
+{
+    public const decimal PorDefecto = 1m;
+
+    public static readonly IReadOnlyList<decimal> Todos = [1m, 0.5m, 0m];
+
+    public static bool EsValido(decimal valor) => Todos.Contains(valor);
+}
+
 public static class PlanGrupo
 {
     public const string Gratis = "gratis";
@@ -80,6 +90,9 @@ public sealed class Grupo : Entidad
 
     public string Redondeo { get; private set; } = ConfiguracionCalificacion.PorDefecto.Redondeo;
 
+    /// <summary>Lo que vale un retardo en la asistencia (RN-102).</summary>
+    public decimal ValorRetardo { get; private set; } = Grupos.ValorRetardo.PorDefecto;
+
     public DateTimeOffset? ArchivadoEn { get; private set; }
 
     public bool EstaArchivado => ArchivadoEn is not null;
@@ -102,8 +115,10 @@ public sealed class Grupo : Entidad
     public IReadOnlyList<Periodo> CrearPeriodos(IEnumerable<Unidad> unidades, DateTimeOffset ahora) =>
         unidades.Select(u => new Periodo(this, u, ahora)).ToList();
 
+    /// <summary>Sin <paramref name="valorRetardo"/>, el retardo conserva su valor.</summary>
     public Resultado Editar(
-        string nombre, int grado, string? materia, ConfiguracionCalificacion configuracion, DateTimeOffset ahora)
+        string nombre, int grado, string? materia, ConfiguracionCalificacion configuracion, DateTimeOffset ahora,
+        decimal? valorRetardo = null)
     {
         if (EstaArchivado)
         {
@@ -115,7 +130,7 @@ public sealed class Grupo : Entidad
             return Resultado.Fallo(error);
         }
 
-        if (!configuracion.EsValida)
+        if (!configuracion.EsValida || valorRetardo is { } v && !Grupos.ValorRetardo.EsValido(v))
         {
             return Resultado.Fallo(ErroresGrupos.ConfiguracionCalificacionInvalida);
         }
@@ -127,6 +142,7 @@ public sealed class Grupo : Entidad
         CalifAprobatoria = configuracion.CalifAprobatoria;
         DecimalesFinal = configuracion.DecimalesFinal;
         Redondeo = configuracion.Redondeo;
+        ValorRetardo = valorRetardo ?? ValorRetardo;
         MarcarActualizada(ahora);
         return Resultado.Exito();
     }

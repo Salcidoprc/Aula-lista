@@ -414,7 +414,7 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
         var g = await PrepararAsync(0);
         var tipos = await g.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/tipos-rubro");
 
-        Assert.Equal(["Tareas", "Actividades", "Prácticas", "Participaciones", "Exámenes", "Proyecto", "Exposición"],
+        Assert.Equal(["Tareas", "Actividades", "Prácticas", "Participaciones", "Exámenes", "Proyecto", "Exposición", "Asistencia"],
             tipos.EnumerateArray().Select(t => t.GetProperty("nombre").GetString()));
         await using var conexion = new NpgsqlConnection(baseDeDatos.ConexionRuntime);
         await conexion.OpenAsync();

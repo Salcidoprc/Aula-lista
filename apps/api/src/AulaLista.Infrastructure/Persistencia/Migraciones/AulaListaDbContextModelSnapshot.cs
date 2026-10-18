@@ -470,6 +470,61 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                     b.ToTable("actividad_equipo", (string)null);
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Asistencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<Guid>("TomaAsistenciaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("toma_asistencia_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asistencia");
+
+                    b.HasIndex("AlumnoId")
+                        .HasDatabaseName("ix_asistencia_alumno_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_asistencia_docente_id");
+
+                    b.HasIndex("TomaAsistenciaId", "AlumnoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asistencia_toma_asistencia_id_alumno_id");
+
+                    b.ToTable("asistencia", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_asistencia_estado", "estado IN ('presente', 'falta', 'retardo', 'justificada')");
+                        });
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -984,6 +1039,45 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.TomaAsistencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<Guid>("GrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_toma_asistencia");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_toma_asistencia_docente_id");
+
+                    b.HasIndex("GrupoId", "Fecha")
+                        .IsUnique()
+                        .HasDatabaseName("ix_toma_asistencia_grupo_id_fecha");
+
+                    b.ToTable("toma_asistencia", (string)null);
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Grupos.Alumno", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1181,6 +1275,13 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<decimal>("ValorRetardo")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(3, 2)
+                        .HasColumnType("numeric(3,2)")
+                        .HasDefaultValue(1m)
+                        .HasColumnName("valor_retardo");
+
                     b.HasKey("Id")
                         .HasName("pk_grupo");
 
@@ -1203,6 +1304,8 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                             t.HasCheckConstraint("ck_grupo_plan", "plan IN ('gratis', 'pro')");
 
                             t.HasCheckConstraint("ck_grupo_redondeo", "redondeo IN ('arriba', 'abajo', 'cercano')");
+
+                            t.HasCheckConstraint("ck_grupo_valor_retardo", "valor_retardo IN (0, 0.5, 1)");
                         });
                 });
 
@@ -1599,6 +1702,23 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasConstraintName("fk_actividad_equipo_alumnos_alumno_id");
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.Asistencia", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_asistencia_alumno_alumno_id");
+
+                    b.HasOne("AulaLista.Domain.Evaluacion.TomaAsistencia", null)
+                        .WithMany("Alumnos")
+                        .HasForeignKey("TomaAsistenciaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_asistencia_tomas_asistencia_toma_asistencia_id");
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Calificacion", b =>
                 {
                     b.HasOne("AulaLista.Domain.Evaluacion.Actividad", null)
@@ -1714,6 +1834,16 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasConstraintName("fk_rubro_tipos_rubro_tipo_rubro_id");
                 });
 
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.TomaAsistencia", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_toma_asistencia_grupo_grupo_id");
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Grupos.Alumno", b =>
                 {
                     b.HasOne("AulaLista.Domain.Grupos.Grupo", null)
@@ -1818,6 +1948,11 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
             modelBuilder.Entity("AulaLista.Domain.Evaluacion.Rubro", b =>
                 {
                     b.Navigation("Criterios");
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Evaluacion.TomaAsistencia", b =>
+                {
+                    b.Navigation("Alumnos");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Grupos.CicloEscolar", b =>

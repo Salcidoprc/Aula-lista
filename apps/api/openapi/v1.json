@@ -1947,6 +1947,178 @@
         }
       }
     },
+    "/api/v1/grupos/{id}/asistencias": {
+      "get": {
+        "tags": [
+          "Asistencia"
+        ],
+        "operationId": "ListarAsistencias",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TomaAsistenciaDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/asistencias/{fecha}": {
+      "put": {
+        "tags": [
+          "Asistencia"
+        ],
+        "operationId": "GuardarAsistencia",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fecha",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuardarAsistencia"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoAsistencia"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Asistencia"
+        ],
+        "operationId": "BorrarAsistencia",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fecha",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/alumnos/{id}/notas": {
       "get": {
         "tags": [
@@ -2221,6 +2393,25 @@
           }
         }
       },
+      "AsistenciaAlumnoDto": {
+        "required": [
+          "alumnoId",
+          "estados"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estados": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "CambiarContrasena": {
         "required": [
           "actual",
@@ -2478,7 +2669,8 @@
           "califMinima",
           "califAprobatoria",
           "decimalesFinal",
-          "redondeo"
+          "redondeo",
+          "valorRetardo"
         ],
         "type": "object",
         "properties": {
@@ -2508,6 +2700,14 @@
           },
           "redondeo": {
             "type": "string"
+          },
+          "valorRetardo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -2992,6 +3192,15 @@
           },
           "redondeo": {
             "type": "string"
+          },
+          "valorRetardo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -3064,6 +3273,47 @@
           }
         }
       },
+      "EstadoAlumno": {
+        "required": [
+          "alumnoId",
+          "estado"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "EstadoAlumnoDto": {
+        "required": [
+          "alumnoId",
+          "estado",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "FilaImportacion": {
         "required": [
           "nombres",
@@ -3128,6 +3378,7 @@
           "califAprobatoria",
           "decimalesFinal",
           "redondeo",
+          "valorRetardo",
           "archivadoEn"
         ],
         "type": "object",
@@ -3201,12 +3452,34 @@
           "redondeo": {
             "type": "string"
           },
+          "valorRetardo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
           "archivadoEn": {
             "type": [
               "null",
               "string"
             ],
             "format": "date-time"
+          }
+        }
+      },
+      "GuardarAsistencia": {
+        "required": [
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EstadoAlumno"
+            }
           }
         }
       },
@@ -3306,7 +3579,9 @@
           "celdas",
           "resultados",
           "equipos",
-          "composiciones"
+          "composiciones",
+          "tomas",
+          "asistencia"
         ],
         "type": "object",
         "properties": {
@@ -3369,6 +3644,20 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ComposicionDto"
+            }
+          },
+          "tomas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "asistencia": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AsistenciaAlumnoDto"
             }
           }
         }
@@ -3632,6 +3921,10 @@
             "items": {
               "$ref": "#/components/schemas/UnidadEditada"
             }
+          },
+          "confirmarTomasFuera": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -3772,6 +4065,25 @@
             "format": "double"
           },
           "rubrosSinDatos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ResultadoAsistencia": {
+        "required": [
+          "toma",
+          "omitidos"
+        ],
+        "type": "object",
+        "properties": {
+          "toma": {
+            "$ref": "#/components/schemas/TomaAsistenciaDto"
+          },
+          "omitidos": {
             "type": "array",
             "items": {
               "type": "string",
@@ -4104,6 +4416,25 @@
           }
         }
       },
+      "TomaAsistenciaDto": {
+        "required": [
+          "fecha",
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "alumnos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EstadoAlumnoDto"
+            }
+          }
+        }
+      },
       "TutorDto": {
         "required": [
           "id",
@@ -4362,6 +4693,9 @@
     },
     {
       "name": "Equipos"
+    },
+    {
+      "name": "Asistencia"
     },
     {
       "name": "Notas"
