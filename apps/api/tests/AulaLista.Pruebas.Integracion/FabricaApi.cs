@@ -155,6 +155,12 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
             _pendientes.Add(() => ejecutor.RedactarObservacionesAsync(docenteId, periodoId, ids, CancellationToken.None));
         }
 
+        public void EncolarBoletas(Guid docenteId, IReadOnlyList<Guid> boletaIds)
+        {
+            var ids = boletaIds.ToArray();
+            _pendientes.Add(() => ejecutor.PrepararBoletasAsync(docenteId, ids, null, CancellationToken.None));
+        }
+
         public void Despachar()
         {
             foreach (var pendiente in _pendientes)

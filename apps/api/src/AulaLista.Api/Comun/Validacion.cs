@@ -1,4 +1,5 @@
 using AulaLista.Application.Comun;
+using AulaLista.Domain.Boletas;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
@@ -51,6 +52,11 @@ internal static class Validacion
             _ when error == ErroresCierre.PeriodoSinCierre || error == ErroresCierre.ObservacionAprobada
                 || error == ErroresCierre.ObservacionPublicada || error == ErroresCierre.EnGeneracion
                 || error == ErroresCierre.LimiteRegeneraciones
+                => StatusCodes.Status409Conflict,
+            _ when error == ErroresBoletas.BoletaPublicada || error == ErroresBoletas.BoletaNoCorregible
+                || error == ErroresBoletas.SinCambios || error == ErroresBoletas.BoletaPreparando
+                || error == ErroresBoletas.ObservacionSinAprobar || error == ErroresBoletas.SinBoletasPorPublicar
+                || error == ErroresBoletas.BoletasDesactualizadas || error == ErroresBoletas.SinBoletas
                 => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status422UnprocessableEntity,
         };

@@ -1,4 +1,5 @@
 using AulaLista.Application.Comun;
+using AulaLista.Domain.Boletas;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
@@ -67,6 +68,8 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<LlamadaIa> LlamadasIa => Set<LlamadaIa>();
 
+    public DbSet<Boleta> Boletas => Set<Boleta>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();
@@ -113,5 +116,6 @@ public sealed class AulaListaDbContext : DbContext
         modelBuilder.Entity<Observacion>().HasQueryFilter(o => o.DocenteId == DocenteActual);
         modelBuilder.Entity<EstiloObservaciones>().HasQueryFilter(e => e.DocenteId == DocenteActual);
         modelBuilder.Entity<LlamadaIa>().HasQueryFilter(l => l.DocenteId == DocenteActual);
+        modelBuilder.Entity<Boleta>().HasQueryFilter(b => b.DocenteId == DocenteActual);
     }
 }

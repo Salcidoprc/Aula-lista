@@ -211,4 +211,24 @@ public sealed class Periodo : Entidad
             MarcarActualizada(ahora);
         }
     }
+
+    /// <summary>RN-048: de solo lectura, al publicar todas las boletas o cuando el docente lo decide.</summary>
+    public void Cerrar(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoPeriodo.EnCierre)
+        {
+            Estado = EstadoPeriodo.Cerrado;
+            MarcarActualizada(ahora);
+        }
+    }
+
+    /// <summary>RN-038: vuelve a cierre para corregir; quien lo llama lo confirma y lo audita.</summary>
+    public void Reabrir(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoPeriodo.Cerrado)
+        {
+            Estado = EstadoPeriodo.EnCierre;
+            MarcarActualizada(ahora);
+        }
+    }
 }

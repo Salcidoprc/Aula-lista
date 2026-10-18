@@ -23,6 +23,94 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AulaLista.Domain.Boletas.Boleta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character(8)")
+                        .HasColumnName("codigo")
+                        .IsFixedLength();
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Datos")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("datos");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateTimeOffset>("EmitidaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("emitida_en");
+
+                    b.Property<bool>("FalloPdf")
+                        .HasColumnType("boolean")
+                        .HasColumnName("fallo_pdf");
+
+                    b.Property<string>("PdfRuta")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("pdf_ruta");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("periodo_id");
+
+                    b.Property<DateTimeOffset?>("PublicadaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("publicada_en");
+
+                    b.Property<Guid?>("ReemplazadaPor")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reemplazada_por");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_boleta");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_boleta_codigo");
+
+                    b.HasIndex("PeriodoId")
+                        .HasDatabaseName("ix_boleta_periodo_id");
+
+                    b.HasIndex("ReemplazadaPor")
+                        .HasDatabaseName("ix_boleta_reemplazada_por");
+
+                    b.HasIndex("AlumnoId", "PeriodoId", "Version")
+                        .IsUnique()
+                        .HasDatabaseName("ix_boleta_alumno_id_periodo_id_version");
+
+                    b.ToTable("boleta", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_boleta_reemplazada", "reemplazada_por IS NULL OR publicada_en IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_boleta_version", "version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("AulaLista.Domain.Cierre.EstiloObservaciones", b =>
                 {
                     b.Property<Guid>("DocenteId")
@@ -1812,6 +1900,10 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("character varying(20)")
                         .HasColumnName("actor_tipo");
 
+                    b.Property<int?>("Cantidad")
+                        .HasColumnType("integer")
+                        .HasColumnName("cantidad");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -1846,6 +1938,29 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasDatabaseName("ix_auditoria_actor_id_fecha");
 
                     b.ToTable("auditoria", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Boletas.Boleta", b =>
+                {
+                    b.HasOne("AulaLista.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_boleta_alumno_alumno_id");
+
+                    b.HasOne("AulaLista.Domain.Grupos.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_boleta_periodos_periodo_id");
+
+                    b.HasOne("AulaLista.Domain.Boletas.Boleta", null)
+                        .WithMany()
+                        .HasForeignKey("ReemplazadaPor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_boleta_boleta_reemplazada_por");
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Cierre.EstiloObservaciones", b =>

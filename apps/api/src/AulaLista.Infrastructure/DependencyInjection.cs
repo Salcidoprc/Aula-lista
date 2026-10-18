@@ -1,9 +1,11 @@
 using Anthropic;
+using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Infrastructure.Boletas;
 using AulaLista.Infrastructure.Cierre;
 using AulaLista.Infrastructure.Comun;
 using AulaLista.Infrastructure.Cuentas;
@@ -54,6 +56,8 @@ public static class DependencyInjection
         services.AddSingleton<IAlmacenArchivos, AlmacenArchivosLocal>();
 
         services.AddScoped<IRepositorioCierre, RepositorioCierre>();
+        services.AddScoped<IRepositorioBoletas, RepositorioBoletas>();
+        services.AddSingleton<IGeneradorBoletas, GeneradorBoletas>();
         AgregarIa(services, configuration);
 
         AgregarCorreo(services, configuration);

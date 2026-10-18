@@ -32,6 +32,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Cuentas\contrasenas-comunes.txt" LogicalName="AulaLista.Infrastructure.Cuentas.contrasenas-comunes.txt" />
     <EmbeddedResource Include="Ia\Prompts\*.md" LogicalName="AulaLista.Infrastructure.Ia.Prompts.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Boletas\Fuentes\*.ttf" LogicalName="AulaLista.Infrastructure.Boletas.Fuentes.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

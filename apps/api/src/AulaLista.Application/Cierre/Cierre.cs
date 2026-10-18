@@ -4,6 +4,7 @@ using AulaLista.Application.Grupos;
 using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Operacion;
 using Microsoft.Extensions.Options;
 
 namespace AulaLista.Application.Cierre;
@@ -204,4 +205,61 @@ public sealed class GenerarObservacionesCasoUso(
     }
 
     private Guid Docente => usuario.DocenteId ?? throw new InvalidOperationException("Generar requiere un docente autenticado.");
+}
+
+/// <summary>RN-048: el docente cierra la unidad aunque falten boletas por publicar; queda de solo lectura y en auditoría.</summary>
+public sealed class CerrarPeriodoCasoUso(
+    IRepositorioGrupos grupos, ConsultaCierre consulta, IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+{
+    public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, CancellationToken ct)
+    {
+        if (await grupos.PeriodoAsync(periodoId, ct) is not { } periodo)
+        {
+            return null;
+        }
+
+        if (periodo.Periodo.Estado != EstadoPeriodo.Cerrado)
+        {
+            if (ReglasCierre.PuedeRevisar(periodo) is { } bloqueo)
+            {
+                return Resultado.Fallo<CierreDto>(bloqueo);
+            }
+
+            periodo.Periodo.Cerrar(reloj.GetUtcNow());
+            auditoria.Registrar(AccionAuditoria.PeriodoCerrado, "periodo", periodoId, usuario.DocenteId);
+            await unidad.GuardarAsync(ct);
+        }
+
+        return Resultado.Exito((await consulta.LeerAsync(periodoId, ct))!);
+    }
+}
+
+/// <summary>
+/// RN-038: reabrir una unidad cerrada la regresa a cierre para corregir calificaciones u observaciones. La confirmación
+/// la pide la pantalla y queda en auditoría. Las boletas publicadas no cambian hasta emitir su versión corregida.
+/// </summary>
+public sealed class ReabrirPeriodoCasoUso(
+    IRepositorioGrupos grupos, ConsultaCierre consulta, IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
+{
+    public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, CancellationToken ct)
+    {
+        if (await grupos.PeriodoAsync(periodoId, ct) is not { } periodo)
+        {
+            return null;
+        }
+
+        if (periodo.Grupo.EstaArchivado)
+        {
+            return Resultado.Fallo<CierreDto>(ErroresGrupos.GrupoArchivado);
+        }
+
+        if (periodo.Periodo.Estado == EstadoPeriodo.Cerrado)
+        {
+            periodo.Periodo.Reabrir(reloj.GetUtcNow());
+            auditoria.Registrar(AccionAuditoria.PeriodoReabierto, "periodo", periodoId, usuario.DocenteId);
+            await unidad.GuardarAsync(ct);
+        }
+
+        return Resultado.Exito((await consulta.LeerAsync(periodoId, ct))!);
+    }
 }

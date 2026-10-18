@@ -225,15 +225,14 @@ public sealed class Observacion : Entidad
         return Resultado.Exito();
     }
 
-    /// <summary>RF-046: vuelve a borrador mientras la boleta no esté publicada.</summary>
+    /// <summary>
+    /// RF-046: vuelve a borrador. Si su boleta ya se publicó, la boleta no cambia: el tutor sigue viendo la emitida
+    /// hasta que el docente emita la versión corregida (RN-051, RN-052). Publicada solo se reabre con el periodo
+    /// reabierto, porque un periodo cerrado es de solo lectura (RN-038).
+    /// </summary>
     public Resultado Reabrir(DateTimeOffset ahora)
     {
-        if (Estado == EstadoObservacion.Publicada)
-        {
-            return Resultado.Fallo(ErroresCierre.ObservacionPublicada);
-        }
-
-        if (Estado == EstadoObservacion.Aprobada)
+        if (EstaAprobada)
         {
             Estado = EstadoObservacion.Borrador;
             AprobadaEn = null;
@@ -241,6 +240,16 @@ public sealed class Observacion : Entidad
         }
 
         return Resultado.Exito();
+    }
+
+    /// <summary>RN-050: su boleta llegó al tutor. Solo una aprobada se publica.</summary>
+    public void MarcarPublicada(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoObservacion.Aprobada)
+        {
+            Estado = EstadoObservacion.Publicada;
+            MarcarActualizada(ahora);
+        }
     }
 
     private static ErrorNegocio? TextoValido(string texto) =>

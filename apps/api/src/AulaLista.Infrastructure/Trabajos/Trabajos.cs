@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
@@ -34,6 +35,12 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
         var ids = observacionIds.ToArray();
         _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(
             e => e.RedactarObservacionesAsync(docenteId, periodoId, ids, CancellationToken.None)));
+    }
+
+    public void EncolarBoletas(Guid docenteId, IReadOnlyList<Guid> boletaIds)
+    {
+        var ids = boletaIds.ToArray();
+        _pendientes.Add(() => cliente.Enqueue<EjecutorTrabajos>(e => e.PrepararBoletasAsync(docenteId, ids, null, CancellationToken.None)));
     }
 
     public void Despachar()
@@ -173,6 +180,32 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
         var resultado = await trabajo(sp);
         await transaccion.CommitAsync(cancellationToken);
         return resultado;
+    }
+
+    /// <summary>
+    /// RF-050: dibuja y guarda los PDF de las boletas. Si falla el último reintento, las que quedaron sin PDF dicen
+    /// "No se pudo preparar" y volver a generar lo intenta de nuevo.
+    /// </summary>
+    [AutomaticRetry(Attempts = Reintentos)]
+    public async Task PrepararBoletasAsync(Guid docenteId, Guid[] boletaIds, PerformContext? contexto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await EnAlcanceAsync(docenteId, async sp =>
+            {
+                await sp.GetRequiredService<PrepararBoletasTrabajo>().EjecutarAsync(boletaIds, cancellationToken);
+                return true;
+            }, cancellationToken);
+        }
+        catch (Exception) when ((contexto?.GetJobParameter<int>("RetryCount") ?? Reintentos) >= Reintentos)
+        {
+            await EnAlcanceAsync(docenteId, async sp =>
+            {
+                await sp.GetRequiredService<PrepararBoletasTrabajo>().MarcarFallidasAsync(boletaIds, cancellationToken);
+                return true;
+            }, cancellationToken);
+            throw;
+        }
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Falló la redacción de observaciones del periodo {PeriodoId}")]

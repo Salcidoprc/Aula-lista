@@ -22,7 +22,9 @@ internal sealed class RepositorioCierre(AulaListaDbContext db) : IRepositorioCie
     public async Task MarcarDatosCambiaronAsync(
         Guid periodoId, IReadOnlyCollection<Guid>? alumnoIds, DateTimeOffset ahora, CancellationToken cancellationToken)
     {
-        var aprobadas = db.Observaciones.Where(o => o.PeriodoId == periodoId && o.Estado == EstadoObservacion.Aprobada);
+        // Una publicada también: su boleta emitida no cambia, pero el docente debe revisar antes de emitir la corregida.
+        var aprobadas = db.Observaciones.Where(o => o.PeriodoId == periodoId
+            && (o.Estado == EstadoObservacion.Aprobada || o.Estado == EstadoObservacion.Publicada));
         if (alumnoIds is not null)
         {
             aprobadas = aprobadas.Where(o => alumnoIds.Contains(o.AlumnoId));
