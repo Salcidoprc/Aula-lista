@@ -23,7 +23,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AulaLista.Pruebas.Integracion;
 
-public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000, int solicitudesIaPorHora = 200)
+public sealed partial class FabricaApi(
+    BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000, int solicitudesIaPorHora = 200, bool registrosDetallados = false)
     : WebApplicationFactory<Program>
 {
     public const string ContrasenaValida = "lapiz-azul-del-salon-4B";
@@ -52,6 +53,9 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
     /// <summary>La IA de las pruebas: guarda lo que se le envía y responde como el redactor simulado.</summary>
     public RedactorDePrueba Redactor => Services.GetRequiredService<RedactorDePrueba>();
 
+    /// <summary>Todo lo que la API escribió en sus logs (SPEC-09: sin nombres ni teléfonos).</summary>
+    public SumideroRegistros Registros => Services.GetRequiredService<SumideroRegistros>();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Pruebas");
@@ -67,6 +71,14 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
         builder.UseSetting("Trabajos:Servidor", "false");
         builder.UseSetting("Whatsapp:SecretoApp", SecretoWebhook);
         builder.UseSetting("Pagos:SecretoWebhook", SecretoPagos);
+        if (registrosDetallados)
+        {
+            builder.UseSetting("Serilog:MinimumLevel:Default", "Debug");
+            builder.UseSetting("Serilog:MinimumLevel:Override:Microsoft.AspNetCore", "Information");
+            builder.UseSetting("Serilog:MinimumLevel:Override:Microsoft.EntityFrameworkCore", "Information");
+            builder.UseSetting("Serilog:MinimumLevel:Override:Hangfire", "Information");
+        }
+
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<TimeProvider>();
@@ -76,6 +88,8 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
             services.RemoveAll<IRedactorObservaciones>();
             services.AddSingleton<RedactorDePrueba>();
             services.AddSingleton<IRedactorObservaciones>(sp => sp.GetRequiredService<RedactorDePrueba>());
+            services.AddSingleton<SumideroRegistros>();
+            services.AddSingleton<Serilog.Core.ILogEventSink>(sp => sp.GetRequiredService<SumideroRegistros>());
             services.AddScoped<ColaInmediata>();
             services.AddScoped<IColaTrabajos>(sp => sp.GetRequiredService<ColaInmediata>());
             services.AddScoped<IDespachoTrabajos>(sp => sp.GetRequiredService<ColaInmediata>());
@@ -193,6 +207,22 @@ public sealed partial class FabricaApi(BaseDeDatosFixture baseDeDatos, int inten
 
             _pendientes.Clear();
         }
+    }
+}
+
+/// <summary>Guarda cada evento de log ya renderizado, con sus propiedades y su excepción.</summary>
+public sealed class SumideroRegistros : Serilog.Core.ILogEventSink
+{
+    private readonly System.Collections.Concurrent.ConcurrentQueue<string> _lineas = new();
+
+    public IReadOnlyCollection<string> Lineas => _lineas;
+
+    public void Emit(Serilog.Events.LogEvent logEvent)
+    {
+        ArgumentNullException.ThrowIfNull(logEvent);
+        var escritor = new StringWriter(System.Globalization.CultureInfo.InvariantCulture);
+        new Serilog.Formatting.Json.JsonFormatter(renderMessage: true).Format(logEvent, escritor);
+        _lineas.Enqueue(escritor.ToString());
     }
 }
 

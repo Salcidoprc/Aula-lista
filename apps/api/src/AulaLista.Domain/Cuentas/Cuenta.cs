@@ -31,9 +31,14 @@ public sealed class Cuenta : Entidad
 
     public DateTimeOffset? EliminacionSolicitadaEn { get; private set; }
 
+    /// <summary>SPEC-09: <c>admin</c> abre el panel de administración. Se asigna con un comando de la API, nunca en la app.</summary>
+    public string Rol { get; private set; } = RolCuenta.Docente;
+
     public bool EstaActiva => Estado == EstadoCuenta.Activa;
 
     public bool CorreoVerificado => CorreoVerificadoEn is not null;
+
+    public bool EsAdmin => Rol == RolCuenta.Admin;
 
     public static Cuenta ConContrasena(string correo, string hashContrasena, DateTimeOffset ahora)
     {
@@ -52,6 +57,12 @@ public sealed class Cuenta : Entidad
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(correo);
         return correo.Trim().ToLowerInvariant();
+    }
+
+    public void HacerAdmin(DateTimeOffset ahora)
+    {
+        Rol = RolCuenta.Admin;
+        MarcarActualizada(ahora);
     }
 
     public void VerificarCorreo(DateTimeOffset ahora)
@@ -88,4 +99,10 @@ public static class EstadoCuenta
 {
     public const string Activa = "activa";
     public const string EliminacionSolicitada = "eliminacion_solicitada";
+}
+
+public static class RolCuenta
+{
+    public const string Docente = "docente";
+    public const string Admin = "admin";
 }

@@ -23,6 +23,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +41,24 @@ builder.Services.AddSerilog((services, configuracion) => configuracion
     .ReadFrom.Configuration(builder.Configuration)
     .ReadFrom.Services(services)
     .Enrich.FromLogContext());
+
+// SPEC-09: trazas y métricas con OpenTelemetry, solo si hay a dónde mandarlas (OTEL_EXPORTER_OTLP_ENDPOINT). Las
+// rutas llevan IDs, nunca nombres; la cadena de consulta se redacta y SQL viaja sin valores.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+{
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(r => r.AddService("aula-lista-api"))
+        .WithTracing(t => t
+            .AddAspNetCoreInstrumentation(o => o.Filter = http => !http.Request.Path.StartsWithSegments("/salud", StringComparison.Ordinal))
+            .AddHttpClientInstrumentation()
+            .AddSource("Npgsql")
+            .AddOtlpExporter())
+        .WithMetrics(m => m
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddMeter("Npgsql")
+            .AddOtlpExporter());
+}
 
 var opcionesJwt = builder.Services.AddOptions<OpcionesJwt>()
     .Bind(builder.Configuration.GetSection(OpcionesJwt.Seccion))
@@ -107,7 +128,10 @@ builder.Services.AddAuthorizationBuilder()
         .RequireClaim(ContextoUsuarioHttp.ClaimTutor))
     .AddPolicy(AutenticacionTutor.PoliticaDocenteOTutor, p => p
         .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, AutenticacionTutor.Esquema)
-        .RequireAuthenticatedUser());
+        .RequireAuthenticatedUser())
+    .AddPolicy(PoliticaAdmin.Nombre, PoliticaAdmin.Crear());
+builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, PoliticaAdmin.Manejador>();
+builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationMiddlewareResultHandler, PoliticaAdmin.Resultado>();
 
 // RNF-004: 5 intentos de inicio de sesión por minuto por IP (el límite por cuenta vive en el caso de uso).
 builder.Services.AddRateLimiter(o =>
@@ -156,6 +180,18 @@ builder.Services.AddInfraestructura(builder.Configuration);
 
 var app = builder.Build();
 
+// `--admin <correo>` da el rol admin a una cuenta verificada (SPEC-09: nunca desde la interfaz) y termina.
+if (Array.IndexOf(args, "--admin") is var posicion and >= 0)
+{
+    var correo = posicion + 1 < args.Length ? args[posicion + 1] : string.Empty;
+    await using var alcance = app.Services.CreateAsyncScope();
+    var hecho = await alcance.ServiceProvider.GetRequiredService<AulaLista.Application.Operacion.HacerAdminCasoUso>()
+        .EjecutarAsync(correo, CancellationToken.None);
+    Console.WriteLine(hecho ? "Listo: la cuenta ya es administradora." : "No hay una cuenta activa y verificada con ese correo.");
+    Environment.ExitCode = hecho ? 0 : 1;
+    return;
+}
+
 app.UseForwardedHeaders();
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
@@ -178,6 +214,7 @@ api.MapBoletas();
 api.MapTutores();
 api.MapAvisos();
 api.MapPlanes(app.Configuration);
+api.MapAdmin();
 if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is { } esquemas
     && await esquemas.GetSchemeAsync(GoogleEndpoints.EsquemaGoogle) is not null)
 {

@@ -28,7 +28,7 @@ import { PeriodoDto } from '../../api/models/periodo-dto';
 import { RubroEntrada } from '../../api/models/rubro-entrada';
 import { RubrosDelPeriodoDto } from '../../api/models/rubros-del-periodo-dto';
 import { TipoRubroDto } from '../../api/models/tipo-rubro-dto';
-import { ColaSincronizacion } from '../../core/sincronizacion/cola-sincronizacion';
+import { ColaSincronizacion, VistaCaptura } from '../../core/sincronizacion/cola-sincronizacion';
 import { GruposService } from '../grupos/grupos.service';
 
 /**
@@ -80,8 +80,12 @@ export class EvaluacionService {
   }
 
   /** Captura: primero en el dispositivo, luego la cola la envía (SPEC-03: no hay botón "Guardar"). */
-  capturar(matriz: MatrizCalificacionesDto, cambios: readonly CambioCelda[]): Promise<void> {
-    return this.cola.guardar(matriz, cambios);
+  capturar(
+    matriz: MatrizCalificacionesDto,
+    cambios: readonly CambioCelda[],
+    vista: VistaCaptura,
+  ): Promise<void> {
+    return this.cola.guardar(matriz, cambios, vista);
   }
 
   rubros(periodoId: string): Promise<RubrosDelPeriodoDto> {

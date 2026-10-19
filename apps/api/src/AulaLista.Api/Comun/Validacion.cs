@@ -5,6 +5,7 @@ using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Evaluacion;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Operacion;
 using AulaLista.Domain.Planes;
 using AulaLista.Domain.Tutores;
 using FluentValidation;
@@ -56,6 +57,8 @@ internal static class Validacion
             _ when error == ErroresPlanes.PruebaUsada || error == ErroresPlanes.YaTieneTarjeta || error == ErroresPlanes.SinTarjeta
                 || error == ErroresPlanes.SinCambios || error == ErroresPlanes.PrepagoVigente || error == ErroresPlanes.AgregarRequierePago
                 || error == ErroresPlanes.PagoSimuladoTerminado
+                => StatusCodes.Status409Conflict,
+            _ when error == ErroresOperacion.TipoRubroRepetido || error == ErroresOperacion.ComportamientoEnUso
                 => StatusCodes.Status409Conflict,
             _ when error == ErroresCierre.LimiteIa => StatusCodes.Status429TooManyRequests,
             _ when error == ErroresCierre.PeriodoSinCierre || error == ErroresCierre.ObservacionAprobada

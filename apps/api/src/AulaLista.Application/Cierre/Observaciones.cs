@@ -79,13 +79,41 @@ public sealed class AccionesObservacion(
     IUnidadDeTrabajo unidad,
     Planes.AccesoPro acceso,
     IOptions<OpcionesIa> opciones,
+    Operacion.IEventosProducto eventos,
     TimeProvider reloj)
 {
     public Task<Resultado<ObservacionDto>?> EditarAsync(Guid id, EditarObservacion comando, CancellationToken ct) =>
         AplicarAsync(id, (o, ahora) => Task.FromResult(o.Editar(comando.Texto, ahora)), ct);
 
-    public Task<Resultado<ObservacionDto>?> AprobarAsync(Guid id, AprobarObservacion comando, CancellationToken ct) =>
-        AplicarAsync(id, (o, ahora) => Task.FromResult(o.Aprobar(comando.Texto, ahora)), ct);
+    /// <summary>
+    /// SPEC-09: mide la aceptación de la IA solo en observaciones que partieron de un borrador generado; la primera
+    /// aprobación de cada una es la que cuenta.
+    /// </summary>
+    public async Task<Resultado<ObservacionDto>?> AprobarAsync(Guid id, AprobarObservacion comando, CancellationToken ct)
+    {
+        Observacion? aprobada = null;
+        var resultado = await AplicarAsync(id, (o, ahora) =>
+        {
+            aprobada = o;
+            return Task.FromResult(o.Aprobar(comando.Texto, ahora));
+        }, ct);
+
+        if (resultado is { EsExito: true } && aprobada is { BorradorIa: { } borrador, TextoFinal: { } final })
+        {
+            await eventos.RegistrarAsync(
+                Domain.Operacion.EventoProducto.ObservacionAprobada,
+                usuario.DocenteId!.Value,
+                new Dictionary<string, object?>
+                {
+                    ["distancia_edicion"] = Domain.Operacion.DistanciaEdicion.Entre(borrador, final),
+                    ["regeneraciones"] = aprobada.Regeneraciones,
+                },
+                id.ToString(),
+                ct);
+        }
+
+        return resultado;
+    }
 
     public Task<Resultado<ObservacionDto>?> ReabrirAsync(Guid id, CancellationToken ct) =>
         AplicarAsync(id, (o, ahora) => Task.FromResult(o.Reabrir(ahora)), ct);

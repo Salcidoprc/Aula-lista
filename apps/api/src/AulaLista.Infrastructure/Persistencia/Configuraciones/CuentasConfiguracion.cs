@@ -9,7 +9,11 @@ internal sealed class CuentaConfiguracion : IEntityTypeConfiguration<Cuenta>
 {
     public void Configure(EntityTypeBuilder<Cuenta> builder)
     {
-        builder.ToTable("cuenta", t => t.HasCheckConstraint("ck_cuenta_estado", "estado IN ('activa', 'eliminacion_solicitada')"));
+        builder.ToTable("cuenta", t =>
+        {
+            t.HasCheckConstraint("ck_cuenta_estado", "estado IN ('activa', 'eliminacion_solicitada')");
+            t.HasCheckConstraint("ck_cuenta_rol", "rol IN ('docente', 'admin')");
+        });
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedNever();
         builder.Property(c => c.Correo).HasMaxLength(254).IsRequired();
@@ -18,6 +22,8 @@ internal sealed class CuentaConfiguracion : IEntityTypeConfiguration<Cuenta>
         builder.Property(c => c.GoogleSub).HasMaxLength(64);
         builder.HasIndex(c => c.GoogleSub).IsUnique();
         builder.Property(c => c.Estado).HasMaxLength(30).IsRequired();
+        builder.Property(c => c.Rol).HasMaxLength(20).IsRequired().HasDefaultValue(RolCuenta.Docente);
+        builder.Ignore(c => c.EsAdmin);
         builder.Ignore(c => c.EstaActiva);
         builder.Ignore(c => c.CorreoVerificado);
     }

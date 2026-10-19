@@ -76,7 +76,7 @@ public static class FirmaPagos
 /// docente del evento, dentro de la transacción de quien lo llama.
 /// </summary>
 public sealed class ProcesadorEventosPago(
-    IRepositorioPlanes planes, IRepositorioGrupos grupos, AccesoPro acceso, TimeProvider reloj)
+    IRepositorioPlanes planes, IRepositorioGrupos grupos, AccesoPro acceso, Operacion.IEventosProducto eventos, TimeProvider reloj)
 {
     /// <summary>Falso si el evento ya se había aplicado.</summary>
     public async Task<bool> AplicarAsync(EventoPagoRecibido evento, CancellationToken ct)
@@ -89,6 +89,7 @@ public sealed class ProcesadorEventosPago(
         var ahora = reloj.GetUtcNow();
         var opciones = acceso.Opciones;
         var s = await acceso.SuscripcionOCrearAsync(evento.DocenteId, ct);
+        var pagaba = s.GruposPro.Count > 0;
         switch (evento.Tipo)
         {
             case TipoEventoPago.SuscripcionActualizada when evento.Suscripcion is { } id:
@@ -167,6 +168,19 @@ public sealed class ProcesadorEventosPago(
         }
 
         planes.Agregar(new EventoPago(evento.DocenteId, evento.Id, evento.Tipo, ahora));
+
+        // SPEC-09: conversión es pasar de ningún grupo pagado a alguno, con tarjeta u OXXO.
+        if (!pagaba && s.GruposPro.Count > 0
+            && evento.Tipo is TipoEventoPago.SuscripcionActualizada or TipoEventoPago.PagoUnicoPagado)
+        {
+            await eventos.RegistrarAsync(
+                Domain.Operacion.EventoProducto.SuscripcionActivada,
+                evento.DocenteId,
+                new Dictionary<string, object?> { ["grupos_pro"] = s.GruposPro.Count, ["modalidad"] = s.Modalidad },
+                evento.Id,
+                ct);
+        }
+
         return true;
     }
 

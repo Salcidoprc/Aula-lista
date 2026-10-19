@@ -12,10 +12,13 @@ internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor) : IConte
 
     private Guid? _docenteAsumido;
     private Guid? _tutorAsumido;
+    private Guid? _adminAsumido;
 
     public Guid? DocenteId => _docenteAsumido ?? Leer(ClaimDocente);
 
     public Guid? TutorId => _tutorAsumido ?? (_docenteAsumido is null ? Leer(ClaimTutor) : null);
+
+    public Guid? AdminId => _adminAsumido;
 
     public Guid? FamiliaSesionId => Leer(ClaimFamiliaSesion);
 
@@ -24,6 +27,8 @@ internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor) : IConte
     public void AsumirDocente(Guid docenteId) => _docenteAsumido = docenteId;
 
     public void AsumirTutor(Guid tutorId) => _tutorAsumido = tutorId;
+
+    public void AsumirAdmin(Guid adminId) => _adminAsumido = adminId;
 
     private Guid? Leer(string claim)
     {

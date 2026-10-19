@@ -359,7 +359,11 @@
     "boletas_requieren_pro": "Las boletas son de Pro. Activa Pro en este grupo para generarlas y publicarlas.",
     "agregar_requiere_pago": "Para agregar grupos a tu prepago, paga esos grupos hasta el fin de tu prepago.",
     "pago_simulado_no_disponible": "El pago de prueba solo existe mientras no hay Stripe configurado.",
-    "pago_simulado_terminado": "Este pago de prueba ya terminó."
+    "pago_simulado_terminado": "Este pago de prueba ya terminó.",
+    "tipo_rubro_datos_invalidos": "El tipo lleva nombre de hasta 40 caracteres, descripción de hasta 200, un icono, de 1 a 5 nombres sugeridos y un orden de 1 a 999.",
+    "tipo_rubro_repetido": "Ya hay un tipo de rubro con ese nombre. Elige otro.",
+    "comportamiento_inexistente": "Ese comportamiento no existe en esta versión de Aula Lista.",
+    "comportamiento_en_uso": "Este tipo ya lo usan rubros, así que su comportamiento no se puede cambiar."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -434,7 +438,13 @@
     "aviso": "Aviso",
     "notificaciones": "Notificaciones",
     "plan": "Tu plan",
-    "pagoSimulado": "Pago de prueba"
+    "pagoSimulado": "Pago de prueba",
+    "adminMetricas": "Métricas del piloto",
+    "adminCostos": "Costos del mes",
+    "adminDocentes": "Docentes",
+    "adminErrores": "Errores de procesos",
+    "adminTiposRubro": "Tipos de rubro",
+    "adminAuditoria": "Auditoría"
   },
   "ciclo": {
     "volver": "Volver",
@@ -1048,7 +1058,8 @@
       "texto": "Los cambios a los rubros se pierden.",
       "accion": "Salir sin guardar",
       "quedarse": "Seguir editando"
-    }
+    },
+    "tipoDesactivado": "{{nombre}} (ya no se ofrece)"
   },
   "captura": {
     "volver": "Calificaciones",
@@ -1858,6 +1869,244 @@
       "activar": "Activar Pro en este grupo",
       "precio": "{{primero}} {{moneda}} al mes el primer grupo y {{adicional}} {{moneda}} cada grupo adicional.",
       "pruebaEnCierre": "Tu prueba Pro gratis empieza en el cierre de la unidad."
+    }
+  },
+  "admin": {
+    "titulo": "Administración",
+    "secciones": "Secciones del panel",
+    "privacidad": "Este panel nunca muestra alumnos, tutores, notas ni observaciones.",
+    "metricas": {
+      "titulo": "Métricas del piloto",
+      "cargando": "Cargando métricas",
+      "reintentar": "Reintentar",
+      "resumen": {
+        "antes": "Esta semana se cumplen",
+        "cuenta": "{{n}} de {{de}} metas",
+        "despues": " del piloto."
+      },
+      "boleta": "Boleta del piloto por semana",
+      "metrica": "Métrica",
+      "estaSemana": "Esta semana",
+      "leyenda": "Semanas de lunes a domingo, hora del centro de México. En verde, la meta cumplida.",
+      "estado": {
+        "cumple": "cumple la meta",
+        "falta": "todavía no cumple la meta"
+      },
+      "nombre": {
+        "docentesActivos": "Docentes activos",
+        "porcentajeCierran": "Cierran un periodo",
+        "minutosCierre": "Minutos para cerrar",
+        "porcentajeObservacionesAceptadas": "Observaciones aceptadas",
+        "porcentajeTutoresAbren": "Tutores que abren",
+        "porcentajeConversion": "Pagan después de la prueba"
+      },
+      "meta": {
+        "docentesActivos": "Meta: {{meta}} docentes",
+        "porcentajeCierran": "Meta: {{meta}} de los activos",
+        "minutosCierre": "Meta: menos de {{meta}}",
+        "porcentajeObservacionesAceptadas": "Meta: {{meta}}",
+        "porcentajeTutoresAbren": "Meta: {{meta}}",
+        "porcentajeConversion": "Meta: {{meta}}"
+      },
+      "como": {
+        "titulo": "Cómo se cuenta",
+        "docentesActivos": "Docentes que capturaron alguna calificación en los 14 días que terminan con la semana.",
+        "porcentajeCierran": "De los activos, los que ya publicaron boletas de al menos un grupo.",
+        "minutosCierre": "Mediana de los minutos entre iniciar el cierre y publicar las boletas, en la semana.",
+        "porcentajeObservacionesAceptadas": "Observaciones de la IA aprobadas en la semana con menos de 30 % del texto editado.",
+        "porcentajeTutoresAbren": "Enlaces abiertos por primera vez sobre enlaces enviados, acumulado.",
+        "porcentajeConversion": "Docentes que pagaron Pro después de usar su prueba, sobre los que la usaron, acumulado."
+      }
+    },
+    "costos": {
+      "titulo": "Costos del mes",
+      "cargando": "Cargando costos",
+      "reintentar": "Reintentar",
+      "resumen": {
+        "mes": "En {{mes}} el costo estimado va en",
+        "contra": "contra",
+        "ingreso": "de ingreso.",
+        "sobre": {
+          "uno": "Un grupo rebasa {{umbral}} al mes.",
+          "otros": "{{n}} grupos rebasan {{umbral}} al mes."
+        },
+        "ninguno": "Ningún grupo rebasa {{umbral}} al mes."
+      },
+      "vacio": "Este mes todavía no hay grupos con consumo ni con Pro.",
+      "leyenda": "Cifras en {{moneda}}. IA: tokens por el precio del modelo; WhatsApp: mensajes por su tarifa. Se marca la IA arriba de {{umbralIa}}.",
+      "grupo": "Grupo",
+      "plan": "Plan",
+      "ia": "IA",
+      "whatsapp": "WhatsApp",
+      "costo": "Costo",
+      "ingreso": "Ingreso",
+      "total": "Total del mes",
+      "planes": {
+        "pro": "Pro",
+        "prueba": "Prueba Pro",
+        "gratis": "Gratis"
+      },
+      "llamadas": {
+        "uno": "1 observación",
+        "otros": "{{n}} observaciones"
+      },
+      "mensajes": {
+        "uno": "1 mensaje",
+        "otros": "{{n}} mensajes"
+      },
+      "iaAlta": "IA alta",
+      "sobreUmbral": "Rebasa el umbral"
+    },
+    "docentes": {
+      "titulo": "Docentes",
+      "cargando": "Cargando docentes",
+      "reintentar": "Reintentar",
+      "resumen": {
+        "uno": "1 docente registrado. El consumo es de {{mes}}.",
+        "otros": "{{n}} docentes registrados. El consumo es de {{mes}}."
+      },
+      "vacio": "Todavía no hay docentes registrados.",
+      "buscar": "Buscar por correo o nombre",
+      "encontrados": {
+        "uno": "1 docente",
+        "otros": "{{n}} docentes"
+      },
+      "sinCoincidencias": "Ningún docente coincide con la búsqueda.",
+      "docente": "Docente",
+      "plan": "Plan",
+      "grupos": "Grupos",
+      "ultimoAcceso": "Último acceso",
+      "consumo": "Consumo del mes",
+      "sinNombre": "Sin nombre todavía",
+      "desactivada": "Cuenta desactivada",
+      "planes": {
+        "gratis": "Gratis",
+        "prueba": "Prueba Pro",
+        "tarjeta": "Pro con tarjeta",
+        "oxxo": "Pro con OXXO",
+        "en_gracia": "Pago pendiente"
+      },
+      "enPro": "{{n}} en Pro",
+      "nunca": "Nunca",
+      "registro": "Se registró el {{fecha}}",
+      "detalleConsumo": "{{ia}} de IA · {{whatsapp}} WhatsApp",
+      "verMas": "Ver más ({{n}} restantes)"
+    },
+    "errores": {
+      "titulo": "Errores de procesos",
+      "cargando": "Cargando errores",
+      "reintentar": "Reintentar",
+      "resumen": "Lo que falló en segundo plano: observaciones de la IA, envíos por WhatsApp, correo y push, pagos, boletas y limpieza. Solo el tipo de error, nunca su mensaje.",
+      "vacio": "No hay errores recientes.",
+      "cuenta": {
+        "uno": "El error más reciente",
+        "otros": "Los {{n}} errores más recientes"
+      },
+      "cuando": "Cuándo",
+      "origen": "Origen",
+      "tipo": "Tipo de error",
+      "docente": "Docente",
+      "sinDocente": "Sin docente",
+      "origenes": {
+        "ia": "IA",
+        "whatsapp": "WhatsApp",
+        "correo": "Correo",
+        "push": "Push",
+        "pagos": "Pagos",
+        "boletas": "Boletas",
+        "exportacion": "Exportación",
+        "retencion": "Limpieza"
+      }
+    },
+    "tiposRubro": {
+      "titulo": "Tipos de rubro",
+      "cargando": "Cargando tipos de rubro",
+      "reintentar": "Reintentar",
+      "resumen": "Lo que los docentes eligen al crear un rubro. Un tipo nuevo aparece en su app al instante; uno que ya usan no se borra, se desactiva.",
+      "nuevo": "Nuevo tipo",
+      "editar": "Editar",
+      "editarTipo": "Editar {{nombre}}",
+      "acciones": "Acciones",
+      "orden": "Orden",
+      "tipo": "Tipo",
+      "comportamiento": "Cálculo",
+      "rubros": "Rubros que lo usan",
+      "estado": "Estado",
+      "activo": "Se ofrece",
+      "inactivo": "Desactivado",
+      "comportamientos": {
+        "actividades": "Promedio de actividades",
+        "asistencia": "Asistencia"
+      },
+      "formas": {
+        "numerica": "Numérica (0 a 10)",
+        "cumplimiento": "Por cumplimiento"
+      },
+      "campos": {
+        "nombre": "Nombre",
+        "descripcion": "Descripción",
+        "comportamiento": "Cómo se calcula",
+        "formaSugerida": "Forma de calificar sugerida",
+        "nombres": "Nombres sugeridos",
+        "orden": "Orden",
+        "icono": "Icono",
+        "activo": "Se ofrece a los docentes"
+      },
+      "ayudas": {
+        "descripcion": "Una frase para el docente, hasta {{maximo}} caracteres.",
+        "comportamiento": "Solo los que existen en esta versión de la app.",
+        "comportamientoEnUso": {
+          "uno": "Lo usa 1 rubro, así que su cálculo ya no cambia.",
+          "otros": "Lo usan {{n}} rubros, así que su cálculo ya no cambia."
+        },
+        "nombres": "Uno por renglón, de 1 a 5. Se proponen al nombrar el rubro.",
+        "orden": "De 1 a 999; los menores salen primero.",
+        "icono": "Clave del icono: minúsculas y guion bajo.",
+        "activo": "Los docentes lo ven al crear un rubro.",
+        "inactivo": "Ya no se ofrece en rubros nuevos. Los rubros que lo usan siguen calculando igual."
+      },
+      "validacion": {
+        "nombre": "Escribe un nombre de hasta 40 caracteres.",
+        "nombres": "Escribe de 1 a 5 nombres, cada uno de hasta 40 caracteres.",
+        "descripcion": "Escribe una descripción de hasta {{maximo}} caracteres."
+      },
+      "crear": "Crear tipo",
+      "guardar": "Guardar cambios",
+      "cancelar": "Cancelar",
+      "creado": "Listo: los docentes ya ven {{nombre}}.",
+      "guardado": "Se guardó {{nombre}}."
+    },
+    "auditoria": {
+      "titulo": "Auditoría",
+      "cargando": "Cargando auditoría",
+      "reintentar": "Reintentar",
+      "resumen": "Cada cambio que hace un administrador, con quién, cuándo y los valores antes y después.",
+      "vacio": "Todavía no hay cambios registrados.",
+      "sinCorreo": "Administrador eliminado",
+      "acciones": {
+        "tipo_rubro_creado": "Creó el tipo",
+        "tipo_rubro_editado": "Editó el tipo",
+        "tipo_rubro_desactivado": "Desactivó el tipo",
+        "tipo_rubro_activado": "Volvió a ofrecer el tipo"
+      },
+      "cambios": "Campos que cambiaron",
+      "campo": "Campo",
+      "antes": "Antes",
+      "despues": "Después",
+      "campos": {
+        "nombre": "Nombre",
+        "descripcion": "Descripción",
+        "icono": "Icono",
+        "comportamiento": "Cálculo",
+        "formaSugerida": "Forma sugerida",
+        "nombresSugeridos": "Nombres sugeridos",
+        "orden": "Orden",
+        "activo": "Se ofrece"
+      },
+      "si": "Sí",
+      "no": "No",
+      "mas": "Ver cambios anteriores",
+      "vacioValor": "(vacío)"
     }
   }
 }

@@ -414,12 +414,22 @@ public sealed class Spec03EvaluacionPruebas(BaseDeDatosFixture baseDeDatos) : ID
         var g = await PrepararAsync(0);
         var tipos = await g.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/tipos-rubro");
 
+        // Los sembrados van primero; después pueden venir los que agregó un administrador (SPEC-09).
         Assert.Equal(["Tareas", "Actividades", "Prácticas", "Participaciones", "Exámenes", "Proyecto", "Exposición", "Asistencia"],
-            tipos.EnumerateArray().Select(t => t.GetProperty("nombre").GetString()));
+            tipos.EnumerateArray().Take(8).Select(t => t.GetProperty("nombre").GetString()));
         await using var conexion = new NpgsqlConnection(baseDeDatos.ConexionRuntime);
         await conexion.OpenAsync();
-        await using var comando = new NpgsqlCommand("UPDATE tipo_rubro SET nombre = 'X'", conexion);
-        var error = await Assert.ThrowsAsync<PostgresException>(() => comando.ExecuteNonQueryAsync());
+        // SPEC-09: sin app.admin_id el rol de la app no cambia el catálogo, y nadie lo borra (RN-094).
+        await using var cambio = new NpgsqlCommand("UPDATE tipo_rubro SET nombre = 'X'", conexion);
+        Assert.Equal(0, await cambio.ExecuteNonQueryAsync());
+        await using var alta = new NpgsqlCommand(
+            "INSERT INTO tipo_rubro (id, nombre, descripcion, icono, comportamiento, forma_sugerida, nombres_sugeridos, orden, activo, created_at, updated_at) "
+            + "VALUES (gen_random_uuid(), 'X', '', 'x', 'actividades', 'numerica', ARRAY['X'], 99, true, now(), now())",
+            conexion);
+        var errorAlta = await Assert.ThrowsAsync<PostgresException>(() => alta.ExecuteNonQueryAsync());
+        Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, errorAlta.SqlState);
+        await using var borrado = new NpgsqlCommand("DELETE FROM tipo_rubro", conexion);
+        var error = await Assert.ThrowsAsync<PostgresException>(() => borrado.ExecuteNonQueryAsync());
         Assert.Equal(PostgresErrorCodes.InsufficientPrivilege, error.SqlState);
     }
 

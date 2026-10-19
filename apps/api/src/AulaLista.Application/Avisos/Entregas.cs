@@ -2,9 +2,11 @@ using System.Net;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Operacion;
 using AulaLista.Application.Tutores;
 using AulaLista.Domain.Avisos;
 using AulaLista.Domain.Grupos;
+using AulaLista.Domain.Operacion;
 using Microsoft.Extensions.Options;
 
 namespace AulaLista.Application.Avisos;
@@ -96,8 +98,11 @@ internal sealed record Envio(
 /// suscripciones vencidas se borran.
 /// </summary>
 public sealed class EnviosATutores(
-    IRepositorioAvisos avisos, EmisionEnlaces emision, ICanalPush push, ICanalWhatsapp whatsapp, IEnvioCorreo correo, TimeProvider reloj)
+    IRepositorioAvisos avisos, EmisionEnlaces emision, ICanalPush push, ICanalWhatsapp whatsapp, IEnvioCorreo correo,
+    Operacion.IRegistroErrores errores, TimeProvider reloj)
 {
+    private const string Trabajo = "envio_tutores";
+
     internal async Task<int> EnviarAsync(
         TutorDelGrupo tutor, Grupo grupo, Envio envio, IEnumerable<SuscripcionPush> suscripciones, bool porCorreo, MensajeWhatsapp? mensaje,
         CancellationToken ct)
@@ -112,6 +117,7 @@ public sealed class EnviosATutores(
                     break;
                 case ResultadoPush.Fallido:
                     fallas++;
+                    await errores.RegistrarAsync(OrigenError.Push, Trabajo, grupo.DocenteId, grupo.Id, "push_fallido", ct);
                     break;
             }
         }
@@ -129,9 +135,10 @@ public sealed class EnviosATutores(
             {
                 await correo.EnviarAsync(envio.Correo(enlace.Url) with { Para = correoDestino }, ct);
             }
-            catch (Exception) when (!ct.IsCancellationRequested)
+            catch (Exception ex) when (!ct.IsCancellationRequested)
             {
                 fallas++;
+                await errores.RegistrarAsync(OrigenError.Correo, Trabajo, grupo.DocenteId, grupo.Id, ex, ct);
             }
         }
 
@@ -142,6 +149,7 @@ public sealed class EnviosATutores(
             {
                 mensaje.MarcarFallido(reloj.GetUtcNow());
                 fallas++;
+                await errores.RegistrarAsync(OrigenError.Whatsapp, Trabajo, grupo.DocenteId, grupo.Id, "whatsapp_fallido", ct);
             }
             else
             {

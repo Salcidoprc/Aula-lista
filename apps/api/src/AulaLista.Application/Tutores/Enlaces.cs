@@ -119,7 +119,8 @@ public sealed class EmisionEnlaces(
 /// </summary>
 public sealed class CanjearEnlaceCasoUso(
     IRepositorioEnlaces enlaces, IRepositorioCuentas cuentas, IEnvioCorreo correo, IAuditoria auditoria, IContextoUsuario usuario,
-    IUnidadDeTrabajo unidad, IOptions<OpcionesTutores> opciones, IOptions<OpcionesCuentas> opcionesCuentas, TimeProvider reloj)
+    IUnidadDeTrabajo unidad, IOptions<OpcionesTutores> opciones, IOptions<OpcionesCuentas> opcionesCuentas,
+    Operacion.IEventosProducto eventos, TimeProvider reloj)
 {
     public async Task<Resultado<SesionTutorEmitida>> EjecutarAsync(string token, string? sesionActual, CancellationToken ct)
     {
@@ -139,7 +140,16 @@ public sealed class CanjearEnlaceCasoUso(
                 return null;
             }
 
+            // SPEC-09: la primera apertura cuenta para la métrica; las demás, una vez por día.
+            var primeraVez = enlace.UltimoUsoEn is null;
             enlace.RegistrarUso(ahora);
+            var dia = Operacion.Calendario.Hoy(ahora).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            await eventos.RegistrarAsync(
+                Domain.Operacion.EventoProducto.EnlaceTutorAbierto,
+                enlace.CreadoPorDocenteId,
+                new Dictionary<string, object?> { ["primera_vez"] = primeraVez },
+                primeraVez ? enlace.Id.ToString() : $"{enlace.Id}:{dia}",
+                ct);
             if (!string.IsNullOrEmpty(sesionActual)
                 && await enlaces.SesionPorHashAsync(TokensSeguros.Hash(sesionActual), ct) is { } actual
                 && actual.Sesion.TutorId == tutorId

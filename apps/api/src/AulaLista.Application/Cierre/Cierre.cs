@@ -104,7 +104,7 @@ public sealed record IniciarCierre(bool UsarPrueba);
 /// </summary>
 public sealed class IniciarCierreCasoUso(
     IRepositorioGrupos grupos, IRepositorioCierre repositorio, ConsultaCierre consulta, AccesoPro acceso, IUnidadDeTrabajo unidad,
-    TimeProvider reloj)
+    Operacion.IEventosProducto eventos, TimeProvider reloj)
 {
     public async Task<Resultado<CierreDto>?> EjecutarAsync(Guid periodoId, IniciarCierre comando, CancellationToken ct)
     {
@@ -141,12 +141,19 @@ public sealed class IniciarCierreCasoUso(
         var ahora = reloj.GetUtcNow();
         periodo.Periodo.IniciarCierre(ahora);
         var existentes = (await repositorio.ObservacionesAsync(periodoId, ct)).Select(o => o.AlumnoId).ToHashSet();
-        foreach (var alumno in (await grupos.AlumnosAsync(periodo.Grupo.Id, ct)).Where(a => a.EstaActivo && !existentes.Contains(a.Id)))
+        var activos = (await grupos.AlumnosAsync(periodo.Grupo.Id, ct)).Where(a => a.EstaActivo).ToList();
+        foreach (var alumno in activos.Where(a => !existentes.Contains(a.Id)))
         {
             repositorio.Agregar(Observacion.Nueva(alumno, periodoId, ahora));
         }
 
         await unidad.GuardarAsync(ct);
+        await eventos.RegistrarAsync(
+            Domain.Operacion.EventoProducto.CierreIniciado,
+            periodo.Grupo.DocenteId,
+            new Dictionary<string, object?> { ["grupo_id"] = periodo.Grupo.Id, ["alumnos"] = activos.Count },
+            periodoId.ToString(),
+            ct);
         return Resultado.Exito((await consulta.LeerAsync(periodoId, ct))!);
     }
 }

@@ -240,12 +240,16 @@ public sealed class Periodo : Entidad
 
     public string Estado { get; private set; } = EstadoPeriodo.Abierto;
 
+    /// <summary>La primera vez que entró en cierre; mide el tiempo de cierre del piloto (SPEC-09). Reabrir no lo cambia.</summary>
+    public DateTimeOffset? CierreIniciadoEn { get; private set; }
+
     /// <summary>RN-040 y RF-040: los pesos quedan fijos; la captura sigue (RN-037). Los requisitos los revisa el caso de uso.</summary>
     public void IniciarCierre(DateTimeOffset ahora)
     {
         if (Estado == EstadoPeriodo.Abierto)
         {
             Estado = EstadoPeriodo.EnCierre;
+            CierreIniciadoEn ??= ahora;
             MarcarActualizada(ahora);
         }
     }

@@ -100,6 +100,8 @@ class ServidorFalso {
   /** La toma de cada fecha por alumno y las claves ya aplicadas, como `cambio_sincronizado`. */
   readonly tomas = new Map<string, Map<string, string>>();
   readonly claves = new Set<string>();
+  /** Cada cambio tal como llegó, para revisar lo que viaja con él. */
+  readonly recibidos: SincronizarCambios['cambios'] = [];
 
   async invoke(
     _fn: unknown,
@@ -135,6 +137,7 @@ class ServidorFalso {
       this.notas.set(params.body.id, (this.notas.get(params.body.id) ?? 0) + 1);
       return { ...params.body };
     }
+    this.recibidos.push(...params.body.cambios);
     const aplicadas = params.body.cambios.map((c) => {
       const llave = `${c.actividadId}:${c.alumnoId}`;
       if (!this.aplicados.has(c.id!)) {
@@ -180,7 +183,7 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
   it('SPEC-03: 30 capturas sin conexión llegan al reconectar, sin duplicados aunque se reenvíen', async () => {
     servidor.sinRed = true;
     for (let i = 0; i < 30; i++) {
-      await cola.guardar(matriz(), [cambio(i)]);
+      await cola.guardar(matriz(), [cambio(i)], 'actividad');
     }
     await cola.enviar();
     expect(cola.pendientes()).toBe(30);
@@ -200,8 +203,17 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
     expect([...servidor.celdas.values()].every((v) => v === 1)).toBe(true);
   });
 
+  it('SPEC-09: cada cambio lleva la vista de captura y si se capturó sin conexión', async () => {
+    await cola.guardar(matriz(), [cambio(1)], 'tabla');
+    await cola.enviar();
+
+    expect(servidor.recibidos).toEqual([
+      expect.objectContaining({ vista: 'tabla', sinConexion: false }),
+    ]);
+  });
+
   it('guarda en el dispositivo antes de enviar y deja la versión del servidor', async () => {
-    await cola.guardar(matriz(), [cambio(1)]);
+    await cola.guardar(matriz(), [cambio(1)], 'actividad');
     await cola.enviar();
     const guardada = await almacen.leerMatriz('p1');
     expect(guardada?.matriz.celdas).toEqual([
@@ -211,8 +223,8 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
 
   it('con dos cambios de la misma celda en la cola, confirma el más nuevo', async () => {
     servidor.sinRed = true;
-    await cola.guardar(matriz(), [{ ...cambio(1), valor: 7 }]);
-    await cola.guardar(matriz(), [{ ...cambio(1), valor: 9 }]);
+    await cola.guardar(matriz(), [{ ...cambio(1), valor: 7 }], 'actividad');
+    await cola.guardar(matriz(), [{ ...cambio(1), valor: 9 }], 'actividad');
     const confirmados: unknown[] = [];
     cola.alConfirmar((r) => confirmados.push(...[...r.vigentes.values()].map((c) => c?.valor)));
     servidor.sinRed = false;
@@ -223,7 +235,7 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
 
   it('una confirmación no pisa una celda que se está capturando en ese momento', async () => {
     servidor.sinRed = true;
-    await cola.guardar(matriz(), [{ ...cambio(1), valor: 6 }]);
+    await cola.guardar(matriz(), [{ ...cambio(1), valor: 6 }], 'actividad');
     await cola.enviar();
     servidor.sinRed = false;
     // La siguiente captura de la misma celda tarda en escribirse: la confirmación llega antes.
@@ -233,7 +245,7 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
       await new Promise<void>((r) => (soltar = r));
       return original(m, c);
     };
-    const escritura = cola.guardar(matriz(), [{ ...cambio(1), valor: 9 }]);
+    const escritura = cola.guardar(matriz(), [{ ...cambio(1), valor: 9 }], 'actividad');
     const confirmados: unknown[] = [];
     cola.alConfirmar((r) => confirmados.push(...[...r.vigentes.values()].map((c) => c?.valor)));
     window.dispatchEvent(new Event('online'));
@@ -300,7 +312,7 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
 
   it('al cerrar sesión no deja calificaciones en el dispositivo', async () => {
     servidor.sinRed = true;
-    await cola.guardar(matriz(), [cambio(1)]);
+    await cola.guardar(matriz(), [cambio(1)], 'actividad');
     await cola.borrarTodo();
     expect(almacen.cola).toEqual([]);
     expect(almacen.matrices.size).toBe(0);
