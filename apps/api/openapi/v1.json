@@ -3967,6 +3967,384 @@
           }
         }
       }
+    },
+    "/api/v1/admin/metricas": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "MetricasAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricasDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/docentes": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "DocentesAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocentesAdminDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/costos": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "CostosAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/errores": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "ErroresAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ErrorTrabajoDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auditoria": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "AuditoriaAdmin",
+        "parameters": [
+          {
+            "name": "antesDe",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaAuditoriaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/comportamientos": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "ComportamientosAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tipos-rubro": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "TiposRubroAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TipoRubroAdminDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "CrearTipoRubro",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TipoRubroEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipoRubroAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tipos-rubro/{id}": {
+      "put": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "EditarTipoRubro",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TipoRubroEntrada"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipoRubroAdminDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4268,6 +4646,53 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "AuditoriaAdminDto": {
+        "required": [
+          "id",
+          "correo",
+          "accion",
+          "entidad",
+          "entidadId",
+          "cambios",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accion": {
+            "type": "string"
+          },
+          "entidad": {
+            "type": "string"
+          },
+          "entidadId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "cambios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CambioAuditoriaDto"
+            }
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4759,6 +5184,31 @@
           }
         }
       },
+      "CambioAuditoriaDto": {
+        "required": [
+          "campo",
+          "antes",
+          "despues"
+        ],
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "antes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "despues": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "CambioCelda": {
         "required": [
           "id",
@@ -4822,6 +5272,16 @@
               "string"
             ],
             "format": "uuid"
+          },
+          "vista": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sinConexion": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -5109,6 +5569,49 @@
           }
         }
       },
+      "ConsumoDto": {
+        "required": [
+          "llamadasIa",
+          "tokensIa",
+          "mensajesWhatsapp",
+          "costoMxn"
+        ],
+        "type": "object",
+        "properties": {
+          "llamadasIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tokensIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "mensajesWhatsapp": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "costoMxn": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "ContactoTutorDto": {
         "required": [
           "correo",
@@ -5249,6 +5752,185 @@
           "desdePeriodoId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "CostoGrupoDto": {
+        "required": [
+          "grupoId",
+          "docenteId",
+          "correo",
+          "nivel",
+          "grado",
+          "nombre",
+          "materia",
+          "plan",
+          "llamadasIa",
+          "tokensIa",
+          "mensajesWhatsapp",
+          "costoIa",
+          "costoWhatsapp",
+          "costo",
+          "ingreso",
+          "sobreUmbral",
+          "iaSobreUmbral"
+        ],
+        "type": "object",
+        "properties": {
+          "grupoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "docenteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "grado": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "materia": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "plan": {
+            "type": "string"
+          },
+          "llamadasIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tokensIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "mensajesWhatsapp": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "costoIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "costoWhatsapp": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "costo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "ingreso": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "sobreUmbral": {
+            "type": "boolean"
+          },
+          "iaSobreUmbral": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CostosDto": {
+        "required": [
+          "mes",
+          "moneda",
+          "umbralGrupo",
+          "umbralIa",
+          "costoTotal",
+          "ingresoTotal",
+          "grupos"
+        ],
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string",
+            "format": "date"
+          },
+          "moneda": {
+            "type": "string"
+          },
+          "umbralGrupo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "umbralIa": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "costoTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "ingresoTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "grupos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostoGrupoDto"
+            }
           }
         }
       },
@@ -5771,6 +6453,91 @@
           }
         }
       },
+      "DocenteAdminDto": {
+        "required": [
+          "id",
+          "correo",
+          "nombre",
+          "cuentaActiva",
+          "plan",
+          "grupos",
+          "gruposPro",
+          "registradoEn",
+          "ultimoAcceso",
+          "consumo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cuentaActiva": {
+            "type": "boolean"
+          },
+          "plan": {
+            "type": "string"
+          },
+          "grupos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "gruposPro": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "registradoEn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ultimoAcceso": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "consumo": {
+            "$ref": "#/components/schemas/ConsumoDto"
+          }
+        }
+      },
+      "DocentesAdminDto": {
+        "required": [
+          "mes",
+          "docentes"
+        ],
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string",
+            "format": "date"
+          },
+          "docentes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocenteAdminDto"
+            }
+          }
+        }
+      },
       "DocumentoPendiente": {
         "required": [
           "documento",
@@ -6085,6 +6852,50 @@
           },
           "codigo": {
             "type": "string"
+          }
+        }
+      },
+      "ErrorTrabajoDto": {
+        "required": [
+          "id",
+          "origen",
+          "trabajo",
+          "correo",
+          "referenciaId",
+          "tipoError",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origen": {
+            "type": "string"
+          },
+          "trabajo": {
+            "type": "string"
+          },
+          "correo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referenciaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "tipoError": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6781,6 +7592,85 @@
           }
         }
       },
+      "MetasDto": {
+        "required": [
+          "docentesActivos",
+          "porcentajeCierran",
+          "minutosCierre",
+          "porcentajeObservacionesAceptadas",
+          "porcentajeTutoresAbren",
+          "porcentajeConversion"
+        ],
+        "type": "object",
+        "properties": {
+          "docentesActivos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeCierran": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "minutosCierre": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "porcentajeObservacionesAceptadas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "porcentajeTutoresAbren": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "porcentajeConversion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "MetricasDto": {
+        "required": [
+          "metas",
+          "semanas"
+        ],
+        "type": "object",
+        "properties": {
+          "metas": {
+            "$ref": "#/components/schemas/MetasDto"
+          },
+          "semanas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SemanaMetricasDto"
+            }
+          }
+        }
+      },
       "MisHijosDto": {
         "required": [
           "nombre",
@@ -6906,6 +7796,28 @@
             ]
           },
           "aprobadaEn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "PaginaAuditoriaDto": {
+        "required": [
+          "registros",
+          "siguiente"
+        ],
+        "type": "object",
+        "properties": {
+          "registros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditoriaAdminDto"
+            }
+          },
+          "siguiente": {
             "type": [
               "null",
               "string"
@@ -7955,7 +8867,8 @@
           "periodoId",
           "estado",
           "sumaPesos",
-          "rubros"
+          "rubros",
+          "tiposInactivos"
         ],
         "type": "object",
         "properties": {
@@ -7979,6 +8892,12 @@
             "items": {
               "$ref": "#/components/schemas/RubroDto"
             }
+          },
+          "tiposInactivos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TipoRubroDto"
+            }
           }
         }
       },
@@ -7997,6 +8916,131 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      },
+      "SemanaMetricasDto": {
+        "required": [
+          "semana",
+          "docentesActivos",
+          "docentesQueCierran",
+          "porcentajeCierran",
+          "minutosCierre",
+          "observacionesAprobadas",
+          "porcentajeObservacionesAceptadas",
+          "enlacesEnviados",
+          "enlacesAbiertos",
+          "porcentajeTutoresAbren",
+          "docentesConPrueba",
+          "docentesQuePagan",
+          "porcentajeConversion"
+        ],
+        "type": "object",
+        "properties": {
+          "semana": {
+            "type": "string",
+            "format": "date"
+          },
+          "docentesActivos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "docentesQueCierran": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeCierran": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "minutosCierre": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "observacionesAprobadas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeObservacionesAceptadas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "enlacesEnviados": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "enlacesAbiertos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeTutoresAbren": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "docentesConPrueba": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "docentesQuePagan": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeConversion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -8263,6 +9307,67 @@
           }
         }
       },
+      "TipoRubroAdminDto": {
+        "required": [
+          "id",
+          "nombre",
+          "descripcion",
+          "icono",
+          "comportamiento",
+          "formaSugerida",
+          "nombresSugeridos",
+          "orden",
+          "activo",
+          "rubros"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "icono": {
+            "type": "string"
+          },
+          "comportamiento": {
+            "type": "string"
+          },
+          "formaSugerida": {
+            "type": "string"
+          },
+          "nombresSugeridos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activo": {
+            "type": "boolean"
+          },
+          "rubros": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "TipoRubroDto": {
         "required": [
           "id",
@@ -8299,6 +9404,53 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "TipoRubroEntrada": {
+        "required": [
+          "nombre",
+          "descripcion",
+          "icono",
+          "comportamiento",
+          "formaSugerida",
+          "nombresSugeridos",
+          "orden",
+          "activo"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "icono": {
+            "type": "string"
+          },
+          "comportamiento": {
+            "type": "string"
+          },
+          "formaSugerida": {
+            "type": "string"
+          },
+          "nombresSugeridos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "orden": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activo": {
+            "type": "boolean"
           }
         }
       },
@@ -8642,6 +9794,9 @@
     },
     {
       "name": "Avisos"
+    },
+    {
+      "name": "Administración"
     }
   ]
 }

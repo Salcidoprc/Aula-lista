@@ -9,6 +9,8 @@ export interface CambioCelda {
   equipoId?: (string | null);
   id: (string | null);
   marca: string;
+  sinConexion?: boolean;
   valor: (number | string | null);
   version: (number | string | null);
+  vista?: (string | null);
 }

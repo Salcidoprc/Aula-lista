@@ -106,6 +106,9 @@ public sealed class AulaListaDbContext : DbContext
 
     public DbSet<RegistroAuditoria> Auditoria => Set<RegistroAuditoria>();
 
+    /// <summary>SPEC-09: sin RLS de lectura; <c>app_runtime</c> solo inserta como el administrador de la solicitud.</summary>
+    public DbSet<RegistroAuditoriaAdmin> AuditoriaAdmin => Set<RegistroAuditoriaAdmin>();
+
     /// <summary>Docente de la solicitud para los filtros globales por dueño (además de RLS).</summary>
     private Guid? DocenteActual => _contexto?.DocenteId;
 

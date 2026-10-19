@@ -4,7 +4,9 @@ using AulaLista.Application.Boletas;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
+using AulaLista.Application.Operacion;
 using AulaLista.Application.Planes;
+using AulaLista.Domain.Operacion;
 using AulaLista.Infrastructure.Persistencia;
 using Hangfire;
 using Hangfire.Server;
@@ -69,7 +71,8 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
 /// Corre cada trabajo en su propio alcance, como el docente dueño y dentro de una transacción,
 /// para que RLS aplique igual que en una solicitud.
 /// </summary>
-public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, LimitadorIa limitador, ILogger<EjecutorTrabajos> registro)
+public sealed partial class EjecutorTrabajos(
+    IServiceScopeFactory alcances, LimitadorIa limitador, IRegistroErrores errores, ILogger<EjecutorTrabajos> registro)
 {
     public const int Reintentos = 3;
 
@@ -85,8 +88,9 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
         {
             await GenerarAsync(docenteId, exportacionId, cancellationToken);
         }
-        catch (Exception) when ((contexto?.GetJobParameter<int>("RetryCount") ?? Reintentos) >= Reintentos)
+        catch (Exception ex) when ((contexto?.GetJobParameter<int>("RetryCount") ?? Reintentos) >= Reintentos)
         {
+            await errores.RegistrarAsync(OrigenError.Exportacion, "exportacion", docenteId, exportacionId, ex, cancellationToken);
             await MarcarFallidaAsync(docenteId, exportacionId, cancellationToken);
             throw;
         }
@@ -137,6 +141,7 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
         catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
         {
             FalloRedaccion(registro, ex, periodoId);
+            await errores.RegistrarAsync(OrigenError.Ia, "redaccion_observaciones", docenteId, periodoId, ex, cancellationToken);
             await MarcarObservacionesFallidasAsync(docenteId, observacionIds, cancellationToken);
             return;
         }
@@ -164,6 +169,7 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
                 FalloRedaccion(registro, ex, periodoId);
+                await errores.RegistrarAsync(OrigenError.Ia, "redaccion_observaciones", docenteId, encargo.ObservacionId, ex, cancellationToken);
                 await MarcarObservacionesFallidasAsync(docenteId, [encargo.ObservacionId], cancellationToken);
             }
             finally
@@ -208,8 +214,9 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
                 return true;
             }, cancellationToken);
         }
-        catch (Exception) when ((contexto?.GetJobParameter<int>("RetryCount") ?? Reintentos) >= Reintentos)
+        catch (Exception ex) when ((contexto?.GetJobParameter<int>("RetryCount") ?? Reintentos) >= Reintentos)
         {
+            await errores.RegistrarAsync(OrigenError.Boletas, "preparar_boletas", docenteId, boletaIds.FirstOrDefault(), ex, cancellationToken);
             await EnAlcanceAsync(docenteId, async sp =>
             {
                 await sp.GetRequiredService<PrepararBoletasTrabajo>().MarcarFallidasAsync(boletaIds, cancellationToken);
@@ -278,6 +285,7 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
             catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
                 FalloRevisionPlan(registro, ex, docenteId);
+                await errores.RegistrarAsync(OrigenError.Pagos, "revisar_suscripciones", docenteId, null, ex, cancellationToken);
             }
         }
     }
@@ -285,11 +293,30 @@ public sealed partial class EjecutorTrabajos(IServiceScopeFactory alcances, Limi
     [LoggerMessage(Level = LogLevel.Error, Message = "Falló la revisión del plan del docente {DocenteId}")]
     private static partial void FalloRevisionPlan(ILogger registro, Exception ex, Guid docenteId);
 
+    /// <summary>RNF-009: cuentas con eliminación vencida y grupos archivados de ciclos viejos (SPEC-09).</summary>
     [AutomaticRetry(Attempts = Reintentos)]
     public async Task RetencionAsync(CancellationToken cancellationToken)
     {
-        await using var alcance = alcances.CreateAsyncScope();
-        await alcance.ServiceProvider.GetRequiredService<RetencionCuentasTrabajo>().EjecutarAsync(cancellationToken);
+        try
+        {
+            await using (var alcance = alcances.CreateAsyncScope())
+            {
+                await alcance.ServiceProvider.GetRequiredService<RetencionCuentasTrabajo>().EjecutarAsync(cancellationToken);
+            }
+
+            await using (var alcance = alcances.CreateAsyncScope())
+            {
+                var db = alcance.ServiceProvider.GetRequiredService<AulaListaDbContext>();
+                await using var transaccion = await db.Database.BeginTransactionAsync(cancellationToken);
+                await alcance.ServiceProvider.GetRequiredService<RetencionGruposTrabajo>().EjecutarAsync(cancellationToken);
+                await transaccion.CommitAsync(cancellationToken);
+            }
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            await errores.RegistrarAsync(OrigenError.Retencion, "retencion", null, null, ex, cancellationToken);
+            throw;
+        }
     }
 }
 

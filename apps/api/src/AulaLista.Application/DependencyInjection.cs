@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<Avisos.AvisoBoletas>();
         services.AddScoped<Planes.AccesoPro>();
         services.AddScoped<Planes.ProcesadorEventosPago>();
+        services.AddScoped<Operacion.AccesoAdmin>();
+        services.AddScoped<Operacion.Costeo>();
         return services;
     }
 }

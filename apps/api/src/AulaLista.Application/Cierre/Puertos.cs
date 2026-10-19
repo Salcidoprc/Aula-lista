@@ -99,4 +99,15 @@ public sealed class OpcionesIa
 
     /// <summary>Clave de la API; solo por variable de entorno (<c>Ia__ApiKey</c>).</summary>
     public string? ApiKey { get; init; }
+
+    /// <summary>SPEC-09, costos: precio del modelo en dólares por millón de tokens de entrada.</summary>
+    [Range(typeof(decimal), "0", "1000")]
+    public decimal PrecioEntradaUsdPorMillon { get; init; }
+
+    [Range(typeof(decimal), "0", "1000")]
+    public decimal PrecioSalidaUsdPorMillon { get; init; }
+
+    /// <summary>Tokens leídos de la caché de prompts.</summary>
+    [Range(typeof(decimal), "0", "1000")]
+    public decimal PrecioCacheLeidoUsdPorMillon { get; init; }
 }

@@ -60,4 +60,7 @@ public static class AccionAuditoria
     public const string CalificacionesExportadas = "calificaciones_exportadas";
     public const string PeriodoCerrado = "periodo_cerrado";
     public const string PeriodoReabierto = "periodo_reabierto";
+
+    /// <summary>SPEC-09: <c>--admin</c> dio el rol de administrador a una cuenta.</summary>
+    public const string RolAdminAsignado = "rol_admin_asignado";
 }

@@ -133,12 +133,14 @@ public sealed record CriterioCambio(Guid CriterioId, decimal? Valor, string Marc
 /// <summary>
 /// Lo capturado en una celda. <see cref="Id"/> es el UUID de la cola sin conexión (RF-037). Con
 /// <see cref="EquipoId"/> (y <see cref="AlumnoId"/> vacío) se califica a un equipo de una actividad por equipo
-/// (RN-115).
+/// (RN-115). <see cref="Vista"/> y <see cref="SinConexion"/> solo alimentan la métrica de captura (SPEC-09).
 /// </summary>
 public sealed record CambioCelda(
     Guid? Id, Guid ActividadId, Guid AlumnoId, decimal? Valor, string Marca, IReadOnlyList<CriterioCambio>? Criterios, int? Version,
-    Guid? EquipoId = null)
+    Guid? EquipoId = null, string? Vista = null, bool SinConexion = false)
 {
+    public static readonly string[] Vistas = ["actividad", "tabla", "alumno"];
+
     [JsonIgnore]
     public bool EsDeEquipo => EquipoId is { } e && e != Guid.Empty;
 }
@@ -167,6 +169,7 @@ internal static class ReglasLote
         v.RuleFor(c => c.Marca).NotNull().MaximumLength(20);
         v.RuleFor(c => c.Criterios).Must(c => c is null || c.Count <= Rubro.MaximoCriterios);
         v.RuleForEach(c => c.Criterios).ChildRules(c => c.RuleFor(x => x.Marca).NotNull().MaximumLength(20));
+        v.RuleFor(c => c.Vista).Must(vista => vista is null || CambioCelda.Vistas.Contains(vista));
     }
 }
 
@@ -205,6 +208,7 @@ public sealed class GuardarCalificacionesCasoUso(
     IContextoUsuario usuario,
     IUnidadDeTrabajo unidad,
     Cierre.AvisoDatosCambiaron aviso,
+    Operacion.IEventosProducto eventos,
     TimeProvider reloj)
 {
     /// <summary>PUT /calificaciones: el lote entero usa la <c>Idempotency-Key</c> como su UUID.</summary>
@@ -222,6 +226,7 @@ public sealed class GuardarCalificacionesCasoUso(
         }
 
         await unidad.GuardarAsync(ct);
+        await RegistrarCapturaAsync(comando.Celdas, resultado, ct);
         return resultado;
     }
 
@@ -240,6 +245,7 @@ public sealed class GuardarCalificacionesCasoUso(
         }
 
         await unidad.GuardarAsync(ct);
+        await RegistrarCapturaAsync(nuevos, resultado, ct);
         if (repetidos.Count == 0)
         {
             return resultado;
@@ -247,6 +253,31 @@ public sealed class GuardarCalificacionesCasoUso(
 
         var vigentes = await VigentesAsync(repetidos, ct);
         return new ResultadoCalificaciones([.. vigentes.Aplicadas, .. resultado.Aplicadas], [.. vigentes.Rechazadas, .. resultado.Rechazadas]);
+    }
+
+    /// <summary>
+    /// SPEC-09: un evento por docente, día, vista y modo; la clave descarta el resto del día, así la tabla no crece por
+    /// cada celda.
+    /// </summary>
+    private async Task RegistrarCapturaAsync(IReadOnlyList<CambioCelda> cambios, ResultadoCalificaciones resultado, CancellationToken ct)
+    {
+        if (resultado.Aplicadas.Count == 0)
+        {
+            return;
+        }
+
+        var dia = Operacion.Calendario.Hoy(reloj.GetUtcNow()).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var rechazadas = resultado.Rechazadas.Select(r => r.Id).ToHashSet();
+        foreach (var (vista, sinConexion) in cambios.Where(c => c.Id is null || !rechazadas.Contains(c.Id))
+                     .Select(c => (c.Vista ?? "actividad", c.SinConexion)).Distinct())
+        {
+            await eventos.RegistrarAsync(
+                Domain.Operacion.EventoProducto.CalificacionCapturada,
+                Docente,
+                new Dictionary<string, object?> { ["vista"] = vista, ["sin_conexion"] = sinConexion },
+                $"{dia}:{vista}:{(sinConexion ? 1 : 0)}",
+                ct);
+        }
     }
 
     private readonly Dictionary<Guid, (Rubro Rubro, PeriodoCompleto Periodo, IReadOnlyList<Alumno> Alumnos)?> _rubros = [];

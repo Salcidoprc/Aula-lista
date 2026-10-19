@@ -44,6 +44,70 @@ public sealed class TipoRubro : Entidad
     public int Orden { get; private set; }
 
     public bool Activo { get; private set; }
+
+    /// <summary>RN-092: un tipo nuevo del panel queda activo y disponible al instante.</summary>
+    public static TipoRubro Crear(DatosTipoRubro datos, DateTimeOffset ahora)
+    {
+        var tipo = new TipoRubro(Guid.CreateVersion7(ahora), datos.Nombre.Trim(), datos.Comportamiento, datos.FormaSugerida, [], datos.Orden, ahora);
+        tipo.Asignar(datos);
+        return tipo;
+    }
+
+    /// <summary>RN-094: desactivar lo oculta al crear rubros; los que ya lo usan siguen igual.</summary>
+    public void Editar(DatosTipoRubro datos, DateTimeOffset ahora)
+    {
+        Asignar(datos);
+        MarcarActualizada(ahora);
+    }
+
+    private void Asignar(DatosTipoRubro datos)
+    {
+        Nombre = datos.Nombre.Trim();
+        Descripcion = datos.Descripcion.Trim();
+        Icono = datos.Icono;
+        Comportamiento = datos.Comportamiento;
+        FormaSugerida = datos.FormaSugerida;
+        NombresSugeridos = datos.NombresSugeridos.Select(n => n.Trim()).ToArray();
+        Orden = datos.Orden;
+        Activo = datos.Activo;
+    }
+}
+
+/// <summary>Lo que el administrador define para un tipo de rubro (RN-091).</summary>
+public sealed record DatosTipoRubro(
+    string Nombre, string Descripcion, string Icono, string Comportamiento, string FormaSugerida, IReadOnlyList<string> NombresSugeridos,
+    int Orden, bool Activo);
+
+/// <summary>Reglas del catálogo de tipos de rubro (RN-091 a RN-094).</summary>
+public static class ReglasTipoRubro
+{
+    public const int LongitudNombre = 40;
+    public const int LongitudDescripcion = 200;
+    public const int LongitudIcono = 40;
+    public const int MaximoNombresSugeridos = 5;
+    public const int OrdenMaximo = 999;
+
+    public static ErrorNegocio? Validar(DatosTipoRubro datos)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+        if (!Evaluacion.Comportamiento.Todos.Contains(datos.Comportamiento))
+        {
+            return Operacion.ErroresOperacion.ComportamientoInexistente;
+        }
+
+        var valido = !string.IsNullOrWhiteSpace(datos.Nombre) && datos.Nombre.Trim().Length <= LongitudNombre
+            && datos.Descripcion is not null && datos.Descripcion.Trim().Length <= LongitudDescripcion
+            && EsIcono(datos.Icono)
+            && FormaCalificacion.Todas.Contains(datos.FormaSugerida)
+            && datos.NombresSugeridos is { Count: >= 1 and <= MaximoNombresSugeridos }
+            && datos.NombresSugeridos.All(n => !string.IsNullOrWhiteSpace(n) && n.Trim().Length <= Rubro.LongitudNombre)
+            && datos.Orden is >= 1 and <= OrdenMaximo;
+        return valido ? null : Operacion.ErroresOperacion.TipoRubroDatosInvalidos;
+    }
+
+    /// <summary>El icono es una clave de la app (minúsculas y guion bajo), no una imagen.</summary>
+    private static bool EsIcono(string? icono) =>
+        !string.IsNullOrEmpty(icono) && icono.Length <= LongitudIcono && icono.All(c => c is (>= 'a' and <= 'z') or '_');
 }
 
 /// <summary>Lo que el docente define para un rubro o criterio; se valida antes de tocar entidades.</summary>
@@ -197,9 +261,11 @@ public static class ReglasRubros
 {
     /// <summary>
     /// Valida lo que se puede guardar como borrador: la suma 100 de los rubros solo se exige al iniciar el cierre
-    /// (RN-031); la de los criterios, siempre (RN-111).
+    /// (RN-031); la de los criterios, siempre (RN-111). <paramref name="tiposActuales"/> es el tipo de cada rubro ya
+    /// guardado: un rubro que conserva un tipo desactivado sigue siendo válido (RN-094).
     /// </summary>
-    public static ErrorNegocio? Validar(IReadOnlyList<DatosRubro> rubros, IReadOnlyDictionary<Guid, TipoRubro> tipos)
+    public static ErrorNegocio? Validar(
+        IReadOnlyList<DatosRubro> rubros, IReadOnlyDictionary<Guid, TipoRubro> tipos, IReadOnlyDictionary<Guid, Guid>? tiposActuales = null)
     {
         if (rubros.Count > Rubro.MaximoPorPeriodo)
         {
@@ -220,7 +286,8 @@ public static class ReglasRubros
                 return ErroresEvaluacion.RubrosInvalidos;
             }
 
-            if (!tipos.TryGetValue(rubro.TipoRubroId, out var tipo) || !tipo.Activo)
+            if (!tipos.TryGetValue(rubro.TipoRubroId, out var tipo)
+                || (!tipo.Activo && !(rubro.Id is { } id && tiposActuales?.GetValueOrDefault(id) == rubro.TipoRubroId)))
             {
                 return ErroresEvaluacion.TipoRubroInvalido;
             }

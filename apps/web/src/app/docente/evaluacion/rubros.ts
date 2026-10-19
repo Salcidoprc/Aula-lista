@@ -171,11 +171,15 @@ interface Fuente {
                           (change)="cambiarTipo(i, valor($event))"
                           [attr.aria-invalid]="falla(r.clave + '-tipo')"
                         >
-                          @for (tipo of tipos(); track tipo.id) {
+                          @for (tipo of opcionesTipo(r.tipoRubroId); track tipo.id) {
                             <option
                               [value]="tipo.id"
                               [selected]="tipo.id === r.tipoRubroId"
-                              [textContent]="tipo.nombre"
+                              [textContent]="
+                                esInactivo(tipo.id)
+                                  ? t('tipoDesactivado', { nombre: tipo.nombre })
+                                  : tipo.nombre
+                              "
                             ></option>
                           }
                         </select>
@@ -836,7 +840,21 @@ export class Rubros implements OnInit, ConCambiosSinGuardar {
   protected readonly periodo = computed(() =>
     this.periodos().find((p) => p.id === this.periodoId()),
   );
-  protected readonly tiposPorId = computed(() => new Map(this.tipos().map((t) => [t.id, t])));
+  /** RN-094: un tipo desactivado sigue sirviendo a los rubros que ya lo usan, aunque ya no se ofrezca. */
+  protected readonly tiposPorId = computed(
+    () =>
+      new Map([...this.tipos(), ...(this.servidor()?.tiposInactivos ?? [])].map((t) => [t.id, t])),
+  );
+  /** Los tipos activos y, si el rubro ya usa uno desactivado, ese también (RN-094). */
+  protected opcionesTipo(tipoId: string): readonly TipoRubroDto[] {
+    const inactivo = this.servidor()?.tiposInactivos.find((t) => t.id === tipoId);
+    return inactivo ? [...this.tipos(), inactivo] : this.tipos();
+  }
+
+  protected esInactivo(tipoId: string): boolean {
+    return !!this.servidor()?.tiposInactivos.some((t) => t.id === tipoId);
+  }
+
   /** RN-037 y RN-038: en cierre o cerrado, los rubros se ven pero no se editan. */
   protected readonly editable = computed(
     () => this.servidor()?.estado === 'abierto' && !this.grupo()?.archivadoEn,

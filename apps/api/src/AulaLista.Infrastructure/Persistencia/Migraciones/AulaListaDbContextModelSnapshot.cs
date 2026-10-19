@@ -656,6 +656,14 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("character varying(200)")
                         .HasColumnName("hash_contrasena");
 
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("docente")
+                        .HasColumnName("rol");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -674,6 +682,8 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                     b.ToTable("cuenta", null, t =>
                         {
                             t.HasCheckConstraint("ck_cuenta_estado", "estado IN ('activa', 'eliminacion_solicitada')");
+
+                            t.HasCheckConstraint("ck_cuenta_rol", "rol IN ('docente', 'admin')");
                         });
                 });
 
@@ -1913,6 +1923,10 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset?>("CierreIniciadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cierre_iniciado_en");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -2178,6 +2192,61 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
                         .HasDatabaseName("ix_auditoria_actor_id_fecha");
 
                     b.ToTable("auditoria", (string)null);
+                });
+
+            modelBuilder.Entity("AulaLista.Domain.Operacion.RegistroAuditoriaAdmin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("accion");
+
+                    b.Property<Guid>("AdminId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("admin_id");
+
+                    b.Property<string>("Antes")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("antes");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Despues")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("despues");
+
+                    b.Property<string>("Entidad")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("entidad");
+
+                    b.Property<Guid?>("EntidadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entidad_id");
+
+                    b.Property<DateTimeOffset>("Fecha")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_auditoria_admin");
+
+                    b.HasIndex("Fecha")
+                        .HasDatabaseName("ix_auditoria_admin_fecha");
+
+                    b.ToTable("auditoria_admin", (string)null);
                 });
 
             modelBuilder.Entity("AulaLista.Domain.Planes.EventoPago", b =>
