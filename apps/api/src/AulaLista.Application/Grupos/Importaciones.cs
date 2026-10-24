@@ -1,9 +1,12 @@
 using System.Globalization;
 using System.Text;
+using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
+using AulaLista.Domain.Cierre;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Grupos;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 
 namespace AulaLista.Application.Grupos;
 
@@ -38,17 +41,19 @@ public static class ErrorFilaImportacion
 public sealed record VistaPreviaImportacion(
     Guid Id, string Origen, IReadOnlyList<string> Encabezados, IReadOnlyList<IReadOnlyList<string>> Filas, IReadOnlyList<string> Mapeo, int Disponibles);
 
-/// <summary>Archivo subido (RF-013) o texto pegado (RF-014).</summary>
-public sealed record FuenteImportacion(Stream? Archivo, string? NombreArchivo, long Tamano, string? Texto);
+/// <summary>Archivo subido (RF-013), texto pegado (RF-014) o foto de la lista (RF-015).</summary>
+public sealed record FuenteImportacion(Stream? Archivo, string? NombreArchivo, long Tamano, string? Texto, ImagenLista? Foto = null);
 
 /// <summary>
-/// Lee el archivo o el texto y devuelve la tabla cruda con el mapeo propuesto (ADR-0014). No guarda nombres:
-/// la vista previa vive en la web hasta confirmar.
+/// Lee el archivo, el texto o la foto y devuelve la tabla cruda con el mapeo propuesto (ADR-0014). No guarda nombres:
+/// la vista previa vive en la web hasta confirmar. La foto se lee en memoria y se descarta (reglas/04-seguridad).
 /// </summary>
 public sealed class CrearImportacionCasoUso(
-    IRepositorioGrupos repositorio, IHojasDeCalculo hojas, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos repositorio, IHojasDeCalculo hojas, ILectorListas lector, IRepositorioCierre llamadas,
+    IOptions<OpcionesIa> opciones, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public const long TamanoMaximo = 2 * 1024 * 1024;
+    public const int TamanoMaximoFoto = 5 * 1024 * 1024;
     public const int LongitudTextoMaxima = 20_000;
     private const int FilasMaximas = 500;
 
@@ -64,7 +69,9 @@ public sealed class CrearImportacionCasoUso(
             return Resultado.Fallo<VistaPreviaImportacion>(ErroresGrupos.GrupoArchivado);
         }
 
-        var leida = fuente.Archivo is null ? LeerTexto(fuente.Texto) : LeerArchivo(fuente);
+        var leida = fuente.Foto is { } foto ? await LeerFotoAsync(grupo, foto, ct)
+            : fuente.Archivo is null ? LeerTexto(fuente.Texto)
+            : LeerArchivo(fuente);
         if (leida.EsFallo)
         {
             return Resultado.Fallo<VistaPreviaImportacion>(leida.Error);
@@ -109,14 +116,50 @@ public sealed class CrearImportacionCasoUso(
             return Resultado.Fallo<(string, TablaCruda)>(ErroresGrupos.ArchivoIlegible);
         }
 
-        var filas = texto.Split('\n')
-            .Select(l => l.Trim().TrimStart('-', '*', '•').Trim())
+        return Resultado.Exito((OrigenImportacion.Texto, UnaColumna(texto.Split('\n'))));
+    }
+
+    /// <summary>
+    /// RF-015: la IA lee los nombres de la foto y el resultado llega como si se hubiera pegado la lista. La llamada
+    /// cuenta para el límite por hora (RNF-004) y para el costo del grupo (RNF-022), aunque no se lea nada; en ese
+    /// caso la vista previa no trae filas.
+    /// </summary>
+    private async Task<Resultado<(string, TablaCruda)>> LeerFotoAsync(Grupo grupo, ImagenLista foto, CancellationToken ct)
+    {
+        if (foto.Datos.Length is 0 or > TamanoMaximoFoto || TipoDeFoto(foto.Datos.Span) != foto.TipoMedio)
+        {
+            return Resultado.Fallo<(string, TablaCruda)>(ErroresGrupos.FotoInvalida);
+        }
+
+        var ahora = reloj.GetUtcNow();
+        if (await llamadas.SolicitudesIaDesdeAsync(ahora.AddHours(-1), ahora, ct) >= opciones.Value.SolicitudesPorHora)
+        {
+            return Resultado.Fallo<(string, TablaCruda)>(ErroresGrupos.LimiteLecturas);
+        }
+
+        var lista = await lector.LeerAsync(foto, ct);
+        llamadas.Agregar(new LlamadaIa(
+            grupo.DocenteId, grupo.Id, lista.Modelo, lista.VersionPrompt, lista.TokensEntrada, lista.TokensSalida, 0,
+            lista.DuracionMs, lista.Fallo ?? "ok", reloj.GetUtcNow()));
+
+        // Si no se leyó nada la vista previa llega vacía y la web ofrece pegar la lista: una respuesta de error
+        // revertiría la transacción de la solicitud y la llamada, que sí costó, dejaría de contar.
+        return Resultado.Exito((OrigenImportacion.Foto, lista.Fallo is null ? UnaColumna(lista.Nombres) : UnaColumna([])));
+    }
+
+    /// <summary>JPG o PNG por sus primeros bytes, no por lo que diga el navegador.</summary>
+    public static string? TipoDeFoto(ReadOnlySpan<byte> datos) =>
+        datos is [0xFF, 0xD8, 0xFF, ..] ? ImagenLista.Jpeg
+        : datos is [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, ..] ? ImagenLista.Png
+        : null;
+
+    private static TablaCruda UnaColumna(IEnumerable<string> lineas) => new(
+        ["Alumno"],
+        lineas.Select(l => l.Trim().TrimStart('-', '*', '•').Trim())
             .Select(QuitarNumeracion)
             .Where(l => l.Length > 0)
             .Select(l => (IReadOnlyList<string>)[l])
-            .ToList();
-        return Resultado.Exito((OrigenImportacion.Texto, new TablaCruda(["Alumno"], filas)));
-    }
+            .ToList());
 
     /// <summary>Quita "1.", "2)" o "3 -" al inicio, como en las listas copiadas de Word.</summary>
     private static string QuitarNumeracion(string linea)

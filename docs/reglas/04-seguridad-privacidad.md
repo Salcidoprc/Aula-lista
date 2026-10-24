@@ -12,7 +12,7 @@ El sistema guarda datos de menores. Ante la duda, se recolecta menos y se compar
 
 - A la API de Claude solo se envía el seudónimo del alumno, el trato gramatical, calificaciones, notas y estilo (SPEC-04). Nunca nombre, apellidos, teléfono, correo, escuela ni CCT.
 - A WhatsApp solo se envía el nombre del tutor, el nombre corto del grupo y el enlace al portal; nunca calificaciones ni observaciones.
-- Las fotos de listas (SPEC-02) se procesan y se descartan; no se guardan.
+- Las fotos de listas (SPEC-02) se procesan y se descartan; no se guardan. Son la única excepción a la seudonimización ante la IA: la foto trae los nombres y no hay forma de quitarlos antes. Por eso solo se pide copiar los nombres, la imagen no se escribe a disco ni a la base, y ni ella ni los nombres leídos llegan a los logs (se registran tokens, renglones y resultado).
 
 ## Autenticación y sesiones
 

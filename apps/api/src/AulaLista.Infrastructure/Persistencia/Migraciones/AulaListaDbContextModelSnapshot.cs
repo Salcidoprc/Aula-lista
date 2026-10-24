@@ -1913,7 +1913,7 @@ namespace AulaLista.Infrastructure.Persistencia.Migraciones
 
                     b.ToTable("importacion", null, t =>
                         {
-                            t.HasCheckConstraint("ck_importacion_origen", "origen IN ('excel', 'csv', 'texto')");
+                            t.HasCheckConstraint("ck_importacion_origen", "origen IN ('excel', 'csv', 'texto', 'foto')");
                         });
                 });
 

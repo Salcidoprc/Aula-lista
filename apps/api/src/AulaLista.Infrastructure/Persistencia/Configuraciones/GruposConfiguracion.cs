@@ -141,7 +141,7 @@ internal sealed class ImportacionConfiguracion : IEntityTypeConfiguration<Import
 {
     public void Configure(EntityTypeBuilder<Importacion> builder)
     {
-        builder.ToTable("importacion", t => t.HasCheckConstraint("ck_importacion_origen", "origen IN ('excel', 'csv', 'texto')"));
+        builder.ToTable("importacion", t => t.HasCheckConstraint("ck_importacion_origen", "origen IN ('excel', 'csv', 'texto', 'foto')"));
         builder.HasKey(i => i.Id);
         builder.Property(i => i.Id).ValueGeneratedNever();
         builder.Property(i => i.Origen).HasMaxLength(10).IsRequired();

@@ -77,7 +77,7 @@ flowchart LR
 | Escuela (F2) | Pro para toda la plantilla y panel del director | Por alumno al año, por definir |
 | Escuela privada (F3) | Módulos extra | Por módulo, por definir |
 
-Costo variable estimado por grupo Pro: unos 5 MXN al mes (IA con Haiku 5.5 y WhatsApp de boletas). WhatsApp de utilidad en México cuesta 0.0085 USD por mensaje (unos 0.16 MXN) según la tabla de Meta vigente desde el 1/10/2026. Los avisos frecuentes van por push y correo para no disparar el costo de WhatsApp.
+Costo variable estimado por grupo Pro: unos 5 MXN al mes (IA con Haiku 5.5 y WhatsApp de boletas). WhatsApp de utilidad en México cuesta 0.0085 USD por mensaje (unos 0.16 MXN) según la tabla de Meta vigente desde el 1/10/2026. Los avisos frecuentes van por push y correo para no disparar el costo de WhatsApp. Leer una foto de lista para importar alumnos cuesta unos 0.015 MXN y se hace casi siempre una vez por grupo al inicio del ciclo, así que no mueve el estimado.
 
 Pago con Stripe: tarjeta como suscripción mensual y OXXO como prepago de varios meses, porque OXXO no admite cobros recurrentes (ADR-0009).
 

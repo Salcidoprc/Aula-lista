@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   OnInit,
   computed,
@@ -41,14 +42,16 @@ import {
   usaNombreCompleto,
   validarFila,
 } from './importacion';
+import { TAMANO_MAXIMO_FOTO, esFotoAceptada, prepararFoto } from './foto';
 
-type Origen = 'excel' | 'texto';
+type Origen = 'excel' | 'texto' | 'foto';
+const PESTANAS: readonly Origen[] = ['excel', 'texto', 'foto'];
 const TAMANO_MAXIMO = 2 * 1024 * 1024;
 
 /**
- * SPEC-02, "Importar": pestañas Excel o CSV y Pegar lista (la foto llega en H6, RF-015), con una vista previa
- * común que el docente corrige antes de confirmar (RF-013, RF-014). Los nombres viven en la web hasta
- * confirmar; la API no guarda el archivo (ADR-0014).
+ * SPEC-02, "Importar": pestañas Excel o CSV, Pegar lista y Foto, con una vista previa común que el docente
+ * corrige antes de confirmar (RF-013, RF-014, RF-015). Los nombres viven en la web hasta confirmar; la API no
+ * guarda el archivo ni la foto (ADR-0014).
  */
 @Component({
   selector: 'app-importar',
@@ -88,6 +91,18 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
           >
             {{ t('pegar') }}
           </button>
+          <button
+            id="pestana-foto"
+            role="tab"
+            type="button"
+            [attr.aria-controls]="pestana() === 'foto' ? 'panel-foto' : null"
+            [attr.aria-selected]="pestana() === 'foto'"
+            [attr.tabindex]="pestana() === 'foto' ? 0 : -1"
+            (click)="pestana.set('foto')"
+            (keydown)="moverPestana($event)"
+          >
+            {{ t('foto') }}
+          </button>
         </div>
 
         @if (pestana() === 'excel') {
@@ -112,6 +127,28 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
               <app-icono nombre="descargar" />
               {{ t('plantilla') }}
             </button>
+          </div>
+        } @else if (pestana() === 'foto') {
+          <div id="panel-foto" class="panel" role="tabpanel" aria-labelledby="pestana-foto">
+            <p class="nota">{{ t('fotoNota') }}</p>
+            @if (!conexion()) {
+              <p class="aviso aviso--pendiente" role="status">{{ t('fotoSinConexion') }}</p>
+              <button class="boton boton--secundario" type="button" (click)="irAPegar()">
+                <app-icono nombre="pegar" />
+                {{ t('irAPegar') }}
+              </button>
+            } @else if (miniatura(); as src) {
+              <div class="leyendo-foto" role="status">
+                <img [src]="src" alt="" width="64" height="64" />
+                <span>{{ t('leyendoFoto') }}</span>
+              </div>
+            } @else {
+              <label class="boton archivo">
+                <app-icono nombre="camara" />
+                {{ t('elegirFoto') }}
+                <input type="file" accept="image/jpeg,image/png" (change)="elegirFoto($event)" />
+              </label>
+            }
           </div>
         } @else {
           <form
@@ -150,6 +187,17 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
 
         @if (error(); as codigo) {
           <p class="aviso aviso--error" role="alert">{{ traducir('errores.' + codigo) }}</p>
+          @if (pestana() === 'foto' && conexion()) {
+            <button
+              id="ir-a-pegar"
+              class="boton boton--secundario ir-a-pegar"
+              type="button"
+              (click)="irAPegar()"
+            >
+              <app-icono nombre="pegar" />
+              {{ t('irAPegar') }}
+            </button>
+          }
         }
       } @else {
         <section class="vista" aria-labelledby="vista-titulo">
@@ -159,11 +207,15 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
               {{ t('vista.nota', { disponibles: disponibles() }) }}
             </p>
             <button class="enlace enlace--solo" type="button" (click)="pedirEmpezarDeNuevo()">
-              {{ t('vista.otra') }}
+              {{ vista()!.origen === 'foto' ? t('vista.otraFoto') : t('vista.otra') }}
             </button>
           </div>
 
-          @if (vista()!.origen !== 'texto') {
+          @if (vista()!.origen === 'foto') {
+            <p class="aviso aviso--pendiente" role="status">{{ t('vista.revisaFoto') }}</p>
+          }
+
+          @if (vista()!.origen !== 'texto' && vista()!.origen !== 'foto') {
             <details class="columnas" [open]="!tieneNombre()">
               <summary>
                 {{ t('vista.columnas', { cantidad: vista()!.encabezados.length }) }}
@@ -470,6 +522,26 @@ const TAMANO_MAXIMO = 2 * 1024 * 1024;
       gap: var(--espacio-2);
     }
 
+    .leyendo-foto {
+      display: flex;
+      align-items: center;
+      gap: var(--espacio-3);
+      font-weight: var(--peso-medio);
+    }
+
+    .leyendo-foto img {
+      flex: none;
+      width: 4rem;
+      height: 4rem;
+      border-radius: var(--radio-md);
+      object-fit: cover;
+      background: var(--color-superficie-hundida);
+    }
+
+    .ir-a-pegar {
+      justify-self: start;
+    }
+
     .plantilla app-icono {
       width: 1rem;
       height: 1rem;
@@ -663,15 +735,20 @@ export class Importar implements OnInit {
   private readonly grupos = inject(GruposService);
   private readonly pintarPortada = controlarPortada();
   private readonly enfocar = crearEnfoque();
+  private readonly destruir = inject(DestroyRef);
 
   readonly id = input.required<string>();
-  /** `?origen=excel` o `?origen=texto`: con qué pestaña abre. */
+  /** `?origen=excel`, `?origen=texto` o `?origen=foto`: con qué pestaña abre. */
   readonly origen = input<string>();
 
   protected readonly campos = CAMPOS;
-  protected readonly pestana = linkedSignal<Origen>(() =>
-    this.origen() === 'texto' ? 'texto' : 'excel',
+  protected readonly pestana = linkedSignal<Origen>(
+    () => PESTANAS.find((p) => p === this.origen()) ?? 'excel',
   );
+  /** RF-015: leer la foto necesita conexión; sin ella se ofrece pegar la lista. */
+  protected readonly conexion = signal(typeof navigator === 'undefined' || navigator.onLine);
+  /** La foto mientras se lee; vive solo en el navegador y se libera al terminar. */
+  protected readonly miniatura = signal<string | null>(null);
   protected readonly texto = signal('');
   protected readonly leyendo = signal(false);
   protected readonly descargando = signal(false);
@@ -705,13 +782,26 @@ export class Importar implements OnInit {
     return cuenta;
   });
   protected readonly pideOrden = computed(
-    () => this.vista()?.origen === 'texto' || usaNombreCompleto(this.mapeo()),
+    () =>
+      this.vista()?.origen === 'texto' ||
+      this.vista()?.origen === 'foto' ||
+      usaNombreCompleto(this.mapeo()),
   );
   protected readonly tieneNombre = computed(() =>
     this.mapeo().some((c) => c === 'nombres' || c === 'nombre_completo'),
   );
 
   async ngOnInit(): Promise<void> {
+    if (typeof window !== 'undefined') {
+      const enLinea = (): void => this.conexion.set(true);
+      const sinLinea = (): void => this.conexion.set(false);
+      window.addEventListener('online', enLinea);
+      window.addEventListener('offline', sinLinea);
+      this.destruir.onDestroy(() => {
+        window.removeEventListener('online', enLinea);
+        window.removeEventListener('offline', sinLinea);
+      });
+    }
     const enCache = this.grupos.enCache(this.id());
     if (enCache) {
       this.pintarPortada(portadaDeGrupo(enCache));
@@ -753,12 +843,12 @@ export class Importar implements OnInit {
 
   /** Flechas izquierda y derecha entre pestañas (patrón de pestañas de WAI-ARIA). */
   protected moverPestana(evento: KeyboardEvent): void {
-    const otra: Origen = this.pestana() === 'excel' ? 'texto' : 'excel';
+    const actual = PESTANAS.indexOf(this.pestana());
     const destinos: Record<string, Origen> = {
-      ArrowLeft: otra,
-      ArrowRight: otra,
-      Home: 'excel',
-      End: 'texto',
+      ArrowLeft: PESTANAS[(actual + PESTANAS.length - 1) % PESTANAS.length],
+      ArrowRight: PESTANAS[(actual + 1) % PESTANAS.length],
+      Home: PESTANAS[0],
+      End: PESTANAS[PESTANAS.length - 1],
     };
     const siguiente = destinos[evento.key];
     if (!siguiente) {
@@ -781,6 +871,46 @@ export class Importar implements OnInit {
       return;
     }
     await this.leer({ archivo: archivo as unknown as IFormFile });
+  }
+
+  protected async elegirFoto(evento: Event): Promise<void> {
+    const entrada = evento.target as HTMLInputElement;
+    const archivo = entrada.files?.[0];
+    entrada.value = '';
+    if (!archivo) {
+      return;
+    }
+    if (!esFotoAceptada(archivo)) {
+      this.error.set('foto_invalida');
+      return;
+    }
+    const url = URL.createObjectURL(archivo);
+    this.miniatura.set(url);
+    this.error.set(null);
+    try {
+      const foto = await prepararFoto(archivo);
+      if (foto.size > TAMANO_MAXIMO_FOTO) {
+        this.error.set('foto_invalida');
+        return;
+      }
+      await this.leer({ foto: foto as unknown as IFormFile });
+      // Sin nombres la vista previa llega vacía: se queda en la pestaña y ofrece pegar la lista.
+      if (this.vista()?.origen === 'foto' && this.filas().length === 0) {
+        this.vista.set(null);
+        this.error.set('foto_ilegible');
+        this.enfocar('#ir-a-pegar');
+      }
+    } finally {
+      this.miniatura.set(null);
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  /** La salida cuando la foto no se puede leer: lo que haya escrito en Pegar lista sigue ahí. */
+  protected irAPegar(): void {
+    this.error.set(null);
+    this.pestana.set('texto');
+    this.enfocar('#importar-texto');
   }
 
   protected async leerTexto(): Promise<void> {
@@ -923,15 +1053,23 @@ export class Importar implements OnInit {
     }
   }
 
-  private async leer(cuerpo: { archivo?: IFormFile; texto?: string }): Promise<void> {
+  private async leer(cuerpo: {
+    archivo?: IFormFile;
+    texto?: string;
+    foto?: IFormFile;
+  }): Promise<void> {
     this.leyendo.set(true);
     this.error.set(null);
     try {
       const vista = await this.api.invoke(crearImportacion, { id: this.id(), body: cuerpo });
       this.vista.set(vista);
-      this.mapeo.set(vista.origen === 'texto' ? ['nombre_completo'] : vista.mapeo);
+      this.mapeo.set(
+        vista.origen === 'texto' || vista.origen === 'foto' ? ['nombre_completo'] : vista.mapeo,
+      );
       this.armarFilas();
-      this.enfocar('#vista-titulo');
+      if (this.filas().length > 0) {
+        this.enfocar('#vista-titulo');
+      }
     } catch (e) {
       this.error.set(codigoDeError(e));
     } finally {

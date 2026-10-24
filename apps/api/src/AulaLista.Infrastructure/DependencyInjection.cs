@@ -213,10 +213,12 @@ public static class DependencyInjection
                 return new AnthropicClient { ApiKey = opciones.ApiKey!, MaxRetries = opciones.Reintentos };
             });
             services.AddSingleton<IRedactorObservaciones, RedactorClaude>();
+            services.AddSingleton<ILectorListas, LectorClaude>();
         }
         else
         {
             services.AddSingleton<IRedactorObservaciones, RedactorSimulado>();
+            services.AddSingleton<ILectorListas, LectorSimulado>();
         }
     }
 

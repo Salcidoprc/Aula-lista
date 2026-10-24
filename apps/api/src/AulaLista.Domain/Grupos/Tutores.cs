@@ -128,10 +128,11 @@ public static class OrigenImportacion
     public const string Excel = "excel";
     public const string Csv = "csv";
     public const string Texto = "texto";
+    public const string Foto = "foto";
 }
 
 /// <summary>
-/// Importación de alumnos (RF-013, RF-014). Solo guarda metadatos, sin nombres: la vista previa vive en la web
+/// Importación de alumnos (RF-013, RF-014, RF-015). Solo guarda metadatos, sin nombres: la vista previa vive en la web
 /// y las filas llegan al confirmar (ADR-0014).
 /// </summary>
 public sealed class Importacion : Entidad

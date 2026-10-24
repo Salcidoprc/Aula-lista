@@ -7045,6 +7045,16 @@
               "null",
               "string"
             ]
+          },
+          "foto": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/IFormFile"
+              }
+            ]
           }
         }
       },
