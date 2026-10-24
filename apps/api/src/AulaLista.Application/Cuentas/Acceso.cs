@@ -1,4 +1,5 @@
 using AulaLista.Application.Comun;
+using AulaLista.Application.Operacion;
 using AulaLista.Domain.Comun;
 using AulaLista.Domain.Cuentas;
 using AulaLista.Domain.Operacion;
@@ -33,6 +34,7 @@ public sealed class RegistrarCuentaCasoUso(
     IContextoUsuario contexto,
     EmisorSesiones emisor,
     IEnvioCorreo correo,
+    IEventosProducto eventos,
     IUnidadDeTrabajo unidad,
     IOptions<OpcionesCuentas> opciones,
     TimeProvider reloj)
@@ -70,6 +72,7 @@ public sealed class RegistrarCuentaCasoUso(
             cuenta.Id, PropositoToken.VerificarCorreo, hash, ahora.AddHours(opciones.Value.HorasTokenVerificacion), ahora));
         var sesion = emisor.Nueva(cuenta, MetodoAutenticacion.Contrasena);
         await unidad.GuardarAsync(ct);
+        await eventos.RegistrarAsync(EventoProducto.DocenteRegistrado, cuenta.Id, new Dictionary<string, object?> { ["origen"] = "correo" }, null, ct);
 
         await correo.EnviarAsync(CorreosCuentas.Verificacion(cuenta.Correo, opciones.Value.UrlWeb, token), ct);
         return Resultado.Exito(sesion);
@@ -204,6 +207,7 @@ public sealed class IniciarConGoogleCasoUso(
     IRepositorioDocentes docentes,
     IContextoUsuario contexto,
     EmisorSesiones emisor,
+    IEventosProducto eventos,
     IUnidadDeTrabajo unidad,
     TimeProvider reloj)
 {
@@ -217,6 +221,7 @@ public sealed class IniciarConGoogleCasoUso(
         var ahora = reloj.GetUtcNow();
         var cuenta = await cuentas.PorGoogleSubAsync(datos.Sub, ct)
             ?? await cuentas.PorCorreoAsync(Cuenta.NormalizarCorreo(datos.Correo), ct);
+        var nueva = cuenta is null;
 
         if (cuenta is null)
         {
@@ -237,6 +242,11 @@ public sealed class IniciarConGoogleCasoUso(
 
         var sesion = emisor.Nueva(cuenta, MetodoAutenticacion.Google);
         await unidad.GuardarAsync(ct);
+        if (nueva)
+        {
+            await eventos.RegistrarAsync(EventoProducto.DocenteRegistrado, cuenta.Id, new Dictionary<string, object?> { ["origen"] = "google" }, null, ct);
+        }
+
         return Resultado.Exito(sesion);
     }
 }

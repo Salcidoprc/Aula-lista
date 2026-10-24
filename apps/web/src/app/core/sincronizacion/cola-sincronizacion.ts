@@ -39,6 +39,9 @@ export interface AsistenciaEnviada {
   readonly codigo: string | null;
 }
 
+/** Desde dónde se capturó (SPEC-09, evento `calificacion_capturada`). */
+export type VistaCaptura = 'actividad' | 'tabla' | 'alumno';
+
 /**
  * Cola de salida sin conexión (RF-037, RF-103, reglas/02). Cada captura se guarda primero en el dispositivo junto con
  * su cambio y un UUID; la cola los manda en orden a `POST /sincronizacion` cuando hay red. El servidor ignora
@@ -107,8 +110,15 @@ export class ColaSincronizacion {
     return () => this.oyentes.delete(oyente);
   }
 
-  /** Guarda la matriz con la captura ya aplicada y encola sus cambios. Después intenta enviarlos. */
-  async guardar(matriz: MatrizCalificacionesDto, cambios: readonly CambioCelda[]): Promise<void> {
+  /**
+   * Guarda la matriz con la captura ya aplicada y encola sus cambios. Después intenta enviarlos. La vista y si había
+   * conexión viajan con cada cambio solo para la métrica de captura (SPEC-09).
+   */
+  async guardar(
+    matriz: MatrizCalificacionesDto,
+    cambios: readonly CambioCelda[],
+    vista: VistaCaptura,
+  ): Promise<void> {
     // Mientras se escribe, una confirmación que llegue no debe pisar estas celdas con lo que tenía el servidor.
     const llaves = cambios.flatMap((c) => llavesDeCambio(matriz, c));
     for (const llave of llaves) {
@@ -118,7 +128,10 @@ export class ColaSincronizacion {
       }
     }
     try {
-      await this.encolar(matriz, cambios);
+      await this.encolar(
+        matriz,
+        cambios.map((c) => ({ ...c, vista, sinConexion: !this.conexion() })),
+      );
     } finally {
       for (const llave of llaves) {
         const n = (this.escribiendo.get(llave) ?? 1) - 1;

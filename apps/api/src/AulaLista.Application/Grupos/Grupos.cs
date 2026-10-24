@@ -87,7 +87,8 @@ internal sealed class CrearGruposLoteValidador : AbstractValidator<CrearGruposLo
 }
 
 /// <summary>RF-010, RF-020: crea uno o varios grupos con un periodo por unidad del ciclo (RN-025).</summary>
-public sealed class CrearGruposCasoUso(IRepositorioGrupos repositorio, IUnidadDeTrabajo unidad, TimeProvider reloj)
+public sealed class CrearGruposCasoUso(
+    IRepositorioGrupos repositorio, Operacion.IEventosProducto eventos, IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public const int MaximoPorLote = 15;
 
@@ -137,6 +138,16 @@ public sealed class CrearGruposCasoUso(IRepositorioGrupos repositorio, IUnidadDe
         }
 
         await unidad.GuardarAsync(ct);
+        foreach (var creado in creados)
+        {
+            await eventos.RegistrarAsync(
+                Domain.Operacion.EventoProducto.GrupoCreado,
+                usuario.DocenteId!.Value,
+                new Dictionary<string, object?> { ["nivel"] = creado.Nivel, ["alumnos"] = 0 },
+                creado.Id.ToString(),
+                ct);
+        }
+
         return Resultado.Exito<IReadOnlyList<GrupoDto>>(creados);
     }
 

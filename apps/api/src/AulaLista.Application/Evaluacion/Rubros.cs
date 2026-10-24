@@ -26,8 +26,12 @@ public sealed record RubroDto(
     bool TieneCalificaciones,
     IReadOnlyList<CriterioDto> Criterios);
 
-/// <summary>Los rubros de un periodo con la suma de sus pesos (siempre visible, RN-031).</summary>
-public sealed record RubrosDelPeriodoDto(Guid PeriodoId, string Estado, decimal SumaPesos, IReadOnlyList<RubroDto> Rubros);
+/// <summary>
+/// Los rubros de un periodo con la suma de sus pesos (siempre visible, RN-031). <see cref="TiposInactivos"/> son los tipos
+/// desactivados que aún usan estos rubros (RN-094): el catálogo ya no los ofrece, pero el rubro los conserva.
+/// </summary>
+public sealed record RubrosDelPeriodoDto(
+    Guid PeriodoId, string Estado, decimal SumaPesos, IReadOnlyList<RubroDto> Rubros, IReadOnlyList<TipoRubroDto> TiposInactivos);
 
 public sealed class ListarTiposRubroCasoUso(IRepositorioEvaluacion repositorio)
 {
@@ -52,7 +56,10 @@ public sealed class ConsultaRubros(IRepositorioEvaluacion repositorio)
                 r.Id, r.Nombre, r.TipoRubroId, tipos.TryGetValue(r.TipoRubroId, out var t) ? t.Comportamiento : Comportamiento.Actividades,
                 r.Peso, r.Forma, r.CalifMinima, r.Orden, rubrosConDatos.Contains(r.Id),
                 r.Criterios.OrderBy(c => c.Orden).Select(c => new CriterioDto(c.Id, c.Nombre, c.Peso, c.Forma, c.CalifMinima, criteriosConDatos.Contains(c.Id))).ToList()))
-                .ToList());
+                .ToList(),
+            rubros.Select(r => r.TipoRubroId).Distinct()
+                .Select(id => tipos.GetValueOrDefault(id)).OfType<TipoRubro>().Where(t => !t.Activo)
+                .OrderBy(t => t.Orden).Select(TipoRubroDto.De).ToList());
     }
 }
 
@@ -111,12 +118,12 @@ public sealed class ReemplazarRubrosCasoUso(
             r.Id, r.Nombre, r.TipoRubroId, r.Peso, r.Forma, r.CalifMinima,
             (r.Criterios ?? []).Select(c => new DatosCriterio(c.Id, c.Nombre, c.Peso, c.Forma, c.CalifMinima)).ToList())).ToList();
         var tipos = (await repositorio.TiposRubroAsync(ct)).ToDictionary(t => t.Id);
-        if (ReglasRubros.Validar(datos, tipos) is { } invalido)
+        var existentes = (await repositorio.RubrosAsync(periodoId, ct)).ToDictionary(r => r.Id);
+        if (ReglasRubros.Validar(datos, tipos, existentes.ToDictionary(r => r.Key, r => r.Value.TipoRubroId)) is { } invalido)
         {
             return Resultado.Fallo<RubrosDelPeriodoDto>(invalido);
         }
 
-        var existentes = (await repositorio.RubrosAsync(periodoId, ct)).ToDictionary(r => r.Id);
         if (!IdsValidos(datos, existentes))
         {
             return Resultado.Fallo<RubrosDelPeriodoDto>(ErroresEvaluacion.RubrosInvalidos);

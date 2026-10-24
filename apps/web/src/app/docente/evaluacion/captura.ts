@@ -1594,7 +1594,7 @@ export class Captura implements OnInit {
     }
     const nueva = conCambios(m, cambios);
     this.matriz.set(nueva);
-    this.servicio.capturar(nueva, cambios).catch(() => {
+    this.servicio.capturar(nueva, cambios, 'actividad').catch(() => {
       this.avisos.mostrar(this.i18n.translate('captura.noSeGuardo'), 'error');
     });
   }

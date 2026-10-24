@@ -135,7 +135,9 @@ erDiagram
 | `pago` | docente_id, tipo (prepago, agregar_grupos), meses, monto (numeric 10,2), grupos (uuid[]), sesion_externa, url_ficha, estado (pendiente, pagado, vencido), vence_en, pagado_en | Pagos únicos: OXXO y grupos agregados a un prepago; es el historial sin portal |
 | `evento_pago` | docente_id, id_externo, tipo | Un evento del proveedor ya aplicado: el `id_externo` único vuelve idempotente el webhook (RN-087) |
 | `auditoria` | actor_tipo, actor_id, accion, entidad, entidad_id, cantidad, fecha, ip | Inmutable: `app_runtime` solo inserta; sin RLS; la retención anula `ip` de las cuentas borradas |
-| `evento_producto` | docente_id, nombre, propiedades (jsonb), fecha | Para métricas; sin datos personales |
+| `evento_producto` | docente_id, nombre, propiedades (jsonb), clave, fecha | Para métricas; sin datos personales. `(docente_id, nombre, clave)` única: un reintento no cuenta dos veces. RLS forzado: `app_runtime` solo inserta |
+| `error_trabajo` | origen (ia, whatsapp, correo, push, pagos, boletas, exportacion, retencion), trabajo, docente_id, referencia_id, tipo_error, fecha | Fallas de procesos en segundo plano con el tipo o un código, nunca el mensaje. Solo inserción, como `evento_producto` |
+| `auditoria_admin` | admin_id, accion, entidad, entidad_id, antes (jsonb), despues (jsonb), fecha | Cambios de los administradores con valores antes y después (RN-095). Solo inserción |
 
 ## Aislamiento de datos (RNF-001)
 
@@ -148,6 +150,8 @@ erDiagram
 Portal del tutor: el enlace y la cookie se buscan por hash con las funciones `tutor_del_enlace` y `tutor_de_la_sesion`, que fijan `app.token_hash` solo durante la búsqueda; con el tutor conocido se fija `app.tutor_id` y las políticas de lectura del tutor limitan `vinculo_tutor`, `alumno`, `grupo`, `docente`, `boleta` (publicadas y vigentes), `periodo` y `unidad` a sus vínculos (SPEC-06).
 
 Pagos (SPEC-08): `suscripcion`, `pago`, `evento_pago` y `consumo_mensual` tienen RLS por docente. El webhook del proveedor llega sin sesión: se verifica la firma, se fija `app.docente_id` del docente del evento y se aplica en una transacción. La revisión diaria lista a los docentes con plan con la función `docentes_con_plan()` (`SECURITY DEFINER`, solo devuelve ids; el rol de migraciones solo tiene políticas de lectura para ella) y revisa a cada uno con su propio `app.docente_id`.
+
+Panel de administración (SPEC-09): la política `admin` exige `cuenta.rol = 'admin'` (o un correo de `Operacion:CorreosAdmin`) y fija `app.admin_id`. Las lecturas pasan por funciones `admin_*` (`SECURITY DEFINER`, del rol de migraciones) que empiezan con `exigir_admin()`; el rol de migraciones solo tiene políticas de lectura para ellas. `tipo_rubro` lo leen todos y solo lo escribe quien tiene `app.admin_id`. Los respaldos usan el rol `app_respaldos` (`BYPASSRLS`, solo lectura con `pg_read_all_data`).
 
 Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen antes de conocer al docente (inicio de sesión, tokens). Solo las usan los casos de uso de `Cuentas` y se buscan por hash del token o correo normalizado (ADR-0013).
 

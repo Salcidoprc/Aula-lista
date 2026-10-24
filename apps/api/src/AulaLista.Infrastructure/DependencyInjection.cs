@@ -6,6 +6,7 @@ using AulaLista.Application.Comun;
 using AulaLista.Application.Cuentas;
 using AulaLista.Application.Evaluacion;
 using AulaLista.Application.Grupos;
+using AulaLista.Application.Operacion;
 using AulaLista.Application.Planes;
 using AulaLista.Application.Tutores;
 using AulaLista.Infrastructure.Avisos;
@@ -43,6 +44,11 @@ public static class DependencyInjection
             .AddInterceptors(sp.GetRequiredService<VariablesRlsInterceptor>()));
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         services.AddScoped<IAuditoria, Auditoria>();
+        services.AddScoped<IEventosProducto, Operacion.EventosProducto>();
+        services.AddSingleton<IRegistroErrores, Operacion.RegistroErrores>();
+        services.AddScoped<IRepositorioAdmin, Operacion.RepositorioAdmin>();
+        services.AddScoped<IRetencionGrupos, Operacion.RetencionGrupos>();
+        services.AddOptions<OpcionesOperacion>().Bind(configuration.GetSection(OpcionesOperacion.Seccion)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddScoped<IRepositorioCuentas, RepositorioCuentas>();
         services.AddScoped<IRepositorioDocentes, RepositorioDocentes>();

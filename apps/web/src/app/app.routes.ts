@@ -213,6 +213,11 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'admin',
+    canActivate: [requiereSesion],
+    loadChildren: () => import('./admin/admin.routes').then((m) => m.rutasAdmin),
+  },
+  {
     path: 'tutor',
     loadChildren: () => import('./tutor/portal.routes').then((m) => m.rutasPortal),
   },

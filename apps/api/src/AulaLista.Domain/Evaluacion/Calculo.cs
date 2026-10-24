@@ -26,6 +26,9 @@ public static class Comportamiento
 {
     public const string Actividades = "actividades";
     public const string Asistencia = "asistencia";
+
+    /// <summary>Los que existen en el código desplegado: el panel solo deja elegir estos (RN-091, RN-093).</summary>
+    public static readonly IReadOnlyList<string> Todos = [Actividades, Asistencia];
 }
 
 /// <summary>Configuración del grupo para calcular; <see cref="ValorRetardo"/> es lo que vale un retardo (RN-102).</summary>

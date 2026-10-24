@@ -256,7 +256,8 @@ public sealed class GenerarBoletasCasoUso(
 /// </summary>
 public sealed class PublicarBoletasCasoUso(
     ArmadoBoletas armado, IRepositorioBoletas repositorio, ConsultaBoletas consulta, Avisos.AvisoBoletas avisos, IColaTrabajos cola,
-    IAuditoria auditoria, IContextoUsuario usuario, AccesoPro acceso, IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IAuditoria auditoria, IContextoUsuario usuario, AccesoPro acceso, IUnidadDeTrabajo unidad, Operacion.IEventosProducto eventos,
+    TimeProvider reloj)
 {
     public async Task<Resultado<PublicacionDto>?> EjecutarAsync(Guid periodoId, SeleccionAlumnos comando, CancellationToken ct)
     {
@@ -307,8 +308,26 @@ public sealed class PublicarBoletasCasoUso(
 
         var porCompartir = await avisos.PlanearAsync(periodo.Periodo, porPublicar.Select(x => (x.Alumno.Alumno, x.Boleta!)).ToList(), ct);
         await unidad.GuardarAsync(ct);
+        await RegistrarEventoAsync(periodo.Periodo, porPublicar.Count, ahora, ct);
         cola.EncolarAvisoBoletas(periodo.Periodo.Grupo.DocenteId, periodoId, porPublicar.Select(x => x.Boleta!.Id).ToList());
         return Resultado.Exito(new PublicacionDto((await consulta.LeerAsync(periodoId, ct))!, porCompartir));
+    }
+
+    /// <summary>SPEC-09: la primera publicación de la unidad mide el tiempo de cierre desde que entró en cierre.</summary>
+    private Task RegistrarEventoAsync(PeriodoCompleto periodo, int boletas, DateTimeOffset ahora, CancellationToken ct)
+    {
+        var minutos = periodo.Periodo.CierreIniciadoEn is { } inicio ? Math.Round((decimal)(ahora - inicio).TotalMinutes, 1) : (decimal?)null;
+        return eventos.RegistrarAsync(
+            Domain.Operacion.EventoProducto.BoletasPublicadas,
+            periodo.Grupo.DocenteId,
+            new Dictionary<string, object?>
+            {
+                ["grupo_id"] = periodo.Grupo.Id,
+                ["boletas"] = boletas,
+                ["minutos_desde_inicio_cierre"] = minutos,
+            },
+            periodo.Periodo.Id.ToString(),
+            ct);
     }
 
     /// <summary>RN-048: cada alumno activo tiene su boleta vigente publicada y al día. Verdadero si cerró.</summary>
