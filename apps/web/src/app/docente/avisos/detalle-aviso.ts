@@ -314,7 +314,7 @@ const REFRESCO_MS = 20_000;
     .barra span {
       display: block;
       block-size: 100%;
-      background: var(--grado);
+      background: var(--grado-trazo);
       transform-origin: left;
       transition: transform 240ms var(--ease-out);
     }

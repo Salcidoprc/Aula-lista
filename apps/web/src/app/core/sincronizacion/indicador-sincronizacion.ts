@@ -71,7 +71,7 @@ const ESPERA_MS = 400;
       gap: var(--espacio-1);
       min-height: var(--tactil-minimo);
       padding: 0 var(--espacio-2);
-      color: var(--grado-tinte);
+      color: var(--grado-rotulo);
       font-size: var(--texto-sm);
       font-weight: var(--peso-medio);
     }

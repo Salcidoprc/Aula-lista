@@ -687,7 +687,7 @@ interface Fila {
 
     .fila.activa {
       background: var(--grado-tinte);
-      box-shadow: inset 3px 0 0 var(--grado);
+      box-shadow: inset 3px 0 0 var(--grado-trazo);
     }
 
     .alumno {

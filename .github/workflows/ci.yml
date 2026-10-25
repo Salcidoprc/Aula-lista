@@ -56,6 +56,8 @@ jobs:
       - name: Cliente de la API generado del contrato
         run: npm run api:generar && git diff --exit-code -- src/app/api
       - run: npm run lint
+      - name: Contraste AA de los temas claro y oscuro (RNF-027)
+        run: npm run contraste:verificar
       - run: npm test
       - name: Build de producción con presupuestos
         run: npm run build

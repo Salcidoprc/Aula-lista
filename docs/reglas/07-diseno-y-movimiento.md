@@ -74,6 +74,7 @@ El PR anota qué skills se corrieron y qué hallazgos quedaron pendientes.
   - Nada de degradados morado a azul ni de neón sobre fondo oscuro.
   - Sobre un fondo de color, el texto va en un tono más oscuro de ese color, no en gris.
   - Colores definidos en OKLCH.
+  - Hay tema claro y oscuro (RF-009). El oscuro se compone aparte, no se invierte: pizarra azul tinta con texto de gis cálido, la acción se aclara y las tapas conservan su color. Los componentes solo usan tokens, así que funcionan en los dos sin código propio; cuando un color del grado traza una barra o una raya sobre el fondo se usa `--grado-trazo`, y el texto claro sobre la base del grado va en `--grado-rotulo`. El cambio de tema no se anima.
 - **Diseño:**
   - No meter todo en tarjetas y nunca tarjetas dentro de tarjetas.
   - Evitar las cuadrículas idénticas de ícono, título y texto.

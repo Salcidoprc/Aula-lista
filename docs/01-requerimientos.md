@@ -19,6 +19,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-006 | Antes de registrar alumnos, el docente declara que la escuela o los tutores autorizaron el uso de los datos. | M |
 | RF-007 | El docente puede cerrar sesión en todos sus dispositivos. | M |
 | RF-008 | El docente puede exportar todos sus datos (Excel y PDF) y solicitar la eliminación de su cuenta. | M |
+| RF-009 | La app tiene tema claro y oscuro. Por defecto sigue el modo del celular o la computadora; en Ajustes el docente elige Automática, Clara u Oscura y la elección se guarda en ese dispositivo. | D |
 
 ### Grupos, alumnos y tutores (SPEC-02)
 
@@ -157,3 +158,4 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RNF-024 | Mantenibilidad | Toda decisión técnica que cambie el stack o la arquitectura queda en un ADR en `docs/decisiones/`. | Revisión de PR |
 | RNF-025 | Usabilidad | Cada pantalla se diseña y revisa con el skill Impeccable y sigue el sistema de diseño de `DESIGN.md` (reglas/07-diseno-y-movimiento.md). | `/impeccable audit` y `/impeccable critique` anotados en el PR |
 | RNF-026 | Usabilidad | Las transiciones y el movimiento combinan los skills de animación disponibles (Emil Kowalski, Design Motion Principles, `/impeccable animate`) con estas reglas: duraciones menores a 300 ms, `ease-out`, solo `transform` y `opacity`, nada animado en acciones repetidas, y respeto a `prefers-reduced-motion`. | `review-animations` y auditoría de `design-motion-principles` en el PR; prueba end-to-end con movimiento reducido |
+| RNF-027 | Usabilidad | El tema claro y el oscuro cumplen WCAG 2.1 AA cada uno: todos los pares de color de `tokens.css` se calculan en CI y la suite end-to-end, con sus revisiones de axe, corre también con el sistema en modo oscuro. | `npm run contraste:verificar` y proyecto `celular-oscuro` de Playwright en CI |

@@ -101,7 +101,7 @@ import { ClaveGrado } from '../../shared/portada/portada';
     /* La pestaña activa toma el color del grado: es parte de la pantalla del grupo (DESIGN.md). */
     .vistas a.activa {
       color: var(--grado-tinta);
-      box-shadow: inset 0 -3px 0 var(--grado);
+      box-shadow: inset 0 -3px 0 var(--grado-trazo);
     }
 
     .vistas a:focus-visible,
@@ -113,7 +113,7 @@ import { ClaveGrado } from '../../shared/portada/portada';
     .vistas a.activa:focus-visible {
       box-shadow:
         var(--foco),
-        inset 0 -3px 0 var(--grado);
+        inset 0 -3px 0 var(--grado-trazo);
     }
 
     .ajustes {

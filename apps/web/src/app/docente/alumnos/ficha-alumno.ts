@@ -610,7 +610,7 @@ export function urlWhatsApp(telefono: string, mensaje: string): string {
 
     .secciones a.activa {
       color: var(--grado-tinta);
-      box-shadow: inset 0 -3px 0 var(--grado);
+      box-shadow: inset 0 -3px 0 var(--grado-trazo);
     }
 
     .secciones a:focus-visible {
@@ -620,7 +620,7 @@ export function urlWhatsApp(telefono: string, mensaje: string): string {
     .secciones a.activa:focus-visible {
       box-shadow:
         var(--foco),
-        inset 0 -3px 0 var(--grado);
+        inset 0 -3px 0 var(--grado-trazo);
     }
 
     @media (hover: hover) and (pointer: fine) {

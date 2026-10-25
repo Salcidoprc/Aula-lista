@@ -196,7 +196,7 @@ import { AvisosGrupoService } from './avisos.service';
     .barra span {
       display: block;
       block-size: 100%;
-      background: var(--grado);
+      background: var(--grado-trazo);
       transform-origin: left;
     }
 

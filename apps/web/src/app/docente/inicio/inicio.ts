@@ -439,7 +439,7 @@ interface CicloConGrupos {
       }
 
       .ciclo a.fila-grupo[data-grado] .dato-suave {
-        color: var(--grado-tinte);
+        color: var(--grado-rotulo);
       }
 
       .ciclo a.fila-grupo[data-grado]:focus-visible {

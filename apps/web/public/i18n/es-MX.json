@@ -161,6 +161,13 @@
       "verificado": "Correo confirmado.",
       "pendiente": "Falta confirmar tu correo. Lo necesitas para dar de alta a tus alumnos."
     },
+    "tema": {
+      "titulo": "Apariencia",
+      "sistema": "Automática",
+      "claro": "Clara",
+      "oscuro": "Oscura",
+      "nota": "«Automática» sigue el modo oscuro de tu celular o tu computadora. Tu elección se guarda en este dispositivo."
+    },
     "contrasena": {
       "titulo": "Cambiar contraseña",
       "definir": "Define una contraseña",

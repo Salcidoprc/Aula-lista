@@ -21,6 +21,7 @@ import { ActualizarPerfil } from '../../api/models/actualizar-perfil';
 import { camposConError, codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { SesionService } from '../../core/sesion/sesion.service';
+import { PREFERENCIAS_TEMA, TemaService } from '../../core/tema/tema.service';
 import { AvisosService } from '../../shared/avisos/avisos.service';
 import { BotonGoogle } from '../../shared/boton-google';
 import { FormularioPerfil } from '../cuenta/formulario-perfil';
@@ -31,7 +32,7 @@ const LONGITUD_MINIMA = 10;
 
 /**
  * SPEC-01, pantalla 3: perfil, correo, contraseña, sesiones, exportar datos (RF-007) y eliminar la cuenta (RF-008).
- * También la entrada al estilo de las observaciones (SPEC-04, RF-043).
+ * También la entrada al estilo de las observaciones (SPEC-04, RF-043) y el tema claro u oscuro (RF-009).
  */
 @Component({
   selector: 'app-ajustes',
@@ -76,6 +77,29 @@ const LONGITUD_MINIMA = 10;
                 <p class="aviso aviso--pendiente">{{ t('correo.pendiente') }}</p>
                 <app-reenviar-verificacion />
               }
+            </section>
+
+            <section aria-labelledby="ajustes-tema">
+              <h2 id="ajustes-tema">{{ t('tema.titulo') }}</h2>
+              <fieldset
+                class="eleccion tema"
+                aria-labelledby="ajustes-tema"
+                aria-describedby="ajustes-tema-nota"
+              >
+                @for (opcion of preferenciasTema; track opcion) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="tema"
+                      [value]="opcion"
+                      [checked]="preferenciaTema() === opcion"
+                      (change)="tema.elegir(opcion)"
+                    />
+                    {{ t('tema.' + opcion) }}
+                  </label>
+                }
+              </fieldset>
+              <p id="ajustes-tema-nota" class="nota">{{ t('tema.nota') }}</p>
             </section>
           </div>
 
@@ -279,7 +303,8 @@ const LONGITUD_MINIMA = 10;
 
     section > app-formulario-perfil,
     section > .formulario,
-    section > .aviso {
+    section > .aviso,
+    section > .tema {
       justify-self: stretch;
     }
 
@@ -289,6 +314,18 @@ const LONGITUD_MINIMA = 10;
 
     h2 {
       font-size: var(--texto-lg);
+    }
+
+    /* Tres opciones: una debajo de otra en el celular, en una fila cuando caben sin cortarse. */
+    .tema {
+      grid-template-columns: minmax(0, 1fr);
+      max-width: var(--ancho-lectura);
+    }
+
+    @media (min-width: 30rem) {
+      .tema {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     .nota {
@@ -328,6 +365,9 @@ export class Ajustes implements OnInit {
   private readonly i18n = inject(TranslocoService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
+  protected readonly tema = inject(TemaService);
+  protected readonly preferenciasTema = PREFERENCIAS_TEMA;
+  protected readonly preferenciaTema = this.tema.preferencia;
 
   /** `?eliminar=1`: regresa de confirmar con Google para eliminar la cuenta. */
   readonly eliminar = input<string>();
