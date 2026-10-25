@@ -322,6 +322,13 @@ interface Problema {
       text-decoration: none;
     }
 
+    /* En escritorio sobra ancho: el nombre de la actividad se lee completo hasta 10 rem. */
+    @media (min-width: 64rem) {
+      th.actividad a {
+        max-inline-size: 10rem;
+      }
+    }
+
     @media (hover: hover) and (pointer: fine) {
       th.actividad a:hover {
         text-decoration: underline;

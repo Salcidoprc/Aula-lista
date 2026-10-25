@@ -24,7 +24,7 @@ const LONGITUD_EJEMPLO = 800;
   imports: [TranslocoDirective, RouterLink, Icono, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="pantalla" *transloco="let t; prefix: 'estilo'">
+    <div class="pantalla pantalla--ancha" *transloco="let t; prefix: 'estilo'">
       <a class="volver" routerLink="/ajustes" (click)="regresar($event)">
         <app-icono nombre="volver" />
         {{ t('volver') }}
@@ -213,7 +213,34 @@ const LONGITUD_EJEMPLO = 800;
       block-size: 16rem;
     }
 
+    /* Celular y tableta: la columna de lectura de siempre. */
+    .formulario,
+    hgroup {
+      max-inline-size: 40rem;
+    }
+
+    /*
+     * Escritorio: longitud, persona y Guardar a la izquierda; los ejemplos, que crecen hacia abajo, a la
+     * derecha. En celular se leen en el mismo orden.
+     */
     @media (min-width: 64rem) {
+      .formulario {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(4, auto) 1fr;
+        align-items: start;
+        column-gap: var(--espacio-7);
+        max-inline-size: none;
+      }
+
+      .formulario > * {
+        grid-column: 1;
+      }
+
+      .formulario > .ejemplos {
+        grid-column: 2;
+        grid-row: 1 / span 5;
+      }
+
       .pie-accion .boton--ancho {
         inline-size: auto;
       }

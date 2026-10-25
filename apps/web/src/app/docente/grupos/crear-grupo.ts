@@ -18,7 +18,7 @@ import { codigoDeError } from '../../core/errores/problema';
 import { PerfilService } from '../../core/sesion/perfil.service';
 import { AvisosService } from '../../shared/avisos/avisos.service';
 import { PRIMER_ERROR, crearEnfoque } from '../../shared/foco';
-import { GRADOS, Nivel, nombreGrupo } from '../../shared/grados';
+import { GRADOS, Nivel, claveGrado, nombreGrupo } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { Ocupado } from '../../shared/ocupado';
 import { Tapa } from '../../shared/tapa';
@@ -209,8 +209,9 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
               }
               <ul class="tapas">
                 @for (n of nombres(); track $index) {
-                  <li>
+                  <li [attr.data-grado]="clave()">
                     <app-tapa [nivel]="nivel()" [grado]="grado()" />
+                    <span class="numero-libro cifras" aria-hidden="true">{{ grado() }}</span>
                     <span class="nombre-tapa">{{ nombreCompleto(n) }}</span>
                   </li>
                 }
@@ -221,8 +222,9 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
             <section class="vista vista--vacia" aria-hidden="true">
               <h2 class="dato-suave">{{ t('vista.uno') }}</h2>
               <ul class="tapas">
-                <li>
+                <li [attr.data-grado]="clave()">
                   <app-tapa [nivel]="nivel()" [grado]="grado()" />
+                  <span class="numero-libro cifras" aria-hidden="true">{{ grado() }}</span>
                 </li>
               </ul>
               <p class="dato-suave">{{ t('vista.vacia') }}</p>
@@ -339,6 +341,57 @@ export function errorDeNombres(nombres: readonly string[]): string | null {
     .tapas .dato-suave {
       overflow-wrap: anywhere;
     }
+
+    .numero-libro {
+      display: none;
+    }
+
+    /*
+     * Escritorio: la vista muestra el libro como quedará en el estante de Mis grupos (DESIGN.md, "Tapa de
+     * libro"): la tapa completa del color del grado, con lomo, el número grande recortado y el nombre abajo.
+     */
+    @media (min-width: 64rem) {
+      .tapas {
+        gap: var(--espacio-4);
+      }
+
+      .tapas li[data-grado] {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        align-content: end;
+        width: 10rem;
+        min-height: 12rem;
+        padding: var(--espacio-4) var(--espacio-4) var(--espacio-4) calc(var(--espacio-4) + 0.5rem);
+        border-radius: 0.375rem var(--radio-lg) var(--radio-lg) 0.375rem;
+        background: var(--grado);
+        box-shadow: inset 0.625rem 0 0 oklch(0.2 0.03 260 / 0.16);
+        color: var(--color-sobre-grado);
+      }
+
+      .tapas li[data-grado] app-tapa {
+        display: none;
+      }
+
+      .tapas li[data-grado] .numero-libro {
+        display: block;
+        position: absolute;
+        z-index: -1;
+        inset-inline-end: -0.04em;
+        inset-block-start: -0.18em;
+        font-size: 7rem;
+        font-weight: var(--peso-fuerte);
+        line-height: 1;
+        color: color-mix(in oklch, var(--grado) 80%, var(--color-sobre-grado));
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .tapas li[data-grado] .nombre-tapa {
+        font-size: var(--texto-xl);
+        line-height: var(--interlineado-ajustado);
+      }
+    }
   `,
 })
 export class CrearGrupo implements OnInit {
@@ -357,6 +410,7 @@ export class CrearGrupo implements OnInit {
   protected readonly niveles: readonly Nivel[] = ['primaria', 'secundaria'];
   protected readonly nivel = signal<Nivel>('primaria');
   protected readonly grado = signal(1);
+  protected readonly clave = computed(() => claveGrado(this.nivel(), this.grado()));
   protected readonly materia = signal('');
   protected readonly cicloId = signal('');
   protected readonly varios = signal(false);

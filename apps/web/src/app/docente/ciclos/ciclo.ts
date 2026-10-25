@@ -346,6 +346,18 @@ function cicloPorDefecto(hoy = new Date()): { nombre: string; inicio: Fecha; fin
       border: 0;
     }
 
+    /* Escritorio: nombre, desde y hasta de cada unidad en una sola fila; el error, debajo a todo lo ancho. */
+    @media (min-width: 64rem) {
+      .datos-unidad {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        column-gap: var(--espacio-3);
+      }
+
+      .datos-unidad > .error {
+        grid-column: 1 / -1;
+      }
+    }
+
     .quitar {
       display: grid;
       place-items: center;

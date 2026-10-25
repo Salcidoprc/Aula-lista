@@ -15,7 +15,7 @@ import { AvisosService } from '../../shared/avisos/avisos.service';
 import { codigoDeError } from '../../core/errores/problema';
 import { crearEnfoque } from '../../shared/foco';
 import { PerfilService } from '../../core/sesion/perfil.service';
-import { nombreGrupo } from '../../shared/grados';
+import { claveGrado, nombreGrupo } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { Tapa } from '../../shared/tapa';
 import { ReenviarVerificacion } from '../cuenta/reenviar-verificacion';
@@ -139,8 +139,15 @@ interface CicloConGrupos {
                 <ul class="filas">
                   @for (grupo of bloque.grupos; track grupo.id) {
                     <li>
-                      <a class="fila-grupo" [routerLink]="['/grupos', grupo.id]">
+                      <a
+                        class="fila-grupo"
+                        [attr.data-grado]="clave(grupo)"
+                        [routerLink]="['/grupos', grupo.id]"
+                      >
                         <app-tapa [nivel]="grupo.nivel" [grado]="grupo.grado" />
+                        <span class="numero-libro cifras" aria-hidden="true">{{
+                          +grupo.grado
+                        }}</span>
                         <span class="texto">
                           <span class="nombre-plan">
                             <span class="nombre">{{ nombre(grupo) }}</span>
@@ -376,6 +383,88 @@ interface CicloConGrupos {
       }
     }
 
+    .numero-libro {
+      display: none;
+    }
+
+    /*
+     * Escritorio ancho: el ciclo es un estante y cada grupo, el libro completo. La tarjeta se vuelve la tapa
+     * del color del grado, con su lomo y el número grande recortado como en la portada; el nombre va abajo,
+     * donde va el título de un libro de texto.
+     */
+    @media (min-width: 64rem) {
+      .ciclo .filas {
+        grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+        gap: var(--espacio-5);
+      }
+
+      .ciclo a.fila-grupo[data-grado] {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: end;
+        min-height: 15rem;
+        padding: var(--espacio-5) var(--espacio-5) var(--espacio-5) calc(var(--espacio-5) + 0.5rem);
+        border: 0;
+        border-radius: 0.375rem var(--radio-lg) var(--radio-lg) 0.375rem;
+        background: var(--grado);
+        box-shadow: inset 0.625rem 0 0 oklch(0.2 0.03 260 / 0.16);
+        color: var(--color-sobre-grado);
+        transition:
+          transform var(--dur-press) var(--ease-out),
+          box-shadow var(--dur-small) var(--ease-out);
+      }
+
+      .ciclo a.fila-grupo[data-grado] app-tapa {
+        display: none;
+      }
+
+      .ciclo a.fila-grupo[data-grado] .numero-libro {
+        display: block;
+        position: absolute;
+        z-index: -1;
+        inset-inline-end: -0.04em;
+        inset-block-start: -0.18em;
+        font-size: 9rem;
+        font-weight: var(--peso-fuerte);
+        line-height: 1;
+        color: color-mix(in oklch, var(--grado) 80%, var(--color-sobre-grado));
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .ciclo a.fila-grupo[data-grado] .nombre {
+        font-size: var(--texto-2xl);
+      }
+
+      .ciclo a.fila-grupo[data-grado] .dato-suave {
+        color: var(--grado-tinte);
+      }
+
+      .ciclo a.fila-grupo[data-grado]:focus-visible {
+        box-shadow:
+          inset 0.625rem 0 0 oklch(0.2 0.03 260 / 0.16),
+          var(--foco);
+      }
+
+      .ciclo a.fila-grupo[data-grado]:active {
+        transform: scale(var(--escala-presion));
+      }
+
+      .ciclo a.fila-grupo[data-grado]:active .nombre {
+        color: inherit;
+      }
+    }
+
+    @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+      .ciclo a.fila-grupo[data-grado]:hover:not(:focus-visible) {
+        box-shadow:
+          inset 0.625rem 0 0 oklch(0.2 0.03 260 / 0.16),
+          var(--sombra-flotante);
+      }
+    }
+
     .archivado app-tapa {
       opacity: 0.6;
     }
@@ -527,6 +616,10 @@ export class Inicio implements OnInit {
 
   protected texto(clave: string): string {
     return this.i18n.translate(clave);
+  }
+
+  protected clave(grupo: GrupoDto): string {
+    return claveGrado(grupo.nivel, grupo.grado);
   }
 
   protected nombre(grupo: GrupoDto): string {

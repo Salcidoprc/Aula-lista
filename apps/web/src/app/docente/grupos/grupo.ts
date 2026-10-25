@@ -118,7 +118,11 @@ const MAXIMO_ALUMNOS = 50;
                 }
               </section>
             } @else {
-              <ol class="filas lista" [attr.aria-label]="t('lista')">
+              <ol
+                class="filas lista"
+                [class.doble]="activos().length > 9"
+                [attr.aria-label]="t('lista')"
+              >
                 @for (alumno of activos(); track alumno.id) {
                   <li>
                     <a class="fila-alumno" [routerLink]="['/alumnos', alumno.id]">
@@ -462,6 +466,25 @@ const MAXIMO_ALUMNOS = 50;
     @media (min-width: 64rem) {
       .vacio .opciones {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    /*
+     * Escritorio ancho (con el panel al lado, cada columna mide al menos 22 rem): la lista larga va en dos
+     * columnas que se leen de arriba abajo, en el orden de la lista.
+     */
+    @media (min-width: 75rem) {
+      .lista.doble {
+        display: block;
+        columns: 2;
+        column-gap: var(--espacio-6);
+        border-top: 1px solid var(--color-divisoria);
+      }
+
+      .lista.doble > li {
+        break-inside: avoid;
+        border-top: 0;
+        border-bottom: 1px solid var(--color-divisoria);
       }
     }
 

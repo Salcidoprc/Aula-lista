@@ -255,15 +255,20 @@ Primero celular (360 px), luego escritorio. Márgenes laterales de 16 px más el
 
 ### Pantalla ancha
 
-Desde 48 rem, las pantallas de cuenta (una sola columna corta) se centran y el resto ocupa un contenedor de 72 rem (`--ancho-app`) centrado, con el texto alineado al de la portada. Desde 64 rem cada pantalla reparte el ancho en lugar de estirar la columna del celular:
+Desde 48 rem, las pantallas de cuenta (una sola columna corta) se centran y el resto ocupa un contenedor de 80 rem (`--ancho-app`, 1280 px) centrado, con el texto alineado al de la portada. Desde 64 rem cada pantalla reparte el ancho en lugar de estirar la columna del celular; ninguna pantalla del docente queda como una columna angosta centrada:
 
-- Mis grupos: los grupos de cada ciclo son tarjetas en cuadrícula, y "Crear grupo" sube a la cabeza.
+- Mis grupos: el ciclo es un estante y cada grupo, el libro completo: la tarjeta es la tapa del color del grado, con lomo, el número grande recortado como en la portada y el nombre abajo. "Crear grupo" sube a la cabeza.
 - Grupo: la lista a la izquierda y, a la derecha, un panel con las formas de agregar alumnos, sin abrir la hoja.
-- Calificaciones, rubros y captura: el contenido a la izquierda y un panel lateral fijo con el resumen de la unidad, la suma de pesos o el teclado rápido.
-- Tabla de calificaciones: solo escritorio, a todo el ancho del contenedor y con desplazamiento propio.
-- Crear grupo: campos a la izquierda y la vista de las tapas a la derecha.
-- Ciclo: los datos del ciclo a la izquierda, fijos al desplazar, y las unidades a la derecha.
+- Calificaciones, rubros y captura: el contenido a la izquierda y un panel lateral fijo con el resumen de la unidad, la suma de pesos o el teclado rápido. En rubros, nombre, tipo, peso y mínima van en una sola fila.
+- Listas largas de alumnos (más de 9) en Alumnos, Captura sin criterios y Pasar lista: desde 75 rem, donde cada columna mide al menos 22 rem, van en dos columnas que se leen de arriba abajo en el orden de la lista. El orden del DOM, el teclado y las flechas no cambian. Cierre y Boletas siguen en una columna: sus etiquetas de estado son largas.
+- Tabla de calificaciones: solo escritorio, a todo el ancho del contenedor y con desplazamiento propio; el nombre de la actividad se lee hasta 10 rem.
+- Crear grupo: campos a la izquierda y, a la derecha, los libros como quedarán en el estante.
+- Ciclo: los datos del ciclo a la izquierda, fijos al desplazar, y las unidades a la derecha, con nombre, desde y hasta en una fila.
+- Avisos: cada aviso es un renglón con título y fecha, "Leído por" y su barra lado a lado. Nuevo aviso: lo que se escribe a la izquierda y, en una columna fija, el urgente, cómo llegará y "Enviar aviso". Detalle: el aviso y la lista por tutor a la izquierda, y fijo a la derecha quién lo leyó y "Compártelo tú".
+- Estilo de las observaciones: longitud, persona y Guardar a la izquierda; los ejemplos a la derecha.
 - Configuración del grupo, ficha del alumno y ajustes: dos columnas que conservan el orden del celular al leerse de izquierda a derecha.
+
+Cuando una pantalla pasa a dos columnas, el orden de lectura del celular se conserva: se acomodan las piezas con la rejilla (`grid-column`, `grid-row`) en lugar de mover el HTML, y lo que va fijo abajo en celular sigue dentro del mismo formulario.
 
 La acción fija abajo (`.pie-accion`) es del celular y la tableta (menos de 64 rem, donde la página es de una columna). Lo que solo existe en un tamaño usa `.solo-celular` o `.solo-escritorio`, con el mismo corte de 64 rem que `.columnas`: el panel lateral solo aparece donde hay dos columnas. El alto real del pie se publica en `--alto-pie-accion` para que la fila o el campo con foco no queden debajo.
 

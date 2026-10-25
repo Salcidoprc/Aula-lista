@@ -1582,6 +1582,7 @@
   },
   "avisos": {
     "titulo": "Avisos",
+    "misGrupos": "Mis grupos",
     "tutores": {
       "uno": "1 tutor en el grupo",
       "otros": "{{n}} tutores en el grupo"
