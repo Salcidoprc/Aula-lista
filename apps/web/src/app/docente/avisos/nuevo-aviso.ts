@@ -44,7 +44,11 @@ type Para = 'todos' | 'elegir';
   imports: [TranslocoDirective, RouterLink, Icono, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="pantalla" [attr.data-grado]="clave() ?? null" *transloco="let t; prefix: 'avisos'">
+    <div
+      class="pantalla pantalla--ancha"
+      [attr.data-grado]="clave() ?? null"
+      *transloco="let t; prefix: 'avisos'"
+    >
       <a class="volver" [routerLink]="['/grupos', id(), 'avisos']">
         <app-icono nombre="volver" />
         {{ t('titulo') }}
@@ -73,199 +77,206 @@ type Para = 'todos' | 'elegir';
             }
           </section>
         } @else {
-          <form class="formulario" novalidate (submit)="$event.preventDefault(); enviar()">
-            <fieldset class="eleccion">
-              <legend>{{ t('para') }}</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="para"
-                  value="todos"
-                  [checked]="para() === 'todos'"
-                  (change)="para.set('todos')"
-                />
-                <span class="cifras">{{ t('todos', { n: d.tutores.length }) }}</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="para"
-                  value="elegir"
-                  [checked]="para() === 'elegir'"
-                  (change)="para.set('elegir')"
-                />
-                {{ t('elegir') }}
-              </label>
-            </fieldset>
-
-            @if (para() === 'elegir') {
-              <fieldset class="elegidos" aria-describedby="elegidos-cuenta">
-                <legend class="solo-lector">{{ t('elegirTutores') }}</legend>
-                <div class="campo">
-                  <label for="buscar">{{ t('buscar') }}</label>
+          <form class="formulario columnas" novalidate (submit)="$event.preventDefault(); enviar()">
+            <div class="columna redaccion">
+              <fieldset class="eleccion">
+                <legend>{{ t('para') }}</legend>
+                <label>
                   <input
-                    id="buscar"
-                    type="search"
-                    autocomplete="off"
-                    enterkeyhint="search"
-                    [value]="busqueda()"
-                    (input)="busqueda.set(valor($event))"
+                    type="radio"
+                    name="para"
+                    value="todos"
+                    [checked]="para() === 'todos'"
+                    (change)="para.set('todos')"
                   />
-                </div>
-                <ul class="tutores">
-                  @for (tutor of visibles(); track tutor.tutorId) {
-                    <li>
-                      <label class="casilla">
-                        <input
-                          type="checkbox"
-                          [checked]="elegidos().has(tutor.tutorId)"
-                          (change)="elegir(tutor.tutorId, marcado($event))"
-                        />
-                        <span>
-                          <span class="nombre">{{ tutor.nombre }}</span>
-                          @if (tutor.parentesco) {
-                            <span class="dato-suave"> · {{ tutor.parentesco }}</span>
-                          }
-                          <span class="alumnos dato-suave">{{ alumnos(tutor) }}</span>
-                        </span>
-                      </label>
-                    </li>
-                  } @empty {
-                    <li class="dato-suave sin-resultados">{{ t('sinResultados') }}</li>
-                  }
-                </ul>
-                <p
-                  id="elegidos-cuenta"
-                  class="cifras"
-                  [class.error]="intentado() && elegidos().size === 0"
-                >
-                  {{
-                    intentado() && elegidos().size === 0
-                      ? t('errorElegir')
-                      : t('elegidosCuenta.' + forma(elegidos().size), { n: elegidos().size })
-                  }}
-                </p>
+                  <span class="cifras">{{ t('todos', { n: d.tutores.length }) }}</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="para"
+                    value="elegir"
+                    [checked]="para() === 'elegir'"
+                    (change)="para.set('elegir')"
+                  />
+                  {{ t('elegir') }}
+                </label>
               </fieldset>
-            }
 
-            <div class="campo">
-              <label for="titulo">{{ t('tituloCampo') }}</label>
-              <input
-                id="titulo"
-                type="text"
-                autocomplete="off"
-                enterkeyhint="next"
-                [maxLength]="tituloMaximo"
-                [value]="titulo()"
-                (input)="titulo.set(valor($event))"
-                [attr.aria-invalid]="intentado() && !titulo().trim() ? 'true' : null"
-                aria-describedby="titulo-ayuda"
-              />
-              <p
-                id="titulo-ayuda"
-                class="ayuda cifras"
-                [class.error]="intentado() && !titulo().trim()"
-              >
-                @if (intentado() && !titulo().trim()) {
-                  {{ t('errorTitulo') }}
-                } @else if (contador(titulo(), tituloMaximo)) {
-                  {{ t('contador', { usados: titulo().length, maximo: tituloMaximo }) }}
-                } @else {
-                  {{ t('tituloAyuda') }}
-                }
-              </p>
-            </div>
-
-            <div class="campo">
-              <label for="cuerpo">{{ t('cuerpo') }}</label>
-              <textarea
-                id="cuerpo"
-                rows="6"
-                [maxLength]="cuerpoMaximo"
-                [value]="cuerpo()"
-                (input)="cuerpo.set(valor($event))"
-                [attr.aria-invalid]="intentado() && !cuerpo().trim() ? 'true' : null"
-                aria-describedby="cuerpo-ayuda"
-              ></textarea>
-              @if (intentado() && !cuerpo().trim()) {
-                <p id="cuerpo-ayuda" class="ayuda error">{{ t('errorCuerpo') }}</p>
-              } @else if (contador(cuerpo(), cuerpoMaximo)) {
-                <p id="cuerpo-ayuda" class="ayuda cifras">
-                  {{ t('contador', { usados: cuerpo().length, maximo: cuerpoMaximo }) }}
-                </p>
-              } @else {
-                <p id="cuerpo-ayuda" class="solo-lector">
-                  {{ t('contador', { usados: cuerpo().length, maximo: cuerpoMaximo }) }}
-                </p>
+              @if (para() === 'elegir') {
+                <fieldset class="elegidos" aria-describedby="elegidos-cuenta">
+                  <legend class="solo-lector">{{ t('elegirTutores') }}</legend>
+                  <div class="campo">
+                    <label for="buscar">{{ t('buscar') }}</label>
+                    <input
+                      id="buscar"
+                      type="search"
+                      autocomplete="off"
+                      enterkeyhint="search"
+                      [value]="busqueda()"
+                      (input)="busqueda.set(valor($event))"
+                    />
+                  </div>
+                  <ul class="tutores">
+                    @for (tutor of visibles(); track tutor.tutorId) {
+                      <li>
+                        <label class="casilla">
+                          <input
+                            type="checkbox"
+                            [checked]="elegidos().has(tutor.tutorId)"
+                            (change)="elegir(tutor.tutorId, marcado($event))"
+                          />
+                          <span>
+                            <span class="nombre">{{ tutor.nombre }}</span>
+                            @if (tutor.parentesco) {
+                              <span class="dato-suave"> · {{ tutor.parentesco }}</span>
+                            }
+                            <span class="alumnos dato-suave">{{ alumnos(tutor) }}</span>
+                          </span>
+                        </label>
+                      </li>
+                    } @empty {
+                      <li class="dato-suave sin-resultados">{{ t('sinResultados') }}</li>
+                    }
+                  </ul>
+                  <p
+                    id="elegidos-cuenta"
+                    class="cifras"
+                    [class.error]="intentado() && elegidos().size === 0"
+                  >
+                    {{
+                      intentado() && elegidos().size === 0
+                        ? t('errorElegir')
+                        : t('elegidosCuenta.' + forma(elegidos().size), { n: elegidos().size })
+                    }}
+                  </p>
+                </fieldset>
               }
-            </div>
 
-            <div class="urgente">
-              <label class="interruptor">
-                <span class="texto-interruptor">
-                  <span class="nombre">{{ t('urgenteCampo') }}</span>
-                  <span class="ayuda dato-suave cifras" id="urgente-ayuda">{{
-                    ayudaUrgente()
-                  }}</span>
-                </span>
+              <div class="campo">
+                <label for="titulo">{{ t('tituloCampo') }}</label>
                 <input
-                  type="checkbox"
-                  role="switch"
-                  [checked]="urgente()"
-                  [disabled]="sinPro() || sinSaldoTodos()"
-                  (change)="urgente.set(marcado($event))"
-                  aria-describedby="urgente-ayuda"
+                  id="titulo"
+                  type="text"
+                  autocomplete="off"
+                  enterkeyhint="next"
+                  [maxLength]="tituloMaximo"
+                  [value]="titulo()"
+                  (input)="titulo.set(valor($event))"
+                  [attr.aria-invalid]="intentado() && !titulo().trim() ? 'true' : null"
+                  aria-describedby="titulo-ayuda"
                 />
-              </label>
-              @if (sinPro()) {
-                <a class="enlace enlace--solo" routerLink="/plan" [queryParams]="{ grupo: id() }">{{
-                  t('urgenteVerPlanes')
-                }}</a>
-              }
+                <p
+                  id="titulo-ayuda"
+                  class="ayuda cifras"
+                  [class.error]="intentado() && !titulo().trim()"
+                >
+                  @if (intentado() && !titulo().trim()) {
+                    {{ t('errorTitulo') }}
+                  } @else if (contador(titulo(), tituloMaximo)) {
+                    {{ t('contador', { usados: titulo().length, maximo: tituloMaximo }) }}
+                  } @else {
+                    {{ t('tituloAyuda') }}
+                  }
+                </p>
+              </div>
+
+              <div class="campo">
+                <label for="cuerpo">{{ t('cuerpo') }}</label>
+                <textarea
+                  id="cuerpo"
+                  rows="6"
+                  [maxLength]="cuerpoMaximo"
+                  [value]="cuerpo()"
+                  (input)="cuerpo.set(valor($event))"
+                  [attr.aria-invalid]="intentado() && !cuerpo().trim() ? 'true' : null"
+                  aria-describedby="cuerpo-ayuda"
+                ></textarea>
+                @if (intentado() && !cuerpo().trim()) {
+                  <p id="cuerpo-ayuda" class="ayuda error">{{ t('errorCuerpo') }}</p>
+                } @else if (contador(cuerpo(), cuerpoMaximo)) {
+                  <p id="cuerpo-ayuda" class="ayuda cifras">
+                    {{ t('contador', { usados: cuerpo().length, maximo: cuerpoMaximo }) }}
+                  </p>
+                } @else {
+                  <p id="cuerpo-ayuda" class="solo-lector">
+                    {{ t('contador', { usados: cuerpo().length, maximo: cuerpoMaximo }) }}
+                  </p>
+                }
+              </div>
             </div>
 
-            <section class="llegada" aria-labelledby="llegada-titulo">
-              <h2 id="llegada-titulo">{{ t('llegara') }}</h2>
-              <dl class="canales cifras" aria-live="polite">
-                <div>
-                  <dt>{{ t('canales.push') }}</dt>
-                  <dd>{{ canales().push }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('canales.correo') }}</dt>
-                  <dd>{{ canales().correo }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('canales.whatsapp') }}</dt>
-                  <dd>{{ canales().whatsapp }}</dd>
-                </div>
-                <div [class.falta]="canales().compartir > 0">
-                  <dt>{{ t('canales.compartir') }}</dt>
-                  <dd>{{ canales().compartir }}</dd>
-                </div>
-              </dl>
-              @if (canales().compartir > 0) {
-                <p class="dato-suave">{{ t('compartirNota') }}</p>
+            <div class="lateral envio">
+              <div class="urgente">
+                <label class="interruptor">
+                  <span class="texto-interruptor">
+                    <span class="nombre">{{ t('urgenteCampo') }}</span>
+                    <span class="ayuda dato-suave cifras" id="urgente-ayuda">{{
+                      ayudaUrgente()
+                    }}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    [checked]="urgente()"
+                    [disabled]="sinPro() || sinSaldoTodos()"
+                    (change)="urgente.set(marcado($event))"
+                    aria-describedby="urgente-ayuda"
+                  />
+                </label>
+                @if (sinPro()) {
+                  <a
+                    class="enlace enlace--solo"
+                    routerLink="/plan"
+                    [queryParams]="{ grupo: id() }"
+                    >{{ t('urgenteVerPlanes') }}</a
+                  >
+                }
+              </div>
+
+              <section class="llegada" aria-labelledby="llegada-titulo">
+                <h2 id="llegada-titulo">{{ t('llegara') }}</h2>
+                <dl class="canales cifras" aria-live="polite">
+                  <div>
+                    <dt>{{ t('canales.push') }}</dt>
+                    <dd>{{ canales().push }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('canales.correo') }}</dt>
+                    <dd>{{ canales().correo }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t('canales.whatsapp') }}</dt>
+                    <dd>{{ canales().whatsapp }}</dd>
+                  </div>
+                  <div [class.falta]="canales().compartir > 0">
+                    <dt>{{ t('canales.compartir') }}</dt>
+                    <dd>{{ canales().compartir }}</dd>
+                  </div>
+                </dl>
+                @if (canales().compartir > 0) {
+                  <p class="dato-suave">{{ t('compartirNota') }}</p>
+                }
+              </section>
+
+              @if (errorEnviar(); as codigo) {
+                <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
               }
-            </section>
 
-            @if (errorEnviar(); as codigo) {
-              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-            }
+              <p class="dato-suave nota-envio">
+                {{ enLinea() ? t('sinEditar') : t('sinConexion') }}
+              </p>
 
-            <p class="dato-suave nota-envio">
-              {{ enLinea() ? t('sinEditar') : t('sinConexion') }}
-            </p>
-
-            <div class="pie-accion">
-              <button
-                class="boton boton--ancho"
-                type="submit"
-                [disabled]="!enLinea()"
-                [appOcupado]="enviando()"
-              >
-                {{ t('enviar') }}
-              </button>
+              <div class="pie-accion">
+                <button
+                  class="boton boton--ancho"
+                  type="submit"
+                  [disabled]="!enLinea()"
+                  [appOcupado]="enviando()"
+                >
+                  {{ t('enviar') }}
+                </button>
+              </div>
             </div>
           </form>
         }
@@ -283,6 +294,48 @@ type Para = 'todos' | 'elegir';
       display: grid;
       gap: var(--espacio-5);
       max-inline-size: 40rem;
+    }
+
+    .redaccion,
+    .envio {
+      display: grid;
+      gap: var(--espacio-5);
+    }
+
+    /*
+     * Celular y tableta: una sola columna, en el orden de siempre; los dos grupos no cuentan como cajas, así
+     * que "Enviar" sigue pegado abajo mientras se escribe. Escritorio: lo que se escribe a la izquierda y, en
+     * la columna fija de la derecha, el urgente, cómo llegará y Enviar. Sin hoja ni borde: el urgente y los
+     * canales ya son bloques hundidos.
+     */
+    @media (max-width: 63.99rem) {
+      .redaccion,
+      .envio {
+        display: contents;
+      }
+    }
+
+    .envio.lateral {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+    }
+
+    @media (min-width: 64rem) {
+      .formulario.columnas {
+        grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+        gap: var(--espacio-7);
+        max-inline-size: none;
+      }
+
+      .redaccion textarea {
+        min-block-size: 16rem;
+      }
+
+      .envio {
+        gap: var(--espacio-4);
+      }
     }
 
     .elegidos {

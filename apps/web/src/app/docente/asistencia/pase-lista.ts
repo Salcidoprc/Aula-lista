@@ -154,7 +154,7 @@ interface FilaLista {
               </div>
             }
 
-            <ol class="lista" [attr.aria-label]="t('lista')">
+            <ol class="lista" [class.doble]="filas().length > 9" [attr.aria-label]="t('lista')">
               @for (f of filas(); track f.alumno.id) {
                 <li>
                   <button
@@ -386,6 +386,19 @@ interface FilaLista {
 
     .lista > li {
       border-bottom: 1px solid var(--color-divisoria);
+    }
+
+    /* Escritorio ancho con lista larga (cada columna mide al menos 22 rem): dos columnas, en el orden de la lista. */
+    @media (min-width: 75rem) {
+      .lista.doble {
+        display: block;
+        columns: 2;
+        column-gap: var(--espacio-6);
+      }
+
+      .lista.doble > li {
+        break-inside: avoid;
+      }
     }
 
     /* La fila entera es el botón; al marcar solo cambia su fondo (DESIGN.md, pase de lista). */

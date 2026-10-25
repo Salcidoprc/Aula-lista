@@ -262,7 +262,11 @@ interface Fila {
                 </section>
               }
             } @else {
-              <ol class="alumnos" [attr.aria-label]="t('lista')">
+              <ol
+                class="alumnos"
+                [class.doble]="!conCriterios() && activos().length > 9"
+                [attr.aria-label]="t('lista')"
+              >
                 @for (a of activos(); track a.id) {
                   <ng-container
                     [ngTemplateOutlet]="fila"
@@ -788,6 +792,22 @@ interface Fila {
       .fila > .par,
       .fila > .celda {
         justify-self: end;
+      }
+    }
+
+    /*
+     * Escritorio ancho con lista larga (cada columna mide al menos 22 rem): dos columnas que se leen de arriba
+     * abajo, en el orden de la lista. El teclado va al lado y ya no hay que desplazar hasta el último alumno.
+     */
+    @media (min-width: 75rem) {
+      .alumnos.doble {
+        display: block;
+        columns: 2;
+        column-gap: var(--espacio-6);
+      }
+
+      .alumnos.doble > .fila {
+        break-inside: avoid;
       }
     }
 

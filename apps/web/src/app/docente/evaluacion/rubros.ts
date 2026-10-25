@@ -628,6 +628,17 @@ interface Fuente {
       }
     }
 
+    /* Escritorio: el nombre se queda en la misma fila que tipo, peso y mínima; cada rubro mide la mitad. */
+    @media (min-width: 64rem) {
+      .rejilla {
+        grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.75fr) minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .rejilla .campo--nombre {
+        grid-column: auto;
+      }
+    }
+
     .con-sufijo {
       position: relative;
       display: grid;

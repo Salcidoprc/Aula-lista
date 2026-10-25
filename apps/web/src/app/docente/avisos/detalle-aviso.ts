@@ -40,7 +40,11 @@ const REFRESCO_MS = 20_000;
   imports: [TranslocoDirective, RouterLink, Icono, Ocupado],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="pantalla" [attr.data-grado]="clave() ?? null" *transloco="let t; prefix: 'avisos'">
+    <div
+      class="pantalla pantalla--ancha"
+      [attr.data-grado]="clave() ?? null"
+      *transloco="let t; prefix: 'avisos'"
+    >
       @if (aviso(); as a) {
         <a class="volver" [routerLink]="['/grupos', a.grupoId, 'avisos']">
           <app-icono nombre="volver" />
@@ -58,126 +62,130 @@ const REFRESCO_MS = 20_000;
           </button>
         </div>
       } @else if (aviso(); as a) {
-        <article class="leido-aviso" aria-labelledby="aviso-titulo">
-          <header>
-            @if (a.urgente) {
-              <span class="etiqueta-urgente">{{ t('urgente') }}</span>
+        <div class="hoja-aviso">
+          <article class="leido-aviso" aria-labelledby="aviso-titulo">
+            <header>
+              @if (a.urgente) {
+                <span class="etiqueta-urgente">{{ t('urgente') }}</span>
+              }
+              <h1 id="aviso-titulo" tabindex="-1">{{ a.titulo }}</h1>
+              <p class="dato-suave cifras">
+                {{ t('enviadoEl', { fecha: fechaHora(a.creadoEn) }) }} ·
+                {{
+                  a.paraTodos
+                    ? t('paraTodos')
+                    : t('paraElegidos.' + forma(a.destinatarios), { n: a.destinatarios })
+                }}
+              </p>
+            </header>
+            <p class="cuerpo">{{ a.cuerpo }}</p>
+          </article>
+
+          <div class="seguimiento">
+            <section class="lectura" aria-labelledby="lectura-titulo">
+              <h2 id="lectura-titulo" class="cifras">
+                {{ t('leidoPor', { leidos: a.leidos, total: a.destinatarios }) }}
+              </h2>
+              <span class="barra" aria-hidden="true">
+                <span [style.transform]="'scaleX(' + fraccion() + ')'"></span>
+              </span>
+            </section>
+
+            @if (aCompartir().length > 0) {
+              <section class="compartir" aria-labelledby="compartir-titulo">
+                <h2 id="compartir-titulo">{{ t('compartelo.titulo') }}</h2>
+                <p class="dato-suave">{{ t('compartelo.texto') }}</p>
+                <ul class="filas">
+                  @for (e of aCompartir(); track e.tutorId) {
+                    <li class="fila-compartir">
+                      <span class="quien">
+                        <span class="nombre">{{ e.nombre }}</span>
+                        <span class="dato-suave">{{ alumnos(e) }}</span>
+                        @if (e.compartidoEn) {
+                          <span class="compartido cifras">
+                            <app-icono nombre="guardado" />
+                            {{ t('compartelo.compartido', { fecha: fechaHora(e.compartidoEn) }) }}
+                          </span>
+                        }
+                      </span>
+                      <button
+                        class="boton"
+                        type="button"
+                        [class.boton--secundario]="!!e.compartidoEn"
+                        [disabled]="!enLinea() || !e.telefono"
+                        [appOcupado]="compartiendo() === e.tutorId"
+                        (click)="compartir(a, e)"
+                      >
+                        <app-icono nombre="mensaje" />
+                        {{ e.compartidoEn ? t('compartelo.otraVez') : t('compartelo.accion') }}
+                        <span class="solo-lector">{{ e.nombre }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+                @if (errorCompartir(); as codigo) {
+                  <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
+                }
+              </section>
             }
-            <h1 id="aviso-titulo" tabindex="-1">{{ a.titulo }}</h1>
-            <p class="dato-suave cifras">
-              {{ t('enviadoEl', { fecha: fechaHora(a.creadoEn) }) }} ·
-              {{
-                a.paraTodos
-                  ? t('paraTodos')
-                  : t('paraElegidos.' + forma(a.destinatarios), { n: a.destinatarios })
-              }}
-            </p>
-          </header>
-          <p class="cuerpo">{{ a.cuerpo }}</p>
-        </article>
+          </div>
 
-        <section class="lectura" aria-labelledby="lectura-titulo">
-          <h2 id="lectura-titulo" class="cifras">
-            {{ t('leidoPor', { leidos: a.leidos, total: a.destinatarios }) }}
-          </h2>
-          <span class="barra" aria-hidden="true">
-            <span [style.transform]="'scaleX(' + fraccion() + ')'"></span>
-          </span>
-        </section>
-
-        @if (aCompartir().length > 0) {
-          <section class="compartir" aria-labelledby="compartir-titulo">
-            <h2 id="compartir-titulo">{{ t('compartelo.titulo') }}</h2>
-            <p class="dato-suave">{{ t('compartelo.texto') }}</p>
+          <section class="entregas" aria-labelledby="entregas-titulo">
+            <h2 id="entregas-titulo">{{ t('porTutor') }}</h2>
             <ul class="filas">
-              @for (e of aCompartir(); track e.tutorId) {
-                <li class="fila-compartir">
+              @for (e of a.entregas; track e.tutorId) {
+                <li class="entrega">
                   <span class="quien">
-                    <span class="nombre">{{ e.nombre }}</span>
+                    <span class="nombre">{{ e.nombre ?? t('tutorSinDatos') }}</span>
                     <span class="dato-suave">{{ alumnos(e) }}</span>
-                    @if (e.compartidoEn) {
-                      <span class="compartido cifras">
-                        <app-icono nombre="guardado" />
-                        {{ t('compartelo.compartido', { fecha: fechaHora(e.compartidoEn) }) }}
+                  </span>
+                  <span class="estado cifras" [class.leido]="!!e.leidoEn">
+                    @if (e.leidoEn) {
+                      {{ t('leidoEl', { fecha: fechaHora(e.leidoEn) }) }}
+                    } @else {
+                      {{ t('sinLeer') }}
+                    }
+                  </span>
+                  <span class="canales" [attr.aria-label]="t('canales.nombre')">
+                    @if (e.push) {
+                      <span class="canal">{{ t('canales.push') }}</span>
+                    }
+                    @if (e.correo) {
+                      <span class="canal">{{ t('canales.correo') }}</span>
+                    }
+                    @if (e.whatsapp) {
+                      <span class="canal" [class.fallido]="e.estadoWhatsapp === 'fallido'">
+                        {{ t('canales.whatsapp') }}
+                        @if (e.estadoWhatsapp; as estado) {
+                          · {{ t('estadosWhatsapp.' + estado) }}
+                        }
+                      </span>
+                    }
+                    @if (e.sinSaldoWhatsapp) {
+                      <span class="canal canal--falta">{{ t('canales.sinSaldo') }}</span>
+                    }
+                    @if (e.porCompartir) {
+                      <span class="canal canal--falta">
+                        {{ e.compartidoEn ? t('canales.compartido') : t('canales.compartir') }}
                       </span>
                     }
                   </span>
-                  <button
-                    class="boton"
-                    type="button"
-                    [class.boton--secundario]="!!e.compartidoEn"
-                    [disabled]="!enLinea() || !e.telefono"
-                    [appOcupado]="compartiendo() === e.tutorId"
-                    (click)="compartir(a, e)"
-                  >
-                    <app-icono nombre="mensaje" />
-                    {{ e.compartidoEn ? t('compartelo.otraVez') : t('compartelo.accion') }}
-                    <span class="solo-lector">{{ e.nombre }}</span>
-                  </button>
                 </li>
               }
             </ul>
-            @if (errorCompartir(); as codigo) {
-              <p class="aviso aviso--error" role="alert">{{ texto('errores.' + codigo) }}</p>
-            }
           </section>
-        }
 
-        <section class="entregas" aria-labelledby="entregas-titulo">
-          <h2 id="entregas-titulo">{{ t('porTutor') }}</h2>
-          <ul class="filas">
-            @for (e of a.entregas; track e.tutorId) {
-              <li class="entrega">
-                <span class="quien">
-                  <span class="nombre">{{ e.nombre ?? t('tutorSinDatos') }}</span>
-                  <span class="dato-suave">{{ alumnos(e) }}</span>
-                </span>
-                <span class="estado cifras" [class.leido]="!!e.leidoEn">
-                  @if (e.leidoEn) {
-                    {{ t('leidoEl', { fecha: fechaHora(e.leidoEn) }) }}
-                  } @else {
-                    {{ t('sinLeer') }}
-                  }
-                </span>
-                <span class="canales" [attr.aria-label]="t('canales.nombre')">
-                  @if (e.push) {
-                    <span class="canal">{{ t('canales.push') }}</span>
-                  }
-                  @if (e.correo) {
-                    <span class="canal">{{ t('canales.correo') }}</span>
-                  }
-                  @if (e.whatsapp) {
-                    <span class="canal" [class.fallido]="e.estadoWhatsapp === 'fallido'">
-                      {{ t('canales.whatsapp') }}
-                      @if (e.estadoWhatsapp; as estado) {
-                        · {{ t('estadosWhatsapp.' + estado) }}
-                      }
-                    </span>
-                  }
-                  @if (e.sinSaldoWhatsapp) {
-                    <span class="canal canal--falta">{{ t('canales.sinSaldo') }}</span>
-                  }
-                  @if (e.porCompartir) {
-                    <span class="canal canal--falta">
-                      {{ e.compartidoEn ? t('canales.compartido') : t('canales.compartir') }}
-                    </span>
-                  }
-                </span>
-              </li>
-            }
-          </ul>
-        </section>
-
-        <div class="borrar">
-          <button
-            class="enlace enlace--solo peligro"
-            type="button"
-            [disabled]="!enLinea()"
-            (click)="dialogoBorrar.showModal()"
-          >
-            <app-icono nombre="borrar" />
-            {{ t('borrar.accion') }}
-          </button>
+          <div class="borrar">
+            <button
+              class="enlace enlace--solo peligro"
+              type="button"
+              [disabled]="!enLinea()"
+              (click)="dialogoBorrar.showModal()"
+            >
+              <app-icono nombre="borrar" />
+              {{ t('borrar.accion') }}
+            </button>
+          </div>
         </div>
 
         <dialog #dialogoBorrar class="dialogo" closedby="any" aria-labelledby="borrar-titulo">
@@ -213,6 +221,41 @@ const REFRESCO_MS = 20_000;
     </div>
   `,
   styles: `
+    .hoja-aviso,
+    .seguimiento {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      gap: var(--espacio-5);
+    }
+
+    /*
+     * Escritorio: el aviso y la lista por tutor a la izquierda; a la derecha, fijo al desplazar, quién lo leyó
+     * y a quién se lo compartes tú. En celular se lee en el mismo orden de siempre.
+     */
+    @media (min-width: 64rem) {
+      .hoja-aviso {
+        grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+        grid-template-rows: auto auto 1fr;
+        column-gap: var(--espacio-7);
+      }
+
+      .hoja-aviso > :not(.seguimiento) {
+        grid-column: 1;
+      }
+
+      .seguimiento {
+        position: sticky;
+        top: var(--espacio-5);
+        grid-column: 2;
+        grid-row: 1 / span 3;
+      }
+
+      .seguimiento .lectura {
+        max-inline-size: none;
+      }
+    }
+
     .leido-aviso {
       display: grid;
       gap: var(--espacio-4);

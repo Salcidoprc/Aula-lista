@@ -35,6 +35,11 @@ import { AvisosGrupoService } from './avisos.service';
       [attr.data-grado]="clave() ?? null"
       *transloco="let t; prefix: 'avisos'"
     >
+      <a class="volver" routerLink="/">
+        <app-icono nombre="volver" />
+        {{ t('misGrupos') }}
+      </a>
+
       <app-pestanas-grupo [id]="id()" [grado]="clave()" />
 
       <div class="cabeza-pantalla">
@@ -199,6 +204,37 @@ import { AvisosGrupoService } from './avisos.service';
       grid-column: 2;
       grid-row: 1 / 4;
       color: var(--color-texto-suave);
+    }
+
+    /* Escritorio: cada aviso es un renglón de tabla; título y fecha, quién lo leyó y la barra, lado a lado. */
+    @media (min-width: 64rem) {
+      .aviso-fila {
+        grid-template-columns: minmax(0, 1fr) 11rem 12rem auto;
+        column-gap: var(--espacio-6);
+        padding-inline: var(--espacio-3);
+      }
+
+      .cabeza {
+        justify-content: start;
+        column-gap: var(--espacio-4);
+      }
+
+      .lectura {
+        grid-column: 2;
+        grid-row: 1;
+        justify-content: end;
+      }
+
+      .barra {
+        grid-column: 3;
+        grid-row: 1;
+        inline-size: 100%;
+      }
+
+      .aviso-fila app-icono {
+        grid-column: 4;
+        grid-row: 1;
+      }
     }
 
     .aviso-fila:active .titulo-aviso {
