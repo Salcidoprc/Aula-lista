@@ -30,7 +30,7 @@
 .progreso > span {
   display: block;
   block-size: 100%;
-  background: var(--grado);
+  background: var(--grado-trazo);
 }
 
 /* Botón de solo ícono: 44 px, sin fondo; el nombre va en aria-label. */

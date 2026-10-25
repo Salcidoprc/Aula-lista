@@ -147,4 +147,31 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
       'El correo o la contraseña no coinciden.',
     );
   });
+
+  test('RF-009: elige la apariencia oscura, se queda al recargar y «Automática» sigue al sistema', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await registrarYCompletarPerfil(page);
+    const html = page.locator('html');
+    await expect(html).toHaveAttribute('data-tema', 'claro');
+
+    await page.getByRole('link', { name: 'Ajustes' }).click();
+    const apariencia = page.getByRole('group', { name: 'Apariencia' });
+    await expect(apariencia.getByLabel('Automática')).toBeChecked();
+    await apariencia.getByLabel('Oscura').check();
+    await expect(html).toHaveAttribute('data-tema', 'oscuro');
+    await sinFallasDeAccesibilidad(page);
+
+    await page.reload();
+    await expect(html).toHaveAttribute('data-tema', 'oscuro');
+    await expect(
+      page.getByRole('group', { name: 'Apariencia' }).getByLabel('Oscura'),
+    ).toBeChecked();
+
+    await page.getByRole('group', { name: 'Apariencia' }).getByLabel('Automática').check();
+    await expect(html).toHaveAttribute('data-tema', 'claro');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(html).toHaveAttribute('data-tema', 'oscuro');
+  });
 });

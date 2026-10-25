@@ -12,6 +12,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
+import { TemaService } from './core/tema/tema.service';
 import { IndicadorSincronizacion } from './core/sincronizacion/indicador-sincronizacion';
 import { Avisos } from './shared/avisos/avisos';
 import { Portada } from './shared/portada/portada';
@@ -122,7 +123,7 @@ import { PortadaService } from './shared/portada/portada.service';
       min-height: var(--tactil-minimo);
       padding: 0 var(--espacio-2);
       border-radius: var(--radio-lg);
-      color: var(--grado-tinte);
+      color: var(--grado-rotulo);
       font-size: var(--texto-sm);
       font-weight: var(--peso-medio);
       text-decoration: none;
@@ -153,6 +154,7 @@ import { PortadaService } from './shared/portada/portada.service';
 export class App {
   protected readonly sesion = inject(SesionService);
   protected readonly portada = inject(PortadaService).datos;
+  private readonly tema = inject(TemaService).tema;
 
   constructor() {
     const injector = inject(Injector);
@@ -183,9 +185,11 @@ export class App {
       );
 
     // La barra de estado del celular (theme-color) toma el color de la portada: azul fuera de un grupo,
-    // el del grado dentro. El color se lee ya pintado y se pasa a rgb, que todo navegador entiende.
+    // el del grado dentro, y cambia con el tema. El color se lee ya pintado y se pasa a rgb, que todo
+    // navegador entiende.
     effect(() => {
       this.portada();
+      this.tema();
       afterNextRender(
         () => {
           const portada = host.nativeElement.querySelector('app-portada');

@@ -735,7 +735,7 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
     }
 
     .conteo [data-estado='lista'] {
-      border-color: var(--grado);
+      border-color: var(--grado-trazo);
     }
 
     .conteo [data-estado='pendiente'] {

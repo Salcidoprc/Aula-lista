@@ -400,7 +400,7 @@ const CONSULTA_MS = 3000;
     }
 
     .barra [data-segmento='borrador'] {
-      background: var(--grado);
+      background: var(--grado-trazo);
     }
 
     .barra [data-segmento='pendiente'] {
@@ -426,7 +426,7 @@ const CONSULTA_MS = 3000;
     }
 
     .conteo [data-segmento='borrador'] {
-      border-color: var(--grado);
+      border-color: var(--grado-trazo);
     }
 
     .conteo dt {

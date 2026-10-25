@@ -180,8 +180,9 @@ Papel cálido y tinta azul pizarra como neutros, un azul de acción y nueve colo
 ### Secondary: colores de grado
 - **Rojo** (`grado-p1`), **naranja** (`grado-p2`), **verde** (`grado-p3`), **turquesa** (`grado-p4`), **morado** (`grado-p5`) y **magenta** (`grado-p6`) para 1° a 6° de primaria.
 - **Olivo** (`grado-s1`), **azul petróleo** (`grado-s2`) y **pizarra** (`grado-s3`) para 1° a 3° de secundaria; más sobrios, como corresponde a alumnos mayores.
-- Cada grado tiene `-tinta` (texto oscuro sobre su tinte o sobre el fondo) y `-tinte` (fondo suave: actividad seleccionada, celda guardada). Sobre la base, el texto va en `sobre-grado` o en el tinte del mismo grado.
-- En los componentes no se escribe `grado-p4`: se pone `data-grado="p4"` en el contenedor y se usan `--grado`, `--grado-tinta` y `--grado-tinte`. Sin `data-grado`, esas variables toman la familia de la acción.
+- Cada grado tiene `-tinta` (texto sobre su tinte o sobre el fondo), `-tinte` (fondo suave: actividad seleccionada, celda guardada) y `-rotulo` (texto suave sobre la base: subtítulo de la portada, datos de la tapa). En claro el rótulo es el mismo tinte; en oscuro el tinte se oscurece y el rótulo sigue claro. Sobre la base, el texto va en `sobre-grado` o en el rótulo.
+- En los componentes no se escribe `grado-p4`: se pone `data-grado="p4"` en el contenedor y se usan `--grado`, `--grado-tinta`, `--grado-tinte`, `--grado-rotulo` y `--grado-trazo`. Sin `data-grado`, la base es `marca` (el azul de la portada sin grupo) y las demás toman la familia de la acción.
+- **Trazo** (`--grado-trazo`): el color del grado cuando dibuja una barra de avance, la raya de la pestaña activa, la marca de la fila activa o el borde de un conteo. En claro es la base; en oscuro se mezcla 55% con la tinta para llegar a 3:1 sobre la pizarra.
 
 ### Tertiary: estados
 - **Éxito**, **aviso** y **peligro** (`exito`, `aviso`, `peligro`), cada uno con tinte y tinta. Solo donde cargan significado: sincronizado, pendiente de enviar, error. La celda de captura guardada usa el tinte del grado, no el verde de éxito.
@@ -219,10 +220,48 @@ Papel cálido y tinta azul pizarra como neutros, un azul de acción y nueve colo
 
 Todas las bases dan además 4.5:1 o más contra `superficie-hundida` como elemento de interfaz (barra de avance, borde de la celda activa). El número decorativo de la portada (base al 80% con `sobre-grado`) queda a 1.5:1 de la base a propósito: es textura, va con `aria-hidden` y el texto nunca se encima sobre él.
 
+### Tema oscuro (RF-009)
+
+**Escena:** la docente revisa observaciones de noche, en casa y con la luz baja; abre la app en el celular que ya tiene en modo oscuro. El tema oscuro se compone para esa escena, no se invierte el claro.
+
+- **Pizarra y gis.** El papel se vuelve pizarra azul tinta (`fondo` L 0.20, hue 260) y la tinta se vuelve gis cálido (`texto` L 0.93, hue 95: el tono del papel del claro). La elevación sube un paso de luz por capa: `fondo` 0.20, `superficie` 0.235, `superficie-hundida` 0.28 (campos, celdas y botones secundarios se aclaran para seguir pareciendo tocables) y `divisoria` 0.35.
+- **Acción.** El azul se aclara (L 0.74) y su texto se oscurece (`sobre-accion` L 0.20): el botón principal sigue siendo lo más visible de la pantalla. Los tintes de estado y de la acción bajan a L 0.30 a 0.32 y sus tintas suben a 0.87 o más.
+- **Las tapas siguen siendo libros.** Portada, tapas y chips elegidos conservan el color del grado, 0.03 más bajo para no deslumbrar, con `sobre-grado` en L 0.97. La portada sin grupo usa `marca` y no la acción, que en oscuro es un azul claro.
+- **Sombras.** En la pizarra la sombra entintada al 12% no se ve: `sombra-flotante`, `sombra-hoja` y el velo suben a 40-60%.
+- **Mecánica.** `TemaService` pone `data-tema="claro"` u `"oscuro"` en `<html>` según la elección guardada en el dispositivo o el sistema; `tokens.css` redefine los mismos tokens en `:root[data-tema='oscuro']`. Antes de que arranque la app, una consulta `prefers-color-scheme` pinta el fondo de pizarra para que no haya destello claro. La barra de estado del celular toma el color de la portada del tema activo. El cambio de tema no se anima.
+- **Fuera.** Las boletas en PDF quedan en claro: son para imprimir. El botón de Google conserva sus colores de marca.
+
+| Texto o elemento (oscuro) | Fondo | Contraste | Mínimo |
+| --- | --- | --- | --- |
+| `texto` | `fondo` / `superficie` / `superficie-hundida` | 14.74 / 13.57 / 11.88 | 4.5 |
+| `texto-suave` | `fondo` / `superficie-hundida` | 9.05 / 7.29 | 4.5 |
+| `texto-tenue` (solo UI) | `fondo` / `superficie-hundida` | 5.38 / 4.34 | 3 |
+| `sobre-accion` | `accion` / `accion-presionada` | 7.78 / 6.22 | 4.5 |
+| `accion` (enlace, foco) | `fondo` | 7.77 | 4.5 |
+| `accion-tinta` | `accion-tinte` | 8.59 | 4.5 |
+| `sobre-grado` / `marca-rotulo` | `marca` | 6.42 / 5.52 | 4.5 |
+| `exito-tinta` / `aviso-tinta` / `peligro-tinta` | su tinte | 9.29 / 9.16 / 8.92 | 4.5 |
+| `exito-tinta` / `aviso-tinta` / `peligro-tinta` | `fondo` | 12.57 / 12.99 / 11.92 | 4.5 |
+| `exito` / `aviso` / `peligro` (UI) | `fondo` | 7.69 / 9.53 / 6.59 | 3 |
+
+| Grado (oscuro) | `sobre-grado` / base | rótulo / base | tinta / tinte | tinta / fondo | trazo / fondo | trazo / hundida |
+| --- | --- | --- | --- | --- | --- | --- |
+| p1 rojo | 6.01 | 5.44 | 8.30 | 10.76 | 6.12 | 4.94 |
+| p2 naranja | 5.79 | 5.26 | 8.30 | 10.88 | 6.26 | 5.04 |
+| p3 verde | 5.93 | 5.50 | 8.73 | 11.41 | 6.38 | 5.15 |
+| p4 turquesa | 6.03 | 5.57 | 8.70 | 11.33 | 6.31 | 5.09 |
+| p5 morado | 6.15 | 5.59 | 8.63 | 11.24 | 6.25 | 5.04 |
+| p6 magenta | 6.06 | 5.47 | 8.57 | 11.07 | 6.21 | 5.00 |
+| s1 olivo | 5.60 | 5.17 | 8.99 | 11.65 | 6.62 | 5.33 |
+| s2 azul petróleo | 6.15 | 5.65 | 8.67 | 11.20 | 6.22 | 5.02 |
+| s3 pizarra | 6.83 | 6.24 | 8.35 | 11.09 | 5.92 | 4.77 |
+
+`npm run contraste:verificar` recalcula estas tablas (y las del claro) desde `tokens.css` en cada PR y falla si un par baja del mínimo. La base de un grado no se usa como trazo sobre la pizarra: ahí queda debajo de 3:1, por eso existe `--grado-trazo`.
+
 ### Named Rules
 **La regla del color por grado.** El color del grado vive en la portada, la tapa, la barra de avance, la celda activa y los tintes de la pantalla del grupo. Nunca en botones de acción ni en texto largo.
 
-**La regla del texto sobre color.** Sobre la base de un grado el texto va en `sobre-grado` o en el tinte de ese grado; sobre un tinte, en la tinta del mismo grado. Nunca gris.
+**La regla del texto sobre color.** Sobre la base de un grado el texto va en `sobre-grado` o en el rótulo de ese grado; sobre un tinte, en la tinta del mismo grado. Nunca gris.
 
 **La regla de la acción azul.** La acción principal siempre es `accion`, en cualquier grado. Si el botón cambiara de color con el grupo, el docente tendría que volver a buscarlo.
 
@@ -294,7 +333,7 @@ Esquinas redondeadas y amables: 4 px en chips y la barra de avance (`sm`), 10 px
 
 ### Portada (`app-portada`, `src/app/compartido/portada/portada.ts`)
 La cabecera de la app y de cada pantalla de grupo. Entradas: `titulo` (obligatoria), `subtitulo`, `numero` ("4") y `grado` (`p1` … `s3`).
-- **Fondo:** `--grado`; sin grado, la acción. **Texto:** `sobre-grado`; subtítulo en `--grado-tinte`.
+- **Fondo:** `--grado`; sin grado, `marca`. **Texto:** `sobre-grado`; subtítulo en `--grado-rotulo`.
 - **Número:** 120 px, peso 700, en el color del grado mezclado al 80% con `sobre-grado`, pegado arriba a la derecha y recortado. Decorativo (`aria-hidden`); el título ya nombra el grupo.
 - Con número, el texto reserva 5.5rem a la derecha para no encimarse.
 - Cambiar de grupo cambia el color sin animación: es navegación frecuente.

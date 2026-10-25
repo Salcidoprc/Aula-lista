@@ -15,7 +15,12 @@ export default defineConfig({
   },
   projects: [
     { name: 'celular', use: { ...devices['Pixel 7'] } },
-    { name: 'celular-movimiento-reducido', use: { ...devices['Pixel 7'], reducedMotion: 'reduce' } },
+    {
+      name: 'celular-movimiento-reducido',
+      use: { ...devices['Pixel 7'], reducedMotion: 'reduce' },
+    },
     { name: 'escritorio', use: { ...devices['Desktop Chrome'] } },
+    // RF-009: toda la suite, con sus revisiones de axe, también con el sistema en modo oscuro.
+    { name: 'celular-oscuro', use: { ...devices['Pixel 7'], colorScheme: 'dark' } },
   ],
 });

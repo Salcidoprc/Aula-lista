@@ -70,7 +70,7 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
 
     .subtitulo {
       font-size: var(--texto-sm);
-      color: var(--grado-tinte);
+      color: var(--grado-rotulo);
       overflow-wrap: anywhere;
     }
 

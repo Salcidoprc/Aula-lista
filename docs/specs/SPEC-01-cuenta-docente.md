@@ -23,6 +23,7 @@ Que un docente cree su cuenta en menos de 2 minutos desde el celular, con la bas
 | RN-005 | Una cuenta de Google y una de correo con la misma dirección son la misma cuenta. |
 | RN-006 | Al solicitar la eliminación, la cuenta se desactiva de inmediato, los enlaces de tutores de sus grupos se revocan y los datos se borran a los 30 días. |
 | RN-007 | Los vínculos de tutores con alumnos de otros docentes no se tocan al borrar una cuenta. |
+| RN-008 | El tema (RF-009) es una preferencia del dispositivo, no de la cuenta: se guarda en el navegador, no viaja a la API y vale para todo lo que se abra en ese navegador (docente, portal de tutores y administración). Sin elección, sigue al sistema y cambia en cuanto el sistema cambia. |
 
 ## Sesión
 
@@ -65,7 +66,7 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 
 1. **Registro e inicio de sesión:** correo y contraseña, botón de Google, enlace a recuperar.
 2. **Bienvenida:** perfil (nombre, nivel, escuela, CCT opcional, estado) y aceptación legal en un solo paso.
-3. **Ajustes de cuenta:** perfil, cerrar sesiones, exportar datos, eliminar cuenta, plan.
+3. **Ajustes de cuenta:** perfil, apariencia (Automática, Clara u Oscura, RF-009), cerrar sesiones, exportar datos, eliminar cuenta, plan. La apariencia cambia al tocarla, sin botón de guardar y sin animar el cambio de colores.
 
 ## Casos borde
 
@@ -80,7 +81,8 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un token de actualización ya usado, cuando alguien lo reutiliza, entonces se revocan todas las sesiones de ese docente y queda en auditoría.
 - Dado un docente que pide eliminar su cuenta, cuando confirma, entonces no puede iniciar sesión, los enlaces de sus tutores dejan de funcionar para sus grupos y a los 30 días no quedan datos suyos en la base.
 - Dados 6 intentos fallidos de inicio de sesión en un minuto, entonces el sexto se rechaza con `demasiados_intentos`.
+- Dado un docente con el sistema en modo claro, cuando elige Oscura en Ajustes, entonces toda la app cambia al tema oscuro sin fallas de axe y sigue oscura al recargar; al volver a Automática, la app sigue al sistema y cambia sola si el sistema pasa a oscuro (RF-009, RN-008).
 
 ## Fuera de alcance
 
-Inicio de sesión con Microsoft o Apple, autenticación de dos factores, cuentas de escuela.
+Inicio de sesión con Microsoft o Apple, autenticación de dos factores, cuentas de escuela. Guardar el tema en la cuenta para que viaje entre dispositivos y un selector de tema en el portal de tutores (el tutor sigue al modo de su celular). Las boletas en PDF son documentos para imprimir y quedan siempre en claro.

@@ -351,7 +351,7 @@ const VISTAS: readonly Vista[] = ['boletas', 'calificaciones', 'avisos'];
       width: calc(100% / 3);
       height: 3px;
       border-radius: var(--radio-sm) var(--radio-sm) 0 0;
-      background: var(--grado);
+      background: var(--grado-trazo);
       transform: translateX(calc(var(--indice, 0) * 100%));
       transition: transform var(--dur-icono) var(--ease-out);
     }
