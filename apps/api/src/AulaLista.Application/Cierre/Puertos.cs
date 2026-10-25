@@ -87,6 +87,10 @@ public sealed class OpcionesIa
     [Range(200, 8000)]
     public int MaximoTokensSalida { get; init; } = 1200;
 
+    /// <summary>RF-015: tope de salida al leer una foto de lista (hasta 50 nombres, uno por línea).</summary>
+    [Range(200, 8000)]
+    public int MaximoTokensSalidaLista { get; init; } = 2000;
+
     /// <summary>Reintentos ante errores pasajeros, con espera exponencial (SPEC-04, Errores).</summary>
     [Range(0, 5)]
     public int Reintentos { get; init; } = 3;

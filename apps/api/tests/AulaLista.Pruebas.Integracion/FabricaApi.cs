@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using AulaLista.Application.Cierre;
 using AulaLista.Application.Comun;
+using AulaLista.Application.Grupos;
 using AulaLista.Infrastructure;
 using AulaLista.Infrastructure.Avisos;
 using AulaLista.Infrastructure.Comun;
@@ -53,6 +54,8 @@ public sealed partial class FabricaApi(
     /// <summary>La IA de las pruebas: guarda lo que se le envía y responde como el redactor simulado.</summary>
     public RedactorDePrueba Redactor => Services.GetRequiredService<RedactorDePrueba>();
 
+    public LectorDePrueba Lector => Services.GetRequiredService<LectorDePrueba>();
+
     /// <summary>Todo lo que la API escribió en sus logs (SPEC-09: sin nombres ni teléfonos).</summary>
     public SumideroRegistros Registros => Services.GetRequiredService<SumideroRegistros>();
 
@@ -88,6 +91,9 @@ public sealed partial class FabricaApi(
             services.RemoveAll<IRedactorObservaciones>();
             services.AddSingleton<RedactorDePrueba>();
             services.AddSingleton<IRedactorObservaciones>(sp => sp.GetRequiredService<RedactorDePrueba>());
+            services.RemoveAll<ILectorListas>();
+            services.AddSingleton<LectorDePrueba>();
+            services.AddSingleton<ILectorListas>(sp => sp.GetRequiredService<LectorDePrueba>());
             services.AddSingleton<SumideroRegistros>();
             services.AddSingleton<Serilog.Core.ILogEventSink>(sp => sp.GetRequiredService<SumideroRegistros>());
             services.AddScoped<ColaInmediata>();

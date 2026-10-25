@@ -95,3 +95,20 @@ public interface IHojasDeCalculo
 }
 
 public sealed record TablaCruda(IReadOnlyList<string> Encabezados, IReadOnlyList<IReadOnlyList<string>> Filas);
+
+/// <summary>Una foto de lista (RF-015) en memoria: nunca se escribe a disco ni a la base.</summary>
+public sealed record ImagenLista(ReadOnlyMemory<byte> Datos, string TipoMedio)
+{
+    public const string Jpeg = "image/jpeg";
+    public const string Png = "image/png";
+}
+
+/// <summary>Los nombres que la IA leyó, o la falla; los tokens y la duración van a <c>llamada_ia</c>, sin el contenido.</summary>
+public sealed record ListaLeida(
+    IReadOnlyList<string> Nombres, string? Fallo, string Modelo, string VersionPrompt, int TokensEntrada, int TokensSalida, int DuracionMs);
+
+/// <summary>Lee los nombres de los alumnos de una foto de lista con la IA (02-arquitectura, Integraciones).</summary>
+public interface ILectorListas
+{
+    Task<ListaLeida> LeerAsync(ImagenLista imagen, CancellationToken cancellationToken);
+}

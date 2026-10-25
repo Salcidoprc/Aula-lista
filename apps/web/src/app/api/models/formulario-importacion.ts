@@ -4,5 +4,6 @@
 import { IFormFile } from '../models/i-form-file';
 export interface FormularioImportacion {
   archivo?: (null | IFormFile | null);
+  foto?: (null | IFormFile | null);
   texto?: (string | null);
 }

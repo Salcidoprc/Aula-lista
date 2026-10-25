@@ -66,6 +66,13 @@ Un alumno por línea. Se aceptan formatos "Apellidos Nombres", "Nombres Apellido
 3. El resultado llega a la misma vista previa de la importación por texto para corregir y confirmar.
 4. Requiere conexión; si la lectura falla, se ofrece pegar texto.
 
+Decisiones de H6.3:
+- La web reduce la foto a 1568 px por el lado largo y la vuelve a codificar como JPEG antes de subirla: menos datos, menos tokens y sin metadatos de la cámara (ubicación). La API acepta JPG o PNG por sus primeros bytes y rechaza lo que pase de 5 MB con `foto_invalida`.
+- La lectura es la única llamada a la IA que lleva nombres reales, porque la foto los trae (`reglas/04-seguridad-privacidad.md`). Solo se piden los nombres de los alumnos; la imagen vive en memoria durante la petición y no se guarda ni se registra.
+- Cada lectura se registra en `llamada_ia` (versión de prompt `lista-v1`) y cuenta para el límite por hora (RNF-004, `limite_lecturas`, 429) y para el costo del grupo en el panel (RNF-022). Costo estimado: unos 0.015 MXN por lectura con Haiku 5.5.
+- Si la IA no lee ningún nombre, la vista previa llega sin filas (200) para no revertir el registro de la llamada; la web lo muestra como "No pudimos leer nombres" y ofrece pegar la lista.
+- Disponible en todos los planes, como el resto de la importación.
+
 ## API
 
 | Método y ruta | Descripción |
@@ -117,6 +124,9 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un teléfono ya registrado por otro docente, cuando se captura como tutor, entonces se vincula al tutor existente y el docente no ve ningún dato del otro grupo.
 - Dado un alumno dado de baja, cuando el tutor abre el portal, entonces ve las boletas ya publicadas de ese alumno pero no periodos nuevos.
 - Dada una foto de lista legible con 30 nombres, cuando se procesa, entonces la vista previa muestra al menos 28 nombres correctos (meta de calidad, no bloqueante).
+- Dada una foto JPG o PNG de una lista, cuando el docente la sube, entonces los nombres llegan a la misma vista previa de "Pegar lista", con un aviso de revisarlos, y la foto no queda guardada.
+- Dado un archivo que no es JPG ni PNG o pesa más de 5 MB, cuando se sube como foto, entonces se rechaza con `foto_invalida` sin llamar a la IA.
+- Dada una foto en la que la IA no lee nombres, o sin conexión, entonces se ofrece pegar la lista y la lectura fallida cuenta para el límite y el costo.
 
 ## Fuera de alcance
 

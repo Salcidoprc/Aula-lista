@@ -157,8 +157,26 @@ internal static class GruposEndpoints
     {
         var archivo = formulario.Archivo;
         await using var flujo = archivo?.OpenReadStream();
-        var fuente = new FuenteImportacion(flujo, archivo?.FileName, archivo?.Length ?? 0, formulario.Texto);
+        var fuente = new FuenteImportacion(flujo, archivo?.FileName, archivo?.Length ?? 0, formulario.Texto, await FotoAsync(formulario.Foto, ct));
         return Respuesta(await caso.EjecutarAsync(id, fuente, ct));
+    }
+
+    /// <summary>La foto se lee a memoria y nada más (RF-015); una de más de 5 MB llega vacía y la rechaza el caso de uso.</summary>
+    private static async Task<ImagenLista?> FotoAsync(IFormFile? foto, CancellationToken ct)
+    {
+        if (foto is null)
+        {
+            return null;
+        }
+
+        if (foto.Length is 0 or > CrearImportacionCasoUso.TamanoMaximoFoto)
+        {
+            return new ImagenLista(ReadOnlyMemory<byte>.Empty, foto.ContentType);
+        }
+
+        using var memoria = new MemoryStream((int)foto.Length);
+        await foto.CopyToAsync(memoria, ct);
+        return new ImagenLista(memoria.ToArray(), foto.ContentType);
     }
 
     private static async Task<IResult> ConfirmarImportacion(
@@ -166,10 +184,13 @@ internal static class GruposEndpoints
         await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct));
 }
 
-/// <summary>Un archivo .xlsx o .csv (RF-013), o el texto pegado con un alumno por línea (RF-014).</summary>
+/// <summary>Un archivo .xlsx o .csv (RF-013), el texto pegado con un alumno por línea (RF-014) o la foto de la lista (RF-015).</summary>
 public sealed class FormularioImportacion
 {
     public IFormFile? Archivo { get; init; }
 
     public string? Texto { get; init; }
+
+    /// <summary>JPG o PNG de hasta 5 MB; se lee con la IA y se descarta.</summary>
+    public IFormFile? Foto { get; init; }
 }

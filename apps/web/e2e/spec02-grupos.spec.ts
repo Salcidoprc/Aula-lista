@@ -2,6 +2,10 @@ import { expect, test } from '@playwright/test';
 import { registrarYCompletarPerfil, sinFallasDeAccesibilidad } from './cuenta';
 import { crearCicloYGrupo, docenteVerificado } from './grupos';
 
+/** Una foto válida mínima: el navegador la reduce y la vuelve JPEG antes de subirla; la IA simulada no la mira. */
+const PNG_DE_UN_PIXEL =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
 test.describe('SPEC-02: grupos, alumnos y tutores', () => {
   test('ciclo de agosto a julio por trimestre: propone 3 unidades editables y crea varios grupos', async ({
     page,
@@ -83,6 +87,50 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
     await expect(filas.nth(2)).toContainText('Ruiz Vega Ana Sofía');
     await expect(filas.nth(0)).toContainText('Sin tutor');
     await sinFallasDeAccesibilidad(page);
+  });
+
+  test('RF-015: lee los nombres de una foto, pide revisarlos y sin conexión ofrece pegar la lista', async ({
+    page,
+    request,
+    context,
+  }) => {
+    await docenteVerificado(page, request);
+    await crearCicloYGrupo(page);
+    await page.getByRole('link', { name: /Desde una foto/ }).click();
+    await expect(page.getByRole('tab', { name: 'Foto' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByText('la foto no se guarda')).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+
+    // Sin conexión no se puede leer: la salida es pegar la lista.
+    await context.setOffline(true);
+    await expect(page.getByText('Para leer la foto necesitas conexión.')).toBeVisible();
+    await page.getByRole('button', { name: 'Pegar la lista' }).click();
+    await expect(page.getByRole('tab', { name: 'Pegar lista' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await context.setOffline(false);
+
+    await page.getByRole('tab', { name: 'Foto' }).click();
+    const lectura = page.waitForResponse((r) => r.url().includes('/importaciones'));
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'lista.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(PNG_DE_UN_PIXEL, 'base64'),
+    });
+    expect((await lectura).status()).toBe(200);
+
+    // La IA simulada lee 12 nombres; la vista previa es la de Pegar lista con el aviso de revisar (RN-042).
+    await expect(page.getByText('Revisa cada nombre')).toBeVisible();
+    await expect(page.getByText('12 listos')).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Apellidos' })).toBeChecked();
+    await sinFallasDeAccesibilidad(page);
+    await page.getByRole('button', { name: 'Importar 12 alumnos' }).click();
+
+    await expect(page.getByText('Se importaron 12 alumnos.')).toBeVisible();
+    await expect(
+      page.getByRole('list', { name: 'Lista del grupo' }).getByRole('listitem').first(),
+    ).toContainText('Acosta Beltrán Ana Sofía');
   });
 
   test('RF-013: CSV con tutores; la fila con WhatsApp inválido se corrige en la vista previa', async ({

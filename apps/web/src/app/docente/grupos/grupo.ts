@@ -279,6 +279,19 @@ const MAXIMO_ALUMNOS = 50;
             </a>
           </li>
           <li>
+            <a
+              class="opcion"
+              [routerLink]="['/grupos', id(), 'importar']"
+              [queryParams]="{ origen: 'foto' }"
+            >
+              <app-icono nombre="camara" />
+              <span>
+                <strong>{{ t('opciones.foto') }}</strong>
+                <span class="dato-suave">{{ t('opciones.fotoTexto') }}</span>
+              </span>
+            </a>
+          </li>
+          <li>
             <button class="opcion" type="button" (click)="empezarAAgregar()">
               <app-icono nombre="persona" />
               <span>

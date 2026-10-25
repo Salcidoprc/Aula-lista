@@ -36,6 +36,8 @@ public static class ErroresGrupos
     public static readonly ErrorNegocio ArchivoInvalido = new("archivo_invalido", "Sube un archivo .xlsx o .csv de hasta 2 MB.");
     public static readonly ErrorNegocio ArchivoIlegible = new("archivo_ilegible", "No pudimos leer el archivo. Revisa que sea un Excel o CSV con encabezados.");
     public static readonly ErrorNegocio ImportacionConfirmada = new("importacion_confirmada", "Esa importación ya se guardó.");
+    public static readonly ErrorNegocio FotoInvalida = new("foto_invalida", "Sube una foto JPG o PNG de hasta 5 MB.");
+    public static readonly ErrorNegocio LimiteLecturas = new("limite_lecturas", "Llegaste al límite de lecturas con IA por hora. Intenta más tarde o pega la lista.");
 
     public static readonly IReadOnlyList<ErrorNegocio> Todos =
     [
@@ -44,6 +46,6 @@ public static class ErroresGrupos
         CicloInexistente, GradoInvalido, GrupoDuplicado, LoteInvalido, ConfiguracionCalificacionInvalida,
         GrupoArchivado, CorreoNoVerificado, LimiteAlumnosGrupo, NumeroListaInvalido, TratoInvalido,
         AlumnoDadoDeBaja, TelefonoInvalido, LimiteTutoresAlumno, TutorYaVinculado, ArchivoInvalido,
-        ArchivoIlegible, ImportacionConfirmada,
+        ArchivoIlegible, ImportacionConfirmada, FotoInvalida, LimiteLecturas,
     ];
 }
