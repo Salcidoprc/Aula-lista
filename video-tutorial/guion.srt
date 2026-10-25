@@ -1,0 +1,167 @@
+1
+00:00:00,900 --> 00:00:04,638
+Esto es Aula Lista: la libreta del docente, en tu celular.
+
+2
+00:00:04,888 --> 00:00:15,068
+Capturas calificaciones en segundos, cierras el trimestre con observaciones redactadas por inteligencia artificial, y compartes las boletas con las familias.
+
+3
+00:00:15,318 --> 00:00:20,213
+Te mostramos el recorrido completo, desde crear tu cuenta hasta avisar a los tutores.
+
+4
+00:00:23,537 --> 00:00:27,709
+Para empezar, crea tu cuenta con tu correo, o con tu cuenta de Google.
+
+5
+00:00:27,988 --> 00:00:32,373
+Elige una contraseña, acepta el aviso de privacidad, y listo.
+
+6
+00:00:32,524 --> 00:00:38,883
+Aula Lista te pide solo lo necesario: tu nombre, el nivel en el que das clases, tu escuela y tu estado.
+
+7
+00:00:41,341 --> 00:00:46,628
+Confirmas tu correo con el enlace que te llega, y ya puedes dar de alta a tus alumnos.
+
+8
+00:00:50,091 --> 00:00:56,500
+Tu grupo queda listo en tres pasos. El primero es tu ciclo escolar, y lo defines una sola vez.
+
+9
+00:00:56,651 --> 00:01:04,526
+Indica cuándo empieza y cuándo termina. Aula Lista propone los tres trimestres, y puedes ajustar sus fechas y sus nombres.
+
+10
+00:01:06,183 --> 00:01:12,506
+Luego creas tu grupo: eliges el grado y la letra. También puedes crear varios grupos a la vez.
+
+11
+00:01:12,407 --> 00:01:17,305
+Cada grupo toma el color de su grado, como las portadas de los libros de texto.
+
+12
+00:01:20,667 --> 00:01:28,614
+Ahora, tus alumnos. Puedes agregarlos uno por uno, pegar una lista, subir tu Excel, o tomarle foto a la lista impresa.
+
+13
+00:01:28,765 --> 00:01:36,331
+Aquí subimos el Excel del grupo, con los datos de los tutores. Antes de importar, revisas cómo queda cada renglón.
+
+14
+00:01:36,233 --> 00:01:40,978
+Listo: veinticuatro alumnos, en orden alfabético y con su número de lista.
+
+15
+00:01:41,441 --> 00:01:49,235
+En la ficha de cada alumno están sus tutores con su WhatsApp. Desde aquí les mandas su enlace personal al portal de familias.
+
+16
+00:01:52,695 --> 00:02:02,012
+Después, defines cómo vas a calificar. Los rubros son libres: tareas, actividades, exámenes o asistencia, cada uno con su peso.
+
+17
+00:02:04,036 --> 00:02:12,730
+Las tareas se califican con cumplió o no cumplió; los exámenes, con número. Los pesos suman cien, y Aula Lista te avisa si no cuadran.
+
+18
+00:02:17,837 --> 00:02:23,435
+En el salón, todo pasa en el celular. Creas la actividad y capturas al momento.
+
+19
+00:02:26,062 --> 00:02:32,090
+Con un toque marcas quién cumplió y quién no. Y si todos cumplieron, basta un botón.
+
+20
+00:02:34,838 --> 00:02:40,806
+Para un examen, usas el teclado rápido: tocas la calificación y avanza al siguiente.
+
+21
+00:02:43,106 --> 00:02:49,288
+Funciona aun sin internet. Lo que capturas se guarda en el celular y se sube en cuanto vuelve la señal.
+
+22
+00:02:55,511 --> 00:03:02,547
+Si trabajas por equipos, los armas una sola vez, y calificas cada actividad del equipo con un solo valor.
+
+23
+00:03:07,655 --> 00:03:15,541
+Pasar lista toma segundos: marcas a todos presentes, y tocas solo a quien faltó. Un toque es falta; dos, retardo.
+
+24
+00:03:15,738 --> 00:03:20,737
+La asistencia se suma sola, y cuenta en la calificación si así lo decides.
+
+25
+00:03:24,097 --> 00:03:32,737
+En la computadora, la tabla te muestra todas las calificaciones del trimestre, y el promedio de cada alumno con tus pesos y tu forma de redondear.
+
+26
+00:03:32,890 --> 00:03:38,652
+Al final del trimestre llega lo que más tiempo te quitaba: las observaciones de cada alumno.
+
+27
+00:03:38,803 --> 00:03:50,383
+Tu primer cierre incluye la prueba Pro. Con un clic, la inteligencia artificial redacta un borrador para cada alumno, a partir de sus calificaciones, su asistencia y tus notas.
+
+28
+00:03:50,186 --> 00:03:57,104
+Por privacidad, la inteligencia artificial nunca recibe el nombre de los niños: solo un seudónimo.
+
+29
+00:03:58,518 --> 00:04:06,992
+Tú revisas cada borrador. Puedes editarlo, pedir otra versión más breve, más positiva o más específica, o escribirlo a mano.
+
+30
+00:04:09,180 --> 00:04:14,212
+Nada llega a las familias sin tu aprobación. Apruebas, y pasas al siguiente.
+
+31
+00:04:19,328 --> 00:04:23,526
+Con las observaciones aprobadas, generas las boletas en PDF.
+
+32
+00:04:25,579 --> 00:04:32,512
+Puedes abrir cada boleta, descargar el PDF de todo el grupo, o exportar las calificaciones a Excel.
+
+33
+00:04:34,342 --> 00:04:41,905
+Al publicar, Aula Lista te dice a quién le llega el aviso por WhatsApp, a quién por correo, y quién no tiene contacto registrado.
+
+34
+00:04:48,538 --> 00:04:56,856
+Para entrar al portal, cada tutor recibe su enlace personal. Lo mandas desde la ficha del alumno por WhatsApp, con el mensaje ya escrito.
+
+35
+00:04:57,708 --> 00:05:02,737
+Las familias no instalan nada. El tutor abre su enlace, y ve a sus hijos.
+
+36
+00:05:02,889 --> 00:05:08,213
+Ahí consulta la boleta, lee la observación de la maestra, y descarga el PDF.
+
+37
+00:05:11,873 --> 00:05:16,400
+Y cuando necesitas avisar algo al grupo, lo escribes una sola vez.
+
+38
+00:05:19,521 --> 00:05:26,524
+Antes de enviar ves por dónde va a llegar: notificación en el celular, correo, o WhatsApp cuando es urgente.
+
+39
+00:05:29,913 --> 00:05:34,231
+La familia lo lee en su celular, y tú sabes quién ya lo leyó.
+
+40
+00:05:40,758 --> 00:05:51,868
+Aula Lista es gratis para capturar, pasar lista y mandar avisos. Pro agrega las observaciones con inteligencia artificial, las boletas y los avisos urgentes por WhatsApp.
+
+41
+00:05:52,026 --> 00:06:00,324
+Cuesta setenta y nueve pesos al mes por tu primer grupo, y veintinueve por cada grupo adicional. Pagas con tarjeta, o en OXXO.
+
+42
+00:06:01,977 --> 00:06:06,846
+Aula Lista. Menos tiempo en papeleo, y más tiempo para tu grupo.
