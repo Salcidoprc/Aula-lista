@@ -59,6 +59,8 @@ Solo conteos y montos de todos los docentes; ningún nombre ni correo (RN-090). 
 | Valor entregado | Avisos leídos | Entregas de esos avisos que el tutor leyó, sobre las entregas |
 | Tendencia | Por semana | Activos (abrieron la app esa semana), registros, docentes que pagan al cierre de la semana (activaron su suscripción antes y no la tenían cancelada), altas y bajas de pago, boletas publicadas, observaciones aprobadas y avisos |
 
+En pantalla el Resumen se ve con gráficas (DESIGN.md, "Panel de administración"): una franja con activos hoy, activos en 30 días, MRR y margen; la tendencia de 12 semanas de activos (línea), registros, docentes que pagan, boletas, observaciones y avisos (columnas); el embudo en barras; la retención como mapa de calor, y frecuencia y avisos leídos como medidor. La semana en curso se marca como incompleta. Cada gráfica se recorre con cursor o flechas y todo valor también está en la tabla "Ver los datos por semana".
+
 Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de la suscripción, porque la cancelación no guarda su propia fecha: si una suscripción cancelada cambia después, su baja se mueve a esa semana.
 
 ### Reglas
@@ -121,5 +123,6 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 - Dado el panel de administración, entonces muestra las 6 métricas del piloto calculadas desde los eventos.
 - Dado un docente nuevo que arma un grupo Pro con 2 alumnos, cierra, publica sus boletas y manda un aviso, cuando el administrador abre el Resumen, entonces suben en uno los docentes, los activos de hoy, los registros, los grupos, cada paso del embudo, los que pagan y los avisos; en dos los alumnos, las boletas y las observaciones; el MRR en 79 MXN, y la respuesta no lleva nombres ni correos (RF-094, RN-090).
 - Dado un docente que vuelve a abrir la app 8 días después de registrarse, cuando terminó la semana 1 de su cohorte, entonces su cohorte tiene retención de semana 1 mayor que cero y la semana 4 sigue "sin datos" (RF-094).
+- Dado el Resumen abierto, cuando el administrador enfoca la gráfica de docentes activos y pulsa la flecha izquierda, entonces la gráfica dice la cifra de la semana anterior y su fecha, y la misma cifra está en "Ver los datos por semana" (RF-094, RNF-015).
 - Dado cualquier log de la API, entonces no contiene nombres ni teléfonos (prueba automática con datos marcados).
 - Dado un respaldo del día anterior, cuando se restaura en staging, entonces la app arranca y los conteos coinciden.

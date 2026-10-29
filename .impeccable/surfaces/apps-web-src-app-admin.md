@@ -62,3 +62,24 @@ paginada de 50 en 50. Métricas sin datos (división entre cero) se muestran com
 
 Angular con signals y Transloco (es-MX), cliente generado de la API, tokens de `tokens.css`, componentes compartidos
 (`hoja`, `tapa`, `ocupado`, `iconos`). WCAG 2.1 AA, tablas con encabezados reales, objetivos táctiles de 44 px.
+
+## Resumen con gráficas (`/impeccable shape`, 29/10/2026)
+
+El dueño del producto pidió que el Resumen (RF-094) sea "gráficas y así", rediseñado con Impeccable. Supuestos (S): no
+hubo ronda de preguntas; se toma la lectura más probable y se dice en el PR.
+
+- **Trabajo:** el dueño abre el panel una o dos veces por semana y quiere ver de un golpe si el uso y el dinero suben o
+  bajan. La forma de la curva importa más que la cifra exacta; la cifra exacta sigue a un toque (tooltip) y en la tabla.
+- **Dirección:** el mismo mundo "Libros de texto", en su versión libreta de control. Se cambia la regla anterior "sin
+  gráficas ni tarjetas de KPI" solo para el Resumen: arriba una franja de cuatro cifras sobre papel (sin tarjetas, con
+  divisorias), y debajo gráficas de una sola tinta, `accion`, sobre la cuadrícula de la libreta (líneas de 1 px en
+  `divisoria`). Nada de anillos, donas, degradados ni colores de grado.
+- **Forma por dato:** activos por semana = línea con lavado al 10 %; registros, docentes que pagan y valor entregado =
+  columnas; activación = barras horizontales; retención = mapa de calor por cohorte (una tinta, cinco pasos); MRR contra
+  costo = dos barras en la misma escala; frecuencia y avisos leídos = medidor.
+- **Semana en curso:** honesta, no destacada: la columna va en un tinte más claro y la línea en tramo punteado, con
+  "en curso" al pasar el cursor. Cero es cero; sin datos es una raya.
+- **Interacción:** cada gráfica es enfocable; el cursor o las flechas eligen la semana y un tooltip dice la cifra.
+  Nada depende del tooltip: la tabla "Ver los datos por semana" lo tiene todo. Sin animación (tampoco al cargar).
+- **Disposición:** celular apilado a lo ancho; escritorio en dos columnas, con Uso y Valor entregado a lo ancho.
+- **Límites:** sin librerías de gráficas (SVG propio), RN-090 igual, presupuesto del bundle intacto.

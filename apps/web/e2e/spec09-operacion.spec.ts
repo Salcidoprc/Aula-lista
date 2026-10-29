@@ -55,7 +55,18 @@ test.describe('SPEC-09: operación y métricas', () => {
       await expect(page.getByRole('heading', { level: 2, name: bloque })).toBeVisible();
     }
     await expect(page.getByText('Publicó boletas')).toBeVisible();
-    await expect(page.getByRole('img', { name: /^Activos en 7 días por semana:/ })).toBeVisible();
+    const activos = page.getByRole('group', { name: /^Docentes activos por semana:/ });
+    await expect(activos).toBeVisible();
+    await activos.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(activos.locator('[aria-live]')).toHaveText(/^\d+, Semana del \d+ \w+$/);
+    const anuncio = (await activos.locator('[aria-live]').innerText()).split(', ');
+    await page.getByText('Ver los datos por semana', { exact: true }).first().click();
+    await expect(
+      page
+        .getByRole('region', { name: 'Ver los datos por semana' })
+        .getByRole('row', { name: new RegExp(`^${anuncio[1]} ${anuncio[0]} `) }),
+    ).toBeVisible();
     await sinFallasDeAccesibilidad(page);
 
     await abrirSeccion(page, 'Métricas del piloto');

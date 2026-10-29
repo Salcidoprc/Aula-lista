@@ -1901,25 +1901,14 @@
       "titulo": "Resumen",
       "cargando": "Cargando resumen",
       "reintentar": "Reintentar",
-      "docentes": {
-        "uno": "1 docente",
-        "otros": "{{n}} docentes"
-      },
-      "frase": {
-        "hoy": "Hoy abrieron la app",
-        "mes": "; en 30 días,",
-        "de": "de {{total}}.",
-        "entran": "Entran",
-        "margen": "al mes y el margen estimado del mes es de"
-      },
-      "leyenda": "Un docente activo es el que abrió la app. Las barras son las últimas 12 semanas, de lunes a domingo; la azul es la semana en curso.",
-      "porSemana": "{{indicador}} por semana: {{valores}}",
+      "leyenda": "Las gráficas son las últimas 12 semanas, de lunes a domingo. La semana en curso va hueca o punteada porque aún no termina. Pasa el cursor o enfoca una gráfica y usa las flechas para ver cada semana.",
+      "porSemana": "{{indicador}}: {{valores}}. Usa las flechas para recorrer las semanas.",
       "uso": {
         "titulo": "Uso",
         "activosDia": "Activos hoy",
         "activosDiaDetalle": "En las últimas 24 horas",
         "activosSemana": "Activos en 7 días",
-        "activosSemanaDetalle": "Barras: los que la abrieron cada semana",
+        "activosSemanaDetalle": "Abrieron la app en los últimos 7 días",
         "activosMes": "Activos en 30 días",
         "activosMesDetalle": "De {{total}} docentes con cuenta",
         "frecuencia": "Frecuencia",
@@ -1947,10 +1936,11 @@
         "pruebasDetalle": "Grupos con la prueba en curso",
         "bajas": "Bajas en 30 días",
         "bajasDetalle": "Suscripciones canceladas",
-        "costo": "Costo del mes",
+        "costo": "Costo",
         "costoDetalle": "IA y WhatsApp en lo que va del mes",
         "margen": "Margen estimado",
-        "margenDetalle": "MRR menos el costo del mes"
+        "margenDetalle": "MRR menos el costo del mes",
+        "ingreso": "Ingreso"
       },
       "embudo": {
         "titulo": "Activación",
@@ -1981,7 +1971,7 @@
       },
       "retencion": {
         "titulo": "Retención",
-        "nota": "Por semana de registro, cuántos volvieron a abrir la app 1, 2 y 4 semanas después. Una raya es una semana que todavía no termina.",
+        "nota": "Por semana de registro, cuántos volvieron a abrir la app 1, 2 y 4 semanas después. Más intenso el color, más volvieron; una raya es una semana que todavía no termina.",
         "vacio": "Nadie se ha registrado en las últimas 12 semanas.",
         "cohorte": "Semana de registro",
         "docentes": "Docentes",
@@ -2013,6 +2003,33 @@
           "nombre": "Margen estimado",
           "texto": "MRR menos el costo variable del mes en curso. Es el mismo cálculo que la sección Costos."
         }
+      },
+      "reciente": "Esta semana {{actual}} · la anterior {{anterior}}",
+      "semanaDel": "Semana del {{fecha}}",
+      "semanaEnCurso": "Semana del {{fecha}}, en curso",
+      "franja": {
+        "activosDia": "Activos hoy",
+        "activosMes": "Activos en 30 días",
+        "mrr": "Ingreso mensual (MRR)",
+        "margen": "Margen estimado",
+        "mrrDetalle": {
+          "uno": "1 docente paga",
+          "otros": "{{n}} docentes pagan"
+        }
+      },
+      "serie": {
+        "activos": "Docentes activos por semana",
+        "registros": "Registros por semana",
+        "pagan": "Docentes que pagan, por semana",
+        "altasPago": "Altas de pago",
+        "bajas": "Bajas",
+        "boletas": "Boletas publicadas",
+        "observaciones": "Observaciones aprobadas",
+        "avisos": "Avisos a tutores"
+      },
+      "datos": {
+        "titulo": "Ver los datos por semana",
+        "semana": "Semana"
       }
     },
     "metricas": {
