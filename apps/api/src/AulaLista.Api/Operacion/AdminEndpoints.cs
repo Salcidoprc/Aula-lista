@@ -18,6 +18,8 @@ internal static class AdminEndpoints
         var admin = api.MapGroup("/admin").WithTags("Administración").RequireAuthorization(PoliticaAdmin.Nombre)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        admin.MapGet("/resumen", async (ResumenCasoUso caso, CancellationToken ct) => TypedResults.Ok(await caso.EjecutarAsync(ct)))
+            .WithName("ResumenAdmin").Produces<ResumenDto>();
         admin.MapGet("/metricas", async (MetricasCasoUso caso, CancellationToken ct) => TypedResults.Ok(await caso.EjecutarAsync(ct)))
             .WithName("MetricasAdmin").Produces<MetricasDto>();
         admin.MapGet("/docentes", async (DocentesAdminCasoUso caso, CancellationToken ct) => TypedResults.Ok(await caso.EjecutarAsync(ct)))

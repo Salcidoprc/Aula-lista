@@ -4,6 +4,7 @@ import {
   estadoMeta,
   nombresSugeridos,
   pesos,
+  porciento,
   semanaCorta,
   valorAuditoria,
   valorMetrica,
@@ -51,5 +52,12 @@ describe('panel de administración (SPEC-09)', () => {
     expect(valorAuditoria('true', 'Sí', 'No')).toBe('Sí');
     expect(valorAuditoria(null, 'Sí', 'No')).toBe('—');
     expect(valorAuditoria('Laboratorio', 'Sí', 'No')).toBe('Laboratorio');
+  });
+
+  it('RF-094: el resumen escribe el porcentaje sin datos como raya, nunca como 0 %', () => {
+    expect(porciento(null)).toBe('—');
+    expect(porciento(0)).toBe('0 %');
+    expect(porciento(7.5)).toBe('7.5 %');
+    expect(porciento('100')).toBe('100 %');
   });
 });

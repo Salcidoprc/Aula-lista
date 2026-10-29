@@ -47,7 +47,7 @@ Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de a
 
 ## 5.1 Panel de administración
 
-El equipo de Aula Lista opera el producto desde un panel de administración separado de la app del docente (SPEC-09). En el MVP tiene: métricas del piloto, docentes con su plan y consumo, costos de IA y WhatsApp contra ingreso, errores de procesos en segundo plano, auditoría y el catálogo de tipos de rubro. Desde el catálogo el administrador agrega tipos de rubro nuevos que usan una forma de cálculo existente, al instante; un tipo con otra forma de calcular o de capturar se desarrolla con su propia pantalla y después se activa en el panel (ADR-0012). El panel nunca muestra datos de alumnos ni de tutores.
+El equipo de Aula Lista opera el producto desde un panel de administración separado de la app del docente (SPEC-09). En el MVP tiene: un resumen del negocio (uso, activación, retención, dinero y valor entregado), métricas del piloto, docentes con su plan y consumo, costos de IA y WhatsApp contra ingreso, errores de procesos en segundo plano, auditoría y el catálogo de tipos de rubro. Desde el catálogo el administrador agrega tipos de rubro nuevos que usan una forma de cálculo existente, al instante; un tipo con otra forma de calcular o de capturar se desarrolla con su propia pantalla y después se activa en el panel (ADR-0012). El panel nunca muestra datos de alumnos ni de tutores.
 
 ## 6. Diseño y movimiento
 

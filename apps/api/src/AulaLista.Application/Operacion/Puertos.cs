@@ -136,6 +136,32 @@ public sealed record FilaCosto(
     int MensajesWhatsapp,
     decimal CostoWhatsapp);
 
+/// <summary>RF-094: los conteos del resumen en ventanas de 1, 7 y 30 días que terminan ahora.</summary>
+public sealed record FilaResumen(
+    int Docentes,
+    int ActivosDia,
+    int ActivosSemana,
+    int ActivosMes,
+    int RegistrosSemana,
+    int RegistrosMes,
+    int Grupos,
+    int Alumnos,
+    int BajasMes,
+    int BoletasMes,
+    int ObservacionesMes,
+    int AvisosMes,
+    int EntregasMes,
+    int EntregasLeidasMes);
+
+public sealed record FilaResumenSemana(
+    DateOnly Semana, int Activos, int Registros, int Pagan, int AltasPago, int Bajas, int Boletas, int Observaciones, int Avisos);
+
+/// <summary>Cuántos docentes con la cuenta activa llegaron a cada paso, de todos los registrados.</summary>
+public sealed record FilaEmbudo(int Registrados, int ConGrupo, int ConAlumnos, int ConCalificacion, int ConCierre, int ConBoletas);
+
+/// <summary>Una semana de registro y cuántos de sus docentes volvieron en la semana 1, 2 y 4.</summary>
+public sealed record FilaCohorte(DateOnly Cohorte, int Docentes, int Semana1, int Semana2, int Semana4);
+
 public sealed record FilaError(
     Guid Id, string Origen, string Trabajo, Guid? DocenteId, string? Correo, Guid? ReferenciaId, string TipoError, DateTimeOffset Fecha);
 
@@ -153,6 +179,14 @@ public interface IRepositorioAdmin
     Task<IReadOnlyList<FilaDocente>> DocentesAsync(DateOnly mes, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<FilaCosto>> CostosAsync(DateOnly mes, int diasMaximoPrueba, CancellationToken cancellationToken);
+
+    Task<FilaResumen> ResumenAsync(DateTimeOffset ahora, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<FilaResumenSemana>> ResumenSemanasAsync(DateOnly desde, int semanas, CancellationToken cancellationToken);
+
+    Task<FilaEmbudo> EmbudoAsync(CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<FilaCohorte>> RetencionAsync(DateOnly desde, int semanas, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<FilaError>> ErroresAsync(int limite, CancellationToken cancellationToken);
 

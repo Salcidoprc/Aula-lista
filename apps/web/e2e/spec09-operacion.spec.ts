@@ -48,10 +48,17 @@ test.describe('SPEC-09: operación y métricas', () => {
     hacerAdmin(correo);
     const nombre = nombreNuevo();
 
+    // RF-094: el panel abre en el Resumen, con sus cinco bloques y el embudo completo.
     await page.goto('/admin');
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Métricas del piloto' }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Resumen' })).toBeVisible();
+    for (const bloque of ['Uso', 'Dinero', 'Activación', 'Valor entregado', 'Retención']) {
+      await expect(page.getByRole('heading', { level: 2, name: bloque })).toBeVisible();
+    }
+    await expect(page.getByText('Publicó boletas')).toBeVisible();
+    await expect(page.getByRole('img', { name: /^Activos en 7 días por semana:/ })).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+
+    await abrirSeccion(page, 'Métricas del piloto');
     await expect(page.getByRole('region', { name: 'Boleta del piloto por semana' })).toBeVisible();
     for (const metrica of [
       'Docentes activos',

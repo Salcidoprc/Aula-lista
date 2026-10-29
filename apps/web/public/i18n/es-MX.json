@@ -449,6 +449,7 @@
     "notificaciones": "Notificaciones",
     "plan": "Tu plan",
     "pagoSimulado": "Pago de prueba",
+    "adminResumen": "Resumen",
     "adminMetricas": "Métricas del piloto",
     "adminCostos": "Costos del mes",
     "adminDocentes": "Docentes",
@@ -1896,6 +1897,124 @@
     "titulo": "Administración",
     "secciones": "Secciones del panel",
     "privacidad": "Este panel nunca muestra alumnos, tutores, notas ni observaciones.",
+    "resumen": {
+      "titulo": "Resumen",
+      "cargando": "Cargando resumen",
+      "reintentar": "Reintentar",
+      "docentes": {
+        "uno": "1 docente",
+        "otros": "{{n}} docentes"
+      },
+      "frase": {
+        "hoy": "Hoy abrieron la app",
+        "mes": "; en 30 días,",
+        "de": "de {{total}}.",
+        "entran": "Entran",
+        "margen": "al mes y el margen estimado del mes es de"
+      },
+      "leyenda": "Un docente activo es el que abrió la app. Las barras son las últimas 12 semanas, de lunes a domingo; la azul es la semana en curso.",
+      "porSemana": "{{indicador}} por semana: {{valores}}",
+      "uso": {
+        "titulo": "Uso",
+        "activosDia": "Activos hoy",
+        "activosDiaDetalle": "En las últimas 24 horas",
+        "activosSemana": "Activos en 7 días",
+        "activosSemanaDetalle": "Barras: los que la abrieron cada semana",
+        "activosMes": "Activos en 30 días",
+        "activosMesDetalle": "De {{total}} docentes con cuenta",
+        "frecuencia": "Frecuencia",
+        "frecuenciaDetalle": "De los activos del mes, los que volvieron esta semana",
+        "registros": "Registros en 7 días",
+        "registrosDetalle": "{{n}} en 30 días",
+        "alumnos": "Alumnos",
+        "alumnosDetalle": {
+          "uno": "En 1 grupo activo",
+          "otros": "En {{n}} grupos activos"
+        }
+      },
+      "dinero": {
+        "titulo": "Dinero",
+        "mrr": "Ingreso mensual (MRR)",
+        "mrrDetalle": "Lo que cobran al mes los grupos Pro pagados",
+        "pagan": "Docentes que pagan",
+        "paganDetalle": {
+          "uno": "1 grupo en Pro",
+          "otros": "{{n}} grupos en Pro"
+        },
+        "promedio": "Ingreso por docente",
+        "promedioDetalle": "MRR entre los docentes que pagan",
+        "pruebas": "Pruebas Pro activas",
+        "pruebasDetalle": "Grupos con la prueba en curso",
+        "bajas": "Bajas en 30 días",
+        "bajasDetalle": "Suscripciones canceladas",
+        "costo": "Costo del mes",
+        "costoDetalle": "IA y WhatsApp en lo que va del mes",
+        "margen": "Margen estimado",
+        "margenDetalle": "MRR menos el costo del mes"
+      },
+      "embudo": {
+        "titulo": "Activación",
+        "nota": "Hasta dónde llegó cada docente con cuenta, de todos los registrados.",
+        "paso": {
+          "registro": "Se registró",
+          "grupo": "Creó un grupo",
+          "alumnos": "Agregó alumnos",
+          "calificacion": "Capturó una calificación",
+          "cierre": "Inició un cierre",
+          "boletas": "Publicó boletas"
+        },
+        "delAnterior": "{{p}} del paso anterior"
+      },
+      "valor": {
+        "titulo": "Valor entregado",
+        "boletas": "Boletas publicadas",
+        "boletasDetalle": "En 30 días, contando cada versión",
+        "observaciones": "Observaciones de la IA aprobadas",
+        "observacionesDetalle": "En 30 días",
+        "avisos": "Avisos a tutores",
+        "avisosDetalle": "Enviados en 30 días",
+        "leidos": "Avisos leídos",
+        "leidosDetalle": {
+          "uno": "De 1 entrega a tutores",
+          "otros": "De {{n}} entregas a tutores"
+        }
+      },
+      "retencion": {
+        "titulo": "Retención",
+        "nota": "Por semana de registro, cuántos volvieron a abrir la app 1, 2 y 4 semanas después. Una raya es una semana que todavía no termina.",
+        "vacio": "Nadie se ha registrado en las últimas 12 semanas.",
+        "cohorte": "Semana de registro",
+        "docentes": "Docentes",
+        "semana": "Semana {{n}}"
+      },
+      "como": {
+        "titulo": "Cómo se cuenta",
+        "activos": {
+          "nombre": "Docentes activos",
+          "texto": "Los que iniciaron o renovaron su sesión en la ventana: abrir la app basta, aunque no capturen."
+        },
+        "frecuencia": {
+          "nombre": "Frecuencia",
+          "texto": "Activos en 7 días sobre activos en 30 días. Cerca de 100 % es que casi todos vuelven cada semana."
+        },
+        "embudo": {
+          "nombre": "Activación",
+          "texto": "Cada paso cuenta a quien lo hizo alguna vez; el porcentaje del paso anterior dice dónde se atoran."
+        },
+        "retencion": {
+          "nombre": "Retención",
+          "texto": "La semana 1 son los días 7 a 13 después de registrarse; la 2, del 14 al 20, y la 4, del 28 al 34."
+        },
+        "mrr": {
+          "nombre": "MRR",
+          "texto": "Por docente, el precio del primer grupo Pro pagado más el de cada adicional, con tarjeta o con prepago OXXO."
+        },
+        "margen": {
+          "nombre": "Margen estimado",
+          "texto": "MRR menos el costo variable del mes en curso. Es el mismo cálculo que la sección Costos."
+        }
+      }
+    },
     "metricas": {
       "titulo": "Métricas del piloto",
       "cargando": "Cargando métricas",

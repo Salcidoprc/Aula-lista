@@ -24,7 +24,7 @@ Esta carpeta es la **fuente de verdad** del producto: qué se construye, cómo d
 | [SPEC-06](specs/SPEC-06-portal-tutores.md) | Portal de tutores | RF-060 a RF-065 |
 | [SPEC-07](specs/SPEC-07-avisos-notificaciones.md) | Avisos y notificaciones | RF-070 a RF-073 |
 | [SPEC-08](specs/SPEC-08-planes-pagos.md) | Planes y pagos | RF-080 a RF-087 |
-| [SPEC-09](specs/SPEC-09-operacion-metricas.md) | Operación, métricas y panel de administración | RF-090 a RF-093 |
+| [SPEC-09](specs/SPEC-09-operacion-metricas.md) | Operación, métricas y panel de administración | RF-090 a RF-094 |
 | [SPEC-10](specs/SPEC-10-asistencia.md) | Asistencia | RF-100 a RF-103 |
 
 ## Reglas
