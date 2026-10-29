@@ -11,6 +11,7 @@ Esta carpeta es la **fuente de verdad** del producto: qué se construye, cómo d
 5. [reglas/](reglas/): reglas obligatorias de desarrollo.
 6. [decisiones/](decisiones/): decisiones técnicas registradas (ADR).
 7. [03-glosario.md](03-glosario.md), [04-preguntas-abiertas.md](04-preguntas-abiertas.md) y [05-plan-de-desarrollo.md](05-plan-de-desarrollo.md).
+8. [operacion/](operacion/): cómo operar el servicio: [monitoreo con Grafana Cloud](operacion/grafana-cloud.md) y [registro de restauraciones](operacion/restauraciones.md).
 
 ## Specs
 

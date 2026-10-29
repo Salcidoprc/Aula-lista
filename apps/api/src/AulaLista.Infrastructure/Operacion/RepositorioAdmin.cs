@@ -5,6 +5,7 @@ using AulaLista.Domain.Operacion;
 using AulaLista.Infrastructure.Persistencia;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AulaLista.Infrastructure.Operacion;
 
@@ -35,6 +36,11 @@ internal sealed class RepositorioAdmin(AulaListaDbContext db) : IRepositorioAdmi
         .Select(c => new FilaCosto(
             c.GrupoId, c.DocenteId, c.Correo, c.Nivel, c.Grado, c.Nombre, c.Materia, c.ProPagado, c.EnPrueba, c.LlamadasIa, c.TokensEntrada,
             c.TokensSalida, c.TokensCache, c.MensajesWhatsapp, c.CostoWhatsapp))
+        .ToList();
+
+    public async Task<IReadOnlyList<FilaConsumoGrupo>> ConsumoParaAlertasAsync(DateOnly mes, CancellationToken cancellationToken) =>
+        (await db.Database.SqlQuery<Consumo>($"SELECT * FROM consumo_para_alertas({mes})").ToListAsync(cancellationToken))
+        .Select(c => new FilaConsumoGrupo(c.GrupoId, c.TokensEntrada, c.TokensSalida, c.TokensCache, c.CostoWhatsapp))
         .ToList();
 
     public async Task<FilaResumen> ResumenAsync(DateTimeOffset ahora, CancellationToken cancellationToken)
@@ -259,6 +265,19 @@ internal sealed class RepositorioAdmin(AulaListaDbContext db) : IRepositorioAdmi
         public decimal CostoWhatsapp { get; init; }
     }
 
+    private sealed class Consumo
+    {
+        public Guid GrupoId { get; init; }
+
+        public long TokensEntrada { get; init; }
+
+        public long TokensSalida { get; init; }
+
+        public long TokensCache { get; init; }
+
+        public decimal CostoWhatsapp { get; init; }
+    }
+
     private sealed class Error
     {
         public Guid Id { get; init; }
@@ -327,14 +346,20 @@ internal sealed class EventosProducto(AulaListaDbContext db, TimeProvider reloj)
     }
 }
 
-/// <summary>Errores de trabajos para el panel, en su propia conexión: el trabajo que falló pudo deshacer su transacción.</summary>
-internal sealed class RegistroErrores(IServiceScopeFactory alcances, TimeProvider reloj) : IRegistroErrores
+/// <summary>
+/// Errores de trabajos para el panel, en su propia conexión: el trabajo que falló pudo deshacer su transacción. También
+/// suman a la métrica de la alerta "job fallido" (SPEC-09) y dejan una línea en el log con IDs, nunca datos de nadie.
+/// </summary>
+internal sealed partial class RegistroErrores(
+    IServiceScopeFactory alcances, TimeProvider reloj, MetricasAulaLista metricas, ILogger<RegistroErrores> registro) : IRegistroErrores
 {
     public async Task RegistrarAsync(
         string origen, string trabajo, Guid? docenteId, Guid? referenciaId, string tipoError, CancellationToken cancellationToken)
     {
         var ahora = reloj.GetUtcNow();
         var tipo = tipoError.Length > 200 ? tipoError[..200] : tipoError;
+        metricas.TrabajoFallido(origen);
+        TrabajoFallido(registro, origen, trabajo, tipo, referenciaId);
         await using var alcance = alcances.CreateAsyncScope();
         var db = alcance.ServiceProvider.GetRequiredService<AulaListaDbContext>();
         await db.Database.ExecuteSqlAsync(
@@ -344,6 +369,9 @@ internal sealed class RegistroErrores(IServiceScopeFactory alcances, TimeProvide
             """,
             cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Trabajo fallido: {Origen} {Trabajo} {TipoError} {ReferenciaId}")]
+    private static partial void TrabajoFallido(ILogger registro, string origen, string trabajo, string tipoError, Guid? referenciaId);
 }
 
 internal sealed class RetencionGrupos(AulaListaDbContext db) : IRetencionGrupos

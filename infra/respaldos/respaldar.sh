@@ -8,13 +8,36 @@
 #   RESPALDO_DESTINO                                remoto de rclone, por ejemplo "objetos:aula-lista-respaldos"
 #   RCLONE_CONFIG_*                                 configuración del remoto, solo en variables de entorno
 #   RESPALDO_DIAS                                   días que se conservan (30 si no se indica)
+#   OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_HEADERS
+#                                                   opcionales: las mismas de la API; al terminar se manda respaldo_ok o
+#                                                   respaldo_fallido a Grafana Cloud para su alerta (ADR-0015)
 set -euo pipefail
+
+# Un log OTLP en JSON del servicio aula-lista-respaldos. Si no se puede mandar, el respaldo no falla por eso.
+avisar() {
+    [[ -n "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ]] || return 0
+    local evento="$1" severidad="$2" numero="$3" encabezados=() par
+    IFS=',' read -ra pares <<< "${OTEL_EXPORTER_OTLP_HEADERS:-}"
+    for par in "${pares[@]}"; do
+        [[ -n "$par" ]] && encabezados+=(--header "${par%%=*}: ${par#*=}")
+    done
+    encabezados=("${encabezados[@]//%20/ }")
+    curl --silent --show-error --fail --max-time 20 "${encabezados[@]}" --header 'Content-Type: application/json' \
+        --data "{\"resourceLogs\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"aula-lista-respaldos\"}}]},\"scopeLogs\":[{\"logRecords\":[{\"timeUnixNano\":\"$(date +%s%N)\",\"severityText\":\"$severidad\",\"severityNumber\":$numero,\"body\":{\"stringValue\":\"$evento\"},\"attributes\":[{\"key\":\"base\",\"value\":{\"stringValue\":\"${PGDATABASE:-}\"}}]}]}]}]}" \
+        "${OTEL_EXPORTER_OTLP_ENDPOINT%/}/v1/logs" > /dev/null || echo "No se pudo avisar $evento a OTLP" >&2
+}
+
+terminar() {
+    local estado=$?
+    rm -rf "${trabajo:-}"
+    if [[ $estado -eq 0 ]]; then avisar respaldo_ok INFO 9; else avisar respaldo_fallido ERROR 17; fi
+}
+trap terminar EXIT
 
 : "${PGDATABASE:?Falta PGDATABASE}" "${AGE_RECIPIENT:?Falta AGE_RECIPIENT}" "${RESPALDO_DESTINO:?Falta RESPALDO_DESTINO}"
 dias="${RESPALDO_DIAS:-30}"
 fecha="$(date -u +%Y-%m-%dT%H%M%SZ)"
 trabajo="$(mktemp -d)"
-trap 'rm -rf "$trabajo"' EXIT
 
 # Volcado y conteos salen de la misma instantánea: una transacción REPEATABLE READ la exporta, cuenta las filas y
 # pg_dump la usa, así lo que se escribe mientras tanto no hace que los conteos dejen de coincidir al restaurar.

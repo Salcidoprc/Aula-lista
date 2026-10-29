@@ -16,7 +16,9 @@ Pendiente de configurar con acceso al servidor. Pasos:
    - Correr `infra/postgres/respaldos.sql` una vez como superusuario (`psql -v clave_respaldos=... -f respaldos.sql`): crea `app_respaldos`, de solo lectura.
    - Crear un bucket en almacenamiento de objetos fuera del servidor (Oracle Object Storage u otro) y su remoto de rclone solo con variables `RCLONE_CONFIG_<REMOTO>_*`.
    - Generar la llave con `age-keygen` fuera del servidor; en el servidor solo va la pública (`AGE_RECIPIENT`). La privada se guarda aparte (gestor de contraseñas del dueño).
-   - Tarea programada de Coolify, diaria a las 02:00 hora del centro de México, en un contenedor con `postgresql-client-18`, `age` y `rclone` que monte `infra/respaldos/`: `respaldar.sh` con `PGHOST`, `PGDATABASE`, `PGUSER=app_respaldos`, `PGPASSWORD`, `AGE_RECIPIENT` y `RESPALDO_DESTINO`. Retiene 30 días (`RESPALDO_DIAS`).
-   - Alerta si la tarea falla (notificaciones de Coolify por correo).
+   - Tarea programada de Coolify, diaria a las 02:00 hora del centro de México, en un contenedor con `postgresql-client-18`, `age`, `rclone` y `curl` que monte `infra/respaldos/`: `respaldar.sh` con `PGHOST`, `PGDATABASE`, `PGUSER=app_respaldos`, `PGPASSWORD`, `AGE_RECIPIENT` y `RESPALDO_DESTINO`. Retiene 30 días (`RESPALDO_DIAS`).
+   - Alerta si la tarea falla: con `OTEL_EXPORTER_OTLP_ENDPOINT` y `OTEL_EXPORTER_OTLP_HEADERS` (las mismas de la API) el script avisa a Grafana Cloud, que alerta si falla o si pasan 26 horas sin un respaldo exitoso (paso 7).
    - Probar la restauración el primer lunes de cada mes y anotarla en `docs/operacion/restauraciones.md`.
-7. Trazas (opcional): con `OTEL_EXPORTER_OTLP_ENDPOINT` (y `OTEL_EXPORTER_OTLP_HEADERS` si el servicio pide llave) la API manda trazas y métricas por OTLP; sin esa variable no se instrumenta.
+7. Monitoreo con Grafana Cloud (SPEC-09, ADR-0015), pasos completos en `docs/operacion/grafana-cloud.md`:
+   - `api`: `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`, `OTEL_EXPORTER_OTLP_HEADERS` (secreto) y `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging`. Sin la primera no se manda nada.
+   - `web`: `FARO_URL` (la URL del colector de Faro) y `FARO_ENTORNO=staging`. Sin `FARO_URL` la web no carga Faro.

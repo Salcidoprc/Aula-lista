@@ -66,6 +66,11 @@ services:
       Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
       Almacen__Ruta: /var/lib/aula-lista/archivos
       Trabajos__Servidor: ${TRABAJOS_SERVIDOR:-true}
+      # Grafana Cloud (SPEC-09, ADR-0015). Vacías: no se manda nada.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${ENTORNO:-local}
       # RNF-004: 5 por minuto. Las pruebas end-to-end lo suben porque todas entran desde la misma IP.
       Cuentas__IntentosInicioSesionPorMinuto: ${INTENTOS_INICIO_SESION:-5}
     volumes:
@@ -81,6 +86,10 @@ services:
     build:
       context: ..
       dockerfile: infra/docker/web.Dockerfile
+    environment:
+      # Grafana Faro (ADR-0015). Vacía: la web no lo carga.
+      FARO_URL: ${FARO_URL:-}
+      FARO_ENTORNO: ${ENTORNO:-local}
     depends_on:
       - api
     ports:

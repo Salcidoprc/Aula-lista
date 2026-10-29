@@ -24,6 +24,9 @@ server {
     proxy_pass ${API_URL};
   }
 
+  # Grafana Faro y /observabilidad.json (ADR-0015); los escribe /docker-entrypoint.d/40-faro.sh según FARO_URL.
+  include /etc/nginx/faro/*.conf;
+
   location = /ngsw-worker.js {
     add_header Cache-Control "no-cache" always;
   }
