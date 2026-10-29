@@ -213,6 +213,8 @@ export type { BorrarAviso$Params as BorrarAviso$Params } from './fn/avisos/borra
 export { borrarAviso as borrarAviso } from './fn/avisos/borrar-aviso';
 export type { CompartirAviso$Params as CompartirAviso$Params } from './fn/avisos/compartir-aviso';
 export { compartirAviso as compartirAviso } from './fn/avisos/compartir-aviso';
+export type { ResumenAdmin$Params as ResumenAdmin$Params } from './fn/administracion/resumen-admin';
+export { resumenAdmin as resumenAdmin } from './fn/administracion/resumen-admin';
 export type { MetricasAdmin$Params as MetricasAdmin$Params } from './fn/administracion/metricas-admin';
 export { metricasAdmin as metricasAdmin } from './fn/administracion/metricas-admin';
 export type { DocentesAdmin$Params as DocentesAdmin$Params } from './fn/administracion/docentes-admin';

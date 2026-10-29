@@ -3968,6 +3968,36 @@
         }
       }
     },
+    "/api/v1/admin/resumen": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "operationId": "ResumenAdmin",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumenDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/metricas": {
       "get": {
         "tags": [
@@ -5479,6 +5509,57 @@
           }
         }
       },
+      "CohorteDto": {
+        "required": [
+          "semana",
+          "docentes",
+          "semana1",
+          "semana2",
+          "semana4"
+        ],
+        "type": "object",
+        "properties": {
+          "semana": {
+            "type": "string",
+            "format": "date"
+          },
+          "docentes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "semana1": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "semana2": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "semana4": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "ComposicionDto": {
         "required": [
           "actividadId",
@@ -6450,6 +6531,90 @@
             "items": {
               "$ref": "#/components/schemas/BoletaPublicadaDto"
             }
+          }
+        }
+      },
+      "DineroResumenDto": {
+        "required": [
+          "moneda",
+          "mrr",
+          "docentesQuePagan",
+          "gruposPro",
+          "ingresoPromedio",
+          "pruebasActivas",
+          "bajasMes",
+          "costoMes",
+          "margen"
+        ],
+        "type": "object",
+        "properties": {
+          "moneda": {
+            "type": "string"
+          },
+          "mrr": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "docentesQuePagan": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "gruposPro": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "ingresoPromedio": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "pruebasActivas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "bajasMes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "costoMes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "margen": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -7911,6 +8076,46 @@
           }
         }
       },
+      "PasoEmbudoDto": {
+        "required": [
+          "paso",
+          "docentes",
+          "porcentaje",
+          "porcentajeDelAnterior"
+        ],
+        "type": "object",
+        "properties": {
+          "paso": {
+            "type": "string"
+          },
+          "docentes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentaje": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "porcentajeDelAnterior": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "PerfilDocente": {
         "required": [
           "correo",
@@ -8701,6 +8906,46 @@
           }
         }
       },
+      "ResumenDto": {
+        "required": [
+          "uso",
+          "embudo",
+          "retencion",
+          "dinero",
+          "valor",
+          "semanas"
+        ],
+        "type": "object",
+        "properties": {
+          "uso": {
+            "$ref": "#/components/schemas/UsoResumenDto"
+          },
+          "embudo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PasoEmbudoDto"
+            }
+          },
+          "retencion": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CohorteDto"
+            }
+          },
+          "dinero": {
+            "$ref": "#/components/schemas/DineroResumenDto"
+          },
+          "valor": {
+            "$ref": "#/components/schemas/ValorResumenDto"
+          },
+          "semanas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SemanaResumenDto"
+            }
+          }
+        }
+      },
       "RubroBoleta": {
         "required": [
           "nombre",
@@ -9051,6 +9296,90 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "SemanaResumenDto": {
+        "required": [
+          "semana",
+          "activos",
+          "registros",
+          "pagan",
+          "altasPago",
+          "bajas",
+          "boletas",
+          "observaciones",
+          "avisos"
+        ],
+        "type": "object",
+        "properties": {
+          "semana": {
+            "type": "string",
+            "format": "date"
+          },
+          "activos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "registros": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pagan": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "altasPago": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "bajas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "boletas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "observaciones": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "avisos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -9670,6 +9999,148 @@
           "fin": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "UsoResumenDto": {
+        "required": [
+          "docentes",
+          "activosDia",
+          "activosSemana",
+          "activosMes",
+          "porcentajeFrecuencia",
+          "registrosSemana",
+          "registrosMes",
+          "grupos",
+          "alumnos"
+        ],
+        "type": "object",
+        "properties": {
+          "docentes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activosDia": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activosSemana": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "activosMes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeFrecuencia": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "registrosSemana": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "registrosMes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "grupos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "alumnos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ValorResumenDto": {
+        "required": [
+          "boletas",
+          "observaciones",
+          "avisos",
+          "entregas",
+          "porcentajeAvisosLeidos"
+        ],
+        "type": "object",
+        "properties": {
+          "boletas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "observaciones": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "avisos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "entregas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "porcentajeAvisosLeidos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },

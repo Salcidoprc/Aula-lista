@@ -122,3 +122,11 @@ const INSTANTE = new Intl.DateTimeFormat('es-MX', {
 export function instante(valor: string): string {
   return INSTANTE.format(new Date(valor)).replace(/\./g, '');
 }
+
+/** Porcentaje con un decimal si lo tiene; sin con qué calcularlo es una raya, nunca 0 %. */
+export function porciento(valor: number | string | null | undefined): string {
+  if (valor === null || valor === undefined) {
+    return '—';
+  }
+  return `${new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 }).format(Number(valor))} %`;
+}

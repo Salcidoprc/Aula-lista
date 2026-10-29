@@ -48,10 +48,28 @@ test.describe('SPEC-09: operación y métricas', () => {
     hacerAdmin(correo);
     const nombre = nombreNuevo();
 
+    // RF-094: el panel abre en el Resumen, con sus cinco bloques y el embudo completo.
     await page.goto('/admin');
+    await expect(page.getByRole('heading', { level: 1, name: 'Resumen' })).toBeVisible();
+    for (const bloque of ['Uso', 'Dinero', 'Activación', 'Valor entregado', 'Retención']) {
+      await expect(page.getByRole('heading', { level: 2, name: bloque })).toBeVisible();
+    }
+    await expect(page.getByText('Publicó boletas')).toBeVisible();
+    const activos = page.getByRole('group', { name: /^Docentes activos por semana:/ });
+    await expect(activos).toBeVisible();
+    await activos.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(activos.locator('[aria-live]')).toHaveText(/^\d+, Semana del \d+ \w+$/);
+    const anuncio = (await activos.locator('[aria-live]').innerText()).split(', ');
+    await page.getByText('Ver los datos por semana', { exact: true }).first().click();
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Métricas del piloto' }),
+      page
+        .getByRole('region', { name: 'Ver los datos por semana' })
+        .getByRole('row', { name: new RegExp(`^${anuncio[1]} ${anuncio[0]} `) }),
     ).toBeVisible();
+    await sinFallasDeAccesibilidad(page);
+
+    await abrirSeccion(page, 'Métricas del piloto');
     await expect(page.getByRole('region', { name: 'Boleta del piloto por semana' })).toBeVisible();
     for (const metrica of [
       'Docentes activos',

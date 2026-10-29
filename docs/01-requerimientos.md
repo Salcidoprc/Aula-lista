@@ -127,6 +127,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-091 | Existe un panel de administración con métricas del piloto, docentes, costos y consumo de IA y WhatsApp, y errores de jobs. | M |
 | RF-092 | El administrador gestiona el catálogo de tipos de rubro: crea tipos con un comportamiento existente, los edita y los desactiva. | M |
 | RF-093 | Las acciones de los administradores quedan en auditoría. | M |
+| RF-094 | El panel abre con un resumen del negocio: docentes activos, registros, embudo de activación, retención por cohorte, MRR y pagos, costo y margen, y lo que la app entregó (boletas, observaciones y avisos), con su tendencia semanal. | M |
 
 ## Requerimientos no funcionales
 

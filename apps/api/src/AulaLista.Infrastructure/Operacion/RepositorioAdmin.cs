@@ -37,6 +37,31 @@ internal sealed class RepositorioAdmin(AulaListaDbContext db) : IRepositorioAdmi
             c.TokensSalida, c.TokensCache, c.MensajesWhatsapp, c.CostoWhatsapp))
         .ToList();
 
+    public async Task<FilaResumen> ResumenAsync(DateTimeOffset ahora, CancellationToken cancellationToken)
+    {
+        var r = (await db.Database.SqlQuery<Resumen>($"SELECT * FROM admin_resumen({ahora})").ToListAsync(cancellationToken)).Single();
+        return new FilaResumen(
+            r.Docentes, r.ActivosDia, r.ActivosSemana, r.ActivosMes, r.RegistrosSemana, r.RegistrosMes, r.Grupos, r.Alumnos, r.BajasMes,
+            r.BoletasMes, r.ObservacionesMes, r.AvisosMes, r.EntregasMes, r.EntregasLeidasMes);
+    }
+
+    public async Task<IReadOnlyList<FilaResumenSemana>> ResumenSemanasAsync(DateOnly desde, int semanas, CancellationToken cancellationToken) =>
+        (await db.Database.SqlQuery<ResumenSemana>($"SELECT * FROM admin_resumen_semanas({desde}, {semanas})").ToListAsync(cancellationToken))
+        .Select(s => new FilaResumenSemana(
+            DateOnly.FromDateTime(s.Semana), s.Activos, s.Registros, s.Pagan, s.AltasPago, s.Bajas, s.Boletas, s.Observaciones, s.Avisos))
+        .ToList();
+
+    public async Task<FilaEmbudo> EmbudoAsync(CancellationToken cancellationToken)
+    {
+        var e = (await db.Database.SqlQuery<Embudo>($"SELECT * FROM admin_embudo()").ToListAsync(cancellationToken)).Single();
+        return new FilaEmbudo(e.Registrados, e.ConGrupo, e.ConAlumnos, e.ConCalificacion, e.ConCierre, e.ConBoletas);
+    }
+
+    public async Task<IReadOnlyList<FilaCohorte>> RetencionAsync(DateOnly desde, int semanas, CancellationToken cancellationToken) =>
+        (await db.Database.SqlQuery<CohorteSemana>($"SELECT * FROM admin_retencion({desde}, {semanas})").ToListAsync(cancellationToken))
+        .Select(c => new FilaCohorte(DateOnly.FromDateTime(c.Cohorte), c.Docentes, c.Semana1, c.Semana2, c.Semana4))
+        .ToList();
+
     public async Task<IReadOnlyList<FilaError>> ErroresAsync(int limite, CancellationToken cancellationToken) =>
         (await db.Database.SqlQuery<Error>($"SELECT * FROM admin_errores({limite})").ToListAsync(cancellationToken))
         .Select(e => new FilaError(e.Id, e.Origen, e.Trabajo, e.DocenteId, e.Correo, e.ReferenciaId, e.TipoError, e.Fecha))
@@ -82,6 +107,86 @@ internal sealed class RepositorioAdmin(AulaListaDbContext db) : IRepositorioAdmi
         public int ConPrueba { get; init; }
 
         public int Pagan { get; init; }
+    }
+
+    private sealed class Resumen
+    {
+        public int Docentes { get; init; }
+
+        public int ActivosDia { get; init; }
+
+        public int ActivosSemana { get; init; }
+
+        public int ActivosMes { get; init; }
+
+        public int RegistrosSemana { get; init; }
+
+        public int RegistrosMes { get; init; }
+
+        public int Grupos { get; init; }
+
+        public int Alumnos { get; init; }
+
+        public int BajasMes { get; init; }
+
+        public int BoletasMes { get; init; }
+
+        public int ObservacionesMes { get; init; }
+
+        public int AvisosMes { get; init; }
+
+        public int EntregasMes { get; init; }
+
+        public int EntregasLeidasMes { get; init; }
+    }
+
+    private sealed class ResumenSemana
+    {
+        public DateTime Semana { get; init; }
+
+        public int Activos { get; init; }
+
+        public int Registros { get; init; }
+
+        public int Pagan { get; init; }
+
+        public int AltasPago { get; init; }
+
+        public int Bajas { get; init; }
+
+        public int Boletas { get; init; }
+
+        public int Observaciones { get; init; }
+
+        public int Avisos { get; init; }
+    }
+
+    private sealed class Embudo
+    {
+        public int Registrados { get; init; }
+
+        public int ConGrupo { get; init; }
+
+        public int ConAlumnos { get; init; }
+
+        public int ConCalificacion { get; init; }
+
+        public int ConCierre { get; init; }
+
+        public int ConBoletas { get; init; }
+    }
+
+    private sealed class CohorteSemana
+    {
+        public DateTime Cohorte { get; init; }
+
+        public int Docentes { get; init; }
+
+        public int Semana1 { get; init; }
+
+        public int Semana2 { get; init; }
+
+        public int Semana4 { get; init; }
     }
 
     private sealed class Docente

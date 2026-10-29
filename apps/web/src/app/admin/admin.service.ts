@@ -8,12 +8,14 @@ import { docentesAdmin } from '../api/fn/administracion/docentes-admin';
 import { editarTipoRubro } from '../api/fn/administracion/editar-tipo-rubro';
 import { erroresAdmin } from '../api/fn/administracion/errores-admin';
 import { metricasAdmin } from '../api/fn/administracion/metricas-admin';
+import { resumenAdmin } from '../api/fn/administracion/resumen-admin';
 import { tiposRubroAdmin } from '../api/fn/administracion/tipos-rubro-admin';
 import { CostosDto } from '../api/models/costos-dto';
 import { DocentesAdminDto } from '../api/models/docentes-admin-dto';
 import { ErrorTrabajoDto } from '../api/models/error-trabajo-dto';
 import { MetricasDto } from '../api/models/metricas-dto';
 import { PaginaAuditoriaDto } from '../api/models/pagina-auditoria-dto';
+import { ResumenDto } from '../api/models/resumen-dto';
 import { TipoRubroAdminDto } from '../api/models/tipo-rubro-admin-dto';
 import { TipoRubroEntrada } from '../api/models/tipo-rubro-entrada';
 
@@ -24,6 +26,10 @@ import { TipoRubroEntrada } from '../api/models/tipo-rubro-entrada';
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly api = inject(Api);
+
+  resumen(): Promise<ResumenDto> {
+    return this.api.invoke(resumenAdmin);
+  }
 
   metricas(): Promise<MetricasDto> {
     return this.api.invoke(metricasAdmin);

@@ -22,7 +22,12 @@ export const rutasAdmin: Routes = [
     canActivate: [requiereAdmin],
     loadComponent: () => import('./admin').then((m) => m.Admin),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'metricas' },
+      { path: '', pathMatch: 'full', redirectTo: 'resumen' },
+      {
+        path: 'resumen',
+        title: 'titulos.adminResumen',
+        loadComponent: () => import('./resumen').then((m) => m.Resumen),
+      },
       {
         path: 'metricas',
         title: 'titulos.adminMetricas',

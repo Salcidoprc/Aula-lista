@@ -1,6 +1,6 @@
 # SPEC-09: Operación y métricas
 
-**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-090 a RF-093, RNF-005, RNF-009, RNF-015, RNF-016, RNF-021, RNF-022
+**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-090 a RF-094, RNF-005, RNF-009, RNF-015, RNF-016, RNF-021, RNF-022
 
 ## Objetivo
 
@@ -21,7 +21,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | `enlace_tutor_abierto` | primera_vez | Apertura de tutores |
 | `suscripcion_activada` | grupos_pro, modalidad (tarjeta, prepago_oxxo) | Conversión |
 
-## Panel de administración (RF-091 a RF-093)
+## Panel de administración (RF-091 a RF-094)
 
 Área separada de la app del docente (`/admin`), solo para usuarios con rol `admin`. El rol se asigna por configuración o por un comando de la API, nunca desde la interfaz.
 
@@ -29,12 +29,39 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 
 | Sección | Qué hace | Puede editar |
 | --- | --- | --- |
+| Resumen | El negocio de un vistazo (RF-094): uso, activación, retención, dinero y valor entregado, con su tendencia semanal. Es la sección que abre el panel | No |
 | Métricas | Las 6 métricas del piloto de `00-prd.md` sección 4, por semana | No |
 | Docentes | Lista con grupos, plan, último acceso y consumo del mes | No |
 | Costos | Costo estimado del mes por grupo (tokens de IA × precio y mensajes de WhatsApp × tarifa) contra ingreso | No |
 | Errores | Errores recientes de jobs (IA, WhatsApp, correo, pagos) | No |
 | Tipos de rubro | Catálogo de tipos de rubro que ven los docentes (RF-092) | Sí |
 | Auditoría | Acciones de los administradores (RF-093) | No |
+
+### Resumen (RF-094)
+
+Solo conteos y montos de todos los docentes; ningún nombre ni correo (RN-090). Las ventanas de 1, 7 y 30 días terminan en el momento de la consulta; las semanas son las de Métricas (lunes a domingo, hora del centro de México, las últimas `Operacion:SemanasMetricas`).
+
+| Bloque | KPI | Cómo se calcula |
+| --- | --- | --- |
+| Uso | Docentes | Cuentas activas con perfil de docente |
+| Uso | Activos hoy, en 7 y en 30 días | Docentes que abrieron la app: iniciaron o renovaron su sesión (una fila de `sesion`) en las últimas 24 horas, 7 días o 30 días |
+| Uso | Frecuencia | Activos en 7 días sobre activos en 30 días: cuántos de los del mes volvieron esta semana |
+| Uso | Registros | Cuentas nuevas en 7 y en 30 días |
+| Uso | Grupos y alumnos | Grupos sin archivar y sus alumnos sin baja |
+| Activación | Embudo | De los docentes con cuenta activa, cuántos llegaron a: registrarse, crear un grupo, agregar alumnos, capturar una calificación, iniciar un cierre y publicar boletas. Cada paso da su porcentaje sobre los registrados y sobre el paso anterior |
+| Retención | Cohortes | Por semana de registro, el porcentaje que volvió a abrir la app en su semana 1, 2 y 4 (días 7 a 13, 14 a 20 y 28 a 34 desde su registro). Mientras la semana no termina para todo el que se registró ese domingo, se muestra "sin datos" |
+| Dinero | MRR | Lo que cobran al mes los grupos Pro pagados: 79 + 29 por adicional por docente (`Planes:*`), el mismo cálculo que Costos |
+| Dinero | Docentes que pagan, grupos Pro e ingreso promedio | Docentes con al menos un grupo Pro pagado, sus grupos y MRR entre docentes |
+| Dinero | Pruebas activas | Grupos con la prueba Pro en curso |
+| Dinero | Bajas | Suscripciones canceladas en los últimos 30 días |
+| Dinero | Costo y margen | Costo variable del mes en curso (el total de Costos) y MRR menos ese costo |
+| Valor entregado | Boletas, observaciones y avisos | En 30 días: boletas publicadas (cada versión), observaciones de la IA aprobadas (`observacion_aprobada`) y avisos enviados sin borrar |
+| Valor entregado | Avisos leídos | Entregas de esos avisos que el tutor leyó, sobre las entregas |
+| Tendencia | Por semana | Activos (abrieron la app esa semana), registros, docentes que pagan al cierre de la semana (activaron su suscripción antes y no la tenían cancelada), altas y bajas de pago, boletas publicadas, observaciones aprobadas y avisos |
+
+En pantalla el Resumen se ve con gráficas (DESIGN.md, "Panel de administración"): una franja con activos hoy, activos en 30 días, MRR y margen; la tendencia de 12 semanas de activos (línea), registros, docentes que pagan, boletas, observaciones y avisos (columnas); el embudo en barras; la retención como mapa de calor, y frecuencia y avisos leídos como medidor. La semana en curso se marca como incompleta. Cada gráfica se recorre con cursor o flechas y todo valor también está en la tabla "Ver los datos por semana".
+
+Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de la suscripción, porque la cancelación no guarda su propia fecha: si una suscripción cancelada cambia después, su baja se mueve a esa semana.
 
 ### Reglas
 
@@ -55,7 +82,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | `GET` / `POST /api/v1/admin/tipos-rubro` | Lista todos y crea (solo `admin`) |
 | `PUT /api/v1/admin/tipos-rubro/{id}` | Edita o desactiva (solo `admin`) |
 | `GET /api/v1/admin/comportamientos` | Comportamientos disponibles en el código desplegado |
-| `GET /api/v1/admin/metricas`, `/docentes`, `/costos`, `/errores`, `/auditoria` | Lecturas del panel |
+| `GET /api/v1/admin/resumen`, `/metricas`, `/docentes`, `/costos`, `/errores`, `/auditoria` | Lecturas del panel |
 
 ## Observabilidad
 
@@ -83,6 +110,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 - **Trazas:** OpenTelemetry (ASP.NET Core sin `/salud`, HttpClient y Npgsql) se exporta por OTLP solo si existe `OTEL_EXPORTER_OTLP_ENDPOINT`; sin esa variable no se instrumenta nada.
 - **Logs sin datos personales:** la prueba automática corre los flujos con nombres y teléfonos marcados y nivel `Debug`, y revisa cada línea del log.
 - **Respaldos:** `infra/respaldos/respaldar.sh` (`pg_dump` → `age` → `rclone`, con el conteo de filas de la misma instantánea, cifrado al lado) con el rol `app_respaldos` (`infra/postgres/respaldos.sql`, solo lectura). `restaurar.sh` restaura en una base vacía y compara conteos. Cómo programarlo en `infra/coolify.md`; cada prueba se anota en `docs/operacion/restauraciones.md`.
+- **Resumen (RF-094):** funciones `admin_resumen(ahora)`, `admin_resumen_semanas(desde, semanas)`, `admin_embudo()` y `admin_retencion(desde, semanas)`, con el mismo patrón que las demás; el rol de migraciones gana lectura sobre `alumno`, `aviso`, `entrega_aviso` y `boleta` solo para contar. El dinero se arma en la aplicación con el resultado de Costos, así MRR y costo coinciden con esa sección.
 - **Retención (RNF-009):** el trabajo diario borra primero las cuentas vencidas y luego los grupos archivados cuyo ciclo terminó hace más de `Operacion:AniosGruposArchivados` (2) años; si falla, queda en errores y Hangfire reintenta.
 
 ## Criterios de aceptación
@@ -93,5 +121,8 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 - Dado cualquier cambio en tipos de rubro, entonces aparece en la auditoría con valores antes y después.
 
 - Dado el panel de administración, entonces muestra las 6 métricas del piloto calculadas desde los eventos.
+- Dado un docente nuevo que arma un grupo Pro con 2 alumnos, cierra, publica sus boletas y manda un aviso, cuando el administrador abre el Resumen, entonces suben en uno los docentes, los activos de hoy, los registros, los grupos, cada paso del embudo, los que pagan y los avisos; en dos los alumnos, las boletas y las observaciones; el MRR en 79 MXN, y la respuesta no lleva nombres ni correos (RF-094, RN-090).
+- Dado un docente que vuelve a abrir la app 8 días después de registrarse, cuando terminó la semana 1 de su cohorte, entonces su cohorte tiene retención de semana 1 mayor que cero y la semana 4 sigue "sin datos" (RF-094).
+- Dado el Resumen abierto, cuando el administrador enfoca la gráfica de docentes activos y pulsa la flecha izquierda, entonces la gráfica dice la cifra de la semana anterior y su fecha, y la misma cifra está en "Ver los datos por semana" (RF-094, RNF-015).
 - Dado cualquier log de la API, entonces no contiene nombres ni teléfonos (prueba automática con datos marcados).
 - Dado un respaldo del día anterior, cuando se restaura en staging, entonces la app arranca y los conteos coinciden.

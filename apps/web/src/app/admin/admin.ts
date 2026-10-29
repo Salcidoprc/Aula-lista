@@ -153,6 +153,7 @@ import { controlarPortada } from '../shared/portada/portada.service';
 })
 export class Admin {
   protected readonly secciones = [
+    { ruta: 'resumen', clave: 'resumen' },
     { ruta: 'metricas', clave: 'metricas' },
     { ruta: 'costos', clave: 'costos' },
     { ruta: 'docentes', clave: 'docentes' },

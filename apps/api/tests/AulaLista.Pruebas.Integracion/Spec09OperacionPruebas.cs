@@ -79,10 +79,10 @@ public sealed class Spec09OperacionPruebas(BaseDeDatosFixture baseDeDatos) : IDi
     [Fact]
     public async Task SPEC09_DocenteSinRolAdmin_RecibeEn404TodoElPanel()
     {
-        var (docente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+        var (docente, _, _) = await _fabrica.RegistrarDocenteAsync();
         var anonimo = _fabrica.Cliente();
         var tipoId = Guid.NewGuid();
-        string[] lecturas = ["metricas", "docentes", "costos", "errores", "auditoria", "comportamientos", "tipos-rubro"];
+        string[] lecturas = ["resumen", "metricas", "docentes", "costos", "errores", "auditoria", "comportamientos", "tipos-rubro"];
 
         foreach (var ruta in lecturas)
         {
@@ -192,6 +192,80 @@ public sealed class Spec09OperacionPruebas(BaseDeDatosFixture baseDeDatos) : IDi
         var texto = await admin.GetStringAsync("/api/v1/admin/costos") + await admin.GetStringAsync("/api/v1/admin/docentes");
         Assert.DoesNotContain("Alumno", texto, StringComparison.Ordinal);
         Assert.DoesNotContain("Prueba Ríos", texto, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RF094_Resumen_CuentaUsoActivacionDineroYValorEntregadoSinDatosPersonales()
+    {
+        var admin = await AdminAsync();
+        var antes = await admin.GetFromJsonAsync<JsonElement>("/api/v1/admin/resumen");
+        var g = await GrupoAsync(2, nombres: "Zuriñe"); // Pro pagado: 79 MXN al mes
+        await TutorAsync(g, g.Alumnos[0], "Laura Méndez");
+        await BoletasListasAsync(g, editarPrimera: false);
+        await PublicarAsync(g);
+        var aviso = await g.Cliente.PostAsJsonAsync($"/api/v1/grupos/{g.GrupoId}/avisos", new { titulo = "Junta", cuerpo = "El viernes a las 8.", urgente = false });
+        Assert.Equal(HttpStatusCode.Created, aviso.StatusCode);
+
+        var despues = await admin.GetFromJsonAsync<JsonElement>("/api/v1/admin/resumen");
+        int Delta(string seccion, string campo) =>
+            despues.GetProperty(seccion).GetProperty(campo).GetInt32() - antes.GetProperty(seccion).GetProperty(campo).GetInt32();
+        decimal Dinero(JsonElement r, string campo) => r.GetProperty("dinero").GetProperty(campo).GetDecimal();
+
+        Assert.Equal(1, Delta("uso", "docentes"));
+        Assert.Equal(1, Delta("uso", "activosDia"));
+        Assert.Equal(1, Delta("uso", "activosMes"));
+        Assert.Equal(1, Delta("uso", "registrosSemana"));
+        Assert.Equal(1, Delta("uso", "grupos"));
+        Assert.Equal(2, Delta("uso", "alumnos"));
+        Assert.Equal(2, Delta("valor", "boletas"));
+        Assert.Equal(2, Delta("valor", "observaciones"));
+        Assert.Equal(1, Delta("valor", "avisos"));
+        Assert.Equal(1, Delta("valor", "entregas"));
+        Assert.Equal(1, Delta("dinero", "docentesQuePagan"));
+        Assert.Equal(1, Delta("dinero", "gruposPro"));
+        Assert.Equal(79m, Dinero(despues, "mrr") - Dinero(antes, "mrr"));
+        Assert.Equal(Dinero(despues, "mrr") - Dinero(despues, "costoMes"), Dinero(despues, "margen"));
+
+        // Cada paso del embudo suma al docente nuevo: registro, grupo, alumnos, calificación, cierre y boletas.
+        var pasosAntes = antes.GetProperty("embudo").EnumerateArray().ToList();
+        var pasos = despues.GetProperty("embudo").EnumerateArray().ToList();
+        Assert.Equal(["registro", "grupo", "alumnos", "calificacion", "cierre", "boletas"], pasos.Select(p => p.GetProperty("paso").GetString()));
+        Assert.All(pasos.Zip(pasosAntes), p => Assert.Equal(1, p.First.GetProperty("docentes").GetInt32() - p.Second.GetProperty("docentes").GetInt32()));
+        Assert.Equal(100m, pasos[0].GetProperty("porcentaje").GetDecimal());
+
+        var semana = despues.GetProperty("semanas").EnumerateArray().Last();
+        var semanaAntes = antes.GetProperty("semanas").EnumerateArray().Last();
+        Assert.Equal(12, despues.GetProperty("semanas").GetArrayLength());
+        Assert.Equal(1, semana.GetProperty("registros").GetInt32() - semanaAntes.GetProperty("registros").GetInt32());
+        Assert.Equal(1, semana.GetProperty("altasPago").GetInt32() - semanaAntes.GetProperty("altasPago").GetInt32());
+        Assert.Equal(1, semana.GetProperty("pagan").GetInt32() - semanaAntes.GetProperty("pagan").GetInt32());
+        Assert.Equal(2, semana.GetProperty("boletas").GetInt32() - semanaAntes.GetProperty("boletas").GetInt32());
+
+        // RN-090: solo conteos y montos; ni docentes ni alumnos ni tutores.
+        var texto = await admin.GetStringAsync("/api/v1/admin/resumen");
+        Assert.DoesNotContain("Zuriñe", texto, StringComparison.Ordinal);
+        Assert.DoesNotContain("Laura", texto, StringComparison.Ordinal);
+        Assert.DoesNotContain("@", texto, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RF094_Retencion_CuentaAlDocenteQueVuelveEnSuSemanaUnoCuandoLaSemanaTermino()
+    {
+        var admin = await AdminAsync(); // antes de adelantar el reloj: el token se valida con la hora real
+        var (docente, _, _) = await _fabrica.RegistrarDocenteAsync();
+        var hoy = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(_fabrica.Reloj.GetUtcNow(), TimeZoneInfo.FindSystemTimeZoneById("America/Mexico_City")).DateTime);
+        var cohorte = hoy.AddDays(-(((int)hoy.DayOfWeek + 6) % 7));
+        _fabrica.Reloj.Advance(TimeSpan.FromDays(8));
+        (await docente.PostAsync("/api/v1/cuentas/sesion/renovar", null)).EnsureSuccessStatusCode();
+        _fabrica.Reloj.Advance(TimeSpan.FromDays(14));
+
+        var resumen = await admin.GetFromJsonAsync<JsonElement>("/api/v1/admin/resumen");
+
+        var suya = Assert.Single(resumen.GetProperty("retencion").EnumerateArray(),
+            c => DateOnly.Parse(c.GetProperty("semana").GetString()!, CultureInfo.InvariantCulture) == cohorte);
+        Assert.True(suya.GetProperty("docentes").GetInt32() >= 1);
+        Assert.True(suya.GetProperty("semana1").GetDecimal() > 0m);
+        Assert.Equal(JsonValueKind.Null, suya.GetProperty("semana4").ValueKind); // termina 6 semanas después del lunes
     }
 
     [Fact]
