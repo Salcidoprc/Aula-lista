@@ -20,3 +20,4 @@ Formato: contexto, decisión, alternativas consideradas, consecuencias.
 | [ADR-0012](ADR-0012-tipos-de-rubro-extensibles.md) | Tipos de rubro como catálogo administrable con comportamientos en código | Aceptada | 11/10/2026 |
 | [ADR-0013](ADR-0013-cuenta-docente.md) | Cuenta docente: tablas sin RLS por clave de búsqueda, tokens con hash, Hangfire tras el commit y retención | Aceptada | 11/10/2026 |
 | [ADR-0014](ADR-0014-grupos-alumnos-tutores.md) | Grupos, alumnos y tutores: tutor compartido por función, unidades sin traslape, numeración de lista e importación sin guardar archivos | Aceptada | 11/10/2026 |
+| [ADR-0015](ADR-0015-observabilidad-grafana-cloud.md) | Observabilidad en Grafana Cloud: OTLP, Faro por el mismo origen y alertas como código | Aceptada | 29/10/2026 |

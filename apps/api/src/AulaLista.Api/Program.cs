@@ -37,17 +37,32 @@ if (args.Contains("--migrar"))
     return;
 }
 
-builder.Services.AddSerilog((services, configuracion) => configuracion
-    .ReadFrom.Configuration(builder.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext());
+// SPEC-09 y ADR-0015: logs, trazas y métricas por OTLP (Grafana Cloud), solo si hay a dónde mandarlos. Las variables
+// OTEL_EXPORTER_OTLP_* (destino, protocolo y encabezado de autenticación) las leen igual el sink y el exportador.
+const string Servicio = "aula-lista-api";
+var conOtlp = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
-// SPEC-09: trazas y métricas con OpenTelemetry, solo si hay a dónde mandarlas (OTEL_EXPORTER_OTLP_ENDPOINT). Las
-// rutas llevan IDs, nunca nombres; la cadena de consulta se redacta y SQL viaja sin valores.
-if (!string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+builder.Services.AddSerilog((services, configuracion) =>
+{
+    configuracion
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+    if (conOtlp)
+    {
+        configuracion.WriteTo.OpenTelemetry(o =>
+        {
+            o.Protocol = Serilog.Sinks.OpenTelemetry.OtlpProtocol.HttpProtobuf;
+            o.ResourceAttributes = new Dictionary<string, object> { ["service.name"] = Servicio };
+        });
+    }
+});
+
+// Las rutas llevan IDs, nunca nombres; la cadena de consulta se redacta y SQL viaja sin valores.
+if (conOtlp)
 {
     builder.Services.AddOpenTelemetry()
-        .ConfigureResource(r => r.AddService("aula-lista-api"))
+        .ConfigureResource(r => r.AddService(Servicio))
         .WithTracing(t => t
             .AddAspNetCoreInstrumentation(o => o.Filter = http => !http.Request.Path.StartsWithSegments("/salud", StringComparison.Ordinal))
             .AddHttpClientInstrumentation()
@@ -57,6 +72,7 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOIN
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddMeter("Npgsql")
+            .AddMeter(AulaLista.Infrastructure.Operacion.MetricasAulaLista.Medidor)
             .AddOtlpExporter());
 }
 
@@ -192,6 +208,11 @@ if (Array.IndexOf(args, "--admin") is var posicion and >= 0)
     return;
 }
 
+// Las métricas propias existen desde el arranque, con sus series en 0, aunque todavía no falle nada (SPEC-09). El
+// proveedor de OpenTelemetry va primero: lo que se mide antes de que escuche se pierde.
+app.Services.GetService<MeterProvider>();
+app.Services.GetRequiredService<AulaLista.Infrastructure.Operacion.MetricasAulaLista>();
+
 app.UseForwardedHeaders();
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
@@ -242,6 +263,13 @@ if (app.Configuration.GetValue("Trabajos:Servidor", true)
         "revisar-suscripciones",
         e => e.RevisarSuscripcionesAsync(CancellationToken.None),
         "0 6 * * *",
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById(Docente.ZonaHorariaPorDefecto) });
+
+    // SPEC-09: alimenta la alerta de costo por grupo, cada hora.
+    app.Services.GetRequiredService<IRecurringJobManager>().AddOrUpdate<EjecutorTrabajos>(
+        "vigilar-costos",
+        e => e.VigilarCostosAsync(CancellationToken.None),
+        "15 * * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById(Docente.ZonaHorariaPorDefecto) });
 }
 

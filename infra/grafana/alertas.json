@@ -1,0 +1,397 @@
+{
+  "title": "operacion",
+  "folderUid": "aula-lista",
+  "interval": 60,
+  "rules": [
+    {
+      "uid": "al-api-5xx",
+      "title": "API: más de 2 % de respuestas 5xx en 5 minutos",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "critica"
+      },
+      "annotations": {
+        "summary": "La API responde con error a más del 2 % de las solicitudes.",
+        "description": "Revisa los logs de aula-lista-api en Explore (nivel Error) y las trazas con estado de error.",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 600,
+            "to": 0
+          },
+          "datasourceUid": "${DS_PROM}",
+          "model": {
+            "refId": "A",
+            "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aula-lista-api\",http_response_status_code=~\"5..\",http_route!=\"/salud\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aula-lista-api\",http_route!=\"/salud\"}[5m]))",
+            "instant": true,
+            "range": false
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "gt",
+                  "params": [
+                    0.02
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "al-job-fallido",
+      "title": "Job fallido tras sus reintentos",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "aviso"
+      },
+      "annotations": {
+        "summary": "Un trabajo en segundo plano ({{ $labels.origen }}) falló tras sus reintentos.",
+        "description": "El detalle (docente, referencia y tipo de error) está en /admin, sección Errores.",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 600,
+            "to": 0
+          },
+          "datasourceUid": "${DS_PROM}",
+          "model": {
+            "refId": "A",
+            "expr": "sum by (origen) (increase(aula_lista_trabajos_fallidos_total[10m]))",
+            "instant": true,
+            "range": false
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "gt",
+                  "params": [
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "al-respaldo-fallido",
+      "title": "Respaldo fallido",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "critica"
+      },
+      "annotations": {
+        "summary": "El respaldo diario de la base falló.",
+        "description": "Revisa la salida de la tarea programada de respaldos en Coolify y vuelve a correrla (infra/respaldos/respaldar.sh).",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 3600,
+            "to": 0
+          },
+          "datasourceUid": "${DS_LOGS}",
+          "model": {
+            "refId": "A",
+            "expr": "sum(count_over_time({service_name=\"aula-lista-respaldos\"} |= \"respaldo_fallido\" [1h]))",
+            "queryType": "instant"
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "gt",
+                  "params": [
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "al-respaldo-ausente",
+      "title": "Sin respaldo exitoso en 26 horas",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "critica",
+        "frecuencia": "diaria"
+      },
+      "annotations": {
+        "summary": "No llegó ningún respaldo exitoso en 26 horas.",
+        "description": "La tarea de respaldos no corrió o no pudo avisar. Revisa la tarea programada de Coolify y sus variables OTEL_*.",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 93600,
+            "to": 0
+          },
+          "datasourceUid": "${DS_LOGS}",
+          "model": {
+            "refId": "A",
+            "expr": "absent_over_time({service_name=\"aula-lista-respaldos\"} |= \"respaldo_ok\" [26h])",
+            "queryType": "instant"
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "gt",
+                  "params": [
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "al-costo-grupo",
+      "title": "Un grupo pasó 8 MXN de costo en el mes",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "aviso",
+        "frecuencia": "diaria"
+      },
+      "annotations": {
+        "summary": "{{ $values.B.Value }} grupo(s) pasan el costo máximo del mes (RNF-022).",
+        "description": "Los grupos y su consumo están en /admin, sección Costos; el id de cada uno está en el log \"Costo del mes arriba del umbral\".",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 7200,
+            "to": 0
+          },
+          "datasourceUid": "${DS_PROM}",
+          "model": {
+            "refId": "A",
+            "expr": "max(max_over_time(aula_lista_grupos_costo_alto[2h]))",
+            "instant": true,
+            "range": false
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "gt",
+                  "params": [
+                    0
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "al-salud-caida",
+      "title": "/salud no responde (3 fallas seguidas)",
+      "condition": "C",
+      "for": "0s",
+      "noDataState": "OK",
+      "execErrState": "Error",
+      "labels": {
+        "servicio": "aula-lista",
+        "severidad": "critica"
+      },
+      "annotations": {
+        "summary": "El monitor externo no pudo abrir /salud en 3 revisiones seguidas.",
+        "description": "Revisa el servidor y los contenedores en Coolify. La prueba está en Testing & synthetics.",
+        "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
+      },
+      "data": [
+        {
+          "refId": "A",
+          "relativeTimeRange": {
+            "from": 300,
+            "to": 0
+          },
+          "datasourceUid": "${DS_PROM}",
+          "model": {
+            "refId": "A",
+            "expr": "max(max_over_time(probe_success{job=\"aula-lista-salud\"}[3m]))",
+            "instant": true,
+            "range": false
+          }
+        },
+        {
+          "refId": "B",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "B",
+            "type": "reduce",
+            "expression": "A",
+            "reducer": "last",
+            "settings": {
+              "mode": "dropNN"
+            }
+          }
+        },
+        {
+          "refId": "C",
+          "datasourceUid": "__expr__",
+          "model": {
+            "refId": "C",
+            "type": "threshold",
+            "expression": "B",
+            "conditions": [
+              {
+                "evaluator": {
+                  "type": "lt",
+                  "params": [
+                    1
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

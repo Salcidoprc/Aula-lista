@@ -232,6 +232,26 @@ public sealed class CostosCasoUso(
     }
 }
 
+public sealed record GrupoCostoAlto(Guid GrupoId, decimal Costo);
+
+/// <summary>
+/// SPEC-09 y RNF-022: grupos cuyo costo estimado del mes pasa <c>Operacion:AlertaCostoGrupoMxn</c>, con el mismo costeo que la
+/// sección Costos. Lo usa el trabajo que alimenta la alerta de Grafana.
+/// </summary>
+public sealed class VigilarCostosCasoUso(IRepositorioAdmin repositorio, Costeo costeo, IOptions<OpcionesOperacion> operacion, TimeProvider reloj)
+{
+    public async Task<IReadOnlyList<GrupoCostoAlto>> EjecutarAsync(CancellationToken ct)
+    {
+        var mes = Calendario.MesDe(Calendario.Hoy(reloj.GetUtcNow()));
+        var umbral = operacion.Value.AlertaCostoGrupoMxn;
+        return (await repositorio.ConsumoParaAlertasAsync(mes, ct))
+            .Select(f => new GrupoCostoAlto(f.GrupoId, costeo.Ia(f.TokensEntrada, f.TokensSalida, f.TokensCache) + decimal.Round(f.CostoWhatsapp, 2)))
+            .Where(g => g.Costo > umbral)
+            .OrderByDescending(g => g.Costo)
+            .ToList();
+    }
+}
+
 public sealed record ErrorTrabajoDto(
     Guid Id, string Origen, string Trabajo, string? Correo, Guid? ReferenciaId, string TipoError, DateTimeOffset Fecha);
 

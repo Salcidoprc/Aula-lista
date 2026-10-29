@@ -86,10 +86,13 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 
 ## Observabilidad
 
-- Logs estructurados con Serilog en JSON; nunca se registran nombres, teléfonos, correos, textos de notas u observaciones, ni tokens.
-- Trazas y métricas con OpenTelemetry; se exportan a un servicio gestionado (por definir) o a Grafana en el mismo servidor.
-- Monitoreo externo de disponibilidad cada minuto sobre `/health` y alerta por correo y Telegram si falla 3 veces seguidas.
-- Alertas: tasa de errores 5xx mayor a 2% en 5 minutos, job fallido tras sus reintentos, respaldo fallido, costo de un grupo mayor a 8 MXN en el mes.
+Destino: Grafana Cloud, plan gratis (ADR-0015). Todo se apaga si faltan sus variables de entorno; en local y en CI no se manda nada.
+
+- Logs estructurados con Serilog en JSON a la consola y, con `OTEL_EXPORTER_OTLP_ENDPOINT`, también por OTLP a Grafana Cloud (Loki); nunca se registran nombres, teléfonos, correos, textos de notas u observaciones, ni tokens.
+- Trazas y métricas con OpenTelemetry, por OTLP al mismo destino (Tempo y Prometheus). Métricas propias del medidor `AulaLista`: `aula_lista.trabajos.fallidos` (por origen) y `aula_lista.grupos.costo_alto` (grupos del mes arriba de `Operacion:AlertaCostoGrupoMxn`).
+- Errores y rendimiento del navegador con Grafana Faro, solo si el servidor web tiene `FARO_URL`. Va por el mismo origen (`/faro`), así la CSP no cambia y Grafana no recibe la IP del tutor ni del docente. Sin captura de consola ni de usuario; antes de enviar se quitan la consulta y el fragmento de toda URL (el enlace del tutor lleva su token en `#`) y los textos de error se recortan.
+- Monitoreo externo de disponibilidad cada minuto sobre `/salud` (Synthetic Monitoring de Grafana) y alerta por correo y Telegram si falla 3 veces seguidas.
+- Alertas por correo y Telegram: tasa de errores 5xx mayor a 2% en 5 minutos, job fallido tras sus reintentos, respaldo fallido o sin respaldo exitoso en 26 horas, costo de un grupo mayor a 8 MXN en el mes. Viven como código en `infra/grafana/` y se aplican con el flujo manual "Configurar Grafana" de GitHub Actions. Pasos para la cuenta y los tokens en `docs/operacion/grafana-cloud.md`.
 
 ## Respaldos y retención
 
@@ -108,6 +111,7 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 - **Rol admin:** por configuración (`Operacion__CorreosAdmin__0`) o con `dotnet AulaLista.Api.dll --admin <correo>`, que pide una cuenta activa y verificada y deja `rol_admin_asignado` en la auditoría. La app del docente no tiene enlace al panel; quien no es admin y abre `/admin` vuelve a sus grupos.
 - **Costos:** IA = tokens × precio del modelo (`Ia:Precio*UsdPorMillon`) × `Operacion:TipoCambioUsdMxn`; WhatsApp = mensajes × tarifa. Se marca un grupo arriba de `Operacion:AlertaCostoGrupoMxn` (8) o con IA arriba de `AlertaCostoIaGrupoMxn` (2).
 - **Trazas:** OpenTelemetry (ASP.NET Core sin `/salud`, HttpClient y Npgsql) se exporta por OTLP solo si existe `OTEL_EXPORTER_OTLP_ENDPOINT`; sin esa variable no se instrumenta nada.
+- **Grafana Cloud (ADR-0015):** con `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` y `OTEL_EXPORTER_OTLP_HEADERS` la API manda logs (sink de Serilog), trazas y métricas al gateway OTLP del stack. Un job fallido suma a `aula_lista.trabajos.fallidos` al registrarse en `error_trabajo`; las series de cada origen arrancan en 0 para que el primer fallo cuente. El trabajo `vigilar-costos` corre cada hora, cuenta los grupos del mes arriba del umbral con `consumo_para_alertas(mes)` (solo IDs y consumo, sin correos) y deja ese número en `aula_lista.grupos.costo_alto` y un aviso en el log con el id de cada grupo. `respaldar.sh` manda `respaldo_ok` o `respaldo_fallido` al mismo destino como log del servicio `aula-lista-respaldos`.
 - **Logs sin datos personales:** la prueba automática corre los flujos con nombres y teléfonos marcados y nivel `Debug`, y revisa cada línea del log.
 - **Respaldos:** `infra/respaldos/respaldar.sh` (`pg_dump` → `age` → `rclone`, con el conteo de filas de la misma instantánea, cifrado al lado) con el rol `app_respaldos` (`infra/postgres/respaldos.sql`, solo lectura). `restaurar.sh` restaura en una base vacía y compara conteos. Cómo programarlo en `infra/coolify.md`; cada prueba se anota en `docs/operacion/restauraciones.md`.
 - **Resumen (RF-094):** funciones `admin_resumen(ahora)`, `admin_resumen_semanas(desde, semanas)`, `admin_embudo()` y `admin_retencion(desde, semanas)`, con el mismo patrón que las demás; el rol de migraciones gana lectura sobre `alumno`, `aviso`, `entrega_aviso` y `boleta` solo para contar. El dinero se arma en la aplicación con el resultado de Costos, así MRR y costo coinciden con esa sección.
@@ -126,3 +130,6 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 - Dado el Resumen abierto, cuando el administrador enfoca la gráfica de docentes activos y pulsa la flecha izquierda, entonces la gráfica dice la cifra de la semana anterior y su fecha, y la misma cifra está en "Ver los datos por semana" (RF-094, RNF-015).
 - Dado cualquier log de la API, entonces no contiene nombres ni teléfonos (prueba automática con datos marcados).
 - Dado un respaldo del día anterior, cuando se restaura en staging, entonces la app arranca y los conteos coinciden.
+- Dado un job que falla tras sus reintentos, entonces `aula_lista.trabajos.fallidos` sube en uno para su origen y queda en `error_trabajo` (RNF-021).
+- Dado un grupo con un costo del mes mayor a 8 MXN, cuando corre `vigilar-costos`, entonces `aula_lista.grupos.costo_alto` cuenta ese grupo y el log lleva su id, sin correos ni nombres (RNF-021, RNF-022).
+- Dado un error del navegador en el portal del tutor abierto con su enlace, cuando Faro lo envía, entonces ninguna URL del envío lleva el fragmento ni la consulta (RN-019, RF-060).

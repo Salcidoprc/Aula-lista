@@ -3,8 +3,10 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using AulaLista.Application.Operacion;
+using AulaLista.Infrastructure.Operacion;
 using AulaLista.Infrastructure.Trabajos;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.Metrics.Testing;
 
 namespace AulaLista.Pruebas.Integracion;
 
@@ -311,6 +313,44 @@ public sealed class Spec09OperacionPruebas(BaseDeDatosFixture baseDeDatos) : IDi
             (error.GetProperty("origen").GetString(), error.GetProperty("correo").GetString(), error.GetProperty("tipoError").GetString()));
         Assert.DoesNotContain("6681234570", errores, StringComparison.Ordinal);
         Assert.DoesNotContain("Ana", errores, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SPEC09_TrabajoFallido_SumaALaMetricaDeSuOrigenParaLaAlerta()
+    {
+        var (_, docenteId, _) = await _fabrica.RegistrarDocenteAsync();
+        using var fallidos = new MetricCollector<long>(
+            _fabrica.Services.GetRequiredService<System.Diagnostics.Metrics.IMeterFactory>(), MetricasAulaLista.Medidor, "aula_lista.trabajos.fallidos");
+
+        await _fabrica.Services.GetRequiredService<IRegistroErrores>().RegistrarAsync(
+            "correo", "envio_tutores", docenteId, Guid.NewGuid(), "correo_rechazado", CancellationToken.None);
+
+        var medicion = Assert.Single(fallidos.GetMeasurementSnapshot());
+        Assert.Equal(1, medicion.Value);
+        Assert.Equal("correo", medicion.Tags["origen"]);
+        Assert.Contains(_fabrica.Registros.Lineas, l => l.Contains("Trabajo fallido", StringComparison.Ordinal) && l.Contains("correo_rechazado", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task SPEC09_GrupoArribaDe8Mxn_CuentaEnLaMetricaDeCostoYElLogSoloLlevaSuId()
+    {
+        var g = await GrupoAsync(1, "Zuriñe");
+        var barato = await OtroGrupoAsync(g, "C");
+        var hoy = TimeZoneInfo.ConvertTime(_fabrica.Reloj.GetUtcNow(), TimeZoneInfo.FindSystemTimeZoneById("America/Mexico_City"));
+        var mes = new DateOnly(hoy.Year, hoy.Month, 1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        await EjecutarAsync($"""
+            INSERT INTO consumo_mensual (docente_id, grupo_id, mes, mensajes_whatsapp, costo_whatsapp)
+            VALUES ('{g.DocenteId}', '{g.GrupoId}', '{mes}', 60, 9.60), ('{g.DocenteId}', '{barato}', '{mes}', 10, 1.60)
+            ON CONFLICT (grupo_id, mes) DO UPDATE SET mensajes_whatsapp = EXCLUDED.mensajes_whatsapp, costo_whatsapp = EXCLUDED.costo_whatsapp
+            """);
+
+        await _fabrica.Services.GetRequiredService<EjecutorTrabajos>().VigilarCostosAsync(CancellationToken.None);
+
+        Assert.True(_fabrica.Services.GetRequiredService<MetricasAulaLista>().GruposCostoAlto >= 1);
+        var avisos = _fabrica.Registros.Lineas.Where(l => l.Contains("Costo del mes arriba del umbral", StringComparison.Ordinal)).ToList();
+        Assert.Contains(avisos, l => l.Contains(g.GrupoId.ToString(), StringComparison.Ordinal));
+        Assert.DoesNotContain(avisos, l => l.Contains(barato.ToString(), StringComparison.Ordinal));
+        Assert.DoesNotContain(avisos, l => l.Contains("Zuri", StringComparison.Ordinal) || l.Contains('@', StringComparison.Ordinal));
     }
 
     [Fact]

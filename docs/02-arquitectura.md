@@ -207,6 +207,7 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009); simulado con la página "Pago de prueba" hasta tener claves (`Pagos__Proveedor`) | `IPasarelaPagos` |
 | QuestPDF | Boletas | `IGeneradorBoletas` |
 | Almacenamiento de objetos | PDFs, exportaciones y respaldos; en el piloto, disco del servidor en un volumen (ADR-0013) | `IAlmacenArchivos` |
+| Grafana Cloud (ADR-0015) | Logs, trazas y métricas por OTLP, errores del navegador (Faro por `/faro`), monitor de `/salud` y alertas de SPEC-09; apagado sin `OTEL_EXPORTER_OTLP_ENDPOINT` ni `FARO_URL` | Ninguna: OpenTelemetry y Serilog en `Program.cs`, `MetricasAulaLista` |
 
 ## Entornos
 

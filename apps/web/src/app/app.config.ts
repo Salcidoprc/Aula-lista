@@ -3,6 +3,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import localeEsMx from '@angular/common/locales/es-MX';
 import {
   ApplicationConfig,
+  ErrorHandler,
   LOCALE_ID,
   isDevMode,
   provideBrowserGlobalErrorListeners,
@@ -19,6 +20,7 @@ import { provideTransloco } from '@jsverse/transloco';
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { TituloTraducido } from './core/i18n/titulo.strategy';
+import { ErroresConFaro } from './core/observabilidad/faro';
 import { autenticacionInterceptor } from './core/sesion/autenticacion.interceptor';
 
 registerLocaleData(localeEsMx);
@@ -26,6 +28,7 @@ registerLocaleData(localeEsMx);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: ErroresConFaro },
     provideRouter(
       routes,
       withComponentInputBinding(),

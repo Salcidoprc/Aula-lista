@@ -45,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
         services.AddScoped<IAuditoria, Auditoria>();
         services.AddScoped<IEventosProducto, Operacion.EventosProducto>();
+        services.AddMetrics();
+        services.AddSingleton<Operacion.MetricasAulaLista>();
         services.AddSingleton<IRegistroErrores, Operacion.RegistroErrores>();
         services.AddScoped<IRepositorioAdmin, Operacion.RepositorioAdmin>();
         services.AddScoped<IRetencionGrupos, Operacion.RetencionGrupos>();

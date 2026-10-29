@@ -72,7 +72,8 @@ internal sealed class ColaTrabajosHangfire(IBackgroundJobClient cliente) : ICola
 /// para que RLS aplique igual que en una solicitud.
 /// </summary>
 public sealed partial class EjecutorTrabajos(
-    IServiceScopeFactory alcances, LimitadorIa limitador, IRegistroErrores errores, ILogger<EjecutorTrabajos> registro)
+    IServiceScopeFactory alcances, LimitadorIa limitador, IRegistroErrores errores, Operacion.MetricasAulaLista metricas,
+    ILogger<EjecutorTrabajos> registro)
 {
     public const int Reintentos = 3;
 
@@ -318,6 +319,25 @@ public sealed partial class EjecutorTrabajos(
             throw;
         }
     }
+
+    /// <summary>
+    /// SPEC-09 y RNF-022: cada hora deja en <c>aula_lista.grupos.costo_alto</c> cuántos grupos pasan el costo del mes, para la
+    /// alerta de Grafana, y el id de cada uno en el log. El siguiente turno corrige cualquier fallo, así que no se reintenta.
+    /// </summary>
+    [AutomaticRetry(Attempts = 0)]
+    public async Task VigilarCostosAsync(CancellationToken cancellationToken)
+    {
+        await using var alcance = alcances.CreateAsyncScope();
+        var grupos = await alcance.ServiceProvider.GetRequiredService<VigilarCostosCasoUso>().EjecutarAsync(cancellationToken);
+        metricas.FijarGruposCostoAlto(grupos.Count);
+        foreach (var grupo in grupos)
+        {
+            CostoAlto(registro, grupo.GrupoId, grupo.Costo);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Costo del mes arriba del umbral en el grupo {GrupoId}: {CostoMxn} MXN")]
+    private static partial void CostoAlto(ILogger registro, Guid grupoId, decimal costoMxn);
 }
 
 /// <summary>RNF-004 y reglas/05-ia: máximo de solicitudes simultáneas a la IA por docente, en todo el proceso.</summary>

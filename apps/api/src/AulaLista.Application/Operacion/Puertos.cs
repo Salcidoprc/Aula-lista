@@ -136,6 +136,8 @@ public sealed record FilaCosto(
     int MensajesWhatsapp,
     decimal CostoWhatsapp);
 
+public sealed record FilaConsumoGrupo(Guid GrupoId, long TokensEntrada, long TokensSalida, long TokensCache, decimal CostoWhatsapp);
+
 /// <summary>RF-094: los conteos del resumen en ventanas de 1, 7 y 30 días que terminan ahora.</summary>
 public sealed record FilaResumen(
     int Docentes,
@@ -179,6 +181,9 @@ public interface IRepositorioAdmin
     Task<IReadOnlyList<FilaDocente>> DocentesAsync(DateOnly mes, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<FilaCosto>> CostosAsync(DateOnly mes, int diasMaximoPrueba, CancellationToken cancellationToken);
+
+    /// <summary>SPEC-09: consumo del mes por grupo para la alerta de costo, sin pedir un administrador; solo IDs y números.</summary>
+    Task<IReadOnlyList<FilaConsumoGrupo>> ConsumoParaAlertasAsync(DateOnly mes, CancellationToken cancellationToken);
 
     Task<FilaResumen> ResumenAsync(DateTimeOffset ahora, CancellationToken cancellationToken);
 
