@@ -69,12 +69,19 @@ test.describe('SPEC-04: cierre de periodo y observaciones con IA', () => {
       .click();
     await expect(teclado(page)).toBeVisible();
     await page.locator('li.fila').first().getByRole('button').first().click();
+    // "Guardado" ya se ve antes de que la cola escriba y mande el cambio; salir entonces lo perdía a veces.
+    // Se espera a que el servidor confirme el lote antes de volver al cierre.
+    const subida = page.waitForResponse(
+      (r) =>
+        r.url().includes('/api/v1/sincronizacion') && r.request().method() === 'POST' && r.ok(),
+    );
     await teclado(page).getByRole('button', { name: '6', exact: true }).click();
+    await subida;
     await expect(
       page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
     ).toBeVisible();
 
-    // "Guardado" puede seguir visible del guardado anterior mientras la cola sube el cambio: se recarga hasta verlo.
+    // La lista del cierre se recarga hasta ver el cambio.
     const primera = page.locator('.fila').first();
     await expect(async () => {
       await page.goto(cierre);
