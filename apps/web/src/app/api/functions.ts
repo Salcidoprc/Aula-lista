@@ -233,3 +233,17 @@ export type { CrearTipoRubro$Params as CrearTipoRubro$Params } from './fn/admini
 export { crearTipoRubro as crearTipoRubro } from './fn/administracion/crear-tipo-rubro';
 export type { EditarTipoRubro$Params as EditarTipoRubro$Params } from './fn/administracion/editar-tipo-rubro';
 export { editarTipoRubro as editarTipoRubro } from './fn/administracion/editar-tipo-rubro';
+export type { CatalogoAdmin$Params as CatalogoAdmin$Params } from './fn/administracion/catalogo-admin';
+export { catalogoAdmin as catalogoAdmin } from './fn/administracion/catalogo-admin';
+export type { CrearProducto$Params as CrearProducto$Params } from './fn/administracion/crear-producto';
+export { crearProducto as crearProducto } from './fn/administracion/crear-producto';
+export type { EditarProducto$Params as EditarProducto$Params } from './fn/administracion/editar-producto';
+export { editarProducto as editarProducto } from './fn/administracion/editar-producto';
+export type { CambiarPrecioProducto$Params as CambiarPrecioProducto$Params } from './fn/administracion/cambiar-precio-producto';
+export { cambiarPrecioProducto as cambiarPrecioProducto } from './fn/administracion/cambiar-precio-producto';
+export type { PublicarProducto$Params as PublicarProducto$Params } from './fn/administracion/publicar-producto';
+export { publicarProducto as publicarProducto } from './fn/administracion/publicar-producto';
+export type { ArchivarProducto$Params as ArchivarProducto$Params } from './fn/administracion/archivar-producto';
+export { archivarProducto as archivarProducto } from './fn/administracion/archivar-producto';
+export type { SincronizarProducto$Params as SincronizarProducto$Params } from './fn/administracion/sincronizar-producto';
+export { sincronizarProducto as sincronizarProducto } from './fn/administracion/sincronizar-producto';

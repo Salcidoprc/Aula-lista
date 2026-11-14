@@ -94,7 +94,7 @@ internal sealed class ProductoConfiguracion : IEntityTypeConfiguration<Producto>
         builder.Ignore(p => p.PrecioPendiente);
         builder.Ignore(p => p.SeVende);
         builder.Ignore(p => p.PorSincronizar);
-        builder.HasMany(p => p.Precios).WithOne().HasForeignKey(v => v.ProductoId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(p => p.Precios).WithOne().HasForeignKey(v => v.ProductoId).OnDelete(DeleteBehavior.ClientCascade);
         builder.Navigation(p => p.Precios).HasField("_precios").UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(p => p.IdExterno).IsUnique().HasFilter("id_externo IS NOT NULL");
     }
@@ -119,8 +119,5 @@ internal sealed class PrecioProductoConfiguracion : IEntityTypeConfiguration<Pre
         builder.Property(p => p.IdExternoAdicional).HasMaxLength(100);
         builder.Ignore(p => p.Sincronizado);
         builder.HasIndex(p => new { p.ProductoId, p.Version }).IsUnique();
-
-        // Un solo precio vigente por producto.
-        builder.HasIndex(p => p.ProductoId).IsUnique().HasFilter("estado = 'vigente'").HasDatabaseName("ux_precio_producto_vigente");
     }
 }

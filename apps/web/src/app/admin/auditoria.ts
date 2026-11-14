@@ -199,7 +199,7 @@ export class Auditoria implements OnInit {
   protected readonly errorMas = signal<string | null>(null);
   protected readonly cargandoMas = signal(false);
   protected readonly instante = instante;
-  /** El nombre de cada tipo de rubro, para decir de cuál se trata aunque el cambio no tocara el nombre. */
+  /** El nombre de cada tipo de rubro y producto, para decir de cuál se trata aunque el cambio no tocara el nombre. */
   private readonly nombres = signal<ReadonlyMap<string, string>>(new Map());
 
   async ngOnInit(): Promise<void> {
@@ -209,11 +209,17 @@ export class Auditoria implements OnInit {
   protected async cargar(): Promise<void> {
     this.error.set(null);
     try {
-      const [pagina, tipos] = await Promise.all([
+      const [pagina, tipos, catalogo] = await Promise.all([
         this.servicio.auditoria(null),
         this.servicio.tipos(),
+        this.servicio.catalogo(),
       ]);
-      this.nombres.set(new Map(tipos.map((t) => [t.id, t.nombre])));
+      this.nombres.set(
+        new Map([
+          ...tipos.map((t) => [t.id, t.nombre] as const),
+          ...catalogo.productos.map((p) => [p.id, p.nombre] as const),
+        ]),
+      );
       this.registros.set(pagina.registros);
       this.siguiente.set(pagina.siguiente);
     } catch (e) {
@@ -254,6 +260,21 @@ export class Auditoria implements OnInit {
     const grupo = { comportamiento: 'comportamientos', formaSugerida: 'formas' }[campo];
     if (grupo && v !== null) {
       const clave = `admin.tiposRubro.${grupo}.${v}`;
+      const texto = this.i18n.translate(clave);
+      return texto === clave ? v : texto;
+    }
+    if (campo === 'funciones' && v) {
+      return v
+        .split(', ')
+        .map((f) => {
+          const clave = `admin.productos.funciones.${f}`;
+          const texto = this.i18n.translate(clave);
+          return texto === clave ? f : texto;
+        })
+        .join(', ');
+    }
+    if (campo === 'estado' && v) {
+      const clave = `admin.productos.estados.${v}`;
       const texto = this.i18n.translate(clave);
       return texto === clave ? v : texto;
     }

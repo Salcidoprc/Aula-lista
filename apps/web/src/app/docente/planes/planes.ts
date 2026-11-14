@@ -10,17 +10,28 @@ export interface FormaDePago {
   readonly meses: number | null;
 }
 
+/** Los dos precios de una versión: la que se vende hoy (PlanesDto) o la que conserva quien ya paga (SuscripcionDto). */
+export type Tarifa = Pick<PlanesDto, 'precioPrimerGrupo' | 'precioGrupoAdicional'>;
+
 /** RN-082: el primer grupo a su precio y cada adicional al suyo. Ninguno no cuesta nada. */
-export function mensual(planes: PlanesDto, grupos: number): number {
+export function mensual(tarifa: Tarifa, grupos: number): number {
   if (grupos <= 0) {
     return 0;
   }
-  return Number(planes.precioPrimerGrupo) + Number(planes.precioGrupoAdicional) * (grupos - 1);
+  return Number(tarifa.precioPrimerGrupo) + Number(tarifa.precioGrupoAdicional) * (grupos - 1);
 }
 
 /** Lo que se paga hoy: el mes con tarjeta o los meses del prepago OXXO. */
-export function totalAPagar(planes: PlanesDto, grupos: number, forma: FormaDePago): number {
-  return mensual(planes, grupos) * (forma.modalidad === 'oxxo' ? (forma.meses ?? 1) : 1);
+export function totalAPagar(tarifa: Tarifa, grupos: number, forma: FormaDePago): number {
+  return mensual(tarifa, grupos) * (forma.modalidad === 'oxxo' ? (forma.meses ?? 1) : 1);
+}
+
+/**
+ * ADR-0017: al cambiar los grupos de lo que ya se paga (tarjeta, o agregar al prepago) se cobra con el precio que el
+ * docente conserva; al contratar de nuevo, con el que se vende hoy.
+ */
+export function tarifaDe(planes: PlanesDto, s: SuscripcionDto | null, modo: ModoPlan): Tarifa {
+  return s && modo !== 'contratar' ? s : planes;
 }
 
 /** 137 → "137"; 54.33 → "54.33". Sin símbolo: la moneda va escrita al lado ("137 MXN"). */

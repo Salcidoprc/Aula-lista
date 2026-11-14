@@ -126,8 +126,8 @@ public sealed class Producto : Entidad
 
     /// <summary>Hay algo que llevar al proveedor.</summary>
     public bool PorSincronizar =>
-        Estado != EstadoProducto.Borrador && (IdExterno is null || CambiosPendientes || ArchivoPendiente || PrecioPendiente is not null
-            || _precios.Any(p => p.ArchivoPendiente));
+        (Estado == EstadoProducto.Activo && (IdExterno is null || CambiosPendientes || PrecioPendiente is not null))
+        || (ArchivoPendiente && IdExterno is not null) || _precios.Any(p => p.ArchivoPendiente);
 
     public bool Incluye(string funcion) => Funciones.Contains(funcion);
 
@@ -212,7 +212,7 @@ public sealed class Producto : Entidad
             return Resultado.Fallo(ErroresCatalogo.YaArchivado);
         }
 
-        ArchivoPendiente = IdExterno is not null || Estado == EstadoProducto.Activo;
+        ArchivoPendiente = IdExterno is not null;
         Estado = EstadoProducto.Archivado;
         foreach (var pendiente in _precios.Where(p => p.Estado == EstadoPrecio.Pendiente).ToList())
         {

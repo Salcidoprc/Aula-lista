@@ -188,8 +188,16 @@ internal static class AdminCatalogo
     public static string Foto(Producto p) => JsonSerializer.Serialize(
         new
         {
-            p.Nombre, p.Descripcion, p.Funciones, p.MesesPrepago, p.Orden, p.Estado,
-            Precio = (p.PrecioPendiente ?? p.PrecioVigente) is { } v ? new { v.Version, v.PrecioPrimera, v.PrecioAdicional } : null,
+            p.Nombre,
+            p.Descripcion,
+            p.Funciones,
+            p.MesesPrepago,
+            p.Orden,
+            p.Estado,
+            // Planos, para que la auditoría muestre cada cifra como un campo que cambió.
+            VersionPrecio = (p.PrecioPendiente ?? p.PrecioVigente)?.Version,
+            (p.PrecioPendiente ?? p.PrecioVigente)?.PrecioPrimera,
+            (p.PrecioPendiente ?? p.PrecioVigente)?.PrecioAdicional,
         },
         Json);
 
@@ -227,17 +235,18 @@ public sealed class SincronizacionCatalogo(ICatalogoPagos proveedor, CatalogoPla
                 }
             }
 
-            if (producto.IdExterno is null)
+            var activo = producto.Estado == EstadoProducto.Activo;
+            if (activo && producto.IdExterno is null)
             {
                 producto.RegistrarIdExterno(await proveedor.CrearProductoAsync(producto.Id, producto.Nombre, producto.Descripcion, ct), ahora);
             }
-            else if (producto.CambiosPendientes)
+            else if (producto.CambiosPendientes && producto.IdExterno is not null)
             {
                 await proveedor.ActualizarProductoAsync(producto.IdExterno, producto.Nombre, producto.Descripcion, ct);
                 producto.RegistrarCambiosSincronizados(ahora);
             }
 
-            if (producto.PrecioPendiente is { } pendiente)
+            if (activo && producto.PrecioPendiente is { } pendiente)
             {
                 var apodo = $"{producto.Nombre} v{pendiente.Version}";
                 var idPrimera = pendiente.IdExternoPrimera ?? await proveedor.CrearPrecioAsync(
@@ -260,7 +269,7 @@ public sealed class SincronizacionCatalogo(ICatalogoPagos proveedor, CatalogoPla
                 viejo.RegistrarArchivoSincronizado(ahora);
             }
 
-            if (producto.ArchivoPendiente)
+            if (producto.ArchivoPendiente && producto.IdExterno is not null)
             {
                 await proveedor.ArchivarProductoAsync(producto.IdExterno!, ct);
                 producto.RegistrarArchivoSincronizado(ahora);

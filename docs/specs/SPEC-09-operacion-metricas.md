@@ -21,7 +21,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | `enlace_tutor_abierto` | primera_vez | Apertura de tutores |
 | `suscripcion_activada` | grupos_pro, modalidad (tarjeta, prepago_oxxo) | Conversión |
 
-## Panel de administración (RF-091 a RF-094)
+## Panel de administración (RF-091 a RF-095)
 
 Área separada de la app del docente (`/admin`), solo para usuarios con rol `admin`. El rol se asigna por configuración o por un comando de la API, nunca desde la interfaz.
 
@@ -35,6 +35,7 @@ Se guardan en `evento_producto` sin datos personales (solo IDs internos).
 | Costos | Costo estimado del mes por grupo (tokens de IA × precio y mensajes de WhatsApp × tarifa) contra ingreso | No |
 | Errores | Errores recientes de jobs (IA, WhatsApp, correo, pagos) | No |
 | Tipos de rubro | Catálogo de tipos de rubro que ven los docentes (RF-092) | Sí |
+| Productos y precios | Lo que se cobra: productos, sus funciones, meses de OXXO y versiones de precio sincronizadas con Stripe (RF-095, ADR-0017) | Sí |
 | Auditoría | Acciones de los administradores (RF-093) | No |
 
 ### Resumen (RF-094)
@@ -73,6 +74,7 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 | RN-093 | Un comportamiento nuevo (otra forma de calcular o de capturar, con su propia pantalla) se desarrolla: primero se documenta en la spec que corresponda, luego se implementa con su cálculo, su pantalla de captura y sus vectores de prueba, y al desplegarse aparece como opción en el panel. |
 | RN-094 | Un tipo con rubros que lo usan no se borra: se desactiva. Desactivarlo lo oculta al crear rubros nuevos; los rubros existentes siguen funcionando. |
 | RN-095 | Toda acción de edición en el panel queda en la auditoría con administrador, fecha, acción y valores antes y después (RNF-005). |
+| RN-096 | Un producto se crea en borrador y no existe en Stripe hasta publicarlo. Publicado, su precio no se edita: se cambia con una versión nueva y quien ya paga conserva la suya. Un producto con suscriptores no se borra: se archiva y deja de venderse; sus suscriptores siguen con su precio. |
 
 ### API
 
@@ -81,6 +83,10 @@ Las bajas y "pagan al cierre de la semana" usan la fecha del último cambio de l
 | `GET /api/v1/tipos-rubro` | Tipos activos para los docentes (se guarda sin conexión) |
 | `GET` / `POST /api/v1/admin/tipos-rubro` | Lista todos y crea (solo `admin`) |
 | `PUT /api/v1/admin/tipos-rubro/{id}` | Edita o desactiva (solo `admin`) |
+| `GET` / `POST /api/v1/admin/productos` | Catálogo con versiones y suscriptores por versión, y crear un borrador (solo `admin`) |
+| `PUT /api/v1/admin/productos/{id}` | Edita nombre, descripción, funciones, meses y orden; en borrador, también el precio |
+| `POST /api/v1/admin/productos/{id}/precios` | Versión de precio nueva (`409 precio_sin_cambios` si es igual) |
+| `POST /api/v1/admin/productos/{id}/publicar`, `/archivar`, `/sincronizar` | Publicar un borrador con precio (`409 otro_producto_activo` si ya hay uno a la venta), archivarlo, reintentar Stripe |
 | `GET /api/v1/admin/comportamientos` | Comportamientos disponibles en el código desplegado |
 | `GET /api/v1/admin/resumen`, `/metricas`, `/docentes`, `/costos`, `/errores`, `/auditoria` | Lecturas del panel |
 
@@ -123,6 +129,9 @@ Destino: Grafana Cloud, plan gratis (ADR-0015). Todo se apaga si faltan sus vari
 - Dado un tipo usado por algún rubro, cuando el administrador intenta borrarlo, entonces solo se permite desactivarlo y los rubros existentes siguen calculándose.
 - Dado un docente sin rol `admin`, cuando llama a `/api/v1/admin/...`, entonces recibe 404.
 - Dado cualquier cambio en tipos de rubro, entonces aparece en la auditoría con valores antes y después.
+- Dado un administrador que crea un producto en borrador con precio y lo archiva, entonces no llega a Stripe y ambos cambios aparecen en la auditoría (RF-095, RN-096).
+- Dado un producto a la venta, cuando el administrador publica otro con el mismo alcance, entonces recibe `otro_producto_activo` (RF-095).
+- Dado un cambio de precio, cuando Stripe no responde, entonces la versión queda pendiente, se sigue cobrando la anterior y el panel ofrece reintentar sin duplicar precios (RF-095, ADR-0017).
 
 - Dado el panel de administración, entonces muestra las 6 métricas del piloto calculadas desde los eventos.
 - Dado un docente nuevo que arma un grupo Pro con 2 alumnos, cierra, publica sus boletas y manda un aviso, cuando el administrador abre el Resumen, entonces suben en uno los docentes, los activos de hoy, los registros, los grupos, cada paso del embudo, los que pagan y los avisos; en dos los alumnos, las boletas y las observaciones; el MRR en 79 MXN, y la respuesta no lleva nombres ni correos (RF-094, RN-090).

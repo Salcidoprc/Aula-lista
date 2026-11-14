@@ -26,6 +26,6 @@ internal sealed class RepositorioCatalogo(AulisimaDbContext db) : IRepositorioCa
 
     public async Task<IReadOnlyList<FilaPrecioSuscripcion>> PreciosSuscripcionAsync(CancellationToken cancellationToken) =>
         await db.Database.SqlQuery<FilaPrecioSuscripcion>(
-                $"SELECT docente_id AS \"DocenteId\", precio_id AS \"PrecioId\", estado AS \"Estado\" FROM admin_precios_suscripcion()")
+                $"SELECT * FROM admin_precios_suscripcion()")
             .ToListAsync(cancellationToken);
 }

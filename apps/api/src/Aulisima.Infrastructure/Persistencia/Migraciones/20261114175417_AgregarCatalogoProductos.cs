@@ -80,8 +80,7 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         name: "fk_precio_producto_productos_producto_id",
                         column: x => x.producto_id,
                         principalTable: "producto",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -99,13 +98,6 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                 table: "precio_producto",
                 columns: new[] { "producto_id", "version" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ux_precio_producto_vigente",
-                table: "precio_producto",
-                column: "producto_id",
-                unique: true,
-                filter: "estado = 'vigente'");
 
             migrationBuilder.CreateIndex(
                 name: "ix_producto_id_externo",

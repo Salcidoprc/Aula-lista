@@ -2452,11 +2452,6 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                     b.HasKey("Id")
                         .HasName("pk_precio_producto");
 
-                    b.HasIndex("ProductoId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_precio_producto_vigente")
-                        .HasFilter("estado = 'vigente'");
-
                     b.HasIndex("ProductoId", "Version")
                         .IsUnique()
                         .HasDatabaseName("ix_precio_producto_producto_id_version");
@@ -3249,7 +3244,7 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                     b.HasOne("Aulisima.Domain.Planes.Producto", null)
                         .WithMany("Precios")
                         .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired()
                         .HasConstraintName("fk_precio_producto_productos_producto_id");
                 });

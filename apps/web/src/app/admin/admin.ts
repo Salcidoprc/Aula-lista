@@ -159,6 +159,7 @@ export class Admin {
     { ruta: 'docentes', clave: 'docentes' },
     { ruta: 'errores', clave: 'errores' },
     { ruta: 'tipos-rubro', clave: 'tiposRubro' },
+    { ruta: 'productos', clave: 'productos' },
     { ruta: 'auditoria', clave: 'auditoria' },
   ] as const;
 

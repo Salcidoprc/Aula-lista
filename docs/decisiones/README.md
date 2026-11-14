@@ -22,3 +22,4 @@ Formato: contexto, decisión, alternativas consideradas, consecuencias.
 | [ADR-0014](ADR-0014-grupos-alumnos-tutores.md) | Grupos, alumnos y tutores: tutor compartido por función, unidades sin traslape, numeración de lista e importación sin guardar archivos | Aceptada | 11/10/2026 |
 | [ADR-0015](ADR-0015-observabilidad-grafana-cloud.md) | Observabilidad en Grafana Cloud: OTLP, Faro por el mismo origen y alertas como código | Aceptada | 29/10/2026 |
 | [ADR-0016](ADR-0016-nombre-aulisima.md) | El producto se llama Aulísima | Aceptada | 14/11/2026 |
+| [ADR-0017](ADR-0017-catalogo-de-productos.md) | Catálogo de productos y precios administrable, sincronizado con Stripe | Aceptada | 14/11/2026 |
