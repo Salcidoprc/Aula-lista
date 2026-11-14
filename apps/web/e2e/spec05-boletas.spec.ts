@@ -81,7 +81,9 @@ test.describe('SPEC-05: boletas y envío', () => {
     await expect(hoja.getByText('Alumnos sin tutor registrado')).toBeVisible();
     await expect(hoja.getByText('No es un documento oficial.')).toBeVisible();
     // La hoja entra con un fundido: axe mediría su contraste a media entrada.
-    await hoja.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
+    await hoja.evaluate((el) =>
+      Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)),
+    );
     await accesible(page);
     await hoja.getByRole('button', { name: 'Publicar y avisar', exact: true }).click();
     await expect(page.getByText(`${NOMBRES.length} boletas publicadas`)).toBeVisible();
