@@ -144,7 +144,7 @@ export class Exportacion implements OnInit {
       enlace.href = url;
       enlace.download = nombre
         ? decodeURIComponent(nombre)
-        : `aula-lista-mis-datos.${formato === 'excel' ? 'xlsx' : 'pdf'}`;
+        : `aulisima-mis-datos.${formato === 'excel' ? 'xlsx' : 'pdf'}`;
       enlace.click();
       // Algunos navegadores (Safari en iOS) leen el archivo después del clic.
       setTimeout(() => URL.revokeObjectURL(url), 60_000);

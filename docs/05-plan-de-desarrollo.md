@@ -17,7 +17,7 @@ El MVP se construye en 7 hitos. Cada hito termina con algo que se puede usar en 
 - [ ] Revisión de términos y aviso de privacidad por un abogado externo (PA-11).
 - [ ] Negocio y número verificados en Meta; plantillas aprobadas.
 - [ ] Cuenta de Stripe en México activa con precios configurados y OXXO aprobado para el giro de la cuenta (ADR-0009).
-- [ ] Dominio de Aula Lista con SPF, DKIM y DMARC en Brevo (ADR-0008).
+- [ ] Dominio de Aulísima con SPF, DKIM y DMARC en Brevo (ADR-0008).
 - [ ] Prueba de restauración de respaldo registrada.
 - [ ] 10 entrevistas a docentes registradas en el Sheet (PA-02).
 

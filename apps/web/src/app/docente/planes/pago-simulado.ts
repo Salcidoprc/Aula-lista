@@ -20,7 +20,7 @@ import { cifra, referenciaEnBloques } from './planes';
 import { PlanesService } from './planes.service';
 
 /**
- * "Pago de prueba" (SPEC-08, solo sin Stripe): una página de Aula Lista, no una imitación del proveedor. Confirma o
+ * "Pago de prueba" (SPEC-08, solo sin Stripe): una página de Aulísima, no una imitación del proveedor. Confirma o
  * rechaza la sesión con los mismos eventos que mandaría Stripe; con OXXO muestra la ficha y deja simular el pago en
  * tienda o que venza.
  */

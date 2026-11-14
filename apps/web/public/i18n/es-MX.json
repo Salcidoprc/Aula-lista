@@ -1,6 +1,6 @@
 {
   "app": {
-    "nombre": "Aula Lista",
+    "nombre": "Aulísima",
     "saltar": "Ir al contenido",
     "navegacion": "Principal",
     "inicio": "Inicio",
@@ -124,7 +124,7 @@
       "titulo": "Te damos la bienvenida",
       "entrada": "Cuéntanos de ti y de tu escuela. Lo usamos en tus boletas y avisos.",
       "tituloLegal": "Actualizamos nuestros documentos",
-      "entradaLegal": "Para seguir usando Aula Lista, revisa y acepta la nueva versión.",
+      "entradaLegal": "Para seguir usando Aulísima, revisa y acepta la nueva versión.",
       "acepto": "Acepto",
       "version": "versión {{version}}",
       "aceptar": "Aceptar y continuar",
@@ -185,11 +185,11 @@
       "cerrar": "Cerrar sesión",
       "cerrarTodas": "Cerrar sesión en todos los dispositivos",
       "confirmarTitulo": "¿Cerrar sesión en todos lados?",
-      "confirmarTexto": "Vas a tener que volver a entrar en este y en cualquier otro celular o computadora donde uses Aula Lista."
+      "confirmarTexto": "Vas a tener que volver a entrar en este y en cualquier otro celular o computadora donde uses Aulísima."
     },
     "datos": {
       "titulo": "Tus datos",
-      "nota": "Descarga todo lo que guardas en Aula Lista en Excel y PDF. También te enviamos el enlace por correo.",
+      "nota": "Descarga todo lo que guardas en Aulísima en Excel y PDF. También te enviamos el enlace por correo.",
       "exportar": "Exportar mis datos"
     },
     "eliminar": {
@@ -233,7 +233,7 @@
     "enRevision": "El texto completo está en revisión legal y se publica antes de abrir el piloto.",
     "terminos": {
       "titulo": "Términos de uso",
-      "resumen": "Las reglas para usar Aula Lista como docente."
+      "resumen": "Las reglas para usar Aulísima como docente."
     },
     "privacidad": {
       "titulo": "Aviso de privacidad",
@@ -372,7 +372,7 @@
     "pago_simulado_terminado": "Este pago de prueba ya terminó.",
     "tipo_rubro_datos_invalidos": "El tipo lleva nombre de hasta 40 caracteres, descripción de hasta 200, un icono, de 1 a 5 nombres sugeridos y un orden de 1 a 999.",
     "tipo_rubro_repetido": "Ya hay un tipo de rubro con ese nombre. Elige otro.",
-    "comportamiento_inexistente": "Ese comportamiento no existe en esta versión de Aula Lista.",
+    "comportamiento_inexistente": "Ese comportamiento no existe en esta versión de Aulísima.",
     "comportamiento_en_uso": "Este tipo ya lo usan rubros, así que su comportamiento no se puede cambiar."
   },
   "entidades": {
@@ -1567,12 +1567,12 @@
         "activar": "Activar notificaciones",
         "activadas": "Activadas en este celular",
         "desactivar": "Desactivar",
-        "denegado": "Este navegador tiene bloqueadas las notificaciones de Aula Lista.",
+        "denegado": "Este navegador tiene bloqueadas las notificaciones de Aulísima.",
         "denegadoComo": "Para permitirlas, toca el candado o el ícono junto a la dirección, entra a Permisos y activa Notificaciones.",
-        "iphone": "En iPhone las notificaciones llegan solo si agregas Aula Lista a tu pantalla de inicio:",
+        "iphone": "En iPhone las notificaciones llegan solo si agregas Aulísima a tu pantalla de inicio:",
         "iphonePaso1": "Toca el botón Compartir de Safari (el cuadro con la flecha).",
         "iphonePaso2": "Elige \"Agregar a pantalla de inicio\".",
-        "iphonePaso3": "Abre Aula Lista desde el ícono nuevo y vuelve a esta pantalla.",
+        "iphonePaso3": "Abre Aulísima desde el ícono nuevo y vuelve a esta pantalla.",
         "sinSoporte": "Este navegador no recibe notificaciones. Registra tu correo para que no se te pase nada.",
         "error": "No se pudieron activar. Inténtalo de nuevo."
       },
@@ -1680,7 +1680,7 @@
     "borrar": {
       "accion": "Borrar aviso",
       "titulo": "¿Borrar este aviso?",
-      "texto": "Los tutores dejan de verlo en Aula Lista. Lo que ya les llegó por correo o WhatsApp no se puede quitar.",
+      "texto": "Los tutores dejan de verlo en Aulísima. Lo que ya les llegó por correo o WhatsApp no se puede quitar.",
       "confirmar": "Borrar",
       "hecho": "Aviso borrado"
     },
@@ -1702,8 +1702,8 @@
       "tarjeta": "Pago con tarjeta",
       "ficha": "Ficha OXXO",
       "concepto": {
-        "suscripcion": "Aula Lista Pro, cada mes",
-        "prepago": "Aula Lista Pro por {{meses}} meses",
+        "suscripcion": "Aulísima Pro, cada mes",
+        "prepago": "Aulísima Pro por {{meses}} meses",
         "agregar": "Grupos agregados a tu prepago"
       },
       "referencia": "Referencia",
@@ -1793,7 +1793,7 @@
       }
     },
     "nota": {
-      "tarjeta": "Pagas en la página segura de Stripe; Aula Lista nunca ve tu tarjeta. Cancelas cuando quieras.",
+      "tarjeta": "Pagas en la página segura de Stripe; Aulísima nunca ve tu tarjeta. Cancelas cuando quieras.",
       "prorrateo": "Lo que agregues se cobra hoy solo por los días que faltan del mes.",
       "alCorte": "Lo que quites sigue en Pro hasta el {{fecha}} y ya no se cobra después.",
       "cancelar": "Para dejar de pagar Pro, cancela en Tarjeta y facturas.",

@@ -1,6 +1,6 @@
 # Reglas de diseño visual y movimiento
 
-Aula Lista se diseña con **Impeccable como base** y se mejora con **todos los skills de animación y diseño disponibles**, combinados según el momento (ADR-0010, RNF-025, RNF-026). Impeccable decide el diseño visual; los demás skills afinan el movimiento, el pulido, la accesibilidad y la sensación nativa.
+Aulísima se diseña con **Impeccable como base** y se mejora con **todos los skills de animación y diseño disponibles**, combinados según el momento (ADR-0010, RNF-025, RNF-026). Impeccable decide el diseño visual; los demás skills afinan el movimiento, el pulido, la accesibilidad y la sensación nativa.
 
 El movimiento es de transiciones y desplazamientos en 2D. No hay 3D, ni partículas, ni efectos decorativos que el docente vea decenas de veces al día.
 

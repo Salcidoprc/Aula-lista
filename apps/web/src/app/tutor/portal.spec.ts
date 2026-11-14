@@ -79,9 +79,9 @@ describe('portal del tutor', () => {
 
 describe('urlWhatsApp (RN-063)', () => {
   it('quita el + del número y codifica el mensaje con el enlace', () => {
-    const url = urlWhatsApp('+526671234567', 'Hola: https://aulalista.mx/tutor#abc');
+    const url = urlWhatsApp('+526671234567', 'Hola: https://aulisima.com/tutor#abc');
     expect(url).toBe(
-      'https://wa.me/526671234567?text=Hola%3A%20https%3A%2F%2Faulalista.mx%2Ftutor%23abc',
+      'https://wa.me/526671234567?text=Hola%3A%20https%3A%2F%2Faulisima.com%2Ftutor%23abc',
     );
   });
 });

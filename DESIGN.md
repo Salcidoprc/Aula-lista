@@ -1,5 +1,5 @@
 ---
-name: Aula Lista
+name: Aulísima
 description: Herramienta escolar de captura, cierre y boletas con el lenguaje de los libros de texto gratuitos, un color por grado.
 colors:
   fondo: "oklch(0.985 0.004 95)"
@@ -151,7 +151,7 @@ components:
     height: "44px"
 ---
 
-# Aula Lista: sistema de diseño
+# Aulísima: sistema de diseño
 
 Los valores normativos viven en `apps/web/src/styles/tokens.css`; este archivo explica cómo usarlos. Las reglas de movimiento y el catálogo de transiciones están en `docs/reglas/07-diseno-y-movimiento.md` y ganan si algo aquí las contradice. El estilo lo eligió el dueño del producto el 11/10/2026 (ADR-0010).
 

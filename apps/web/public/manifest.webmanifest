@@ -1,6 +1,6 @@
 {
-  "name": "Aula Lista",
-  "short_name": "Aula Lista",
+  "name": "Aulísima",
+  "short_name": "Aulísima",
   "display": "standalone",
   "scope": "./",
   "start_url": "/",

@@ -62,21 +62,21 @@ describe('TemaService (RF-009)', () => {
     servicio.elegir('oscuro');
     TestBed.tick();
     expect(html.getAttribute('data-tema')).toBe('oscuro');
-    expect(localStorage.getItem('aula-lista.tema')).toBe('oscuro');
+    expect(localStorage.getItem('aulisima.tema')).toBe('oscuro');
   });
 
   it('al abrir de nuevo la app recupera la elección; "Automática" la borra', () => {
-    localStorage.setItem('aula-lista.tema', 'oscuro');
+    localStorage.setItem('aulisima.tema', 'oscuro');
     const { servicio } = crear(false);
     expect(servicio.preferencia()).toBe('oscuro');
     expect(servicio.tema()).toBe('oscuro');
     servicio.elegir('sistema');
-    expect(localStorage.getItem('aula-lista.tema')).toBeNull();
+    expect(localStorage.getItem('aulisima.tema')).toBeNull();
     expect(servicio.tema()).toBe('claro');
   });
 
   it('un valor guardado que no se reconoce vuelve a "Automática"', () => {
-    localStorage.setItem('aula-lista.tema', 'morado');
+    localStorage.setItem('aulisima.tema', 'morado');
     expect(crear(false).servicio.preferencia()).toBe('sistema');
   });
 });

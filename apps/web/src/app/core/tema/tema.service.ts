@@ -5,7 +5,7 @@ export type PreferenciaTema = 'sistema' | 'claro' | 'oscuro';
 export type Tema = 'claro' | 'oscuro';
 
 export const PREFERENCIAS_TEMA: readonly PreferenciaTema[] = ['sistema', 'claro', 'oscuro'];
-const CLAVE = 'aula-lista.tema';
+const CLAVE = 'aulisima.tema';
 
 /**
  * RF-009: tema claro u oscuro. Por defecto sigue al sistema; la elección se guarda en este

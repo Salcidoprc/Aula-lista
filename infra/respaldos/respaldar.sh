@@ -5,7 +5,7 @@
 # Variables:
 #   PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD  conexión con el rol app_respaldos (postgres/respaldos.sql)
 #   AGE_RECIPIENT                                   llave pública de age; la privada nunca está en el servidor
-#   RESPALDO_DESTINO                                remoto de rclone, por ejemplo "objetos:aula-lista-respaldos"
+#   RESPALDO_DESTINO                                remoto de rclone, por ejemplo "objetos:aulisima-respaldos"
 #   RCLONE_CONFIG_*                                 configuración del remoto, solo en variables de entorno
 #   RESPALDO_DIAS                                   días que se conservan (30 si no se indica)
 #   OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_HEADERS
@@ -13,7 +13,7 @@
 #                                                   respaldo_fallido a Grafana Cloud para su alerta (ADR-0015)
 set -euo pipefail
 
-# Un log OTLP en JSON del servicio aula-lista-respaldos. Si no se puede mandar, el respaldo no falla por eso.
+# Un log OTLP en JSON del servicio aulisima-respaldos. Si no se puede mandar, el respaldo no falla por eso.
 avisar() {
     [[ -n "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ]] || return 0
     local evento="$1" severidad="$2" numero="$3" encabezados=() par
@@ -23,7 +23,7 @@ avisar() {
     done
     encabezados=("${encabezados[@]//%20/ }")
     curl --silent --show-error --fail --max-time 20 "${encabezados[@]}" --header 'Content-Type: application/json' \
-        --data "{\"resourceLogs\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"aula-lista-respaldos\"}}]},\"scopeLogs\":[{\"logRecords\":[{\"timeUnixNano\":\"$(date +%s%N)\",\"severityText\":\"$severidad\",\"severityNumber\":$numero,\"body\":{\"stringValue\":\"$evento\"},\"attributes\":[{\"key\":\"base\",\"value\":{\"stringValue\":\"${PGDATABASE:-}\"}}]}]}]}]}" \
+        --data "{\"resourceLogs\":[{\"resource\":{\"attributes\":[{\"key\":\"service.name\",\"value\":{\"stringValue\":\"aulisima-respaldos\"}}]},\"scopeLogs\":[{\"logRecords\":[{\"timeUnixNano\":\"$(date +%s%N)\",\"severityText\":\"$severidad\",\"severityNumber\":$numero,\"body\":{\"stringValue\":\"$evento\"},\"attributes\":[{\"key\":\"base\",\"value\":{\"stringValue\":\"${PGDATABASE:-}\"}}]}]}]}]}" \
         "${OTEL_EXPORTER_OTLP_ENDPOINT%/}/v1/logs" > /dev/null || echo "No se pudo avisar $evento a OTLP" >&2
 }
 

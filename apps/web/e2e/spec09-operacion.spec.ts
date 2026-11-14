@@ -11,7 +11,7 @@ import { docenteVerificado } from './grupos';
 function hacerAdmin(correo: string): void {
   const comando =
     process.env['E2E_HACER_ADMIN'] ??
-    'docker compose -f ../../infra/docker-compose.yml exec -T api dotnet AulaLista.Api.dll --admin {correo}';
+    'docker compose -f ../../infra/docker-compose.yml exec -T api dotnet Aulisima.Api.dll --admin {correo}';
   execSync(comando.replace('{correo}', correo), { stdio: 'pipe' });
 }
 

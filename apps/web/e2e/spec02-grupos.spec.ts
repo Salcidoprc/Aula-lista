@@ -16,7 +16,7 @@ test.describe('SPEC-02: grupos, alumnos y tutores', () => {
     await sinFallasDeAccesibilidad(page);
 
     await page.getByRole('link', { name: 'Definir mi ciclo' }).click();
-    await expect(page).toHaveTitle('Tu ciclo escolar · Aula Lista');
+    await expect(page).toHaveTitle('Tu ciclo escolar · Aulísima');
     await page.getByLabel('Empieza el').fill('2026-08-25');
     await page.getByLabel('Termina el').fill('2027-07-16');
     await expect(page.getByLabel('Divido el ciclo en')).toHaveValue('trimestre');

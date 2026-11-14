@@ -49,7 +49,7 @@ import {
 const CONSULTA_MS = 2000;
 
 /** El detalle de la primera publicación sale una sola vez por docente en este dispositivo (catálogo de reglas/07). */
-const CLAVE_PRIMERA = 'aula-lista.boletas.primera-publicacion';
+const CLAVE_PRIMERA = 'aulisima.boletas.primera-publicacion';
 
 type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grupo' | 'excel';
 

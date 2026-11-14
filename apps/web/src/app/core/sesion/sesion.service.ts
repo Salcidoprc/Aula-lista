@@ -11,7 +11,7 @@ import { ColaSincronizacion } from '../sincronizacion/cola-sincronizacion';
 /** Marca las llamadas que no deben reintentarse con una sesión renovada (las de la propia sesión). */
 export const SIN_RENOVAR = new HttpContextToken<boolean>(() => false);
 
-const CANDADO_RENOVAR = 'aula-lista-renovar-sesion';
+const CANDADO_RENOVAR = 'aulisima-renovar-sesion';
 
 /**
  * Sesión del docente (SPEC-01). El token de acceso vive solo en memoria; el de actualización es una

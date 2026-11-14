@@ -85,7 +85,7 @@ class BaseLocal extends Dexie {
   asistencias!: Table<AsistenciaEnCola, string>;
 
   constructor() {
-    super('aula-lista');
+    super('aulisima');
     this.version(1).stores({
       matrices: 'periodoId',
       cola: 'id, creado, periodoId',

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aulisima.Application\Aulisima.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.58.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.25" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
+    <PackageReference Include="Lib.Net.Http.WebPush" Version="3.3.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.12" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageReference Include="QuestPDF" Version="2026.9.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Aulisima.Pruebas.Integracion" />
+    <InternalsVisibleTo Include="Aulisima.Pruebas.Unit" />
+    <InternalsVisibleTo Include="Aulisima.EvaluacionIa" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Cuentas\contrasenas-comunes.txt" LogicalName="Aulisima.Infrastructure.Cuentas.contrasenas-comunes.txt" />
+    <EmbeddedResource Include="Ia\Prompts\*.md" LogicalName="Aulisima.Infrastructure.Ia.Prompts.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Boletas\Fuentes\*.ttf" LogicalName="Aulisima.Infrastructure.Boletas.Fuentes.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

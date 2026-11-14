@@ -57,7 +57,7 @@ Que el docente cierre un grupo de 30 alumnos en menos de 1 hora: la IA escribe, 
 
 **Salida:** solo el texto de la observación, en español de México, sin encabezados ni nombre del alumno. El backend reemplaza el seudónimo si el modelo lo incluye y valida longitud.
 
-**Prompt:** el prompt de sistema vive versionado en `apps/api/src/AulaLista.Infrastructure/Ia/Prompts/` y se cachea (prompt caching). Cambiarlo requiere correr la evaluación de calidad (ver `reglas/05-ia.md`).
+**Prompt:** el prompt de sistema vive versionado en `apps/api/src/Aulisima.Infrastructure/Ia/Prompts/` y se cachea (prompt caching). Cambiarlo requiere correr la evaluación de calidad (ver `reglas/05-ia.md`).
 
 **Errores:** si la respuesta se rechaza (`stop_reason` = `refusal`), excede longitud o falla, el alumno queda en `sin_generar` con mensaje "No se pudo generar, intenta de nuevo o escribe la observación". Los reintentos automáticos son 3 con espera exponencial.
 

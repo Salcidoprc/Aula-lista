@@ -32,7 +32,7 @@ export async function iniciarFaro(): Promise<void> {
     await import('@grafana/faro-web-sdk');
   const faro = initializeFaro({
     url: '/faro',
-    app: { name: 'aula-lista-web', environment: configuracion.entorno ?? 'produccion' },
+    app: { name: 'aulisima-web', environment: configuracion.entorno ?? 'produccion' },
     // Los errores llegan por el ErrorHandler de Angular, que también recibe los globales: así no se cuentan dos veces.
     instrumentations: [
       new SessionInstrumentation(),

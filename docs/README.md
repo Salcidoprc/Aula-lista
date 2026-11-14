@@ -1,4 +1,4 @@
-# Documentación de Aula Lista
+# Documentación de Aulísima
 
 Esta carpeta es la **fuente de verdad** del producto: qué se construye, cómo debe comportarse y con qué reglas. El código sigue a estos documentos, no al revés.
 

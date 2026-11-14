@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' | 's3';
 
 /**
- * Portada: la cabecera de Aula Lista, como la portada de un libro de texto. Se pinta con el color
+ * Portada: la cabecera de Aulísima, como la portada de un libro de texto. Se pinta con el color
  * del grado activo y muestra el número del grado muy grande y recortado. Sin grado, usa el color
  * de la marca y no lleva número. Ver DESIGN.md, componente "Portada".
  */
