@@ -1,5 +1,7 @@
 # Staging en Coolify (servidor de prueba de Oracle)
 
+> Por ahora staging corre con Docker Compose en el VPS de Oracle, sin Coolify: ver `docs/operacion/staging-oracle.md`. Este plan queda para cuando el servidor crezca.
+
 Pendiente de configurar con acceso al servidor. Pasos:
 
 1. En Coolify, crear el proyecto "Aula Lista" con el entorno `staging` en un subdominio aparte.

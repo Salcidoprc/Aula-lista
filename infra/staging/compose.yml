@@ -1,0 +1,97 @@
+# Staging en el VPS de Oracle (ARM), junto a otras apps que ya usan Caddy en 80/443.
+# Pasos completos en docs/operacion/staging-oracle.md.
+# Uso, desde esta carpeta: docker compose --env-file .env up -d
+name: aulisima
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aulisima
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${CLAVE_POSTGRES:?Define CLAVE_POSTGRES en .env}
+      CLAVE_APP_MIGRACIONES: ${CLAVE_APP_MIGRACIONES:?Define CLAVE_APP_MIGRACIONES en .env}
+      CLAVE_APP_RUNTIME: ${CLAVE_APP_RUNTIME:?Define CLAVE_APP_RUNTIME en .env}
+    volumes:
+      - datos:/var/lib/postgresql
+      - ../postgres/01-roles.sh:/docker-entrypoint-initdb.d/01-roles.sh:ro
+      - ../postgres/roles.sql:/docker-entrypoint-initdb.d/roles.sql.inc:ro
+    # Sin puertos publicados: solo la API la ve, por la red interna.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aulisima"]
+      interval: 5s
+      retries: 10
+
+  migraciones:
+    image: ghcr.io/salcidoprc/aula-lista-api:${VERSION:-main}
+    command: ["--migrar"]
+    environment:
+      ConnectionStrings__Migraciones: Host=db;Database=aulisima;Username=app_migraciones;Password=${CLAVE_APP_MIGRACIONES};GSS Encryption Mode=Disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/salcidoprc/aula-lista-api:${VERSION:-main}
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Aulisima: Host=db;Database=aulisima;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
+      Jwt__ClaveFirma: ${JWT_CLAVE_FIRMA:?Define JWT_CLAVE_FIRMA en .env}
+      Cuentas__UrlWeb: ${URL_WEB:?Define URL_WEB en .env}
+      Ia__Proveedor: ${IA_PROVEEDOR:-simulado}
+      Ia__Modelo: ${IA_MODELO:-claude-haiku-5-5}
+      Ia__ApiKey: ${IA_API_KEY:-}
+      Push__Proveedor: ${PUSH_PROVEEDOR:-simulado}
+      Push__ClavePublica: ${PUSH_CLAVE_PUBLICA:-}
+      Push__ClavePrivada: ${PUSH_CLAVE_PRIVADA:-}
+      Whatsapp__Proveedor: ${WHATSAPP_PROVEEDOR:-simulado}
+      Whatsapp__Token: ${WHATSAPP_TOKEN:-}
+      Whatsapp__IdNumero: ${WHATSAPP_ID_NUMERO:-}
+      Whatsapp__SecretoApp: ${WHATSAPP_SECRETO_APP:-}
+      Whatsapp__TokenVerificacion: ${WHATSAPP_TOKEN_VERIFICACION:-}
+      Pagos__Proveedor: ${PAGOS_PROVEEDOR:-simulado}
+      Pagos__ClaveSecreta: ${STRIPE_CLAVE_SECRETA:-}
+      Pagos__SecretoWebhook: ${STRIPE_SECRETO_WEBHOOK:-}
+      Pagos__PrecioPrimerGrupoId: ${STRIPE_PRECIO_PRIMER_GRUPO:-}
+      Pagos__PrecioGrupoAdicionalId: ${STRIPE_PRECIO_GRUPO_ADICIONAL:-}
+      Planes__OxxoHabilitado: ${OXXO_HABILITADO:-true}
+      Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
+      Correo__BrevoApiKey: ${BREVO_API_KEY:-}
+      Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulisima.com}
+      Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+      Almacen__Ruta: /var/lib/aulisima/archivos
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=staging
+    volumes:
+      - archivos:/var/lib/aulisima/archivos
+    depends_on:
+      migraciones:
+        condition: service_completed_successfully
+
+  # El nombre "aulisima-web" evita chocar con servicios de otras apps en la red de Caddy.
+  aulisima-web:
+    image: ghcr.io/salcidoprc/aula-lista-web:${VERSION:-main}
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8080
+      FARO_URL: ${FARO_URL:-}
+      FARO_ENTORNO: staging
+    depends_on:
+      - api
+    networks:
+      - default
+      - caddy
+
+volumes:
+  datos:
+  archivos:
+
+networks:
+  # Red del Caddy que ya atiende 80/443 en el servidor (docker network ls).
+  caddy:
+    external: true
+    name: ${RED_CADDY:-deploy_default}
