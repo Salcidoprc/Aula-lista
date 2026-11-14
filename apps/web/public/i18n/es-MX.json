@@ -373,7 +373,17 @@
     "tipo_rubro_datos_invalidos": "El tipo lleva nombre de hasta 40 caracteres, descripción de hasta 200, un icono, de 1 a 5 nombres sugeridos y un orden de 1 a 999.",
     "tipo_rubro_repetido": "Ya hay un tipo de rubro con ese nombre. Elige otro.",
     "comportamiento_inexistente": "Ese comportamiento no existe en esta versión de Aulísima.",
-    "comportamiento_en_uso": "Este tipo ya lo usan rubros, así que su comportamiento no se puede cambiar."
+    "comportamiento_en_uso": "Este tipo ya lo usan rubros, así que su comportamiento no se puede cambiar.",
+    "producto_datos_invalidos": "Revisa los datos del producto.",
+    "precio_invalido": "El precio no es válido: el primer grupo va de 1 a 10,000 y el adicional de 0 a 10,000.",
+    "producto_sin_precio": "Ponle precio antes de publicarlo.",
+    "producto_no_es_borrador": "Ese producto ya se publicó.",
+    "producto_archivado": "Ese producto está archivado.",
+    "producto_repetido": "Ya hay un producto con ese nombre.",
+    "otro_producto_activo": "Ya hay otro producto a la venta. Archívalo antes de publicar este.",
+    "precio_sin_cambios": "Ese ya es su precio.",
+    "sin_plan_a_la_venta": "Por ahora no se puede contratar Pro. Intenta más tarde.",
+    "sincronizacion_fallida": "Stripe no respondió. Lo guardado no se perdió; reintenta en un momento."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -455,6 +465,7 @@
     "adminDocentes": "Docentes",
     "adminErrores": "Errores de procesos",
     "adminTiposRubro": "Tipos de rubro",
+    "adminProductos": "Productos y precios",
     "adminAuditoria": "Auditoría"
   },
   "ciclo": {
@@ -1769,8 +1780,10 @@
     "forma": {
       "titulo": "Cómo pagas",
       "tarjeta": "Tarjeta, cada mes",
-      "oxxo3": "OXXO, 3 meses",
-      "oxxo6": "OXXO, 6 meses",
+      "oxxo": {
+        "uno": "OXXO, {{n}} mes",
+        "otros": "OXXO, {{n}} meses"
+      },
       "detalleTarjeta": "{{monto}} {{moneda}} al mes, se cobra solo",
       "detalleOxxo": "{{monto}} {{moneda}} en un solo pago",
       "notaOxxo": "Pagas en cualquier OXXO con la referencia de tu ficha. Tus grupos pasan a Pro cuando se confirma el pago.",
@@ -1798,7 +1811,8 @@
       "alCorte": "Lo que quites sigue en Pro hasta el {{fecha}} y ya no se cobra después.",
       "cancelar": "Para dejar de pagar Pro, cancela en Tarjeta y facturas.",
       "agregar": "Pagas solo los días que faltan hasta el {{fecha}}; el monto exacto aparece antes de pagar.",
-      "quitarPrepago": "Lo que quites sigue en Pro hasta el {{fecha}}; OXXO no tiene reembolsos."
+      "quitarPrepago": "Lo que quites sigue en Pro hasta el {{fecha}}; OXXO no tiene reembolsos.",
+      "sinVenta": "Por ahora no se puede contratar Pro. Intenta más tarde."
     },
     "guardado": "Guardamos tus grupos Pro.",
     "incluye": {
@@ -1816,7 +1830,8 @@
         "boletas": "Boletas en PDF en el portal de tutores",
         "whatsapp": "WhatsApp del sistema: boletas y hasta {{urgentes}} urgentes por tutor al mes"
       },
-      "precio": "Pro: {{primero}} {{moneda}} al mes el primer grupo y {{adicional}} {{moneda}} cada grupo adicional, IVA incluido."
+      "precio": "{{producto}}: {{primero}} {{moneda}} al mes el primer grupo y {{adicional}} {{moneda}} cada grupo adicional, IVA incluido.",
+      "conservas": "Tú conservas el precio con el que contrataste: {{primero}} {{moneda}} el primer grupo y {{adicional}} {{moneda}} cada adicional."
     },
     "pagos": {
       "titulo": "Historial de pagos",
@@ -2233,6 +2248,122 @@
       "creado": "Listo: los docentes ya ven {{nombre}}.",
       "guardado": "Se guardó {{nombre}}."
     },
+    "productos": {
+      "titulo": "Productos y precios",
+      "cargando": "Cargando productos",
+      "reintentar": "Reintentar",
+      "resumen": "Lo que pagan los docentes. El precio vive en Stripe: al cambiarlo se crea una versión nueva y quien ya paga conserva la suya.",
+      "simulado": "Pagos en modo simulado: los cambios no llegan a Stripe.",
+      "sinVenta": "Ningún producto está a la venta: los docentes no pueden contratar Pro hasta que publiques uno.",
+      "vacio": "Todavía no hay productos.",
+      "nuevo": "Nuevo producto",
+      "editar": "Editar",
+      "editarProducto": "Editar {{nombre}}",
+      "cambiarPrecio": "Cambiar precio",
+      "cambiarPrecioDe": "Cambiar el precio de {{nombre}}",
+      "publicar": "Publicar",
+      "archivar": "Archivar",
+      "archivarProducto": "Archivar {{nombre}}",
+      "sincronizar": "Reintentar con Stripe",
+      "enviar": "Enviar a Stripe",
+      "estados": {
+        "activo": "A la venta",
+        "sinSincronizar": "Publicado, falta Stripe",
+        "borrador": "Borrador",
+        "archivado": "Archivado"
+      },
+      "sincronizacion": {
+        "pendiente": "Cambios por enviar a Stripe",
+        "fallo": "Stripe no respondió",
+        "detalle": "No se pudo enviar a Stripe: {{error}}. Lo guardado aquí no se perdió; reintenta cuando quieras."
+      },
+      "precio": {
+        "primera": "{{moneda}} el primer grupo",
+        "adicional": "cada grupo adicional",
+        "sinPrecio": "Sin precio todavía.",
+        "pendiente": "Este precio aún no llega a Stripe; se cobra el anterior hasta que llegue."
+      },
+      "incluye": "Incluye",
+      "oxxo": "OXXO por adelantado",
+      "sinOxxo": "No se ofrece",
+      "suscriptores": "Suscriptores",
+      "orden": "Orden",
+      "mes": {
+        "uno": "{{n}} mes",
+        "otros": "{{n}} meses"
+      },
+      "funciones": {
+        "cierre_ia": "Cierre con observaciones por IA",
+        "boletas": "Boletas",
+        "whatsapp_boletas": "Boletas por WhatsApp",
+        "avisos_urgentes": "Avisos urgentes a tutores"
+      },
+      "versiones": {
+        "titulo": {
+          "uno": "{{n}} versión de precio",
+          "otros": "{{n}} versiones de precio"
+        },
+        "version": "Versión",
+        "precio": "Precio",
+        "estado": "Estado",
+        "monto": "{{primera}} + {{adicional}}",
+        "estados": {
+          "vigente": "Se cobra",
+          "pendiente": "Por enviar",
+          "archivado": "Archivada"
+        }
+      },
+      "confirmarArchivo": {
+        "borrador": "El borrador se archiva y no se podrá publicar.",
+        "uno": "Deja de venderse. El suscriptor que ya paga sigue con su precio hasta que cancele.",
+        "otros": "Deja de venderse. Los {{n}} suscriptores que ya pagan siguen con su precio hasta que cancelen.",
+        "si": "Sí, archivar"
+      },
+      "campos": {
+        "nombre": "Nombre",
+        "descripcion": "Descripción",
+        "funciones": "Qué incluye",
+        "meses": "Meses que se pueden pagar en OXXO",
+        "orden": "Orden",
+        "primera": "Primer grupo ({{moneda}} al mes)",
+        "adicional": "Cada grupo adicional ({{moneda}} al mes)"
+      },
+      "ayudas": {
+        "nombre": "Lo ve el docente en su plan y en Stripe.",
+        "descripcion": "Una o dos frases para el docente, hasta {{maximo}} caracteres.",
+        "funciones": "Elige al menos una. Quitar una la bloquea para quien tenga este producto.",
+        "meses": "Sin ninguno, solo se paga con tarjeta.",
+        "orden": "De 1 a 999; los menores salen primero.",
+        "primera": "De 1 a 10,000, con hasta 2 decimales. IVA incluido.",
+        "adicional": "De 0 a 10,000, con hasta 2 decimales. IVA incluido.",
+        "precioAparte": "El precio se cambia aparte, con Cambiar precio, para que quede su versión."
+      },
+      "explicacionPrecio": {
+        "uno": "Los docentes nuevos pagarán el precio nuevo. El suscriptor que ya paga conserva el suyo.",
+        "otros": "Los docentes nuevos pagarán el precio nuevo. Los {{n}} suscriptores que ya pagan conservan el suyo."
+      },
+      "precioActual": "Hoy: {{primera}} + {{adicional}} {{moneda}} al mes.",
+      "crear": "Crear borrador",
+      "guardar": "Guardar cambios",
+      "guardarPrecio": "Guardar precio nuevo",
+      "cancelar": "Cancelar",
+      "avisos": {
+        "creado": "Se creó el borrador {{nombre}}.",
+        "guardado": "Se guardó {{nombre}}.",
+        "precioCambiado": "Listo: {{nombre}} tiene precio nuevo.",
+        "publicado": "Listo: {{nombre}} ya está a la venta.",
+        "archivado": "Se archivó {{nombre}}.",
+        "sincronizado": "{{nombre}} quedó al día en Stripe.",
+        "pendienteSincronizar": "Se guardó {{nombre}}, pero Stripe no respondió. Reintenta desde su tarjeta."
+      },
+      "validacion": {
+        "nombre": "Escribe un nombre de hasta {{maximo}} caracteres."
+      },
+      "archivados": {
+        "uno": "{{n}} producto archivado",
+        "otros": "{{n}} productos archivados"
+      }
+    },
     "auditoria": {
       "titulo": "Auditoría",
       "cargando": "Cargando auditoría",
@@ -2244,7 +2375,12 @@
         "tipo_rubro_creado": "Creó el tipo",
         "tipo_rubro_editado": "Editó el tipo",
         "tipo_rubro_desactivado": "Desactivó el tipo",
-        "tipo_rubro_activado": "Volvió a ofrecer el tipo"
+        "tipo_rubro_activado": "Volvió a ofrecer el tipo",
+        "producto_creado": "Creó el producto",
+        "producto_editado": "Editó el producto",
+        "precio_cambiado": "Cambió el precio de",
+        "producto_publicado": "Publicó el producto",
+        "producto_archivado": "Archivó el producto"
       },
       "cambios": "Campos que cambiaron",
       "campo": "Campo",
@@ -2258,7 +2394,13 @@
         "formaSugerida": "Forma sugerida",
         "nombresSugeridos": "Nombres sugeridos",
         "orden": "Orden",
-        "activo": "Se ofrece"
+        "activo": "Se ofrece",
+        "funciones": "Qué incluye",
+        "mesesPrepago": "Meses en OXXO",
+        "estado": "Estado",
+        "versionPrecio": "Versión de precio",
+        "precioPrimera": "Primer grupo",
+        "precioAdicional": "Grupo adicional"
       },
       "si": "Sí",
       "no": "No",

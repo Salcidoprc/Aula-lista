@@ -33,6 +33,7 @@ import {
   mensual,
   modoPlan,
   prepagoVigente,
+  tarifaDe,
   totalAPagar,
 } from './planes';
 import { PlanesService } from './planes.service';
@@ -177,7 +178,7 @@ const RELECTURA_MS = 4000;
                       <span class="solo-lector">{{ t('incluye.funcion') }}</span>
                     </th>
                     <th scope="col">{{ t('incluye.gratis') }}</th>
-                    <th scope="col">{{ t('incluye.pro') }}</th>
+                    <th scope="col">{{ planes()!.producto || t('incluye.pro') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,12 +210,24 @@ const RELECTURA_MS = 4000;
               <p class="nota cifras">
                 {{
                   t('incluye.precio', {
+                    producto: planes()!.producto,
                     primero: cifra(planes()!.precioPrimerGrupo),
                     adicional: cifra(planes()!.precioGrupoAdicional),
                     moneda: planes()!.moneda,
                   })
                 }}
               </p>
+              @if (s.conservaPrecio) {
+                <p class="nota cifras">
+                  {{
+                    t('incluye.conservas', {
+                      primero: cifra(s.precioPrimerGrupo),
+                      adicional: cifra(s.precioGrupoAdicional),
+                      moneda: planes()!.moneda,
+                    })
+                  }}
+                </p>
+              }
             </section>
 
             @if (s.pagos.length > 0) {
@@ -307,7 +320,11 @@ const RELECTURA_MS = 4000;
                     (change)="elegirForma(f.forma)"
                   />
                   <span class="opcion">
-                    <span class="nombre-forma">{{ t('forma.' + f.clave) }}</span>
+                    <span class="nombre-forma">{{
+                      f.forma.meses
+                        ? t('forma.oxxo.' + forma(f.forma.meses), { n: f.forma.meses })
+                        : t('forma.tarjeta')
+                    }}</span>
                     <span class="cifras dato-suave">{{ f.detalle }}</span>
                   </span>
                 </label>
@@ -688,13 +705,18 @@ export class Plan implements OnInit {
     const s = this.suscripcion();
     return s ? cambioGrupos(s, this.elegidos()) : { agregados: [], quitados: [] };
   });
-  protected readonly totalMes = computed(() => {
+  /** La versión de precio con que se calcula lo que se ve: la que conserva quien ya paga, o la que se vende hoy. */
+  protected readonly tarifa = computed(() => {
     const p = this.planes();
+    return p ? tarifaDe(p, this.suscripcion(), this.modo()) : null;
+  });
+  protected readonly totalMes = computed(() => {
+    const p = this.tarifa();
     return p ? mensual(p, this.elegidos().size) : 0;
   });
   /** "79 primer grupo + 2 × 29": de dónde sale el total, en cifras. */
   protected readonly desglose = computed(() => {
-    const p = this.planes();
+    const p = this.tarifa();
     const n = this.elegidos().size;
     if (!p || n === 0) {
       return this.texto('plan.total.ninguno');
@@ -725,7 +747,7 @@ export class Plan implements OnInit {
         clave: 'tarjeta',
         forma: { modalidad: 'tarjeta', meses: null },
         detalle: this.texto('plan.forma.detalleTarjeta', {
-          monto: cifra(mensual(p, n)),
+          monto: cifra(mensual(this.tarifa() ?? p, n)),
           moneda: p.moneda,
         }),
         fuera: this.tarjetaBloqueada(),
@@ -793,7 +815,11 @@ export class Plan implements OnInit {
       case 'agregar':
         return n > 0 && (agregados.length > 0 || quitados.length > 0);
       default:
-        return n > 0 && !this.formas().find((f) => f.clave === this.claveForma())?.fuera;
+        return (
+          !!this.planes()?.aLaVenta &&
+          n > 0 &&
+          !this.formas().find((f) => f.clave === this.claveForma())?.fuera
+        );
     }
   });
 
@@ -852,6 +878,9 @@ export class Plan implements OnInit {
         partes.push(this.texto('plan.nota.quitarPrepago', { fecha: this.fecha(s.pagadoHasta) }));
       }
       return partes.join(' ') || null;
+    }
+    if (!this.planes()?.aLaVenta) {
+      return this.texto('plan.nota.sinVenta');
     }
     return this.formaPago().modalidad === 'tarjeta' && this.elegidos().size > 0
       ? this.texto('plan.nota.tarjeta')

@@ -10,18 +10,23 @@ import {
   modoPlan,
   prepagoVigente,
   referenciaEnBloques,
+  tarifaDe,
   tienePro,
   totalAPagar,
 } from './planes';
 
 const planes: PlanesDto = {
+  aLaVenta: true,
+  producto: 'Pro',
+  descripcion: '',
+  funciones: ['cierre_ia', 'boletas', 'whatsapp_boletas', 'avisos_urgentes'],
   precioPrimerGrupo: 79,
   precioGrupoAdicional: 29,
   moneda: 'MXN',
   diasPrueba: 14,
   diasMaximoPrueba: 30,
   diasGracia: 7,
-  mesesPrepago: [3, 6],
+  mesesPrepago: [1, 3, 6],
   oxxoHabilitado: true,
   montoMinimoOxxo: 10,
   montoMaximoOxxo: 10000,
@@ -53,6 +58,9 @@ const suscripcion = (extra: Partial<SuscripcionDto> = {}): SuscripcionDto => ({
   modalidad: null,
   grupos: [],
   totalMensual: 0,
+  precioPrimerGrupo: 79,
+  precioGrupoAdicional: 29,
+  conservaPrecio: false,
   proximoCobro: null,
   pagadoHasta: null,
   graciaHasta: null,
@@ -133,5 +141,23 @@ describe('planes y pagos (SPEC-08)', () => {
     const nuevo = suscripcion({ grupos: [grupo('a'), grupo('b')] });
     expect([...eleccionInicial(nuevo, 'b')]).toEqual(['b']);
     expect([...eleccionInicial(nuevo, 'ajeno')]).toEqual([]);
+  });
+
+  it('ADR-0017: quien ya paga cambia grupos con su precio; al contratar de nuevo, con el que se vende hoy', () => {
+    const vieja = suscripcion({
+      modalidad: 'tarjeta',
+      estado: 'activa',
+      precioPrimerGrupo: 69,
+      precioGrupoAdicional: 19,
+      conservaPrecio: true,
+    });
+    const nuevos = { ...planes, precioPrimerGrupo: 89, precioGrupoAdicional: 39 };
+    expect(mensual(tarifaDe(nuevos, vieja, modoPlan(vieja)), 3)).toBe(107);
+    expect(mensual(tarifaDe(nuevos, vieja, 'contratar'), 3)).toBe(167);
+    expect(mensual(tarifaDe(nuevos, null, 'contratar'), 1)).toBe(89);
+  });
+
+  it('OXXO por 1 mes: el total es un solo mes', () => {
+    expect(totalAPagar(planes, 2, { modalidad: 'oxxo', meses: 1 })).toBe(108);
   });
 });

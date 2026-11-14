@@ -48,9 +48,9 @@ public sealed class PlanesPruebas
     {
         var s = new Suscripcion(Guid.NewGuid(), "simulado", Ahora);
         var grupo = Guid.NewGuid();
-        var hasta = s.AplicarPrepago([grupo], 3, agregar: false, Ahora);
-        var renovado = s.AplicarPrepago([grupo], 6, agregar: false, hasta.AddDays(-2));
-        var conOtro = s.AplicarPrepago([Guid.NewGuid()], 0, agregar: true, hasta);
+        var hasta = s.AplicarPrepago([grupo], 3, agregar: false, null, Ahora);
+        var renovado = s.AplicarPrepago([grupo], 6, agregar: false, null, hasta.AddDays(-2));
+        var conOtro = s.AplicarPrepago([Guid.NewGuid()], 0, agregar: true, null, hasta);
 
         Assert.Equal(Ahora.AddMonths(3), hasta);
         Assert.Equal(hasta.AddMonths(6), renovado);
@@ -62,7 +62,7 @@ public sealed class PlanesPruebas
     public void RN089_AvisoDeVencimiento_Sale7Y1DiasAntesUnaVezCadaUno()
     {
         var s = new Suscripcion(Guid.NewGuid(), "simulado", Ahora);
-        var hasta = s.AplicarPrepago([Guid.NewGuid()], 3, agregar: false, Ahora);
+        var hasta = s.AplicarPrepago([Guid.NewGuid()], 3, agregar: false, null, Ahora);
         int[] dias = [7, 1];
 
         Assert.Null(s.AvisoVencimientoPendiente(hasta.AddDays(-8), dias));
@@ -76,7 +76,7 @@ public sealed class PlanesPruebas
     public void RN085_CobrosFallidosSeguidos_NoAlarganLaGraciaYAlTerminarQuedaSinGrupos()
     {
         var s = new Suscripcion(Guid.NewGuid(), "simulado", Ahora);
-        s.AplicarSuscripcion("cus_1", "sub_1", [Guid.NewGuid()], Ahora.AddMonths(1), Ahora);
+        s.AplicarSuscripcion("cus_1", "sub_1", [Guid.NewGuid()], Ahora.AddMonths(1), null, Ahora);
 
         s.RegistrarCobroFallido(Ahora, 7);
         s.RegistrarCobroFallido(Ahora.AddDays(3), 7);

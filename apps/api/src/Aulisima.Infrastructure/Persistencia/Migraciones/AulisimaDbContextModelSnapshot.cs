@@ -2330,6 +2330,10 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("pagado_en");
 
+                    b.Property<Guid?>("PrecioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("precio_id");
+
                     b.Property<string>("SesionExterna")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -2358,6 +2362,9 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                     b.HasKey("Id")
                         .HasName("pk_pago");
 
+                    b.HasIndex("PrecioId")
+                        .HasDatabaseName("ix_pago_precio_id");
+
                     b.HasIndex("SesionExterna")
                         .IsUnique()
                         .HasDatabaseName("ix_pago_sesion_externa");
@@ -2370,6 +2377,179 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                             t.HasCheckConstraint("ck_pago_estado", "estado IN ('pendiente', 'pagado', 'vencido')");
 
                             t.HasCheckConstraint("ck_pago_monto", "monto > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Aulisima.Domain.Planes.PrecioProducto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ArchivadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archivado_en");
+
+                    b.Property<bool>("ArchivoPendiente")
+                        .HasColumnType("boolean")
+                        .HasColumnName("archivo_pendiente");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<string>("IdExternoAdicional")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("id_externo_adicional");
+
+                    b.Property<string>("IdExternoPrimera")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("id_externo_primera");
+
+                    b.Property<string>("Moneda")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("moneda");
+
+                    b.Property<decimal>("PrecioAdicional")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("precio_adicional");
+
+                    b.Property<decimal>("PrecioPrimera")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("precio_primera");
+
+                    b.Property<Guid>("ProductoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("producto_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<DateTimeOffset?>("VigenteDesde")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vigente_desde");
+
+                    b.HasKey("Id")
+                        .HasName("pk_precio_producto");
+
+                    b.HasIndex("ProductoId", "Version")
+                        .IsUnique()
+                        .HasDatabaseName("ix_precio_producto_producto_id_version");
+
+                    b.ToTable("precio_producto", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_precio_producto_estado", "estado IN ('pendiente', 'vigente', 'archivado')");
+
+                            t.HasCheckConstraint("ck_precio_producto_montos", "precio_primera >= 1 AND precio_adicional >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Aulisima.Domain.Planes.Producto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Alcance")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("alcance");
+
+                    b.Property<bool>("ArchivoPendiente")
+                        .HasColumnType("boolean")
+                        .HasColumnName("archivo_pendiente");
+
+                    b.Property<bool>("CambiosPendientes")
+                        .HasColumnType("boolean")
+                        .HasColumnName("cambios_pendientes");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<string>("ErrorSincronizacion")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("error_sincronizacion");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.PrimitiveCollection<List<string>>("Funciones")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("funciones");
+
+                    b.Property<string>("IdExterno")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("id_externo");
+
+                    b.PrimitiveCollection<List<int>>("MesesPrepago")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("meses_prepago");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("nombre");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer")
+                        .HasColumnName("orden");
+
+                    b.Property<DateTimeOffset?>("SincronizadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sincronizado_en");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_producto");
+
+                    b.HasIndex("IdExterno")
+                        .IsUnique()
+                        .HasDatabaseName("ix_producto_id_externo")
+                        .HasFilter("id_externo IS NOT NULL");
+
+                    b.ToTable("producto", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_producto_alcance", "alcance IN ('grupo')");
+
+                            t.HasCheckConstraint("ck_producto_estado", "estado IN ('borrador', 'activo', 'archivado')");
+
+                            t.HasCheckConstraint("ck_producto_orden", "orden BETWEEN 1 AND 999");
                         });
                 });
 
@@ -2429,6 +2609,10 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("periodo_actual_fin");
 
+                    b.Property<Guid?>("PrecioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("precio_id");
+
                     b.Property<string>("Proveedor")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -2466,6 +2650,9 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .IsUnique()
                         .HasDatabaseName("ix_suscripcion_id_externo")
                         .HasFilter("id_externo IS NOT NULL");
+
+                    b.HasIndex("PrecioId")
+                        .HasDatabaseName("ix_suscripcion_precio_id");
 
                     b.ToTable("suscripcion", null, t =>
                         {
@@ -3041,6 +3228,22 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_pago_docente_docente_id");
+
+                    b.HasOne("Aulisima.Domain.Planes.PrecioProducto", null)
+                        .WithMany()
+                        .HasForeignKey("PrecioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_pago_precios_producto_precio_id");
+                });
+
+            modelBuilder.Entity("Aulisima.Domain.Planes.PrecioProducto", b =>
+                {
+                    b.HasOne("Aulisima.Domain.Planes.Producto", null)
+                        .WithMany("Precios")
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_precio_producto_productos_producto_id");
                 });
 
             modelBuilder.Entity("Aulisima.Domain.Planes.Suscripcion", b =>
@@ -3051,6 +3254,12 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_suscripcion_docente_docente_id");
+
+                    b.HasOne("Aulisima.Domain.Planes.PrecioProducto", null)
+                        .WithMany()
+                        .HasForeignKey("PrecioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_suscripcion_precio_producto_precio_id");
                 });
 
             modelBuilder.Entity("Aulisima.Domain.Tutores.EnlaceTutor", b =>
@@ -3103,6 +3312,11 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
             modelBuilder.Entity("Aulisima.Domain.Grupos.CicloEscolar", b =>
                 {
                     b.Navigation("Unidades");
+                });
+
+            modelBuilder.Entity("Aulisima.Domain.Planes.Producto", b =>
+                {
+                    b.Navigation("Precios");
                 });
 #pragma warning restore 612, 618
         }

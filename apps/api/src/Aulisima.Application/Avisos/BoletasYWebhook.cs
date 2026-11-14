@@ -20,7 +20,7 @@ public sealed record TutorPorCompartirDto(Guid TutorId, string Nombre, string Te
 /// RN-054: al publicar, cada tutor de los alumnos publicados recibe un aviso: WhatsApp del sistema (uno por periodo,
 /// RN-086) y push o correo si los tiene. Una corrección (RN-052) no vuelve a avisar.
 /// </summary>
-public sealed class AvisoBoletas(PlanEntregas plan, IRepositorioAvisos avisos)
+public sealed class AvisoBoletas(PlanEntregas plan, IRepositorioAvisos avisos, Planes.AccesoPro acceso)
 {
     /// <summary>Aparta los WhatsApp y devuelve a quién no le llegará por ningún lado.</summary>
     public async Task<IReadOnlyList<TutorPorCompartirDto>> PlanearAsync(
@@ -28,7 +28,7 @@ public sealed class AvisoBoletas(PlanEntregas plan, IRepositorioAvisos avisos)
     {
         var porAlumno = publicadas.Where(p => !p.Boleta.EsCorreccion).ToDictionary(p => p.Alumno.Id, p => p.Boleta);
         var tutores = await plan.TutoresAsync(publicadas.Where(p => porAlumno.ContainsKey(p.Alumno.Id)).Select(p => p.Alumno).ToList(), ct);
-        var restantes = await plan.BoletasRestantesAsync(periodo.Grupo.Id, periodo.Periodo.Id, ct);
+        var restantes = await RestantesAsync(periodo, ct);
         var sinCanal = new List<TutorPorCompartirDto>();
         foreach (var tutor in tutores)
         {
@@ -47,12 +47,18 @@ public sealed class AvisoBoletas(PlanEntregas plan, IRepositorioAvisos avisos)
         return sinCanal;
     }
 
+    /// <summary>ADR-0017: sin la función <c>whatsapp_boletas</c> en su producto, el grupo no manda WhatsApp de boletas.</summary>
+    private async Task<Func<Guid, int>> RestantesAsync(PeriodoCompleto periodo, CancellationToken ct) =>
+        await acceso.TieneFuncionAsync(periodo.Grupo, Domain.Planes.FuncionCatalogo.WhatsappBoletas, ct)
+            ? await plan.BoletasRestantesAsync(periodo.Grupo.Id, periodo.Periodo.Id, ct)
+            : _ => 0;
+
     /// <summary>Para la hoja previa a publicar: por alumno, cuántos de sus tutores tienen push y cuántos no recibirían nada.</summary>
     public async Task<IReadOnlyDictionary<Guid, (int Push, int PorCompartir)>> CanalesAsync(
         PeriodoCompleto periodo, IReadOnlyCollection<Alumno> alumnos, CancellationToken ct)
     {
         var tutores = await plan.TutoresAsync(alumnos, ct);
-        var restantes = await plan.BoletasRestantesAsync(periodo.Grupo.Id, periodo.Periodo.Id, ct);
+        var restantes = await RestantesAsync(periodo, ct);
         return alumnos.ToDictionary(
             a => a.Id,
             a =>

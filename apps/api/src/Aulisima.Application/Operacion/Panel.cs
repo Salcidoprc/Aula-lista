@@ -200,10 +200,11 @@ public sealed record CostosDto(
 
 /// <summary>
 /// RF-091 y RNF-022: costo estimado del mes por grupo contra su ingreso. Cada grupo Pro pagado recibe una parte igual del
-/// cobro mensual de su docente (79 + 29 por adicional, de configuración); la prueba y Gratis no generan ingreso.
+/// cobro mensual de su docente, con la versión de precio que paga (ADR-0017); la prueba y Gratis no generan ingreso.
 /// </summary>
 public sealed class CostosCasoUso(
-    IRepositorioAdmin repositorio, Costeo costeo, IOptions<OpcionesPlanes> planes, IOptions<OpcionesOperacion> operacion, TimeProvider reloj)
+    IRepositorioAdmin repositorio, Costeo costeo, TarifasPanel tarifas, IOptions<OpcionesPlanes> planes, IOptions<OpcionesOperacion> operacion,
+    TimeProvider reloj)
 {
     public async Task<CostosDto> EjecutarAsync(CancellationToken ct)
     {
@@ -211,13 +212,14 @@ public sealed class CostosCasoUso(
         var filas = await repositorio.CostosAsync(mes, planes.Value.DiasMaximoPrueba, ct);
         var p = planes.Value;
         var o = operacion.Value;
+        var mensual = await tarifas.MensualAsync(ct);
         var proPorDocente = filas.Where(f => f.ProPagado).GroupBy(f => f.DocenteId).ToDictionary(g => g.Key, g => g.Count());
         var grupos = filas.Select(f =>
         {
             var ia = costeo.Ia(f.TokensEntrada, f.TokensSalida, f.TokensCache);
             var whatsapp = decimal.Round(f.CostoWhatsapp, 2);
             var ingreso = f.ProPagado && proPorDocente.TryGetValue(f.DocenteId, out var n)
-                ? decimal.Round(Tarifa.Mensual(n, p.PrecioPrimerGrupo, p.PrecioGrupoAdicional) / n, 2)
+                ? decimal.Round(mensual(f.DocenteId, n) / n, 2)
                 : 0m;
             var costo = ia + whatsapp;
             return new CostoGrupoDto(

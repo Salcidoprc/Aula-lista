@@ -35,6 +35,7 @@ public static class CodigosError
         .. ErroresTutores.Todos.Select(e => e.Codigo),
         .. ErroresAvisos.Todos.Select(e => e.Codigo),
         .. ErroresPlanes.Todos.Select(e => e.Codigo),
+        .. ErroresCatalogo.Todos.Select(e => e.Codigo),
         .. ErroresOperacion.Todos.Select(e => e.Codigo),
     ];
 }

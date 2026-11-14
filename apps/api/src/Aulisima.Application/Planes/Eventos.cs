@@ -94,7 +94,7 @@ public sealed class ProcesadorEventosPago(
         {
             case TipoEventoPago.SuscripcionActualizada when evento.Suscripcion is { } id:
                 var antes = s.GruposPro.ToList();
-                s.AplicarSuscripcion(evento.Cliente, id, evento.Grupos ?? [], evento.PeriodoFin, ahora);
+                s.AplicarSuscripcion(evento.Cliente, id, evento.Grupos ?? [], evento.PeriodoFin, evento.PrecioId, ahora);
                 foreach (var grupo in await GruposAsync(s.GruposPro, ct))
                 {
                     grupo.ActivarPro(s.Estado == EstadoSuscripcion.EnGracia ? s.GraciaHasta : null, ahora);
@@ -145,7 +145,7 @@ public sealed class ProcesadorEventosPago(
                 {
                     var previos = s.GruposPro.ToList();
                     var hastaAnterior = s.PagadoHasta;
-                    var hasta = s.AplicarPrepago(pago.Grupos, pago.Meses, pago.Tipo == TipoPago.AgregarGrupos, ahora);
+                    var hasta = s.AplicarPrepago(pago.Grupos, pago.Meses, pago.Tipo == TipoPago.AgregarGrupos, pago.PrecioId, ahora);
 
                     // RN-089 y RN-085: el prepago cubre hasta su fin más la gracia; al vencer empieza la gracia.
                     foreach (var grupo in await GruposAsync(s.GruposPro, ct))

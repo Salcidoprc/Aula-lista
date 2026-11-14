@@ -135,4 +135,67 @@ test.describe('SPEC-09: operación y métricas', () => {
       page.getByText(/nunca muestra alumnos, tutores, notas ni observaciones/),
     ).toBeAttached();
   });
+
+  test('RF-095 y ADR-0017: el admin ve el Pro a la venta, crea un borrador con precio y lo archiva, y queda en la auditoría', async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(120_000);
+    const correo = await docenteVerificado(page, request);
+    hacerAdmin(correo);
+    await page.goto('/admin');
+    await abrirSeccion(page, 'Productos y precios');
+
+    // El producto sembrado: a la venta, 79 + 29, con sus meses de OXXO.
+    const pro = page.getByRole('article', { name: 'Pro', exact: true });
+    await expect(pro).toContainText('A la venta');
+    await expect(pro).toContainText('79');
+    await expect(pro).toContainText('29');
+    await expect(pro).toContainText('1 mes, 3 meses, 6 meses');
+
+    // Cambiar el precio avisa que quien ya paga conserva el suyo; aquí solo se mira y se cancela.
+    await pro.getByRole('button', { name: 'Cambiar el precio de Pro' }).click();
+    await expect(page.getByRole('dialog')).toContainText('conserva');
+    await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
+
+    // Un borrador nuevo: sin funciones no se guarda.
+    const nombre = `Paquete ${Math.floor(Math.random() * 1e4)}`;
+    await page.getByRole('button', { name: 'Nuevo producto' }).click();
+    const hoja = page.getByRole('dialog');
+    await hoja.getByLabel('Nombre').fill(nombre);
+    await hoja.getByLabel(/^Primer grupo/).fill('99');
+    await hoja.getByLabel(/^Cada grupo adicional/).fill('35.50');
+    await hoja.getByRole('button', { name: 'Crear borrador' }).click();
+    await expect(hoja.getByText(/Elige al menos una/)).toBeVisible();
+    await hoja.getByRole('checkbox', { name: 'Boletas', exact: true }).check();
+    await hoja.getByRole('button', { name: 'Crear borrador' }).click();
+    await expect(page.getByText(`Se creó el borrador ${nombre}.`)).toBeVisible();
+
+    const borrador = page.getByRole('article', { name: nombre });
+    await expect(borrador).toContainText('Borrador');
+    await expect(borrador).toContainText('35.50');
+
+    // Solo uno a la venta a la vez: publicar choca con el Pro.
+    await borrador.getByRole('button', { name: 'Publicar' }).click();
+    await expect(borrador.getByRole('alert')).toContainText('Ya hay otro producto a la venta');
+
+    await borrador.getByRole('button', { name: `Archivar ${nombre}` }).click();
+    await borrador.getByRole('button', { name: 'Sí, archivar' }).click();
+    await expect(page.getByText(`Se archivó ${nombre}.`)).toBeVisible();
+    // RN-096: no se borra; queda aparte, plegado.
+    await page.locator('details.archivados > summary').click();
+    await expect(borrador).toContainText('Archivado');
+    await sinFallasDeAccesibilidad(page);
+
+    await abrirSeccion(page, 'Auditoría');
+    await expect(
+      page.getByRole('article').filter({ hasText: 'Creó el producto' }).filter({ hasText: nombre }),
+    ).toHaveCount(1);
+    await expect(
+      page
+        .getByRole('article')
+        .filter({ hasText: 'Archivó el producto' })
+        .filter({ hasText: nombre }),
+    ).toHaveCount(1);
+  });
 });

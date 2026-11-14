@@ -54,6 +54,11 @@ export const rutasAdmin: Routes = [
         loadComponent: () => import('./tipos-rubro').then((m) => m.TiposRubro),
       },
       {
+        path: 'productos',
+        title: 'titulos.adminProductos',
+        loadComponent: () => import('./productos').then((m) => m.Productos),
+      },
+      {
         path: 'auditoria',
         title: 'titulos.adminAuditoria',
         loadComponent: () => import('./auditoria').then((m) => m.Auditoria),

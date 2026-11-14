@@ -95,9 +95,13 @@ jobs:
       - name: Pruebas end-to-end (incluye movimiento reducido y accesibilidad)
         working-directory: apps/web
         run: npx playwright test
+      # La bitácora completa va al artefacto: impresa aquí tapa el resumen de Playwright en el registro.
       - name: Bitácora de contenedores
         if: failure()
-        run: docker compose -f infra/docker-compose.yml logs
+        run: |
+          mkdir -p apps/web/test-results
+          docker compose -f infra/docker-compose.yml logs --no-color > apps/web/test-results/contenedores.log
+          docker compose -f infra/docker-compose.yml logs --no-color --tail=40 api
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

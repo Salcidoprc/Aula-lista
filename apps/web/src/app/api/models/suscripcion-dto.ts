@@ -8,6 +8,7 @@ import { PruebaDto } from '../models/prueba-dto';
 export interface SuscripcionDto {
   agregarAPrepago: boolean;
   aviso: (null | AvisoPagoDto);
+  conservaPrecio: boolean;
   estado: string;
   graciaHasta: (string | null);
   grupos: Array<GrupoPlanDto>;
@@ -15,6 +16,8 @@ export interface SuscripcionDto {
   pagadoHasta: (string | null);
   pagoPendiente: (null | PagoDto);
   pagos: Array<PagoDto>;
+  precioGrupoAdicional: (number | string);
+  precioPrimerGrupo: (number | string);
   proximoCobro: (string | null);
   prueba: (null | PruebaDto);
   pruebaDisponible: boolean;

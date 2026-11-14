@@ -45,6 +45,11 @@ public static class AccionAuditoriaAdmin
     public const string TipoRubroEditado = "tipo_rubro_editado";
     public const string TipoRubroDesactivado = "tipo_rubro_desactivado";
     public const string TipoRubroActivado = "tipo_rubro_activado";
+    public const string ProductoCreado = "producto_creado";
+    public const string ProductoEditado = "producto_editado";
+    public const string PrecioCambiado = "precio_cambiado";
+    public const string ProductoPublicado = "producto_publicado";
+    public const string ProductoArchivado = "producto_archivado";
 }
 
 /// <summary>Eventos de producto de SPEC-09 (RF-090). Solo ids internos y números; nunca datos personales.</summary>

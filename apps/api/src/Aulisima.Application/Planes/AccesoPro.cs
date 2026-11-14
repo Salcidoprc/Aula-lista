@@ -31,7 +31,8 @@ public sealed record PlanGrupoDto(string Plan, DateTimeOffset? ProHasta, int? Di
 /// por solicitud.
 /// </summary>
 public sealed class AccesoPro(
-    IRepositorioPlanes planes, IRepositorioDocentes docentes, IOptions<OpcionesPlanes> opciones, IOptions<OpcionesPagos> pagos, TimeProvider reloj)
+    IRepositorioPlanes planes, IRepositorioDocentes docentes, CatalogoPlanes catalogo, IOptions<OpcionesPlanes> opciones,
+    IOptions<OpcionesPagos> pagos, TimeProvider reloj)
 {
     private Suscripcion? _suscripcion;
     private bool _cargada;
@@ -81,6 +82,22 @@ public sealed class AccesoPro(
     }
 
     public async Task<bool> TieneProAsync(Grupo grupo, CancellationToken ct) => (await PlanAsync(grupo, ct)).TienePro;
+
+    /// <summary>
+    /// ADR-0017: el grupo tiene Pro (pagado o en prueba) y el producto que lo cubre incluye esa función. El pagado usa el
+    /// producto de la versión que paga el docente; la prueba, el que se vende hoy. Sin catálogo, Pro lo incluye todo.
+    /// </summary>
+    public async Task<bool> TieneFuncionAsync(Grupo grupo, string funcion, CancellationToken ct)
+    {
+        var plan = await PlanAsync(grupo, ct);
+        if (!plan.TienePro)
+        {
+            return false;
+        }
+
+        var precioId = plan.Plan == PlanVigente.Pro ? (await SuscripcionAsync(ct))?.PrecioId : null;
+        return await catalogo.ProductoDeAsync(precioId, ct) is not { } producto || producto.Incluye(funcion);
+    }
 
     /// <summary>RN-081: activa la prueba en ese grupo y periodo; una sola vez por docente.</summary>
     public async Task<Resultado> IniciarPruebaAsync(Grupo grupo, Guid periodoId, CancellationToken ct)

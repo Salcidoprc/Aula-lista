@@ -9,8 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace Aulisima.Application.Planes;
 
-/// <summary>Precios y límites vigentes (SPEC-08, <c>GET /planes</c>), todos de configuración.</summary>
+/// <summary>
+/// Precios y límites vigentes (SPEC-08, <c>GET /planes</c>). Nombre, funciones, precios y meses de OXXO salen del producto
+/// a la venta en el catálogo (ADR-0017); <see cref="ALaVenta"/> es falso si no hay uno listo para cobrarse.
+/// </summary>
 public sealed record PlanesDto(
+    bool ALaVenta,
+    string Producto,
+    string Descripcion,
+    IReadOnlyList<string> Funciones,
     decimal PrecioPrimerGrupo,
     decimal PrecioGrupoAdicional,
     string Moneda,
@@ -59,11 +66,16 @@ public sealed record AvisoPagoDto(string Tipo, DateTimeOffset Fecha, int Dias);
 /// puede pagar otro periodo o pasar a tarjeta. <see cref="AgregarAPrepago"/>: lo que se elija de más se cobra hasta
 /// <see cref="PagadoHasta"/> (RN-089).
 /// </summary>
+/// <see cref="PrecioPrimerGrupo"/> y <see cref="PrecioGrupoAdicional"/>: la versión que paga (ADR-0017), que puede ser
+/// anterior a la que se vende hoy (<see cref="ConservaPrecio"/>).
 public sealed record SuscripcionDto(
     string Estado,
     string? Modalidad,
     IReadOnlyList<GrupoPlanDto> Grupos,
     decimal TotalMensual,
+    decimal PrecioPrimerGrupo,
+    decimal PrecioGrupoAdicional,
+    bool ConservaPrecio,
     DateTimeOffset? ProximoCobro,
     DateTimeOffset? PagadoHasta,
     DateTimeOffset? GraciaHasta,
@@ -76,7 +88,7 @@ public sealed record SuscripcionDto(
     PagoDto? PagoPendiente,
     IReadOnlyList<PagoDto> Pagos);
 
-/// <summary>RN-084: <c>tarjeta</c>, u <c>oxxo</c> con <see cref="Meses"/> 3 o 6.</summary>
+/// <summary>RN-084: <c>tarjeta</c>, u <c>oxxo</c> con <see cref="Meses"/> de los que ofrece el producto.</summary>
 public sealed record CrearCheckout(IReadOnlyList<Guid>? GrupoIds, string? Modalidad, int? Meses);
 
 public sealed record CheckoutDto(string Url);
@@ -104,10 +116,11 @@ internal static class ReglasPlanes
         PrepagoActivo(s, ahora) && !RenovarPrepago(s, ahora, opciones);
 
     /// <summary>RN-089: la diferencia del total mensual por los días que faltan del prepago, en centavos exactos.</summary>
-    public static decimal MontoAgregar(int actuales, int agregados, DateTimeOffset pagadoHasta, DateTimeOffset ahora, OpcionesPlanes opciones)
+    public static decimal MontoAgregar(
+        int actuales, int agregados, DateTimeOffset pagadoHasta, DateTimeOffset ahora, PrecioProducto precio, OpcionesPlanes opciones)
     {
         var dias = (int)Math.Ceiling((pagadoHasta - ahora).TotalDays);
-        var diferencia = opciones.Mensual(actuales + agregados) - opciones.Mensual(actuales);
+        var diferencia = precio.Mensual(actuales + agregados) - precio.Mensual(actuales);
         return Math.Round(diferencia * dias / opciones.DiasPorMes, 2, MidpointRounding.AwayFromZero);
     }
 
@@ -152,20 +165,25 @@ internal static class ReglasPlanes
     }
 }
 
-public sealed class ObtenerPlanesCasoUso(IOptions<OpcionesPlanes> planes, IOptions<OpcionesWhatsapp> whatsapp, IOptions<OpcionesPagos> pagos)
+public sealed class ObtenerPlanesCasoUso(
+    CatalogoPlanes catalogo, IOptions<OpcionesPlanes> planes, IOptions<OpcionesWhatsapp> whatsapp, IOptions<OpcionesPagos> pagos)
 {
-    public PlanesDto Ejecutar()
+    public async Task<PlanesDto> EjecutarAsync(CancellationToken ct)
     {
         var p = planes.Value;
+        var oferta = await catalogo.ALaVentaAsync(ct);
         return new PlanesDto(
-            p.PrecioPrimerGrupo, p.PrecioGrupoAdicional, p.Moneda, p.DiasPrueba, p.DiasMaximoPrueba, p.DiasGracia, p.MesesPrepago,
-            p.OxxoHabilitado, p.MontoMinimoOxxo, p.MontoMaximoOxxo, whatsapp.Value.UrgentesPorTutorPorMes,
+            oferta is not null, oferta?.Producto.Nombre ?? string.Empty, oferta?.Producto.Descripcion ?? string.Empty,
+            oferta?.Producto.Funciones ?? [], oferta?.Precio.PrecioPrimera ?? 0m, oferta?.Precio.PrecioAdicional ?? 0m,
+            oferta?.Precio.Moneda ?? p.Moneda, p.DiasPrueba, p.DiasMaximoPrueba, p.DiasGracia, oferta?.Producto.MesesPrepago ?? [],
+            p.OxxoHabilitado && oferta?.Producto.MesesPrepago.Count > 0, p.MontoMinimoOxxo, p.MontoMaximoOxxo, whatsapp.Value.UrgentesPorTutorPorMes,
             whatsapp.Value.BoletasPorTutorPorPeriodo, pagos.Value.Proveedor == OpcionesPagos.ProveedorSimulado);
     }
 }
 
 /// <summary>SPEC-08, pantalla Plan: estado, grupos con su plan, próximo cobro, prueba, banda de pago e historial.</summary>
-public sealed class ObtenerSuscripcionCasoUso(IRepositorioGrupos grupos, IRepositorioPlanes planes, AccesoPro acceso, TimeProvider reloj)
+public sealed class ObtenerSuscripcionCasoUso(
+    IRepositorioGrupos grupos, IRepositorioPlanes planes, AccesoPro acceso, CatalogoPlanes catalogo, TimeProvider reloj)
 {
     public async Task<SuscripcionDto> EjecutarAsync(CancellationToken ct)
     {
@@ -194,11 +212,17 @@ public sealed class ObtenerSuscripcionCasoUso(IRepositorioGrupos grupos, IReposi
         var pagos = (await planes.PagosAsync(ct)).OrderByDescending(p => p.CreatedAt).ToList();
         var pendiente = pagos.FirstOrDefault(p => p.Estado == EstadoPago.Pendiente && (p.VenceEn is null || p.VenceEn > ahora));
         var cuenta = pagados.Count(id => activos.Any(g => g.Grupo.Id == id));
+        var paga = s is { Estado: EstadoSuscripcion.Activa or EstadoSuscripcion.EnGracia };
+        var oferta = await catalogo.ALaVentaAsync(ct);
+        var precio = paga ? await catalogo.PrecioAsync(s!.PrecioId, ct) : oferta?.Precio;
         return new SuscripcionDto(
             s?.Estado ?? EstadoSuscripcion.Ninguna,
             s?.Modalidad,
             lista,
-            s is { Estado: EstadoSuscripcion.Activa or EstadoSuscripcion.EnGracia } ? opciones.Mensual(cuenta) : 0m,
+            paga ? precio?.Mensual(cuenta) ?? 0m : 0m,
+            precio?.PrecioPrimera ?? 0m,
+            precio?.PrecioAdicional ?? 0m,
+            paga && precio is not null && precio.Id != oferta?.Precio.Id,
             s is { EsTarjetaActiva: true } ? s.PeriodoActualFin : null,
             s is { EsPrepagoVigente: true } ? s.PagadoHasta : null,
             s?.GraciaHasta,
@@ -224,6 +248,7 @@ public sealed class CrearCheckoutCasoUso(
     IRepositorioCuentas cuentas,
     IPasarelaPagos pasarela,
     AccesoPro acceso,
+    CatalogoPlanes catalogo,
     IContextoUsuario usuario,
     IUnidadDeTrabajo unidad,
     IOptions<OpcionesCuentas> opcionesCuentas,
@@ -234,8 +259,13 @@ public sealed class CrearCheckoutCasoUso(
         var docenteId = usuario.DocenteId ?? throw new InvalidOperationException("Pagar requiere un docente.");
         var opciones = acceso.Opciones;
         var oxxo = comando.Modalidad == ReglasPlanes.ModalidadOxxo;
+        if (await catalogo.ALaVentaAsync(ct) is not { } oferta)
+        {
+            return Resultado.Fallo<CheckoutDto>(ErroresCatalogo.SinPlanALaVenta);
+        }
+
         if (comando.Modalidad is not (ModalidadPago.Tarjeta or ReglasPlanes.ModalidadOxxo)
-            || (oxxo && (comando.Meses is not { } m || !opciones.MesesPrepago.Contains(m))))
+            || (oxxo && (comando.Meses is not { } m || !oferta.Producto.MesesPrepago.Contains(m))))
         {
             return Resultado.Fallo<CheckoutDto>(ErroresPlanes.ModalidadInvalida);
         }
@@ -274,30 +304,38 @@ public sealed class CrearCheckoutCasoUso(
                 return Resultado.Fallo<CheckoutDto>(ErroresPlanes.SinCambios);
             }
 
-            var monto = ReglasPlanes.MontoAgregar(s.GruposPro.Count, nuevos.Count, s.PagadoHasta!.Value, ahora, opciones);
+            var precio = await catalogo.PrecioAsync(s.PrecioId, ct) ?? oferta.Precio;
+            var monto = ReglasPlanes.MontoAgregar(s.GruposPro.Count, nuevos.Count, s.PagadoHasta!.Value, ahora, precio, opciones);
             if (monto < opciones.MontoMinimoOxxo || monto > opciones.MontoMaximoOxxo)
             {
                 return Resultado.Fallo<CheckoutDto>(ErroresPlanes.MontoFueraDeRango);
             }
 
-            var concepto = nuevos.Count == 1 ? "Aulísima Pro: 1 grupo más" : $"Aulísima Pro: {nuevos.Count} grupos más";
+            var concepto = nuevos.Count == 1 ? $"Aulísima {oferta.Producto.Nombre}: 1 grupo más" : $"Aulísima {oferta.Producto.Nombre}: {nuevos.Count} grupos más";
             sesion = await pasarela.CheckoutPagoUnicoAsync(
-                new PagoUnico(docenteId, correo, s.ClienteExterno, TipoPago.AgregarGrupos, nuevos, 0, monto, concepto, oxxo, opciones.DiasFichaOxxo, exito, cancelar), ct);
-            pago = new Pago(docenteId, TipoPago.AgregarGrupos, 0, monto, nuevos, sesion.Id, sesion.UrlFicha, sesion.VenceEn, ahora);
+                new PagoUnico(
+                    docenteId, correo, s.ClienteExterno, TipoPago.AgregarGrupos, nuevos, 0, monto, concepto, oxxo, opciones.DiasFichaOxxo, precio.Id,
+                    exito, cancelar),
+                ct);
+            pago = new Pago(docenteId, TipoPago.AgregarGrupos, 0, monto, nuevos, sesion.Id, sesion.UrlFicha, sesion.VenceEn, precio.Id, ahora);
         }
         else if (oxxo)
         {
             var meses = comando.Meses!.Value;
-            var monto = opciones.Mensual(ids.Count) * meses;
+            var monto = oferta.Precio.Mensual(ids.Count) * meses;
             if (monto < opciones.MontoMinimoOxxo || monto > opciones.MontoMaximoOxxo)
             {
                 return Resultado.Fallo<CheckoutDto>(ErroresPlanes.MontoFueraDeRango);
             }
 
-            var concepto = $"Aulísima Pro: {(ids.Count == 1 ? "1 grupo" : $"{ids.Count} grupos")} por {meses} meses";
+            var plazo = meses == 1 ? "1 mes" : $"{meses} meses";
+            var concepto = $"Aulísima {oferta.Producto.Nombre}: {(ids.Count == 1 ? "1 grupo" : $"{ids.Count} grupos")} por {plazo}";
             sesion = await pasarela.CheckoutPagoUnicoAsync(
-                new PagoUnico(docenteId, correo, s.ClienteExterno, TipoPago.Prepago, ids, meses, monto, concepto, true, opciones.DiasFichaOxxo, exito, cancelar), ct);
-            pago = new Pago(docenteId, TipoPago.Prepago, meses, monto, ids, sesion.Id, sesion.UrlFicha, sesion.VenceEn, ahora);
+                new PagoUnico(
+                    docenteId, correo, s.ClienteExterno, TipoPago.Prepago, ids, meses, monto, concepto, true, opciones.DiasFichaOxxo, oferta.Precio.Id,
+                    exito, cancelar),
+                ct);
+            pago = new Pago(docenteId, TipoPago.Prepago, meses, monto, ids, sesion.Id, sesion.UrlFicha, sesion.VenceEn, oferta.Precio.Id, ahora);
         }
         else
         {
@@ -307,7 +345,11 @@ public sealed class CrearCheckoutCasoUso(
                 return Resultado.Fallo<CheckoutDto>(ErroresPlanes.PrepagoVigente);
             }
 
-            sesion = await pasarela.CheckoutSuscripcionAsync(new NuevaSuscripcion(docenteId, correo, s.ClienteExterno, ids, exito, cancelar), ct);
+            sesion = await pasarela.CheckoutSuscripcionAsync(
+                new NuevaSuscripcion(
+                    docenteId, correo, s.ClienteExterno, ids, oferta.Precio.Id, oferta.IdPrimera, oferta.IdAdicional, oferta.Precio.Mensual(ids.Count),
+                    exito, cancelar),
+                ct);
         }
 
         if (pago is not null)
@@ -326,8 +368,8 @@ public sealed class CrearCheckoutCasoUso(
 /// en Pro hasta su fin); agregar se paga con el Checkout (RN-089).
 /// </summary>
 public sealed class CambiarGruposProCasoUso(
-    IRepositorioGrupos grupos, IPasarelaPagos pasarela, AccesoPro acceso, ObtenerSuscripcionCasoUso consulta, IContextoUsuario usuario,
-    IUnidadDeTrabajo unidad, TimeProvider reloj)
+    IRepositorioGrupos grupos, IPasarelaPagos pasarela, AccesoPro acceso, CatalogoPlanes catalogo, ObtenerSuscripcionCasoUso consulta,
+    IContextoUsuario usuario, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado<SuscripcionDto>> EjecutarAsync(CambiarGruposPro comando, CancellationToken ct)
     {
@@ -354,7 +396,10 @@ public sealed class CambiarGruposProCasoUso(
         if (s.EsTarjetaActiva)
         {
             var agrega = ids.Any(id => !s.GruposPro.Contains(id));
-            await pasarela.ActualizarGruposAsync(docenteId, s.IdExterno!, ids, agrega, ct);
+            // ADR-0017: con los precios de su versión, aunque hoy se venda otra.
+            var precio = await catalogo.PrecioAsync(s.PrecioId, ct) ?? throw new InvalidOperationException("La suscripción no tiene precio.");
+            var (primera, adicional) = catalogo.IdsExternos(precio);
+            await pasarela.ActualizarGruposAsync(docenteId, s.IdExterno!, ids, new PreciosSuscripcion(primera, adicional), agrega, ct);
         }
         else
         {

@@ -26,7 +26,6 @@ internal sealed class PasarelaSimulada(
     IRepositorioPlanes planes,
     ProcesadorEventosPago procesador,
     IOptions<OpcionesPagos> pagos,
-    IOptions<OpcionesPlanes> opcionesPlanes,
     IOptions<OpcionesCuentas> cuentas,
     TimeProvider reloj) : IPasarelaPagos, IPasarelaSimulada
 {
@@ -38,8 +37,8 @@ internal sealed class PasarelaSimulada(
     {
         var id = $"cs_sim_{Guid.NewGuid():N}";
         sesiones.Guardar(new SesionSimulada(
-            id, datos.DocenteId, IPasarelaSimulada.TipoSuscripcion, datos.Grupos, 0, opcionesPlanes.Value.Mensual(datos.Grupos.Count), false,
-            string.Empty, null, EstadoSesionSimulada.Abierta));
+            id, datos.DocenteId, IPasarelaSimulada.TipoSuscripcion, datos.Grupos, 0, datos.Mensual, false,
+            string.Empty, null, EstadoSesionSimulada.Abierta, datos.PrecioId));
         return Task.FromResult(new SesionPago(id, Url(id), null));
     }
 
@@ -49,14 +48,15 @@ internal sealed class PasarelaSimulada(
         DateTimeOffset? vence = datos.SoloOxxo ? reloj.GetUtcNow().AddDays(datos.DiasFicha) : null;
         var referencia = datos.SoloOxxo ? string.Concat(Enumerable.Range(0, 14).Select(_ => RandomNumberGenerator.GetInt32(10))) : string.Empty;
         sesiones.Guardar(new SesionSimulada(
-            id, datos.DocenteId, datos.Tipo, datos.Grupos, datos.Meses, datos.Monto, datos.SoloOxxo, referencia, vence, EstadoSesionSimulada.Abierta));
+            id, datos.DocenteId, datos.Tipo, datos.Grupos, datos.Meses, datos.Monto, datos.SoloOxxo, referencia, vence, EstadoSesionSimulada.Abierta,
+            datos.PrecioId));
         var url = Url(id);
         return Task.FromResult(new SesionPago(id, url, vence, datos.SoloOxxo ? url : null));
     }
 
     /// <summary>El proveedor confirmaría el cambio con su evento; aquí se aplica de una vez.</summary>
     public async Task ActualizarGruposAsync(
-        Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, bool prorratear, CancellationToken cancellationToken)
+        Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, PreciosSuscripcion precios, bool prorratear, CancellationToken cancellationToken)
     {
         var actual = await planes.SuscripcionAsync(cancellationToken);
         await procesador.AplicarAsync(

@@ -183,7 +183,7 @@ public sealed class ConsultaBoletas(
             periodoId,
             p.Grupo.Id,
             p.Periodo.Estado,
-            ReglasBoletas.PuedeEmitir(p, plan.TienePro) is not null,
+            ReglasBoletas.PuedeEmitir(p, await acceso.TieneFuncionAsync(p.Grupo, Domain.Planes.FuncionCatalogo.Boletas, ct)) is not null,
             plan,
             p.Grupo.DecimalesFinal,
             new ConteosBoletasDto(
@@ -214,7 +214,7 @@ public sealed class GenerarBoletasCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneFuncionAsync(periodo.Periodo.Grupo, Domain.Planes.FuncionCatalogo.Boletas, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<BoletasDto>(bloqueo);
         }
@@ -266,7 +266,7 @@ public sealed class PublicarBoletasCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneFuncionAsync(periodo.Periodo.Grupo, Domain.Planes.FuncionCatalogo.Boletas, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<PublicacionDto>(bloqueo);
         }
@@ -361,7 +361,7 @@ public sealed class CorregirBoletaCasoUso(
             return null;
         }
 
-        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneProAsync(periodo.Periodo.Grupo, ct)) is { } bloqueo)
+        if (ReglasBoletas.PuedeEmitir(periodo.Periodo, await acceso.TieneFuncionAsync(periodo.Periodo.Grupo, Domain.Planes.FuncionCatalogo.Boletas, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<BoletasDto>(bloqueo);
         }

@@ -65,6 +65,9 @@ public sealed class Suscripcion : Entidad
     /// <summary>RN-089: el último aviso de vencimiento enviado (7 o 1 días antes), para no repetirlo.</summary>
     public int? AvisoVencimientoDias { get; private set; }
 
+    /// <summary>ADR-0017: la versión de precio que paga. Cambiar el precio del catálogo no la mueve.</summary>
+    public Guid? PrecioId { get; private set; }
+
     public Guid? PruebaGrupoId { get; private set; }
 
     public Guid? PruebaPeriodoId { get; private set; }
@@ -113,8 +116,10 @@ public sealed class Suscripcion : Entidad
             : null;
 
     /// <summary>Tarjeta: el proveedor confirmó la suscripción o cambió sus grupos o su periodo.</summary>
-    public void AplicarSuscripcion(string? cliente, string idExterno, IReadOnlyList<Guid> grupos, DateTimeOffset? periodoFin, DateTimeOffset ahora)
+    public void AplicarSuscripcion(
+        string? cliente, string idExterno, IReadOnlyList<Guid> grupos, DateTimeOffset? periodoFin, Guid? precioId, DateTimeOffset ahora)
     {
+        PrecioId = precioId ?? PrecioId;
         Modalidad = ModalidadPago.Tarjeta;
         ClienteExterno = cliente ?? ClienteExterno;
         IdExterno = idExterno;
@@ -164,7 +169,7 @@ public sealed class Suscripcion : Entidad
     /// RN-084: un prepago OXXO pagado cubre sus meses desde hoy, o desde el fin del prepago vigente si se renueva
     /// antes de vencer. Un pago para agregar grupos (RN-089) no mueve la fecha.
     /// </summary>
-    public DateTimeOffset AplicarPrepago(IReadOnlyList<Guid> grupos, int meses, bool agregar, DateTimeOffset ahora)
+    public DateTimeOffset AplicarPrepago(IReadOnlyList<Guid> grupos, int meses, bool agregar, Guid? precioId, DateTimeOffset ahora)
     {
         if (agregar && EsPrepagoVigente && PagadoHasta is { } hasta)
         {
@@ -175,6 +180,7 @@ public sealed class Suscripcion : Entidad
 
         var desde = EsPrepagoVigente && PagadoHasta is { } vigente && vigente > ahora ? vigente : ahora;
         Modalidad = ModalidadPago.PrepagoOxxo;
+        PrecioId = precioId ?? PrecioId;
         GruposPro = [.. grupos];
         PagadoHasta = desde.AddMonths(meses);
         Estado = EstadoSuscripcion.Activa;
@@ -297,7 +303,7 @@ public static class ErroresPlanes
     public static readonly ErrorNegocio PruebaUsada = new("prueba_usada", "Ya usaste tu prueba Pro. Activa Pro en este grupo para cerrar con observaciones.");
     public static readonly ErrorNegocio SinGrupos = new("sin_grupos_pro", "Elige al menos un grupo para Pro.");
     public static readonly ErrorNegocio GrupoNoDisponible = new("grupo_no_disponible", "Uno de los grupos ya no existe o está archivado.");
-    public static readonly ErrorNegocio ModalidadInvalida = new("modalidad_invalida", "Elige tarjeta, u OXXO por 3 o 6 meses.");
+    public static readonly ErrorNegocio ModalidadInvalida = new("modalidad_invalida", "Elige tarjeta, u OXXO por los meses que se ofrecen.");
     public static readonly ErrorNegocio OxxoNoDisponible = new("oxxo_no_disponible", "El pago en OXXO no está disponible por ahora. Paga con tarjeta.");
     public static readonly ErrorNegocio MontoFueraDeRango = new("monto_fuera_de_rango", "El pago debe ser de 10 a 10,000 MXN. Cambia los grupos o los meses.");
     public static readonly ErrorNegocio YaTieneTarjeta = new("ya_tiene_tarjeta", "Ya pagas con tarjeta. Cambia tus grupos Pro sin volver a pagar.");
