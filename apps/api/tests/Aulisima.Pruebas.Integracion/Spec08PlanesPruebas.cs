@@ -35,7 +35,7 @@ public sealed class Spec08PlanesPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     }
 
     [Fact]
-    public async Task RN080_GrupoGratis_NoIniciaElCierreNiGeneraBoletasNiMandaUrgentes()
+    public async Task RN080_RN097_GrupoGratis_CapturaPeroNoVePromediosNiExportaNiAvisaNiIniciaElCierre()
     {
         var d = await DocenteAsync(1);
         var g = d.Grupos[0];
@@ -45,17 +45,44 @@ public sealed class Spec08PlanesPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
         var urgente = await d.Cliente.PostAsJsonAsync($"/api/v1/grupos/{g.Id}/avisos", new { titulo = "Suspensión", cuerpo = "Mañana no hay clases.", urgente = true });
         var normal = await d.Cliente.PostAsJsonAsync($"/api/v1/grupos/{g.Id}/avisos", new { titulo = "Junta", cuerpo = "El viernes hay junta.", urgente = false });
         var destinatarios = await d.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/grupos/{g.Id}/avisos/destinatarios");
+        var avisos = await d.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/grupos/{g.Id}/avisos");
         var excel = await d.Cliente.GetAsync($"/api/v1/periodos/{g.PeriodoId}/exportacion.xlsx");
+        var matriz = await d.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/periodos/{g.PeriodoId}/calificaciones");
 
         Assert.Equal(HttpStatusCode.Forbidden, cierre.StatusCode);
         Assert.Equal("requiere_pro", await CodigoAsync(cierre));
         Assert.Equal(HttpStatusCode.Forbidden, urgente.StatusCode);
-        Assert.Equal("whatsapp_requiere_pro", await CodigoAsync(urgente));
-        Assert.Equal(HttpStatusCode.Created, normal.StatusCode);
+        Assert.Equal("avisos_requieren_pro", await CodigoAsync(urgente));
+        Assert.Equal(HttpStatusCode.Forbidden, normal.StatusCode);
+        Assert.Equal("avisos_requieren_pro", await CodigoAsync(normal));
+        Assert.False(destinatarios.GetProperty("conAvisos").GetBoolean());
         Assert.False(destinatarios.GetProperty("urgentesDisponibles").GetBoolean());
-        Assert.All(destinatarios.GetProperty("tutores").EnumerateArray(), t => Assert.Equal(0, t.GetProperty("urgentesRestantes").GetInt32()));
-        Assert.Equal(HttpStatusCode.OK, excel.StatusCode);
+        Assert.False(avisos.GetProperty("conAvisos").GetBoolean());
+        Assert.Equal(HttpStatusCode.Forbidden, excel.StatusCode);
+        Assert.Equal("excel_requiere_pro", await CodigoAsync(excel));
+        Assert.False(matriz.GetProperty("conPromedios").GetBoolean());
+        Assert.Empty(matriz.GetProperty("resultados").EnumerateArray());
+        Assert.NotEmpty(matriz.GetProperty("celdas").EnumerateArray());
+        Assert.Equal(0, await ContarAsync($"SELECT count(*) FROM aviso WHERE grupo_id = '{g.Id}'"));
         Assert.Empty(_fabrica.Whatsapp.Enviados);
+    }
+
+    [Fact]
+    public async Task RN097_GrupoPro_VePromediosExportaYAvisa()
+    {
+        var d = await DocenteAsync(1);
+        var g = d.Grupos[0];
+        await ListoParaCierreAsync(d, g);
+        await d.Cliente.ActivarProAsync(g.Id);
+
+        var matriz = await d.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/periodos/{g.PeriodoId}/calificaciones");
+        var excel = await d.Cliente.GetAsync($"/api/v1/periodos/{g.PeriodoId}/exportacion.xlsx");
+        var avisos = await d.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/grupos/{g.Id}/avisos");
+
+        Assert.True(matriz.GetProperty("conPromedios").GetBoolean());
+        Assert.NotEmpty(matriz.GetProperty("resultados").EnumerateArray());
+        Assert.Equal(HttpStatusCode.OK, excel.StatusCode);
+        Assert.True(avisos.GetProperty("conAvisos").GetBoolean());
     }
 
     [Fact]

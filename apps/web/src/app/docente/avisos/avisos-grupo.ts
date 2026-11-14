@@ -18,6 +18,7 @@ import { forma } from '../../shared/plural';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
 import { PestanasGrupo } from '../grupos/pestanas-grupo';
+import { CandadoPro } from '../planes/candado-pro';
 import { fechaAviso, fraccionLeidos } from './avisos';
 import { AvisosGrupoService } from './avisos.service';
 
@@ -27,7 +28,7 @@ import { AvisosGrupoService } from './avisos.service';
  */
 @Component({
   selector: 'app-avisos-grupo',
-  imports: [TranslocoDirective, RouterLink, PestanasGrupo, Icono],
+  imports: [TranslocoDirective, RouterLink, PestanasGrupo, Icono, CandadoPro],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -67,6 +68,9 @@ import { AvisosGrupoService } from './avisos.service';
           </button>
         </div>
       } @else if (datos(); as d) {
+        @if (d.conAvisos === false && !d.soloLectura) {
+          <app-candado-pro class="sin-avisos" funcion="avisos" [grupoId]="id()" />
+        }
         @if (Number(d.tutores) === 0) {
           <section class="vacio" aria-labelledby="sin-tutores">
             <h2 id="sin-tutores">{{ t('sinTutores.titulo') }}</h2>
@@ -127,6 +131,10 @@ import { AvisosGrupoService } from './avisos.service';
     </div>
   `,
   styles: `
+    .sin-avisos {
+      margin-block-end: var(--espacio-5);
+    }
+
     hgroup {
       display: grid;
       gap: var(--espacio-1);
@@ -286,7 +294,7 @@ export class AvisosGrupo implements OnInit {
   /** RN-071: solo con tutores y si el grupo no está archivado. */
   protected readonly puedeEnviar = computed(() => {
     const d = this.datos();
-    return !!d && !d.soloLectura && Number(d.tutores) > 0;
+    return !!d && !d.soloLectura && d.conAvisos !== false && Number(d.tutores) > 0;
   });
 
   async ngOnInit(): Promise<void> {

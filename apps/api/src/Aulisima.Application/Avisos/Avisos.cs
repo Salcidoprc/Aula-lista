@@ -12,7 +12,8 @@ namespace Aulisima.Application.Avisos;
 public sealed record AvisoResumenDto(Guid Id, string Titulo, bool Urgente, DateTimeOffset CreadoEn, int Destinatarios, int Leidos);
 
 /// <summary>Avisos del grupo, del más nuevo al más viejo (SPEC-07, pantalla Avisos).</summary>
-public sealed record AvisosDto(Guid GrupoId, bool SoloLectura, int Tutores, IReadOnlyList<AvisoResumenDto> Avisos);
+/// <summary>La pestaña Avisos. Sin <see cref="ConAvisos"/> (grupo Gratis, RN-097) se ven los enviados pero no se envían nuevos.</summary>
+public sealed record AvisosDto(Guid GrupoId, bool SoloLectura, int Tutores, IReadOnlyList<AvisoResumenDto> Avisos, bool ConAvisos = true);
 
 public sealed record AlumnoDeTutorDto(Guid Id, string Nombres, string Apellidos);
 
@@ -22,7 +23,8 @@ public sealed record DestinatarioDto(
 
 /// <summary><see cref="UrgentesDisponibles"/>: el grupo tiene Pro o la prueba Pro, así que puede mandar urgentes (SPEC-08).</summary>
 public sealed record DestinatariosDto(
-    Guid GrupoId, bool SoloLectura, bool UrgentesDisponibles, int UrgentesPorTutor, IReadOnlyList<DestinatarioDto> Tutores);
+    Guid GrupoId, bool SoloLectura, bool UrgentesDisponibles, int UrgentesPorTutor, IReadOnlyList<DestinatarioDto> Tutores,
+    bool ConAvisos = true);
 
 /// <summary>RN-070, RN-071: sin <see cref="TutorIds"/> va a todos los tutores del grupo.</summary>
 public sealed record CrearAviso(string? Titulo, string? Cuerpo, bool Urgente, IReadOnlyList<Guid>? TutorIds);
@@ -61,7 +63,7 @@ public static class AccionesAuditoriaAvisos
 }
 
 /// <summary>La pestaña Avisos del grupo.</summary>
-public sealed class AvisosDelGrupoCasoUso(IRepositorioGrupos grupos, IRepositorioAvisos avisos)
+public sealed class AvisosDelGrupoCasoUso(IRepositorioGrupos grupos, IRepositorioAvisos avisos, Planes.AccesoPro acceso)
 {
     public async Task<AvisosDto?> EjecutarAsync(Guid grupoId, CancellationToken ct)
     {
@@ -75,7 +77,8 @@ public sealed class AvisosDelGrupoCasoUso(IRepositorioGrupos grupos, IRepositori
         var lista = (await avisos.AvisosAsync(grupoId, ct))
             .Select(a => new AvisoResumenDto(a.Aviso.Id, a.Aviso.Titulo, a.Aviso.Urgente, a.Aviso.CreatedAt, a.Destinatarios, a.Leidos))
             .ToList();
-        return new AvisosDto(grupoId, grupo.EstaArchivado, tutores, lista);
+        return new AvisosDto(
+            grupoId, grupo.EstaArchivado, tutores, lista, await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.Avisos, ct));
     }
 }
 
@@ -98,7 +101,8 @@ public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEnt
             pro,
             plan.Opciones.UrgentesPorTutorPorMes,
             tutores.Select(t => new DestinatarioDto(
-                t.TutorId, t.Nombre, t.Parentesco, Alumnos(t.Alumnos), t.Push, t.Correo is not null, restantes(t.TutorId))).ToList());
+                t.TutorId, t.Nombre, t.Parentesco, Alumnos(t.Alumnos), t.Push, t.Correo is not null, restantes(t.TutorId))).ToList(),
+            await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.Avisos, ct));
     }
 
     internal static IReadOnlyList<AlumnoDeTutorDto> Alumnos(IEnumerable<Alumno> alumnos) =>
@@ -107,8 +111,8 @@ public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEnt
 
 /// <summary>
 /// RF-070, RF-071: crea el aviso y decide por dónde le llega a cada tutor (RN-072). El envío sale en un trabajo al
-/// confirmarse; los WhatsApp quedan apartados desde ya para que dos avisos seguidos no pasen el límite (RN-086). Los
-/// urgentes son de Pro (SPEC-08): llegan por WhatsApp del sistema.
+/// confirmarse; los WhatsApp quedan apartados desde ya para que dos avisos seguidos no pasen el límite (RN-086). Enviar
+/// avisos es de Pro (RN-097) y los urgentes, además, llegan por WhatsApp del sistema.
 /// </summary>
 public sealed class CrearAvisoCasoUso(
     IRepositorioGrupos grupos, IRepositorioAvisos avisos, PlanEntregas plan, DetalleAvisoCasoUso detalle, IColaTrabajos cola,
@@ -124,6 +128,11 @@ public sealed class CrearAvisoCasoUso(
         if (grupo.EstaArchivado)
         {
             return Resultado.Fallo<AvisoDto>(ErroresGrupos.GrupoArchivado);
+        }
+
+        if (!await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.Avisos, ct))
+        {
+            return Resultado.Fallo<AvisoDto>(Domain.Planes.ErroresPlanes.AvisosRequierenPro);
         }
 
         if (comando.Urgente && !await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.AvisosUrgentes, ct))

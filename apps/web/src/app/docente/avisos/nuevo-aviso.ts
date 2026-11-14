@@ -21,6 +21,7 @@ import { Ocupado } from '../../shared/ocupado';
 import { forma } from '../../shared/plural';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
+import { CandadoPro } from '../planes/candado-pro';
 import {
   CUERPO_MAXIMO,
   TITULO_MAXIMO,
@@ -41,7 +42,7 @@ type Para = 'todos' | 'elegir';
  */
 @Component({
   selector: 'app-nuevo-aviso',
-  imports: [TranslocoDirective, RouterLink, Icono, Ocupado],
+  imports: [TranslocoDirective, RouterLink, Icono, Ocupado, CandadoPro],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -64,7 +65,10 @@ type Para = 'todos' | 'elegir';
           </button>
         </div>
       } @else if (datos(); as d) {
-        @if (d.soloLectura || d.tutores.length === 0) {
+        @if (d.conAvisos === false && !d.soloLectura) {
+          <!-- RN-097: enviar avisos es de Pro; quien llega directo por la dirección ve por qué. -->
+          <app-candado-pro funcion="avisos" [grupoId]="id()" />
+        } @else if (d.soloLectura || d.tutores.length === 0) {
           <section class="vacio" aria-labelledby="sin-tutores">
             <h2 id="sin-tutores">
               {{ d.soloLectura ? t('archivado') : t('sinTutores.titulo') }}

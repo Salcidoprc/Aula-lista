@@ -6,6 +6,7 @@ import { ConteosBoletasDto } from '../models/conteos-boletas-dto';
 import { PlanGrupoDto } from '../models/plan-grupo-dto';
 export interface BoletasDto {
   alumnos: Array<BoletaAlumnoDto>;
+  conExcel?: boolean;
   conteos: ConteosBoletasDto;
   decimalesFinal: (number | string);
   estado: string;

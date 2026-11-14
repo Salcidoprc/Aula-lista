@@ -52,7 +52,8 @@ internal static class Validacion
                 || error == ErroresEvaluacion.GrupoConCalificaciones || error == ErroresEvaluacion.FormaConCalificaciones
                 => StatusCodes.Status409Conflict,
             _ when error == ErroresCierre.RequierePro || error == ErroresPlanes.BoletasRequierenPro
-                || error == ErroresPlanes.WhatsappRequierePro
+                || error == ErroresPlanes.WhatsappRequierePro || error == ErroresPlanes.ExcelRequierePro
+                || error == ErroresPlanes.AvisosRequierenPro
                 => StatusCodes.Status403Forbidden,
             _ when error == ErroresPlanes.PruebaUsada || error == ErroresPlanes.YaTieneTarjeta || error == ErroresPlanes.SinTarjeta
                 || error == ErroresPlanes.SinCambios || error == ErroresPlanes.PrepagoVigente || error == ErroresPlanes.AgregarRequierePago

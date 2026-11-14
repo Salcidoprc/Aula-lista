@@ -2999,6 +2999,16 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -5289,6 +5299,10 @@
             "items": {
               "$ref": "#/components/schemas/AvisoResumenDto"
             }
+          },
+          "conAvisos": {
+            "type": "boolean",
+            "default": true
           }
         }
       },
@@ -5578,6 +5592,10 @@
             "items": {
               "$ref": "#/components/schemas/BoletaAlumnoDto"
             }
+          },
+          "conExcel": {
+            "type": "boolean",
+            "default": true
           }
         }
       },
@@ -6931,6 +6949,10 @@
             "items": {
               "$ref": "#/components/schemas/DestinatarioDto"
             }
+          },
+          "conAvisos": {
+            "type": "boolean",
+            "default": true
           }
         }
       },
@@ -8196,6 +8218,10 @@
             "items": {
               "$ref": "#/components/schemas/AsistenciaAlumnoDto"
             }
+          },
+          "conPromedios": {
+            "type": "boolean",
+            "default": true
           }
         }
       },

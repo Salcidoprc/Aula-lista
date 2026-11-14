@@ -14,14 +14,15 @@ namespace Aulisima.Pruebas.Integracion;
 public sealed class Spec08CatalogoPruebas(BaseDeDatosFixture baseDeDatos) : IDisposable
 {
     private static readonly string[] NombresDeGrupo = ["A", "B", "C"];
-    private static readonly string[] TodasLasFunciones = ["cierre_ia", "boletas", "whatsapp_boletas", "avisos_urgentes"];
+    private static readonly string[] TodasLasFunciones =
+        ["promedios", "exportar_excel", "avisos", "cierre_ia", "boletas", "whatsapp_boletas", "avisos_urgentes"];
 
     private readonly FabricaApi _fabrica = new(baseDeDatos);
 
     public void Dispose() => _fabrica.Dispose();
 
     [Fact]
-    public async Task RF095_MigracionSiembraElProductoPro_Con79Mas29YMeses1_3_6()
+    public async Task RF095_RN097_MigracionSiembraElProductoPro_Con79Mas29YMeses1_3_6_YLasFuncionesQuePasanAPro()
     {
         var admin = await AdminAsync();
 
@@ -146,7 +147,7 @@ public sealed class Spec08CatalogoPruebas(BaseDeDatosFixture baseDeDatos) : IDis
 
         try
         {
-            (await admin.PutAsJsonAsync($"/api/v1/admin/productos/{id}", Editar(pro, ["cierre_ia", "boletas", "whatsapp_boletas"])))
+            (await admin.PutAsJsonAsync($"/api/v1/admin/productos/{id}", Editar(pro, ["promedios", "exportar_excel", "avisos", "cierre_ia", "boletas", "whatsapp_boletas"])))
                 .EnsureSuccessStatusCode();
             var sinFuncion = await d.Cliente.PostAsJsonAsync($"/api/v1/grupos/{d.Grupos[0]}/avisos", aviso);
 

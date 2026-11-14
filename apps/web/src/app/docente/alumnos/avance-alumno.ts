@@ -24,6 +24,7 @@ import { mostrarFecha } from '../../shared/fechas';
 import { crearEnfoque } from '../../shared/foco';
 import { Ocupado } from '../../shared/ocupado';
 import { EvaluacionService } from '../evaluacion/evaluacion.service';
+import { CandadoPro } from '../planes/candado-pro';
 import {
   celdaVacia,
   dosDecimales,
@@ -57,7 +58,7 @@ interface NotaVista {
  */
 @Component({
   selector: 'app-avance-alumno',
-  imports: [TranslocoDirective, Ocupado],
+  imports: [TranslocoDirective, Ocupado, CandadoPro],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="avance" *transloco="let t; prefix: 'avance'">
@@ -104,13 +105,17 @@ interface NotaVista {
                 <span class="esqueleto fila-esqueleto" aria-hidden="true"></span>
               </div>
             } @else {
-              <div class="promedio-actual">
-                <span class="etiqueta dato-suave">{{ t('promedio') }}</span>
-                <span class="valor cifras">{{ promedio() }}</span>
-                @if (parcial()) {
-                  <span class="parcial dato-suave">{{ t('parcial') }}</span>
-                }
-              </div>
+              @if (conPromedios()) {
+                <div class="promedio-actual">
+                  <span class="etiqueta dato-suave">{{ t('promedio') }}</span>
+                  <span class="valor cifras">{{ promedio() }}</span>
+                  @if (parcial()) {
+                    <span class="parcial dato-suave">{{ t('parcial') }}</span>
+                  }
+                </div>
+              } @else {
+                <app-candado-pro funcion="promedios" [grupoId]="alumno().grupoId" />
+              }
 
               @if (rubros().length === 0) {
                 <p class="dato-suave">{{ t('sinRubros') }}</p>
@@ -125,14 +130,16 @@ interface NotaVista {
                             <span class="peso dato-suave cifras">{{
                               t('peso', { peso: r.peso })
                             }}</span>
-                            <span
-                              class="valor-rubro cifras"
-                              [class.sin-datos]="r.promedio === null"
-                              >{{ r.promedio ?? t('sinDatos') }}</span
-                            >
-                            <span class="progreso" aria-hidden="true">
-                              <span [style.inline-size.%]="r.porcentaje"></span>
-                            </span>
+                            @if (conPromedios()) {
+                              <span
+                                class="valor-rubro cifras"
+                                [class.sin-datos]="r.promedio === null"
+                                >{{ r.promedio ?? t('sinDatos') }}</span
+                              >
+                              <span class="progreso" aria-hidden="true">
+                                <span [style.inline-size.%]="r.porcentaje"></span>
+                              </span>
+                            }
                           </span>
                         </summary>
                         @if (r.actividades.length === 0) {
@@ -483,10 +490,12 @@ export class AvanceAlumno {
     const m = this.matriz();
     return m ? indexar(m) : null;
   });
+  /** RN-097: en un grupo Gratis se ven las calificaciones, sin promedios. */
+  protected readonly conPromedios = computed(() => this.matriz()?.conPromedios !== false);
   private readonly resultado = computed(() => {
     const m = this.matriz();
     const i = this.indice();
-    return m && i ? resultadoAlumno(m, i, this.alumno().id) : null;
+    return m && i && this.conPromedios() ? resultadoAlumno(m, i, this.alumno().id) : null;
   });
   /** El promedio de la unidad con los decimales y el redondeo del grupo (RN-035). */
   protected readonly promedio = computed(() => {

@@ -16,8 +16,11 @@ import { Ocupado } from '../../shared/ocupado';
 import { cifra } from './planes';
 import { PlanesService } from './planes.service';
 
+/** Lo que un grupo Gratis no tiene (RN-041, RN-080, RN-097); cada una tiene su título y su texto. */
+export type FuncionConCandado = 'cierre' | 'boletas' | 'promedios' | 'excel' | 'avisos';
+
 /**
- * El momento de decidir en un grupo Gratis (SPEC-08, RN-080, RN-081): qué da Pro en esta pantalla y un camino claro.
+ * El momento de decidir en un grupo Gratis (SPEC-08, RN-080, RN-081, RN-097): qué da Pro en esta pantalla y un camino claro.
  * En el cierre, si el docente no ha usado su prueba, la acción principal la activa en este grupo; si ya la usó, lleva a
  * su plan con el grupo elegido.
  */
@@ -67,7 +70,7 @@ import { PlanesService } from './planes.service';
             }}
           </p>
         }
-        @if (funcion() === 'boletas' && plan().pruebaDisponible) {
+        @if (funcion() === 'boletas' && plan()?.pruebaDisponible) {
           <p class="nota">{{ t('pruebaEnCierre') }}</p>
         }
         <div class="acciones">
@@ -134,8 +137,9 @@ export class CandadoPro implements OnInit {
   protected readonly cifra = cifra;
   private readonly planes = inject(PlanesService);
 
-  readonly funcion = input.required<'cierre' | 'boletas'>();
-  readonly plan = input.required<PlanGrupoDto>();
+  readonly funcion = input.required<FuncionConCandado>();
+  /** El plan del grupo, si la pantalla lo trae; sin él no se ofrece la prueba. */
+  readonly plan = input<PlanGrupoDto | null>(null);
   readonly grupoId = input.required<string>();
   /** Se cumplen los requisitos del cierre y hay red: la prueba se activa al iniciarlo. */
   readonly puedeUsarPrueba = input(true);
@@ -153,6 +157,6 @@ export class CandadoPro implements OnInit {
   }
 
   protected usarPrueba(): boolean {
-    return this.funcion() === 'cierre' && this.plan().pruebaDisponible;
+    return this.funcion() === 'cierre' && !!this.plan()?.pruebaDisponible;
   }
 }

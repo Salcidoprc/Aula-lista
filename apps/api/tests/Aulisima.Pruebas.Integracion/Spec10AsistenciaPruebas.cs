@@ -296,6 +296,8 @@ public sealed class Spec10AsistenciaPruebas(BaseDeDatosFixture baseDeDatos) : ID
             ids.Add((await alta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid());
         }
 
+        // Los promedios de la matriz son de Pro (RN-097).
+        await cliente.ActivarProAsync(grupoId);
         var tipos = await cliente.GetFromJsonAsync<JsonElement>("/api/v1/tipos-rubro");
         return new Grupo(cliente, cicloId, grupoId, periodo, ids, tipos);
     }
