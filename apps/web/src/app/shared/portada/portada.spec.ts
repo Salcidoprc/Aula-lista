@@ -12,8 +12,8 @@ describe('Portada', () => {
   }
 
   it('sin grado usa el color de la marca y no muestra número', () => {
-    const el = crear({ titulo: 'Aula Lista' });
-    expect(el.textContent).toContain('Aula Lista');
+    const el = crear({ titulo: 'Aulísima' });
+    expect(el.textContent).toContain('Aulísima');
     expect(el.hasAttribute('data-grado')).toBe(false);
     expect(el.querySelector('.numero')).toBeNull();
   });

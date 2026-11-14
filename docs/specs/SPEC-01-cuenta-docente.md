@@ -58,7 +58,7 @@ Decisiones de implementación en [ADR-0013](../decisiones/ADR-0013-cuenta-docent
 | `GET /api/v1/docente/exportaciones/{id}/{formato}` | Descarga el archivo `excel` o `pdf` de una exportación vigente |
 | `DELETE /api/v1/docente` | Solicita eliminación de la cuenta (pide contraseña o reautenticación con Google) |
 
-Google se activa solo si la API tiene `Google__ClientId` y `Google__ClientSecret`; sin ellos, `/callback` y `/completar` no existen y `/inicio` regresa a `/cuenta/entrar?error=google_no_disponible`. `volver` solo acepta rutas locales de la web. El token de actualización viaja en la cookie `aula_lista_sesion` (`HttpOnly`, `Secure`, `SameSite=Strict`, ruta `/api/v1/cuentas`); vence a los 30 días y cada renovación vuelve a contar 30 días. El token de acceso va en el cuerpo de la respuesta y se manda en `Authorization: Bearer`.
+Google se activa solo si la API tiene `Google__ClientId` y `Google__ClientSecret`; sin ellos, `/callback` y `/completar` no existen y `/inicio` regresa a `/cuenta/entrar?error=google_no_disponible`. `volver` solo acepta rutas locales de la web. El token de actualización viaja en la cookie `aulisima_sesion` (`HttpOnly`, `Secure`, `SameSite=Strict`, ruta `/api/v1/cuentas`); vence a los 30 días y cada renovación vuelve a contar 30 días. El token de acceso va en el cuerpo de la respuesta y se manda en `Authorization: Bearer`.
 
 ## Pantallas
 

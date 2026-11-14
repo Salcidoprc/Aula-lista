@@ -1,4 +1,4 @@
--- Roles de Aula Lista (reglas/03-base-de-datos.md).
+-- Roles de Aulísima (reglas/03-base-de-datos.md).
 -- app_migraciones: dueño del esquema, aplica migraciones.
 -- app_runtime: usado por la API; sin BYPASSRLS ni DDL.
 -- Las contraseñas llegan como variables de psql (-v) desde el entorno; nunca se escriben aquí.

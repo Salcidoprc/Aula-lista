@@ -3,11 +3,11 @@ import { limpiarEnvio } from './limpieza';
 describe('limpiarEnvio (SPEC-09, RN-019)', () => {
   it('quita el token del tutor del fragmento en la URL de la página', () => {
     const envio = limpiarEnvio({
-      meta: { page: { url: 'https://aulalista.mx/tutor#9f8e7d6c5b4a-token-secreto' } },
+      meta: { page: { url: 'https://aulisima.com/tutor#9f8e7d6c5b4a-token-secreto' } },
       payload: { type: 'Error', value: 'falló' },
     });
 
-    expect(envio.meta.page.url).toBe('https://aulalista.mx/tutor');
+    expect(envio.meta.page.url).toBe('https://aulisima.com/tutor');
     expect(JSON.stringify(envio)).not.toContain('token-secreto');
   });
 
@@ -16,7 +16,7 @@ describe('limpiarEnvio (SPEC-09, RN-019)', () => {
       payload: {
         value: 'Http failure response for /cuenta/restablecer?token=abc123: 400 Bad Request',
         stacktrace: {
-          frames: [{ filename: 'https://aulalista.mx/main-X1.js?v=2#L10', lineno: 1 }],
+          frames: [{ filename: 'https://aulisima.com/main-X1.js?v=2#L10', lineno: 1 }],
         },
       },
     });
@@ -24,7 +24,7 @@ describe('limpiarEnvio (SPEC-09, RN-019)', () => {
     expect(envio.payload.value).toContain('Http failure response for /cuenta/restablecer');
     expect(envio.payload.value).not.toContain('abc123');
     expect(envio.payload.stacktrace.frames[0]).toEqual({
-      filename: 'https://aulalista.mx/main-X1.js',
+      filename: 'https://aulisima.com/main-X1.js',
       lineno: 1,
     });
   });

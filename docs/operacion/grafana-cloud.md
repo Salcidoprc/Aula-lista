@@ -1,6 +1,6 @@
 # Monitoreo con Grafana Cloud
 
-Cómo conectar Aula Lista a Grafana Cloud (plan gratis, ADR-0015) y qué hacer cuando llega una alerta. Lo que se mide y se alerta está en SPEC-09, sección Observabilidad.
+Cómo conectar Aulísima a Grafana Cloud (plan gratis, ADR-0015) y qué hacer cuando llega una alerta. Lo que se mide y se alerta está en SPEC-09, sección Observabilidad.
 
 Todo se puede preparar antes de tener servidor: la cuenta, las alertas y los avisos. Los datos empiezan a llegar cuando la API y la web corren en Coolify con sus variables.
 
@@ -16,7 +16,7 @@ Todo se puede preparar antes de tener servidor: la cuenta, las alertas y los avi
 ## 1. Crear la cuenta y el stack
 
 1. Entra a [grafana.com](https://grafana.com/auth/sign-up/create-user) y crea una cuenta gratis (no pide tarjeta).
-2. Al crear el stack, ponle un nombre corto (por ejemplo `aulalista`; quedará `https://aulalista.grafana.net`) y elige una región de Estados Unidos, la más cercana a México.
+2. Al crear el stack, ponle un nombre corto (por ejemplo `aulisima`; quedará `https://aulisima.grafana.net`) y elige una región de Estados Unidos, la más cercana a México.
 3. Invita a quien vaya a ver alertas (el plan gratis da 3 usuarios).
 
 ## 2. Logs, trazas y métricas de la API (OTLP)
@@ -33,12 +33,12 @@ Todo se puede preparar antes de tener servidor: la cuenta, las alertas y los avi
    | `OTEL_RESOURCE_ATTRIBUTES` | `deployment.environment=staging` (o `produccion`) |
 
 4. Pon las dos primeras y `OTEL_EXPORTER_OTLP_HEADERS` también en la tarea programada de respaldos (`infra/coolify.md`, paso 6), para que avise si un respaldo falla.
-5. Redespliega. En Grafana, **Explore** → datasource de logs → `{service_name="aula-lista-api"}` debe mostrar líneas en un minuto.
+5. Redespliega. En Grafana, **Explore** → datasource de logs → `{service_name="aulisima-api"}` debe mostrar líneas en un minuto.
 
 ## 3. Errores del navegador (Faro)
 
 1. En tu stack de Grafana, menú **Frontend** → **Frontend Observability** → **Create new**.
-2. Nombre `aula-lista-web`. En **CORS allowed origins** pon el dominio público de la web (por ejemplo `https://staging.aulalista.mx`).
+2. Nombre `aulisima-web`. En **CORS allowed origins** pon el dominio público de la web (por ejemplo `https://staging.aulisima.com`).
 3. Copia la **URL del colector** (`https://faro-collector-....grafana.net/collect/<clave>`).
 4. En Coolify, en el servicio `web`, agrega `FARO_URL` con esa URL y `FARO_ENTORNO=staging`. Redespliega.
 5. Comprueba: `https://<tu dominio>/observabilidad.json` responde `{"faro":true,...}`. Sin `FARO_URL` responde 404 y la web no carga nada de Faro.
@@ -48,7 +48,7 @@ El navegador nunca habla con Grafana: manda a `/faro` del mismo dominio y nginx 
 ## 4. Monitor de `/salud` (Synthetic Monitoring)
 
 1. Menú **Testing & synthetics** → **Synthetics** → **Add new check** → **API Endpoint** (HTTP).
-2. **Job name:** `aula-lista-salud` (exacto: la alerta lo busca con ese nombre).
+2. **Job name:** `aulisima-salud` (exacto: la alerta lo busca con ese nombre).
 3. **Request target:** `https://<tu dominio>/salud`, método GET.
 4. **Frequency:** 1 minuto. **Probe locations:** 2 de Norteamérica. Así son unas 87,600 ejecuciones al mes, dentro de las 100,000 gratis; con 3 sondas te pasarías.
 5. Guarda. La alerta "/salud no responde" avisa cuando las dos sondas fallan 3 minutos seguidos.
@@ -76,8 +76,8 @@ Telegram (opcional, recomendado para lo urgente):
    | `TELEGRAM_BOT_TOKEN` | el token del bot (opcional) |
    | `TELEGRAM_CHAT_ID` | el id del chat (opcional) |
 
-3. **Actions** → **Configurar Grafana** → **Run workflow**. Termina con "Listo: 6 alertas en la carpeta Aula Lista".
-4. En Grafana: **Alerting** → **Contact points** → "Aula Lista" → **Test**, para confirmar que llegan el correo y el mensaje.
+3. **Actions** → **Configurar Grafana** → **Run workflow**. Termina con "Listo: 6 alertas en la carpeta Aulísima".
+4. En Grafana: **Alerting** → **Contact points** → "Aulísima" → **Test**, para confirmar que llegan el correo y el mensaje.
 
 Vuelve a correr el flujo cada vez que cambie `infra/grafana/` o los destinatarios. Reemplaza las alertas, los contactos y la política de avisos; lo que hayas cambiado a mano en esas partes se pierde.
 
@@ -85,7 +85,7 @@ Vuelve a correr el flujo cada vez que cambie `infra/grafana/` o los destinatario
 
 | Alerta | Cuándo | Repite | Qué hacer |
 | --- | --- | --- | --- |
-| API: más de 2 % de respuestas 5xx en 5 minutos | errores del servidor sobre el total, sin contar `/salud` | cada 4 h | Explore → logs de `aula-lista-api` con nivel Error; trazas con error en Tempo |
+| API: más de 2 % de respuestas 5xx en 5 minutos | errores del servidor sobre el total, sin contar `/salud` | cada 4 h | Explore → logs de `aulisima-api` con nivel Error; trazas con error en Tempo |
 | Job fallido tras sus reintentos | algún trabajo (IA, WhatsApp, correo, push, pagos, boletas, exportación, retención) agotó sus reintentos | cada 4 h | `/admin` → Errores tiene docente, referencia y tipo |
 | Respaldo fallido | `respaldar.sh` terminó con error | cada 4 h | salida de la tarea en Coolify; corregir y correrla a mano |
 | Sin respaldo exitoso en 26 horas | no llegó `respaldo_ok` | una vez al día | la tarea no corrió o le faltan las variables `OTEL_*`. Mientras no haya respaldos programados, esta alerta sigue activa a propósito |

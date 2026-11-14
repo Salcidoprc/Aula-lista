@@ -10,7 +10,7 @@ si `restaurar.sh` dice que los conteos son iguales y la API arranca contra esa b
 2. Con `PG*` apuntando a esa base con un superusuario, `RESPALDO_DESTINO` y `RCLONE_CONFIG_*`:
    `infra/respaldos/restaurar.sh <respaldo sin extensión> <archivo de la llave privada de age>`.
    La llave privada se trae solo para esto y se borra al terminar.
-3. Arrancar la API contra la base restaurada (`ConnectionStrings__AulaLista` con `app_runtime`) y revisar `/salud/lista`.
+3. Arrancar la API contra la base restaurada (`ConnectionStrings__Aulisima` con `app_runtime`) y revisar `/salud/lista`.
 4. Borrar la base restaurada y anotar el resultado.
 
 ## Registro

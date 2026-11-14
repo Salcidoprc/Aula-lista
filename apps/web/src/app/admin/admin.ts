@@ -165,7 +165,7 @@ export class Admin {
   constructor() {
     controlarPortada()({
       titulo: inject(TranslocoService).translate('admin.titulo'),
-      subtitulo: 'Aula Lista',
+      subtitulo: 'Aulísima',
     });
   }
 

@@ -15,7 +15,7 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
   }) => {
     const correo = correoNuevo();
     await page.goto('/cuenta/registro');
-    await expect(page).toHaveTitle('Crea tu cuenta · Aula Lista');
+    await expect(page).toHaveTitle('Crea tu cuenta · Aulísima');
     await sinFallasDeAccesibilidad(page);
 
     await page.getByLabel('Correo').fill(correo);
@@ -126,7 +126,7 @@ test.describe('SPEC-01: cuenta y acceso del docente', () => {
     await expect(excel).toBeVisible({ timeout: 30_000 });
     const descarga = page.waitForEvent('download');
     await excel.click();
-    expect((await descarga).suggestedFilename()).toMatch(/^aula-lista-mis-datos-.*\.xlsx$/);
+    expect((await descarga).suggestedFilename()).toMatch(/^aulisima-mis-datos-.*\.xlsx$/);
 
     await page.getByRole('link', { name: 'Volver a Ajustes' }).click();
     await page.getByRole('button', { name: 'Eliminar mi cuenta' }).click();

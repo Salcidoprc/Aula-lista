@@ -1,6 +1,6 @@
 {
   "title": "operacion",
-  "folderUid": "aula-lista",
+  "folderUid": "aulisima",
   "interval": 60,
   "rules": [
     {
@@ -11,12 +11,12 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "critica"
       },
       "annotations": {
         "summary": "La API responde con error a más del 2 % de las solicitudes.",
-        "description": "Revisa los logs de aula-lista-api en Explore (nivel Error) y las trazas con estado de error.",
+        "description": "Revisa los logs de aulisima-api en Explore (nivel Error) y las trazas con estado de error.",
         "runbook_url": "https://github.com/salcidoprc/aula-lista/blob/main/docs/operacion/grafana-cloud.md"
       },
       "data": [
@@ -29,7 +29,7 @@
           "datasourceUid": "${DS_PROM}",
           "model": {
             "refId": "A",
-            "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aula-lista-api\",http_response_status_code=~\"5..\",http_route!=\"/salud\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aula-lista-api\",http_route!=\"/salud\"}[5m]))",
+            "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aulisima-api\",http_response_status_code=~\"5..\",http_route!=\"/salud\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{job=~\"(.+/)?aulisima-api\",http_route!=\"/salud\"}[5m]))",
             "instant": true,
             "range": false
           }
@@ -76,7 +76,7 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "aviso"
       },
       "annotations": {
@@ -94,7 +94,7 @@
           "datasourceUid": "${DS_PROM}",
           "model": {
             "refId": "A",
-            "expr": "sum by (origen) (increase(aula_lista_trabajos_fallidos_total[10m]))",
+            "expr": "sum by (origen) (increase(aulisima_trabajos_fallidos_total[10m]))",
             "instant": true,
             "range": false
           }
@@ -141,7 +141,7 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "critica"
       },
       "annotations": {
@@ -159,7 +159,7 @@
           "datasourceUid": "${DS_LOGS}",
           "model": {
             "refId": "A",
-            "expr": "sum(count_over_time({service_name=\"aula-lista-respaldos\"} |= \"respaldo_fallido\" [1h]))",
+            "expr": "sum(count_over_time({service_name=\"aulisima-respaldos\"} |= \"respaldo_fallido\" [1h]))",
             "queryType": "instant"
           }
         },
@@ -205,7 +205,7 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "critica",
         "frecuencia": "diaria"
       },
@@ -224,7 +224,7 @@
           "datasourceUid": "${DS_LOGS}",
           "model": {
             "refId": "A",
-            "expr": "absent_over_time({service_name=\"aula-lista-respaldos\"} |= \"respaldo_ok\" [26h])",
+            "expr": "absent_over_time({service_name=\"aulisima-respaldos\"} |= \"respaldo_ok\" [26h])",
             "queryType": "instant"
           }
         },
@@ -270,7 +270,7 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "aviso",
         "frecuencia": "diaria"
       },
@@ -289,7 +289,7 @@
           "datasourceUid": "${DS_PROM}",
           "model": {
             "refId": "A",
-            "expr": "max(max_over_time(aula_lista_grupos_costo_alto[2h]))",
+            "expr": "max(max_over_time(aulisima_grupos_costo_alto[2h]))",
             "instant": true,
             "range": false
           }
@@ -336,7 +336,7 @@
       "noDataState": "OK",
       "execErrState": "Error",
       "labels": {
-        "servicio": "aula-lista",
+        "servicio": "aulisima",
         "severidad": "critica"
       },
       "annotations": {
@@ -354,7 +354,7 @@
           "datasourceUid": "${DS_PROM}",
           "model": {
             "refId": "A",
-            "expr": "max(max_over_time(probe_success{job=\"aula-lista-salud\"}[3m]))",
+            "expr": "max(max_over_time(probe_success{job=\"aulisima-salud\"}[3m]))",
             "instant": true,
             "range": false
           }

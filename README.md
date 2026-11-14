@@ -1,4 +1,4 @@
-# Aula Lista
+# Aulísima
 
 App web (PWA) para que docentes de primaria y secundaria en México capturen calificaciones, cierren periodos con observaciones redactadas por IA, publiquen boletas y avisen a los tutores sin que estos instalen nada.
 

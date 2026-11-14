@@ -1,12 +1,12 @@
 # Entorno local: PostgreSQL 18 con los roles de producción, migraciones, API y web.
 # Uso: cp infra/.env.example infra/.env && docker compose -f infra/docker-compose.yml up --build
-name: aula-lista
+name: aulisima
 
 services:
   db:
     image: postgres:18-alpine
     environment:
-      POSTGRES_DB: aula_lista
+      POSTGRES_DB: aulisima
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${CLAVE_POSTGRES:?Define CLAVE_POSTGRES en infra/.env}
       CLAVE_APP_MIGRACIONES: ${CLAVE_APP_MIGRACIONES:?Define CLAVE_APP_MIGRACIONES}
@@ -18,7 +18,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d aula_lista"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aulisima"]
       interval: 5s
       retries: 10
 
@@ -28,7 +28,7 @@ services:
       dockerfile: infra/docker/api.Dockerfile
     command: ["--migrar"]
     environment:
-      ConnectionStrings__Migraciones: Host=db;Database=aula_lista;Username=app_migraciones;Password=${CLAVE_APP_MIGRACIONES};GSS Encryption Mode=Disable
+      ConnectionStrings__Migraciones: Host=db;Database=aulisima;Username=app_migraciones;Password=${CLAVE_APP_MIGRACIONES};GSS Encryption Mode=Disable
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
       dockerfile: infra/docker/api.Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__AulaLista: Host=db;Database=aula_lista;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
+      ConnectionStrings__Aulisima: Host=db;Database=aulisima;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
       Jwt__ClaveFirma: ${JWT_CLAVE_FIRMA:?Define JWT_CLAVE_FIRMA}
       Cuentas__UrlWeb: ${URL_WEB:-http://localhost:8080}
       Ia__Proveedor: ${IA_PROVEEDOR:-simulado}
@@ -61,10 +61,10 @@ services:
       Planes__OxxoHabilitado: ${OXXO_HABILITADO:-true}
       Correo__Proveedor: ${CORREO_PROVEEDOR:-buzon}
       Correo__BrevoApiKey: ${BREVO_API_KEY:-}
-      Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulalista.mx}
+      Correo__Remitente: ${CORREO_REMITENTE:-no-responder@aulisima.com}
       Google__ClientId: ${GOOGLE_CLIENT_ID:-}
       Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
-      Almacen__Ruta: /var/lib/aula-lista/archivos
+      Almacen__Ruta: /var/lib/aulisima/archivos
       Trabajos__Servidor: ${TRABAJOS_SERVIDOR:-true}
       # Grafana Cloud (SPEC-09, ADR-0015). Vacías: no se manda nada.
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
@@ -75,7 +75,7 @@ services:
       Cuentas__IntentosInicioSesionPorMinuto: ${INTENTOS_INICIO_SESION:-5}
     volumes:
       # Exportaciones de datos (24 h). En Azure se cambia por almacenamiento de objetos (ADR-0013).
-      - archivos:/var/lib/aula-lista/archivos
+      - archivos:/var/lib/aulisima/archivos
     depends_on:
       migraciones:
         condition: service_completed_successfully

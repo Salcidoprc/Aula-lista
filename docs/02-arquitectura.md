@@ -39,10 +39,10 @@ flowchart LR
 ├─ docs/                     Fuente de verdad: PRD, requerimientos, specs, reglas, decisiones
 ├─ apps/
 │  ├─ api/                   Solución .NET 10
-│  │  ├─ src/AulaLista.Api            Endpoints (Minimal APIs), autenticación, composición
-│  │  ├─ src/AulaLista.Application    Casos de uso, validaciones, puertos (interfaces)
-│  │  ├─ src/AulaLista.Domain         Entidades, reglas de negocio, cálculos
-│  │  ├─ src/AulaLista.Infrastructure EF Core, Postgres, Claude, WhatsApp, correo, PDF, pagos
+│  │  ├─ src/Aulisima.Api            Endpoints (Minimal APIs), autenticación, composición
+│  │  ├─ src/Aulisima.Application    Casos de uso, validaciones, puertos (interfaces)
+│  │  ├─ src/Aulisima.Domain         Entidades, reglas de negocio, cálculos
+│  │  ├─ src/Aulisima.Infrastructure EF Core, Postgres, Claude, WhatsApp, correo, PDF, pagos
 │  │  └─ tests/                       Unit, integración (Testcontainers) y arquitectura
 │  └─ web/                   Proyecto Angular (PWA)
 │     └─ src/app/
@@ -207,7 +207,7 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | Stripe | Suscripción con tarjeta y prepago en OXXO (ADR-0009); simulado con la página "Pago de prueba" hasta tener claves (`Pagos__Proveedor`) | `IPasarelaPagos` |
 | QuestPDF | Boletas | `IGeneradorBoletas` |
 | Almacenamiento de objetos | PDFs, exportaciones y respaldos; en el piloto, disco del servidor en un volumen (ADR-0013) | `IAlmacenArchivos` |
-| Grafana Cloud (ADR-0015) | Logs, trazas y métricas por OTLP, errores del navegador (Faro por `/faro`), monitor de `/salud` y alertas de SPEC-09; apagado sin `OTEL_EXPORTER_OTLP_ENDPOINT` ni `FARO_URL` | Ninguna: OpenTelemetry y Serilog en `Program.cs`, `MetricasAulaLista` |
+| Grafana Cloud (ADR-0015) | Logs, trazas y métricas por OTLP, errores del navegador (Faro por `/faro`), monitor de `/salud` y alertas de SPEC-09; apagado sin `OTEL_EXPORTER_OTLP_ENDPOINT` ni `FARO_URL` | Ninguna: OpenTelemetry y Serilog en `Program.cs`, `MetricasAulisima` |
 
 ## Entornos
 

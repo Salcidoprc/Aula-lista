@@ -93,7 +93,7 @@ export function esCorregida(version: number | string): boolean {
 export type EstadoPush = 'sinSoporte' | 'agregarInicio' | 'denegado' | 'activado' | 'apagado';
 
 /**
- * RF-064, RN-066: qué puede hacer este navegador con las notificaciones. En iPhone solo hay push con Aula Lista
+ * RF-064, RN-066: qué puede hacer este navegador con las notificaciones. En iPhone solo hay push con Aulísima
  * agregada a la pantalla de inicio; si el permiso se negó, solo el navegador puede volver a darlo.
  */
 export function estadoPush(entorno: {

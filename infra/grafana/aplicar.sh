@@ -3,7 +3,7 @@
 # cuánto repetir. Se puede correr las veces que sea: crea lo que falta y reemplaza lo que ya existe.
 #
 # Variables:
-#   GRAFANA_URL         la del stack, por ejemplo https://aulalista.grafana.net
+#   GRAFANA_URL         la del stack, por ejemplo https://aulisima.grafana.net
 #   GRAFANA_TOKEN       token de una cuenta de servicio con rol Admin (la API de aprovisionamiento lo pide; nunca en el repositorio)
 #   ALERTA_CORREOS      uno o varios correos separados por ";" que reciben las alertas
 #   TELEGRAM_BOT_TOKEN  opcional: token del bot de Telegram (BotFather)
@@ -15,8 +15,8 @@ set -euo pipefail
 url="${GRAFANA_URL%/}"
 ds_prom="${DS_PROM:-grafanacloud-prom}"
 ds_logs="${DS_LOGS:-grafanacloud-logs}"
-carpeta="aula-lista"
-receptor="Aula Lista"
+carpeta="aulisima"
+receptor="Aulísima"
 aqui="$(dirname "$0")"
 
 # Llama a la API y deja el cuerpo en $respuesta y el código en $codigo. X-Disable-Provenance deja editar en la interfaz
@@ -45,7 +45,7 @@ done
 
 api GET "/api/folders/$carpeta"
 if [[ "$codigo" == 404 ]]; then
-    api POST /api/folders "$(jq -n --arg uid "$carpeta" '{uid: $uid, title: "Aula Lista"}')"
+    api POST /api/folders "$(jq -n --arg uid "$carpeta" '{uid: $uid, title: "Aulísima"}')"
     exigir "crear la carpeta"
 fi
 
@@ -59,10 +59,10 @@ contacto() {
     exigir "guardar el contacto $uid"
 }
 
-contacto aula-lista-correo "$(jq -n --arg uid aula-lista-correo --arg nombre "$receptor" --arg correos "$ALERTA_CORREOS" \
+contacto aulisima-correo "$(jq -n --arg uid aulisima-correo --arg nombre "$receptor" --arg correos "$ALERTA_CORREOS" \
     '{uid: $uid, name: $nombre, type: "email", settings: {addresses: $correos, singleEmail: true}, disableResolveMessage: false}')"
 if [[ -n "${TELEGRAM_BOT_TOKEN:-}" && -n "${TELEGRAM_CHAT_ID:-}" ]]; then
-    contacto aula-lista-telegram "$(jq -n --arg uid aula-lista-telegram --arg nombre "$receptor" \
+    contacto aulisima-telegram "$(jq -n --arg uid aulisima-telegram --arg nombre "$receptor" \
         --arg token "$TELEGRAM_BOT_TOKEN" --arg chat "$TELEGRAM_CHAT_ID" \
         '{uid: $uid, name: $nombre, type: "telegram", settings: {bottoken: $token, chatid: $chat}, disableResolveMessage: false}')"
 else
@@ -85,4 +85,4 @@ reglas="$(jq --arg prom "$ds_prom" --arg logs "$ds_logs" --arg carpeta "$carpeta
 api PUT "/api/v1/provisioning/folder/$carpeta/rule-groups/operacion" "$reglas"
 exigir "guardar las alertas"
 
-echo "Listo: $(jq '.rules | length' <<< "$reglas") alertas en la carpeta Aula Lista, avisos a \"$receptor\"."
+echo "Listo: $(jq '.rules | length' <<< "$reglas") alertas en la carpeta Aulísima, avisos a \"$receptor\"."

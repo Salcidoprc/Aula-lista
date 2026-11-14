@@ -21,7 +21,7 @@ import { PortalService } from './portal.service';
 
 /**
  * Notificaciones del tutor (SPEC-07, RF-064): activar los avisos en este celular (Web Push) y registrar un correo.
- * En iPhone el push solo existe con Aula Lista en la pantalla de inicio (RN-066), así que primero se explica eso.
+ * En iPhone el push solo existe con Aulísima en la pantalla de inicio (RN-066), así que primero se explica eso.
  */
 @Component({
   selector: 'app-notificaciones',

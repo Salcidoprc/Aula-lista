@@ -25,18 +25,18 @@ jobs:
         with:
           global-json-file: apps/api/global.json
       - name: Restaurar
-        run: dotnet restore AulaLista.sln
+        run: dotnet restore Aulisima.sln
       - name: Compilar (advertencias como errores)
-        run: dotnet build AulaLista.sln --no-restore -c Release
+        run: dotnet build Aulisima.sln --no-restore -c Release
       - name: Formato
-        run: dotnet format AulaLista.sln --verify-no-changes --no-restore
+        run: dotnet format Aulisima.sln --verify-no-changes --no-restore
       - name: Contrato OpenAPI al día
         run: git diff --exit-code -- openapi/
       - name: Pruebas unitarias, de arquitectura e integración (Testcontainers + RLS)
-        run: dotnet test AulaLista.sln --no-build -c Release --logger "console;verbosity=normal"
+        run: dotnet test Aulisima.sln --no-build -c Release --logger "console;verbosity=normal"
       - name: Paquetes vulnerables
         run: |
-          dotnet list AulaLista.sln package --vulnerable --include-transitive | tee vulnerables.txt
+          dotnet list Aulisima.sln package --vulnerable --include-transitive | tee vulnerables.txt
           ! grep -q "has the following vulnerable packages" vulnerables.txt
 
   frontend:

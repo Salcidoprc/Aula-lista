@@ -1,10 +1,10 @@
-# PRD: Aula Lista
+# PRD: Aulísima
 
 > Versión del 11/10/2026. Este archivo es la versión vigente del PRD; el documento de discusión original está en [Claude Docs](https://claude.ai/code/artifact/93c78d7a-015f-4293-b5fe-566208a6a57a).
 
 ## 1. Resumen
 
-Aula Lista es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de unidad: definen su ciclo y sus unidades (trimestres, bimestres, meses), capturan calificaciones, asistencia y notas en el celular durante la unidad, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
+Aulísima es una app web (PWA) para docentes de primaria y secundaria en México (ambos niveles desde el MVP), y después en LatAm. Les ahorra el cierre de unidad: definen su ciclo y sus unidades (trimestres, bimestres, meses), capturan calificaciones, asistencia y notas en el celular durante la unidad, la IA redacta un borrador de observación por alumno que el docente aprueba, el sistema genera la boleta en PDF y los tutores la ven por un enlace, sin instalar nada.
 
 - **Cliente inicial:** el docente de escuela pública, que lo adopta y lo paga por su cuenta.
 - **Fase 2:** la escuela, que paga por un panel del director y avisos generales.
@@ -47,7 +47,7 @@ Fuera del MVP: libros digitales, chat y foros, exámenes en línea, cuentas de a
 
 ## 5.1 Panel de administración
 
-El equipo de Aula Lista opera el producto desde un panel de administración separado de la app del docente (SPEC-09). En el MVP tiene: un resumen del negocio (uso, activación, retención, dinero y valor entregado), métricas del piloto, docentes con su plan y consumo, costos de IA y WhatsApp contra ingreso, errores de procesos en segundo plano, auditoría y el catálogo de tipos de rubro. Desde el catálogo el administrador agrega tipos de rubro nuevos que usan una forma de cálculo existente, al instante; un tipo con otra forma de calcular o de capturar se desarrolla con su propia pantalla y después se activa en el panel (ADR-0012). El panel nunca muestra datos de alumnos ni de tutores.
+El equipo de Aulísima opera el producto desde un panel de administración separado de la app del docente (SPEC-09). En el MVP tiene: un resumen del negocio (uso, activación, retención, dinero y valor entregado), métricas del piloto, docentes con su plan y consumo, costos de IA y WhatsApp contra ingreso, errores de procesos en segundo plano, auditoría y el catálogo de tipos de rubro. Desde el catálogo el administrador agrega tipos de rubro nuevos que usan una forma de cálculo existente, al instante; un tipo con otra forma de calcular o de capturar se desarrolla con su propia pantalla y después se activa en el panel (ADR-0012). El panel nunca muestra datos de alumnos ni de tutores.
 
 ## 6. Diseño y movimiento
 

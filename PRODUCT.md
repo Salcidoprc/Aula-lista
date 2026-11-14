@@ -43,7 +43,7 @@ Se le vende al docente, no a la dirección: lo adopta solo, sin esperar a la esc
 
 ## Brand Commitments
 
-- Nombre definitivo: **Aula Lista**.
+- Nombre definitivo: **Aulísima**.
 - Tono: cálido y claro, de herramienta escolar confiable. No es una app de tecnología ni de juegos.
 - Debe sentirse como una app nativa y cuidada, no como una plantilla.
 - Estilo visual elegido por el dueño del producto el 11/10/2026: **"Libros de texto"** (cada grupo con el color de su grado, como las portadas de los libros de texto gratuitos). Familiar para el docente, pero sin verse infantil ni parecer un documento oficial de la SEP.
