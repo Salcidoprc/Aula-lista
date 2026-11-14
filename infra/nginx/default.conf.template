@@ -1,3 +1,10 @@
+# Detrás de otro proxy con HTTPS (Caddy en staging) se respeta el esquema que él recibió;
+# sin proxy delante se usa el de nginx. Así la API arma https:// en el retorno de Google.
+map $http_x_forwarded_proto $esquema_original {
+  default $http_x_forwarded_proto;
+  ""      $scheme;
+}
+
 server {
   listen 8080;
   server_name _;
@@ -17,7 +24,7 @@ server {
     proxy_pass ${API_URL};
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Proto $esquema_original;
   }
 
   location = /salud {
