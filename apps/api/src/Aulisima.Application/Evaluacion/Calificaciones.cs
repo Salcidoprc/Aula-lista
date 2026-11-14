@@ -53,7 +53,8 @@ public sealed record MatrizCalificacionesDto(
     IReadOnlyList<EquipoDto> Equipos,
     IReadOnlyList<ComposicionDto> Composiciones,
     int Tomas,
-    IReadOnlyList<AsistenciaAlumnoDto> Asistencia);
+    IReadOnlyList<AsistenciaAlumnoDto> Asistencia,
+    bool ConPromedios = true);
 
 /// <summary>RF-033, RF-034: matriz del periodo. Alumnos activos y, de solo lectura, las bajas con calificaciones.</summary>
 public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, ConsultaRubros consulta)
@@ -125,6 +126,25 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
                 resultado.Final,
                 resultado.RubrosSinDatos);
         }).ToList();
+    }
+}
+
+/// <summary>
+/// RN-097: la matriz que ve el docente. Sin la función de promedios (grupo Gratis) llega sin <c>Resultados</c> y con
+/// <c>ConPromedios</c> en falso; la captura sigue completa. Cierre, boletas y Excel calculan con la matriz completa.
+/// </summary>
+public sealed class VerMatrizCalificacionesCasoUso(MatrizCalificacionesCasoUso matriz, IRepositorioGrupos grupos, Planes.AccesoPro acceso)
+{
+    public async Task<MatrizCalificacionesDto?> EjecutarAsync(Guid periodoId, CancellationToken ct)
+    {
+        if (await matriz.EjecutarAsync(periodoId, ct) is not { } completa || await grupos.GrupoAsync(completa.GrupoId, ct) is not { } grupo)
+        {
+            return null;
+        }
+
+        return await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.Promedios, ct)
+            ? completa
+            : completa with { Resultados = [], ConPromedios = false };
     }
 }
 

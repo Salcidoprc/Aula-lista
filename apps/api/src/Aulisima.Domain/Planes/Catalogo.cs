@@ -8,6 +8,15 @@ namespace Aulisima.Domain.Planes;
 /// </summary>
 public static class FuncionCatalogo
 {
+    /// <summary>Promedios por rubro, del periodo y final en la tabla y en la ficha del alumno (RN-097).</summary>
+    public const string Promedios = "promedios";
+
+    /// <summary>Exportación del periodo a Excel (RN-097).</summary>
+    public const string ExportarExcel = "exportar_excel";
+
+    /// <summary>Avisos a tutores por push y correo (RN-097); los urgentes por WhatsApp van aparte.</summary>
+    public const string Avisos = "avisos";
+
     /// <summary>Cierre de periodo con observaciones redactadas por IA.</summary>
     public const string CierreIa = "cierre_ia";
 
@@ -20,7 +29,7 @@ public static class FuncionCatalogo
     /// <summary>Avisos urgentes que también llegan por WhatsApp.</summary>
     public const string AvisosUrgentes = "avisos_urgentes";
 
-    public static readonly IReadOnlyList<string> Todas = [CierreIa, Boletas, WhatsappBoletas, AvisosUrgentes];
+    public static readonly IReadOnlyList<string> Todas = [Promedios, ExportarExcel, Avisos, CierreIa, Boletas, WhatsappBoletas, AvisosUrgentes];
 }
 
 public static class EstadoProducto

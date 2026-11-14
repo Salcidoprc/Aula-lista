@@ -73,7 +73,7 @@ internal static class EvaluacionEndpoints
     private static async Task<IResult> CopiarRubros(Guid id, CopiarRubros cuerpo, CopiarRubrosCasoUso caso, CancellationToken ct) =>
         Respuesta(await caso.EjecutarAsync(id, cuerpo, ct));
 
-    private static async Task<IResult> Matriz(Guid id, MatrizCalificacionesCasoUso caso, CancellationToken ct) =>
+    private static async Task<IResult> Matriz(Guid id, VerMatrizCalificacionesCasoUso caso, CancellationToken ct) =>
         await caso.EjecutarAsync(id, ct) is { } matriz ? TypedResults.Ok(matriz) : TypedResults.NotFound();
 
     private static async Task<IResult> ListarActividades(Guid id, ListarActividadesCasoUso caso, CancellationToken ct) =>

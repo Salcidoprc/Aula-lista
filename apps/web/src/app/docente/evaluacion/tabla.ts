@@ -28,6 +28,7 @@ import { claveGrado, nombreGrupo } from '../../shared/grados';
 import { Icono } from '../../shared/iconos';
 import { controlarPortada } from '../../shared/portada/portada.service';
 import { portadaDeGrupo } from '../grupos/grupos.service';
+import { CandadoPro } from '../planes/candado-pro';
 import { EvaluacionService } from './evaluacion.service';
 import {
   cambio,
@@ -68,7 +69,7 @@ interface Problema {
  */
 @Component({
   selector: 'app-tabla',
-  imports: [TranslocoDirective, RouterLink, Icono],
+  imports: [TranslocoDirective, RouterLink, Icono, CandadoPro],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -102,6 +103,9 @@ interface Problema {
       } @else if (columnas().length === 0) {
         <p class="dato-suave">{{ t('sinActividades') }}</p>
       } @else {
+        @if (!conPromedios()) {
+          <app-candado-pro class="sin-promedios" funcion="promedios" [grupoId]="id()" />
+        }
         @if (matriz()!.soloLectura || grupo()?.archivadoEn) {
           <p class="aviso aviso--pendiente">{{ t('soloLectura') }}</p>
         } @else {
@@ -130,13 +134,19 @@ interface Problema {
               <tr class="rubros">
                 <th scope="col" rowspan="2" class="fija">{{ t('alumno') }}</th>
                 @for (r of rubrosConActividades(); track r.rubro.id) {
-                  <th scope="colgroup" [attr.colspan]="r.actividades.length + 1" class="rubro">
+                  <th
+                    scope="colgroup"
+                    [attr.colspan]="r.actividades.length + (conPromedios() ? 1 : 0)"
+                    class="rubro"
+                  >
                     {{ r.rubro.nombre }}
                     <span class="peso cifras">{{ numero(r.rubro.peso) }} %</span>
                   </th>
                 }
-                <th scope="col" rowspan="2" class="total">{{ t('periodo') }}</th>
-                <th scope="col" rowspan="2" class="total">{{ t('final') }}</th>
+                @if (conPromedios()) {
+                  <th scope="col" rowspan="2" class="total">{{ t('periodo') }}</th>
+                  <th scope="col" rowspan="2" class="total">{{ t('final') }}</th>
+                }
               </tr>
               <tr class="actividades">
                 @for (c of columnas(); track $index) {
@@ -216,14 +226,16 @@ interface Problema {
                       <td class="promedio cifras">{{ dos(res?.rubros?.get(c.rubro.id)) }}</td>
                     }
                   }
-                  <td class="total cifras">
-                    {{ dos(res?.periodo) }}
-                    @if (parcial(res)) {
-                      <span class="parcial" aria-hidden="true" [title]="t('parcial')">*</span>
-                      <span class="solo-lector">{{ t('parcial') }}</span>
-                    }
-                  </td>
-                  <td class="total final cifras">{{ final(res) }}</td>
+                  @if (conPromedios()) {
+                    <td class="total cifras">
+                      {{ dos(res?.periodo) }}
+                      @if (parcial(res)) {
+                        <span class="parcial" aria-hidden="true" [title]="t('parcial')">*</span>
+                        <span class="solo-lector">{{ t('parcial') }}</span>
+                      }
+                    </td>
+                    <td class="total final cifras">{{ final(res) }}</td>
+                  }
                 </tr>
               }
             </tbody>
@@ -236,6 +248,10 @@ interface Problema {
     </div>
   `,
   styles: `
+    .sin-promedios {
+      margin-block-end: var(--espacio-4);
+    }
+
     .por-equipo {
       inline-size: 0.875rem;
       block-size: 0.875rem;
@@ -520,12 +536,15 @@ export class Tabla implements OnInit {
       ...m.alumnos.filter((a) => a.dadoDeBaja && conDatos.has(a.id)).sort(orden),
     ];
   });
+  /** RN-097: en un grupo Gratis la tabla captura igual, pero sin promedios. Una matriz guardada antes no trae el dato. */
+  protected readonly conPromedios = computed(() => this.matriz()?.conPromedios !== false);
   protected readonly columnas = computed<Columna[]>(() => {
     const m = this.matriz();
     if (!m) {
       return [];
     }
     const lista: Columna[] = [];
+    const conPromedios = this.conPromedios();
     let editable = 0;
     for (const { rubro, actividades } of m.rubros) {
       if (actividades.length === 0) {
@@ -539,7 +558,9 @@ export class Tabla implements OnInit {
           editable: rubro.criterios.length > 0 ? null : editable++,
         });
       }
-      lista.push({ tipo: 'promedio', rubro });
+      if (conPromedios) {
+        lista.push({ tipo: 'promedio', rubro });
+      }
     }
     return lista;
   });
@@ -557,7 +578,7 @@ export class Tabla implements OnInit {
     const m = this.matriz();
     const i = this.indice();
     const mapa = new Map<string, ResultadoPeriodo>();
-    if (m && i) {
+    if (m && i && this.conPromedios()) {
       for (const a of this.alumnos()) {
         mapa.set(a.id, resultadoAlumno(m, i, a.id));
       }

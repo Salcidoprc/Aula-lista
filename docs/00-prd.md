@@ -71,9 +71,9 @@ flowchart LR
 
 | Plan | Incluye | Precio inicial (hipótesis del piloto) |
 | --- | --- | --- |
-| Gratis | Grupos ilimitados, captura, notas, exportación a Excel, avisos por push y correo, compartir por WhatsApp del docente | 0 |
+| Gratis | Grupos ilimitados, alumnos, importación, captura, rubros, equipos, notas y asistencia | 0 |
 | Prueba Pro | Todo Pro en 1 grupo, elegido por el docente, durante su primer cierre de periodo | 0 |
-| Pro por grupo (máximo 50 alumnos) | Cierre con observaciones de IA, boletas PDF publicadas en el portal, notificación por WhatsApp del sistema con límite mensual | 79 MXN al mes el primer grupo y 29 MXN cada grupo adicional, en un solo cobro |
+| Pro por grupo (máximo 50 alumnos) | Promedios, exportación a Excel, avisos a tutores, cierre con observaciones de IA, boletas PDF publicadas en el portal, notificación por WhatsApp del sistema con límite mensual | 79 MXN al mes el primer grupo y 29 MXN cada grupo adicional, en un solo cobro |
 | Escuela (F2) | Pro para toda la plantilla y panel del director | Por alumno al año, por definir |
 | Escuela privada (F3) | Módulos extra | Por módulo, por definir |
 

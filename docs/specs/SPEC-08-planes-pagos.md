@@ -10,9 +10,9 @@ Cobrar por grupo de forma simple, que el docente pruebe lo que paga en su primer
 
 | Plan | Qué incluye | Precio (hipótesis del piloto) |
 | --- | --- | --- |
-| Gratis | Grupos ilimitados, captura, notas, cálculo de promedios, exportación a Excel, avisos por push y correo, compartir por WhatsApp del docente | 0 |
+| Gratis | Grupos ilimitados, alumnos, importación, captura, rubros, equipos, notas y asistencia | 0 |
 | Prueba Pro | Todo Pro en 1 grupo, elegido por el docente, durante su primer cierre | 0 |
-| Pro por grupo | Cierre de periodo con observaciones de IA, boletas PDF publicadas en el portal, notificación de boletas por WhatsApp del sistema, avisos urgentes por WhatsApp con límite | 79 MXN al mes el primer grupo, 29 MXN cada grupo adicional, IVA incluido |
+| Pro por grupo | Promedios (por rubro, de la unidad y final), exportación a Excel, avisos a tutores por push y correo, cierre de periodo con observaciones de IA, boletas PDF publicadas en el portal, notificación de boletas por WhatsApp del sistema, avisos urgentes por WhatsApp con límite | 79 MXN al mes el primer grupo, 29 MXN cada grupo adicional, IVA incluido |
 
 Los precios, las funciones que incluye cada producto y los meses de OXXO viven en el catálogo de productos que el administrador gestiona en el panel (SPEC-09, RF-095) y en Stripe, nunca en el código ni en la configuración (ADR-0017). Las cifras de arriba son las de la versión 1 sembrada.
 
@@ -29,6 +29,7 @@ Los precios, las funciones que incluye cada producto y los meses de OXXO viven e
 | RN-085 | Si un cobro falla, hay 7 días de gracia con aviso diario en la app. Después, los grupos pasan a Gratis; no se borra ningún dato y lo ya publicado sigue visible para los tutores. |
 | RN-086 | Límite de WhatsApp del sistema por grupo Pro y mes: 1 mensaje de boleta por tutor por periodo publicado y hasta 4 avisos urgentes por tutor. Al llegar al límite se bloquea el envío por WhatsApp y se ofrece compartir manualmente. Los límites son configurables. |
 | RN-087 | El estado de la suscripción en la base solo cambia por webhooks verificados del proveedor, procesados de forma idempotente. |
+| RN-097 | Promedios, exportación a Excel y avisos a tutores son de Pro (funciones `promedios`, `exportar_excel` y `avisos` del catálogo). En un grupo Gratis se captura todo igual, pero la tabla y la ficha del alumno no muestran promedios ni la calificación final (la API no los envía), el Excel responde 403 `excel_requiere_pro` y crear un aviso responde 403 `avisos_requieren_pro`. Los avisos ya enviados siguen visibles para el docente y los tutores. Al pasar a Gratis no se borra nada. Cierre, boletas y Excel calculan siempre con la matriz completa. La exportación de todos los datos de la cuenta (RF-008) sigue siendo gratuita. |
 | RN-088 | Se guarda el consumo de tokens de IA y mensajes de WhatsApp por grupo y mes (`consumo_mensual`) para vigilar RNF-022. |
 
 ## Flujo de contratación
@@ -58,7 +59,7 @@ Los precios, las funciones que incluye cada producto y los meses de OXXO viven e
 ## Pantallas
 
 - **Plan (`/plan`):** el estado en una frase ("Pro en 3 grupos con tarjeta. Próximo cobro: 137 MXN el …", "Prueba Pro en 4° B: quedan 9 días.", "Pro en 2 grupos, pagado con OXXO hasta el …" o "Todos tus grupos están en Gratis."), la banda de pago si aplica, los grupos con su tapa y una casilla, el total al mes en vivo con su desglose ("79 primer grupo + 2 × 29"), la forma de pago (tarjeta cada mes, OXXO por cada mes que ofrece el producto, con su monto) y una sola acción. Con tarjeta: "Guardar cambios" y "Tarjeta y facturas" (portal). Durante un prepago: agregar grupos se paga hasta `pagado_hasta` y quitar no reembolsa. Abajo, qué incluye Gratis contra Pro (con el nombre del producto), su precio y, si el docente paga una versión anterior, "Tú conservas el precio con el que contrataste", y el historial de pagos. Quien ya paga ve su total y cambia grupos con el precio de su versión. Sin un producto a la venta, la acción de contratar se desactiva con "Por ahora no se puede contratar Pro". En celular la acción va fija abajo; en escritorio, en el panel lateral. `?grupo=` llega desde un candado con ese grupo marcado.
-- **Candados:** en el cierre de un grupo Gratis, "El cierre con observaciones es de Pro" con "Usar mi prueba Pro en este grupo" (si no la ha usado) o "Activar Pro en este grupo"; en las boletas, "Las boletas son de Pro"; en un aviso nuevo, el interruptor Urgente apagado con "Con Pro, los urgentes también llegan por WhatsApp". El grupo de la prueba lleva "Prueba Pro · quedan n días" en el cierre y en las boletas, y "Pro" o "Prueba Pro" en Mis grupos.
+- **Candados:** en el cierre de un grupo Gratis, "El cierre con observaciones es de Pro" con "Usar mi prueba Pro en este grupo" (si no la ha usado) o "Activar Pro en este grupo"; en las boletas, "Las boletas son de Pro"; en la tabla y en la ficha del alumno, "Los promedios son de Pro"; en Avisos y en un aviso nuevo, "Los avisos a tutores son de Pro" sin el botón de nuevo aviso; en las boletas, "Exportar a Excel con Pro" en lugar de la descarga. Todos llevan a Plan con el grupo marcado. En un grupo Pro cuyo producto no incluye los urgentes, el interruptor Urgente se apaga con "Con Pro, los urgentes también llegan por WhatsApp". El grupo de la prueba lleva "Prueba Pro · quedan n días" en el cierre y en las boletas, y "Pro" o "Prueba Pro" en Mis grupos.
 - **Banda de pago** (Inicio y Plan): prepago por vencer en tinte de aviso (7 y 1 días antes); cobro fallido o prepago vencido, con los días de gracia que quedan, en tinte de peligro.
 - **Pago de prueba (`/plan/pago-simulado/{id}`):** página propia de Aulísima, sin imitar a Stripe. Tarjeta: "Pagar" o "Simular tarjeta rechazada". OXXO: la ficha con su referencia y "Simular pago en tienda" o "Dejar vencer la ficha".
 
@@ -75,6 +76,9 @@ Los precios, las funciones que incluye cada producto y los meses de OXXO viven e
 - Dado un docente que paga OXXO por 1 mes con 2 grupos, entonces paga 108 MXN y `pagado_hasta` queda un mes después de la confirmación (ADR-0017).
 - Dado un docente que contrató a 79 + 29, cuando el administrador cambia el precio a 89 + 39, entonces el docente sigue pagando 79 + 29 al cambiar grupos y uno nuevo contrata a 89 + 39 (ADR-0017).
 - Dado un producto al que el administrador le quita una función, entonces los grupos que pagan ese producto ya no la tienen (ADR-0017).
+- Dado un grupo Gratis con calificaciones, cuando el docente abre la tabla, entonces ve todo lo capturado sin promedios ni final y el aviso "Los promedios son de Pro"; al activar Pro en ese grupo los ve (RN-097).
+- Dado un grupo Gratis, cuando el docente pide el Excel o envía un aviso, entonces se rechaza con 403 `excel_requiere_pro` o `avisos_requieren_pro` y no se crea nada (RN-097).
+- Dado el producto Pro existente al desplegar RN-097, entonces gana las funciones `promedios`, `exportar_excel` y `avisos`, y quien ya paga o está en prueba no pierde nada.
 - Dado un grupo Pro que llegó al límite de WhatsApp del mes, cuando el docente publica boletas, entonces no se envían WhatsApp del sistema y se muestra la lista para compartir manualmente.
 
 ## Decisiones de implementación (H6.1)

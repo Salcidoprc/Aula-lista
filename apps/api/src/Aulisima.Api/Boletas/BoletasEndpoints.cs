@@ -25,7 +25,8 @@ internal static class BoletasEndpoints
         periodos.MapGet("/{id:guid}/boletas/pdf", PdfDelGrupo).WithName("DescargarBoletasDelGrupo")
             .Produces(StatusCodes.Status200OK, contentType: Pdf).ProducesProblem(StatusCodes.Status409Conflict);
         periodos.MapGet("/{id:guid}/exportacion.xlsx", Exportar).WithName("ExportarPeriodo")
-            .Produces(StatusCodes.Status200OK, contentType: Xlsx).Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status200OK, contentType: Xlsx).Produces(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
 
         var boletas = api.MapGroup("/boletas").WithTags("Boletas");
         boletas.MapGet("/{id:guid}/pdf", PdfDeBoleta).WithName("DescargarBoleta")
@@ -85,5 +86,10 @@ internal static class BoletasEndpoints
     }
 
     private static async Task<IResult> Exportar(Guid id, ExportarPeriodoCasoUso caso, CancellationToken ct) =>
-        await caso.EjecutarAsync(id, ct) is { } archivo ? TypedResults.File(archivo.Contenido!, Xlsx, archivo.Nombre) : TypedResults.NotFound();
+        await caso.EjecutarAsync(id, ct) switch
+        {
+            null => TypedResults.NotFound(),
+            { EsExito: true } r => TypedResults.File(r.Valor.Contenido!, Xlsx, r.Valor.Nombre),
+            var r => r.Error.AProblemaHttp(),
+        };
 }

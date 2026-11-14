@@ -110,7 +110,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 
 | ID | Requerimiento | Prioridad |
 | --- | --- | --- |
-| RF-080 | Todo docente inicia en plan Gratis: grupos, captura, notas, exportación a Excel y avisos. El cierre con IA y las boletas son Pro. | M |
+| RF-080 | Todo docente inicia en plan Gratis: grupos, alumnos, importación, captura, rubros, equipos, notas y asistencia. Promedios, exportación a Excel, avisos a tutores, el cierre con IA y las boletas son Pro (RN-097). | M |
 | RF-081 | Cada docente tiene una prueba Pro gratuita en 1 grupo, que el docente elige, durante su primer cierre de periodo. | M |
 | RF-082 | El plan Pro se contrata por grupo: un precio para el primer grupo y otro por cada grupo adicional, en un solo cobro mensual. | M |
 | RF-083 | El docente activa o desactiva Pro por grupo; los cambios se prorratean. | M |

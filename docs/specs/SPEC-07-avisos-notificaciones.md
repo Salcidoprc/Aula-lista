@@ -15,6 +15,8 @@ Que el docente avise a los tutores sin usar su WhatsApp personal y sin que el co
 | WhatsApp del sistema (Cloud API, plantillas de utilidad) | 0.0085 USD por mensaje de utilidad, unos 0.16 MXN (tabla de Meta vigente desde 1/10/2026; ya se cobra también dentro de la ventana de 24 h) | Boleta disponible y avisos urgentes en grupos Pro, dentro del límite |
 | WhatsApp del docente (enlace `wa.me` con texto prellenado) | Gratis | Siempre disponible; lo envía el docente manualmente |
 
+La columna Costo es lo que cuesta cada canal al sistema. Enviar avisos es del plan Pro en el grupo (RN-097, SPEC-08); en Gratis la pestaña Avisos muestra los ya enviados y el candado.
+
 ## Reglas de negocio
 
 | ID | Regla |

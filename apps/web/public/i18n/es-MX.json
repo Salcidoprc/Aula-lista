@@ -383,7 +383,9 @@
     "otro_producto_activo": "Ya hay otro producto a la venta. Archívalo antes de publicar este.",
     "precio_sin_cambios": "Ese ya es su precio.",
     "sin_plan_a_la_venta": "Por ahora no se puede contratar Pro. Intenta más tarde.",
-    "sincronizacion_fallida": "Stripe no respondió. Lo guardado no se perdió; reintenta en un momento."
+    "sincronizacion_fallida": "Stripe no respondió. Lo guardado no se perdió; reintenta en un momento.",
+    "excel_requiere_pro": "La exportación a Excel es de Pro. Activa Pro en este grupo para descargarla.",
+    "avisos_requieren_pro": "Los avisos a tutores son de Pro. Activa Pro en este grupo para enviarlos."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -1455,6 +1457,7 @@
     "publicarElegidas": "Publicar las elegidas y avisar ({{cantidad}})",
     "pdfGrupo": "Descargar PDF del grupo",
     "excel": "Exportar a Excel",
+    "excelPro": "Exportar a Excel con Pro",
     "terminado": {
       "uno": "Terminó la preparación: 1 boleta lista.",
       "otros": "Terminó la preparación: {{cantidad}} boletas listas."
@@ -1823,9 +1826,10 @@
       "si": "Incluido",
       "no": "No incluido",
       "filas": {
-        "captura": "Captura, promedios, notas y asistencia",
+        "captura": "Grupos, alumnos, captura, rubros, equipos, notas y asistencia",
+        "promedios": "Promedios por rubro, de la unidad y final",
         "excel": "Exportar a Excel",
-        "avisos": "Avisos por notificación y correo",
+        "avisos": "Avisos a tutores por notificación y correo",
         "cierre": "Cierre con observaciones redactadas por IA",
         "boletas": "Boletas en PDF en el portal de tutores",
         "whatsapp": "WhatsApp del sistema: boletas y hasta {{urgentes}} urgentes por tutor al mes"
@@ -1899,6 +1903,18 @@
       "boletas": {
         "titulo": "Las boletas son de Pro",
         "texto": "Con Pro generas las boletas en PDF, las publicas en el portal de tutores y les avisas por WhatsApp. Lo que ya publicaste sigue visible."
+      },
+      "promedios": {
+        "titulo": "Los promedios son de Pro",
+        "texto": "Sigues capturando todo gratis. Con Pro ves el promedio de cada rubro, el de la unidad y la calificación final de cada alumno, calculados con tu redondeo."
+      },
+      "excel": {
+        "titulo": "La exportación a Excel es de Pro",
+        "texto": "Con Pro descargas las calificaciones de la unidad en Excel para llenar los formatos oficiales."
+      },
+      "avisos": {
+        "titulo": "Los avisos a tutores son de Pro",
+        "texto": "Con Pro avisas a los tutores por notificación y correo, ves quién lo leyó y los urgentes también les llegan por WhatsApp. Los avisos que ya enviaste siguen aquí."
       },
       "prueba": "Tienes una prueba Pro gratis para un grupo: dura {{dias}} días o hasta que publiques sus boletas, lo que pase después. Se usa una sola vez.",
       "usarPrueba": "Usar mi prueba Pro en este grupo",
@@ -2293,10 +2309,13 @@
         "otros": "{{n}} meses"
       },
       "funciones": {
+        "promedios": "Promedios",
+        "exportar_excel": "Exportar a Excel",
+        "avisos": "Avisos a tutores",
         "cierre_ia": "Cierre con observaciones por IA",
         "boletas": "Boletas",
         "whatsapp_boletas": "Boletas por WhatsApp",
-        "avisos_urgentes": "Avisos urgentes a tutores"
+        "avisos_urgentes": "Avisos urgentes por WhatsApp"
       },
       "versiones": {
         "titulo": {

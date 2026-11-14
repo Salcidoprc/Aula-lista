@@ -688,8 +688,9 @@ export class Plan implements OnInit {
 
   protected readonly filasIncluye = [
     { clave: 'captura', gratis: true },
-    { clave: 'excel', gratis: true },
-    { clave: 'avisos', gratis: true },
+    { clave: 'promedios', gratis: false },
+    { clave: 'excel', gratis: false },
+    { clave: 'avisos', gratis: false },
     { clave: 'cierre', gratis: false },
     { clave: 'boletas', gratis: false },
     { clave: 'whatsapp', gratis: false },

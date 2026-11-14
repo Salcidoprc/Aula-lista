@@ -47,7 +47,8 @@ public sealed record BoletasDto(
     PlanGrupoDto Plan,
     int DecimalesFinal,
     ConteosBoletasDto Conteos,
-    IReadOnlyList<BoletaAlumnoDto> Alumnos);
+    IReadOnlyList<BoletaAlumnoDto> Alumnos,
+    bool ConExcel = true);
 
 /// <summary>Lo publicado y, si a algún tutor no le llega el aviso por ningún canal, la lista para compartirlo (RN-054).</summary>
 public sealed record PublicacionDto(BoletasDto Boletas, IReadOnlyList<Avisos.TutorPorCompartirDto> PorCompartir);
@@ -190,7 +191,8 @@ public sealed class ConsultaBoletas(
                 cuenta.GetValueOrDefault(EstadoBoleta.SinAprobar), cuenta.GetValueOrDefault(EstadoBoleta.SinBoleta),
                 cuenta.GetValueOrDefault(EstadoBoleta.Preparando), cuenta.GetValueOrDefault(EstadoBoleta.Lista),
                 cuenta.GetValueOrDefault(EstadoBoleta.Publicada), alumnos.Count(a => a.Desactualizada)),
-            alumnos);
+            alumnos,
+            await acceso.TieneFuncionAsync(p.Grupo, Domain.Planes.FuncionCatalogo.ExportarExcel, ct));
     }
 }
 
@@ -444,14 +446,23 @@ public sealed class PdfDelGrupoCasoUso(ArmadoBoletas armado, IRepositorioBoletas
     }
 }
 
-/// <summary>RF-055, RN-056: Excel con número, nombre, promedio por rubro, final y observación aprobada, en el orden de la lista.</summary>
-public sealed class ExportarPeriodoCasoUso(ArmadoBoletas armado, IGeneradorBoletas generador, IAuditoria auditoria, IContextoUsuario usuario, IUnidadDeTrabajo unidad)
+/// <summary>
+/// RF-055, RN-056: Excel con número, nombre, promedio por rubro, final y observación aprobada, en el orden de la lista.
+/// Es de Pro (RN-097).
+/// </summary>
+public sealed class ExportarPeriodoCasoUso(
+    ArmadoBoletas armado, IGeneradorBoletas generador, IAuditoria auditoria, IContextoUsuario usuario, AccesoPro acceso, IUnidadDeTrabajo unidad)
 {
-    public async Task<ArchivoBoleta?> EjecutarAsync(Guid periodoId, CancellationToken ct)
+    public async Task<Resultado<ArchivoBoleta>?> EjecutarAsync(Guid periodoId, CancellationToken ct)
     {
         if (await armado.ArmarAsync(periodoId, ct) is not { } periodo)
         {
             return null;
+        }
+
+        if (!await acceso.TieneFuncionAsync(periodo.Periodo.Grupo, Domain.Planes.FuncionCatalogo.ExportarExcel, ct))
+        {
+            return Resultado.Fallo<ArchivoBoleta>(Domain.Planes.ErroresPlanes.ExcelRequierePro);
         }
 
         var p = periodo.Periodo;
@@ -462,7 +473,7 @@ public sealed class ExportarPeriodoCasoUso(ArmadoBoletas armado, IGeneradorBolet
         var contenido = generador.Excel(new ExportacionPeriodo(titulo, periodo.Rubros, p.Grupo.DecimalesFinal, filas));
         auditoria.Registrar(AccionAuditoria.CalificacionesExportadas, "periodo", periodoId, usuario.DocenteId, filas.Count);
         await unidad.GuardarAsync(ct);
-        return new ArchivoBoleta(contenido, null, $"calificaciones-{p.Grupo.Grado}{p.Grupo.Nombre}.xlsx".Replace(' ', '-'));
+        return Resultado.Exito(new ArchivoBoleta(contenido, null, $"calificaciones-{p.Grupo.Grado}{p.Grupo.Nombre}.xlsx".Replace(' ', '-')));
     }
 }
 

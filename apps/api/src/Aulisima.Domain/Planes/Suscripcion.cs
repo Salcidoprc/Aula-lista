@@ -312,6 +312,8 @@ public static class ErroresPlanes
     public static readonly ErrorNegocio PrepagoVigente = new("prepago_vigente", "Tu prepago OXXO sigue vigente. Agrega grupos o cambia a tarjeta cuando venza.");
     public static readonly ErrorNegocio WhatsappRequierePro = new("whatsapp_requiere_pro", "Los avisos urgentes por WhatsApp son de Pro. Envíalo sin urgente o activa Pro en este grupo.");
     public static readonly ErrorNegocio BoletasRequierenPro = new("boletas_requieren_pro", "Las boletas son del plan Pro. Activa Pro en este grupo para generarlas y publicarlas.");
+    public static readonly ErrorNegocio ExcelRequierePro = new("excel_requiere_pro", "La exportación a Excel es del plan Pro. Activa Pro en este grupo para descargarla.");
+    public static readonly ErrorNegocio AvisosRequierenPro = new("avisos_requieren_pro", "Los avisos a tutores son del plan Pro. Activa Pro en este grupo para enviarlos.");
     public static readonly ErrorNegocio AgregarRequierePago = new("agregar_requiere_pago", "Para agregar grupos a tu prepago, paga esos grupos hasta el fin de tu prepago.");
     public static readonly ErrorNegocio PagoSimuladoNoDisponible = new("pago_simulado_no_disponible", "El pago de prueba solo existe sin Stripe.");
     public static readonly ErrorNegocio PagoSimuladoTerminado = new("pago_simulado_terminado", "Este pago de prueba ya terminó.");
@@ -319,7 +321,8 @@ public static class ErroresPlanes
     public static readonly IReadOnlyList<ErrorNegocio> Todos =
     [
         PruebaUsada, SinGrupos, GrupoNoDisponible, ModalidadInvalida, OxxoNoDisponible, MontoFueraDeRango, YaTieneTarjeta,
-        SinTarjeta, SinCambios, PrepagoVigente, WhatsappRequierePro, BoletasRequierenPro, AgregarRequierePago,
+        SinTarjeta, SinCambios, PrepagoVigente, WhatsappRequierePro, BoletasRequierenPro, ExcelRequierePro, AvisosRequierenPro,
+        AgregarRequierePago,
         PagoSimuladoNoDisponible, PagoSimuladoTerminado,
     ];
 }

@@ -4,6 +4,7 @@
 import { AvisoResumenDto } from '../models/aviso-resumen-dto';
 export interface AvisosDto {
   avisos: Array<AvisoResumenDto>;
+  conAvisos?: boolean;
   grupoId: string;
   soloLectura: boolean;
   tutores: (number | string);

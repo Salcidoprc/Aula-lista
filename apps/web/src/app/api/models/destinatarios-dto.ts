@@ -3,6 +3,7 @@
 
 import { DestinatarioDto } from '../models/destinatario-dto';
 export interface DestinatariosDto {
+  conAvisos?: boolean;
   grupoId: string;
   soloLectura: boolean;
   tutores: Array<DestinatarioDto>;

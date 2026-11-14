@@ -1,6 +1,7 @@
 import { Page, expect, test } from '@playwright/test';
 import { sinFallasDeAccesibilidad } from './cuenta';
 import { crearCicloYGrupo, docenteVerificado } from './grupos';
+import { activarPro } from './planes';
 
 const NOMBRES = [
   'Álvarez Soto José Luis',
@@ -123,7 +124,7 @@ test.describe('SPEC-03: evaluación y captura', () => {
     await sinFallasDeAccesibilidad(page);
   });
 
-  test('captura rápida: NE vale la mínima, 3 con mínima 5 se rechaza y cumplimiento 4 ✓ y 1 ✗ da 9.00', async ({
+  test('captura rápida: NE vale la mínima, 3 con mínima 5 se rechaza y cumplimiento 4 ✓ y 1 ✗ da 9.00; los promedios son de Pro (RN-097)', async ({
     page,
     request,
   }, info) => {
@@ -169,8 +170,17 @@ test.describe('SPEC-03: evaluación y captura', () => {
       page.locator('app-indicador-sincronizacion').getByText('Guardado', { exact: true }),
     ).toBeVisible();
 
+    // RN-097: en Gratis la tabla tiene todo lo capturado, sin promedios, y dice cómo tenerlos.
     await page.goto(grupo);
     await page.getByRole('link', { name: 'Ver tabla' }).click();
+    await expect(page.getByRole('heading', { name: 'Los promedios son de Pro' })).toBeVisible();
+    await expect(page.locator('td.promedio, td.total')).toHaveCount(0);
+    await expect(page.locator('tbody tr').first().locator('input.celda').first()).toBeVisible();
+
+    await activarPro(page, grupo);
+    await page.goto(grupo);
+    await page.getByRole('link', { name: 'Ver tabla' }).click();
+    await expect(page.getByRole('heading', { name: 'Los promedios son de Pro' })).toHaveCount(0);
     const primera = page.locator('tbody tr').first();
     const promedios = primera.locator('td.promedio');
     await expect(promedios.nth(0)).toHaveText('9.00'); // (10 × 4 + 5) / 5

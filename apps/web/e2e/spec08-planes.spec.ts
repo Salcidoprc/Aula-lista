@@ -70,7 +70,7 @@ test.describe('SPEC-08: planes y pagos', () => {
     await expect(page.locator('app-etiqueta-plan').getByText('Pro', { exact: true })).toBeVisible();
   });
 
-  test('RN-084, RN-085, RN-086: con tarjeta un cobro fallido muestra la gracia; en Gratis el urgente no va por WhatsApp', async ({
+  test('RN-084, RN-085, RN-097: con tarjeta un cobro fallido muestra la gracia; en Gratis no se envían avisos', async ({
     page,
     request,
   }) => {
@@ -78,14 +78,20 @@ test.describe('SPEC-08: planes y pagos', () => {
     const grupo = await grupoConAlumnos(page);
     await agregarTutor(page, grupo, /Cruz Ortiz/, 'Rosa Vega');
 
-    // RN-086: sin Pro el interruptor se apaga y dice por qué.
-    await page.goto(grupo + '/avisos/nuevo');
-    await expect(page.getByRole('switch', { name: /Urgente/ })).toBeDisabled();
+    // RN-097: en Gratis no se envían avisos; la pestaña lo dice y lleva al plan con el grupo marcado.
+    await page.goto(grupo + '/avisos');
     await expect(
-      page.getByText('Con Pro, los urgentes también llegan por WhatsApp.'),
+      page.getByRole('heading', { name: 'Los avisos a tutores son de Pro' }),
     ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Nuevo aviso' })).toHaveCount(0);
+    await sinFallasDeAccesibilidad(page);
+    await page.goto(grupo + '/avisos/nuevo');
+    await expect(
+      page.getByRole('heading', { name: 'Los avisos a tutores son de Pro' }),
+    ).toBeVisible();
+    await expect(page.getByRole('switch', { name: /Urgente/ })).toHaveCount(0);
 
-    await page.getByRole('link', { name: 'Ver planes' }).click();
+    await page.getByRole('link', { name: 'Activar Pro en este grupo' }).click();
     await expect(page.getByRole('checkbox', { name: /4° B/ })).toBeChecked();
     await page.getByRole('button', { name: 'Pagar 79 MXN al mes' }).locator('visible=true').click();
     await expect(page.getByText('Pago con tarjeta')).toBeVisible();

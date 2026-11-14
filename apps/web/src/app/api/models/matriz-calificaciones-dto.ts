@@ -14,6 +14,7 @@ export interface MatrizCalificacionesDto {
   asistencia: Array<AsistenciaAlumnoDto>;
   celdas: Array<CeldaDto>;
   composiciones: Array<ComposicionDto>;
+  conPromedios?: boolean;
   configuracion: ConfiguracionMatrizDto;
   equipos: Array<EquipoDto>;
   estado: string;

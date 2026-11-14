@@ -381,16 +381,24 @@ type Accion = 'generar' | 'publicar' | 'corregir' | 'cerrar' | 'reabrir' | 'grup
               <app-icono nombre="descargar" />
               {{ t('pdfGrupo') }}
             </button>
-            <button
-              class="enlace"
-              type="button"
-              [disabled]="!enLinea()"
-              [appOcupado]="trabajando() === 'excel'"
-              (click)="exportar()"
-            >
-              <app-icono nombre="tabla" />
-              {{ t('excel') }}
-            </button>
+            @if (b.conExcel !== false) {
+              <button
+                class="enlace"
+                type="button"
+                [disabled]="!enLinea()"
+                [appOcupado]="trabajando() === 'excel'"
+                (click)="exportar()"
+              >
+                <app-icono nombre="tabla" />
+                {{ t('excel') }}
+              </button>
+            } @else {
+              <!-- RN-097: la exportación es de Pro; lleva al plan con este grupo marcado. -->
+              <a class="enlace" routerLink="/plan" [queryParams]="{ grupo: id() }">
+                <app-icono nombre="candado" />
+                {{ t('excelPro') }}
+              </a>
+            }
             @if (!grupo()?.archivadoEn) {
               @if (b.estado === 'en_cierre') {
                 <button
