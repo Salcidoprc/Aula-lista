@@ -92,6 +92,10 @@ public sealed class AulisimaDbContext : DbContext
 
     public DbSet<EventoPago> EventosPago => Set<EventoPago>();
 
+    public DbSet<Producto> Productos => Set<Producto>();
+
+    public DbSet<PrecioProducto> PreciosProducto => Set<PrecioProducto>();
+
     public DbSet<Cuenta> Cuentas => Set<Cuenta>();
 
     public DbSet<TokenCuenta> TokensCuenta => Set<TokenCuenta>();

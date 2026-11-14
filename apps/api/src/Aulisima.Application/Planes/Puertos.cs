@@ -3,17 +3,13 @@ using Aulisima.Domain.Planes;
 
 namespace Aulisima.Application.Planes;
 
-/// <summary>Precios, prueba y gracia de SPEC-08. Viven en configuración (y en el catálogo de Stripe), nunca en el código.</summary>
+/// <summary>
+/// Prueba, gracia y límites de OXXO de SPEC-08. Los precios y los meses de prepago viven en el catálogo de productos que
+/// edita el administrador (ADR-0017), nunca en el código.
+/// </summary>
 public sealed class OpcionesPlanes
 {
     public const string Seccion = "Planes";
-
-    /// <summary>RN-082: precio mensual del primer grupo Pro, en MXN con IVA.</summary>
-    [Range(typeof(decimal), "1", "10000")]
-    public decimal PrecioPrimerGrupo { get; init; } = 79m;
-
-    [Range(typeof(decimal), "1", "10000")]
-    public decimal PrecioGrupoAdicional { get; init; } = 29m;
 
     [Required]
     public string Moneda { get; init; } = "MXN";
@@ -28,11 +24,6 @@ public sealed class OpcionesPlanes
     /// <summary>RN-085.</summary>
     [Range(0, 60)]
     public int DiasGracia { get; init; } = 7;
-
-    /// <summary>RN-084: meses que se pueden pagar por adelantado en OXXO (3 y 6). Sin valor por defecto: el enlace de
-    /// configuración agrega a un arreglo, no lo reemplaza.</summary>
-    [MinLength(1)]
-    public int[] MesesPrepago { get; init; } = [];
 
     /// <summary>RN-089: días antes del fin del prepago en que se avisa (7 y 1).</summary>
     [MinLength(1)]
@@ -55,8 +46,6 @@ public sealed class OpcionesPlanes
     /// <summary>Los días de un mes al prorratear un grupo agregado a un prepago.</summary>
     [Range(28, 31)]
     public int DiasPorMes { get; init; } = 30;
-
-    public decimal Mensual(int grupos) => Tarifa.Mensual(grupos, PrecioPrimerGrupo, PrecioGrupoAdicional);
 }
 
 /// <summary>
@@ -79,7 +68,10 @@ public sealed class OpcionesPagos
     /// <summary><c>sk_…</c> de Stripe.</summary>
     public string? ClaveSecreta { get; init; }
 
-    /// <summary>Precio recurrente del primer grupo en el catálogo de Stripe (<c>price_…</c>).</summary>
+    /// <summary>
+    /// Opcional y heredado: el precio del primer grupo que ya existía en Stripe (<c>price_…</c>). La versión sembrada del
+    /// catálogo lo adopta al sincronizarse (ADR-0017); después se puede borrar.
+    /// </summary>
     public string? PrecioPrimerGrupoId { get; init; }
 
     public string? PrecioGrupoAdicionalId { get; init; }
@@ -95,13 +87,21 @@ public sealed class OpcionesPagos
 /// </summary>
 public sealed record SesionPago(string Id, string Url, DateTimeOffset? VenceEn, string? UrlFicha = null);
 
-/// <summary>Suscripción mensual con tarjeta por los grupos elegidos (RN-082).</summary>
-public sealed record NuevaSuscripcion(Guid DocenteId, string Correo, string? Cliente, IReadOnlyList<Guid> Grupos, string UrlExito, string UrlCancelar);
+/// <summary>
+/// Suscripción mensual con tarjeta por los grupos elegidos (RN-082), con la versión de precio que se vende hoy y sus
+/// precios en el proveedor (ADR-0017).
+/// </summary>
+public sealed record NuevaSuscripcion(
+    Guid DocenteId, string Correo, string? Cliente, IReadOnlyList<Guid> Grupos, Guid PrecioId, string? PrecioPrimeraId,
+    string? PrecioAdicionalId, decimal Mensual, string UrlExito, string UrlCancelar);
+
+/// <summary>Los precios en el proveedor de la versión que paga la suscripción.</summary>
+public sealed record PreciosSuscripcion(string? PrimeraId, string? AdicionalId);
 
 /// <summary>Pago único: prepago OXXO (RN-084) o grupos agregados a un prepago (RN-089).</summary>
 public sealed record PagoUnico(
     Guid DocenteId, string Correo, string? Cliente, string Tipo, IReadOnlyList<Guid> Grupos, int Meses, decimal Monto,
-    string Concepto, bool SoloOxxo, int DiasFicha, string UrlExito, string UrlCancelar);
+    string Concepto, bool SoloOxxo, int DiasFicha, Guid? PrecioId, string UrlExito, string UrlCancelar);
 
 /// <summary>Tipos de evento que la app entiende, ya traducidos del proveedor.</summary>
 public static class TipoEventoPago
@@ -133,7 +133,8 @@ public sealed record EventoPagoRecibido(
     string? Sesion = null,
     string? TipoPago = null,
     int? Meses = null,
-    DateTimeOffset? VenceEn = null);
+    DateTimeOffset? VenceEn = null,
+    Guid? PrecioId = null);
 
 /// <summary>Stripe o la pasarela simulada (02-arquitectura, Integraciones). La app nunca ve datos de tarjeta.</summary>
 public interface IPasarelaPagos
@@ -148,7 +149,8 @@ public interface IPasarelaPagos
     /// RN-083: cambia los grupos de la suscripción. Al agregar se prorratea; al quitar no hay reembolso y el grupo sigue
     /// hasta el corte. El cambio llega a la base por el evento del proveedor, no por esta llamada.
     /// </summary>
-    Task ActualizarGruposAsync(Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, bool prorratear, CancellationToken cancellationToken);
+    Task ActualizarGruposAsync(
+        Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, PreciosSuscripcion precios, bool prorratear, CancellationToken cancellationToken);
 
     /// <summary>Portal de clientes para la tarjeta y las facturas (solo tarjeta).</summary>
     Task<string> PortalAsync(string cliente, string urlRegreso, CancellationToken cancellationToken);

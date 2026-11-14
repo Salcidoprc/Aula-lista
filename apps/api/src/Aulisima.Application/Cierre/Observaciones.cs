@@ -150,7 +150,7 @@ public sealed class AccionesObservacion(
             return null;
         }
 
-        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
+        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneFuncionAsync(periodo.Grupo, Domain.Planes.FuncionCatalogo.CierreIa, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<ObservacionDto>(bloqueo);
         }

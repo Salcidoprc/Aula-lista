@@ -60,6 +60,10 @@ internal static class Validacion
                 => StatusCodes.Status409Conflict,
             _ when error == ErroresOperacion.TipoRubroRepetido || error == ErroresOperacion.ComportamientoEnUso
                 => StatusCodes.Status409Conflict,
+            _ when error == ErroresCatalogo.NombreRepetido || error == ErroresCatalogo.OtroActivo || error == ErroresCatalogo.NoEsBorrador
+                || error == ErroresCatalogo.YaArchivado || error == ErroresCatalogo.SinCambiosPrecio
+                => StatusCodes.Status409Conflict,
+            _ when error == ErroresCatalogo.SinPlanALaVenta => StatusCodes.Status503ServiceUnavailable,
             _ when error == ErroresCierre.LimiteIa || error == ErroresGrupos.LimiteLecturas => StatusCodes.Status429TooManyRequests,
             _ when error == ErroresCierre.PeriodoSinCierre || error == ErroresCierre.ObservacionAprobada
                 || error == ErroresCierre.ObservacionPublicada || error == ErroresCierre.EnGeneracion

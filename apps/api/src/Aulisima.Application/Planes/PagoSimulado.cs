@@ -18,7 +18,7 @@ public static class EstadoSesionSimulada
 /// </summary>
 public sealed record SesionSimulada(
     string Id, Guid DocenteId, string Tipo, IReadOnlyList<Guid> Grupos, int Meses, decimal Monto, bool Oxxo, string Referencia,
-    DateTimeOffset? VenceEn, string Estado);
+    DateTimeOffset? VenceEn, string Estado, Guid? PrecioId = null);
 
 /// <summary>Lo que solo la pasarela simulada sabe hacer: mostrar su sesión y cerrarla.</summary>
 public interface IPasarelaSimulada
@@ -68,7 +68,7 @@ public sealed class PagoSimuladoCasoUso(
         {
             (IPasarelaSimulada.TipoSuscripcion, true) => new EventoPagoRecibido(
                 NuevoId(), TipoEventoPago.SuscripcionActualizada, docente, Cliente: $"cus_sim_{docente:N}", Suscripcion: $"sub_sim_{Guid.NewGuid():N}",
-                Grupos: sesion.Grupos, PeriodoFin: ahora.AddMonths(1), Activa: true),
+                Grupos: sesion.Grupos, PeriodoFin: ahora.AddMonths(1), Activa: true, PrecioId: sesion.PrecioId),
 
             // Una tarjeta rechazada en el Checkout no crea nada.
             (IPasarelaSimulada.TipoSuscripcion, false) => null,

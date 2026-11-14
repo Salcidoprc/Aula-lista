@@ -1,5 +1,6 @@
 using Aulisima.Api.Comun;
 using Aulisima.Application.Operacion;
+using Aulisima.Application.Planes;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
@@ -47,6 +48,35 @@ internal static class AdminEndpoints
                 await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct)))
             .WithName("EditarTipoRubro").Produces<TipoRubroAdminDto>().ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+
+        // RF-095 (ADR-0017): productos, sus funciones y sus versiones de precio, sincronizados con Stripe.
+        var productos = admin.MapGroup("/productos");
+        productos.MapGet("/", async (ListarCatalogoAdminCasoUso caso, CancellationToken ct) => TypedResults.Ok(await caso.EjecutarAsync(ct)))
+            .WithName("CatalogoAdmin").Produces<CatalogoAdminDto>();
+        productos.MapPost("/", async (ProductoEntrada cuerpo, IValidator<ProductoEntrada> validador, CrearProductoCasoUso caso, CancellationToken ct) =>
+                await validador.ValidarAsync(cuerpo, ct)
+                ?? Creado(await caso.EjecutarAsync(cuerpo, ct), p => $"/api/v1/admin/productos/{p.Id}"))
+            .WithName("CrearProducto").Produces<ProductoAdminDto>(StatusCodes.Status201Created).ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        productos.MapPut("/{id:guid}", async (
+                Guid id, ProductoEntrada cuerpo, IValidator<ProductoEntrada> validador, EditarProductoCasoUso caso, CancellationToken ct) =>
+                await validador.ValidarAsync(cuerpo, ct) ?? Respuesta(await caso.EjecutarAsync(id, cuerpo, ct)))
+            .WithName("EditarProducto").Produces<ProductoAdminDto>().ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        productos.MapPost("/{id:guid}/precios", async (Guid id, PrecioEntrada cuerpo, CambiarPrecioProductoCasoUso caso, CancellationToken ct) =>
+                Respuesta(await caso.EjecutarAsync(id, cuerpo, ct)))
+            .WithName("CambiarPrecioProducto").Produces<ProductoAdminDto>()
+            .ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        productos.MapPost("/{id:guid}/publicar", async (Guid id, PublicarProductoCasoUso caso, CancellationToken ct) =>
+                Respuesta(await caso.EjecutarAsync(id, ct)))
+            .WithName("PublicarProducto").Produces<ProductoAdminDto>()
+            .ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        productos.MapPost("/{id:guid}/archivar", async (Guid id, ArchivarProductoCasoUso caso, CancellationToken ct) =>
+                Respuesta(await caso.EjecutarAsync(id, ct)))
+            .WithName("ArchivarProducto").Produces<ProductoAdminDto>().ProducesProblem(StatusCodes.Status409Conflict);
+        productos.MapPost("/{id:guid}/sincronizar", async (Guid id, SincronizarProductoCasoUso caso, CancellationToken ct) =>
+                Respuesta(await caso.EjecutarAsync(id, ct)))
+            .WithName("SincronizarProducto").Produces<ProductoAdminDto>();
         return api;
     }
 }

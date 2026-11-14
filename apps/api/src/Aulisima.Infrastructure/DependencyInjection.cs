@@ -173,15 +173,20 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .Validate(
                 o => o.Proveedor != OpcionesPagos.ProveedorStripe
-                    || (!string.IsNullOrWhiteSpace(o.ClaveSecreta) && !string.IsNullOrWhiteSpace(o.SecretoWebhook)
-                        && !string.IsNullOrWhiteSpace(o.PrecioPrimerGrupoId) && !string.IsNullOrWhiteSpace(o.PrecioGrupoAdicionalId)),
-                "Faltan Pagos__ClaveSecreta, Pagos__SecretoWebhook, Pagos__PrecioPrimerGrupoId y Pagos__PrecioGrupoAdicionalId.")
+                    || (!string.IsNullOrWhiteSpace(o.ClaveSecreta) && !string.IsNullOrWhiteSpace(o.SecretoWebhook)),
+                "Faltan Pagos__ClaveSecreta y Pagos__SecretoWebhook.")
             .ValidateOnStart();
         services.AddScoped<IRepositorioPlanes, RepositorioPlanes>();
+        services.AddScoped<IRepositorioCatalogo, RepositorioCatalogo>();
         if ((configuration.GetSection(OpcionesPagos.Seccion)[nameof(OpcionesPagos.Proveedor)] ?? OpcionesPagos.ProveedorSimulado)
             == OpcionesPagos.ProveedorStripe)
         {
             services.AddHttpClient<IPasarelaPagos, PasarelaStripe>(http =>
+            {
+                http.BaseAddress = new Uri("https://api.stripe.com/");
+                http.Timeout = TimeSpan.FromSeconds(20);
+            });
+            services.AddHttpClient<ICatalogoPagos, CatalogoStripe>(http =>
             {
                 http.BaseAddress = new Uri("https://api.stripe.com/");
                 http.Timeout = TimeSpan.FromSeconds(20);
@@ -191,6 +196,7 @@ public static class DependencyInjection
         {
             services.AddSingleton<SesionesPagoSimuladas>();
             services.AddScoped<IPasarelaPagos, PasarelaSimulada>();
+            services.AddScoped<ICatalogoPagos, CatalogoSimulado>();
         }
     }
 

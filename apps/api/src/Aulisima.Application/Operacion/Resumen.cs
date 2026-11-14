@@ -65,7 +65,7 @@ public sealed record ResumenDto(
 public sealed class ResumenCasoUso(
     IRepositorioAdmin repositorio,
     CostosCasoUso costos,
-    IOptions<OpcionesPlanes> planes,
+    TarifasPanel tarifas,
     IOptions<OpcionesOperacion> opciones,
     TimeProvider reloj)
 {
@@ -82,7 +82,7 @@ public sealed class ResumenCasoUso(
         var serie = await repositorio.ResumenSemanasAsync(desde, semanas, ct);
         var embudo = await repositorio.EmbudoAsync(ct);
         var cohortes = await repositorio.RetencionAsync(desde, semanas, ct);
-        var dinero = Dinero(await costos.EjecutarAsync(ct), r.BajasMes);
+        var dinero = Dinero(await costos.EjecutarAsync(ct), r.BajasMes, await tarifas.MensualAsync(ct));
 
         return new ResumenDto(
             new UsoResumenDto(
@@ -115,11 +115,10 @@ public sealed class ResumenCasoUso(
     public static decimal? Retenidos(FilaCohorte c, int semana, int volvieron, DateOnly hoy) =>
         c.Cohorte.AddDays(7 * (semana + 2)) > hoy ? null : Porcentaje(volvieron, c.Docentes);
 
-    private DineroResumenDto Dinero(CostosDto c, int bajas)
+    private static DineroResumenDto Dinero(CostosDto c, int bajas, Func<Guid, int, decimal> mensual)
     {
-        var p = planes.Value;
         var pro = c.Grupos.Where(g => g.Plan == PlanVigente.Pro).ToList();
-        var mrr = pro.GroupBy(g => g.DocenteId).Sum(g => Tarifa.Mensual(g.Count(), p.PrecioPrimerGrupo, p.PrecioGrupoAdicional));
+        var mrr = pro.GroupBy(g => g.DocenteId).Sum(g => mensual(g.Key, g.Count()));
         var pagan = pro.Select(g => g.DocenteId).Distinct().Count();
         return new DineroResumenDto(
             c.Moneda,

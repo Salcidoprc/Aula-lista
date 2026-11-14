@@ -4,7 +4,7 @@ namespace Aulisima.Domain.Planes;
 
 public static class TipoPago
 {
-    /// <summary>RN-084: 3 o 6 meses del total mensual.</summary>
+    /// <summary>RN-084: los meses que ofrece el producto, por el total mensual.</summary>
     public const string Prepago = "prepago";
 
     /// <summary>RN-089: un grupo Pro más durante un prepago, hasta <see cref="Suscripcion.PagadoHasta"/>.</summary>
@@ -25,9 +25,10 @@ public sealed class Pago : Entidad
 {
     public Pago(
         Guid docenteId, string tipo, int meses, decimal monto, IReadOnlyList<Guid> grupos, string sesionExterna,
-        string? urlFicha, DateTimeOffset? venceEn, DateTimeOffset ahora)
+        string? urlFicha, DateTimeOffset? venceEn, Guid? precioId, DateTimeOffset ahora)
         : base(ahora)
     {
+        PrecioId = precioId;
         DocenteId = docenteId;
         Tipo = tipo;
         Meses = meses;
@@ -47,6 +48,9 @@ public sealed class Pago : Entidad
     public string Tipo { get; private set; } = TipoPago.Prepago;
 
     public int Meses { get; private set; }
+
+    /// <summary>ADR-0017: la versión de precio con la que se calculó el monto.</summary>
+    public Guid? PrecioId { get; private set; }
 
     /// <summary>En MXN con IVA incluido.</summary>
     public decimal Monto { get; private set; }

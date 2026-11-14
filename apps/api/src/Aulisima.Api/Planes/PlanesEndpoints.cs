@@ -11,7 +11,7 @@ internal static class PlanesEndpoints
 
     public static RouteGroupBuilder MapPlanes(this RouteGroupBuilder api, IConfiguration configuracion)
     {
-        api.MapGet("/planes", (ObtenerPlanesCasoUso caso) => TypedResults.Ok(caso.Ejecutar())).WithTags("Planes").WithName("ObtenerPlanes")
+        api.MapGet("/planes", async (ObtenerPlanesCasoUso caso, CancellationToken ct) => TypedResults.Ok(await caso.EjecutarAsync(ct))).WithTags("Planes").WithName("ObtenerPlanes")
             .AllowAnonymous();
 
         var suscripcion = api.MapGroup("/docente/suscripcion").WithTags("Planes");

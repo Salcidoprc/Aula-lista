@@ -79,7 +79,7 @@ public sealed class ConsultaCierre(
             periodoId,
             periodo.Grupo.Id,
             periodo.Periodo.Estado,
-            ReglasCierre.PuedeRevisar(periodo, plan.TienePro) is not null && periodo.Periodo.Estado != EstadoPeriodo.Abierto,
+            ReglasCierre.PuedeRevisar(periodo, await acceso.TieneFuncionAsync(periodo.Grupo, Domain.Planes.FuncionCatalogo.CierreIa, ct)) is not null && periodo.Periodo.Estado != EstadoPeriodo.Abierto,
             plan,
             new RequisitosCierreDto(datos.SumaPesos, datos.SumaPesos == 100m, datos.Celdas.Count > 0 || datos.Tomas > 0),
             new ConteosCierreDto(
@@ -183,7 +183,7 @@ public sealed class GenerarObservacionesCasoUso(
             return null;
         }
 
-        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
+        if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneFuncionAsync(periodo.Grupo, Domain.Planes.FuncionCatalogo.CierreIa, ct)) is { } bloqueo)
         {
             return Resultado.Fallo<CierreDto>(bloqueo);
         }
@@ -246,7 +246,7 @@ public sealed class CerrarPeriodoCasoUso(
 
         if (periodo.Periodo.Estado != EstadoPeriodo.Cerrado)
         {
-            if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneProAsync(periodo.Grupo, ct)) is { } bloqueo)
+            if (ReglasCierre.PuedeRevisar(periodo, await acceso.TieneFuncionAsync(periodo.Grupo, Domain.Planes.FuncionCatalogo.CierreIa, ct)) is { } bloqueo)
             {
                 return Resultado.Fallo<CierreDto>(bloqueo);
             }

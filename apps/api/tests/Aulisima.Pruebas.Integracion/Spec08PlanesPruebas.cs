@@ -317,7 +317,7 @@ public sealed class Spec08PlanesPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
         Assert.Equal("sin_tarjeta", await CodigoAsync(sinTarjeta));
         Assert.Equal(79m, planes.GetProperty("precioPrimerGrupo").GetDecimal());
         Assert.Equal(29m, planes.GetProperty("precioGrupoAdicional").GetDecimal());
-        Assert.Equal([3, 6], planes.GetProperty("mesesPrepago").EnumerateArray().Select(m => m.GetInt32()));
+        Assert.Equal([1, 3, 6], planes.GetProperty("mesesPrepago").EnumerateArray().Select(m => m.GetInt32()));
         Assert.Equal(0, await ContarAsync($"SELECT count(*) FROM pago WHERE docente_id = '{d.DocenteId}'"));
     }
 

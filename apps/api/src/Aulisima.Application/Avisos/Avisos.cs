@@ -90,7 +90,7 @@ public sealed class DestinatariosAvisoCasoUso(IRepositorioGrupos grupos, PlanEnt
         }
 
         var tutores = await plan.TutoresAsync((await grupos.AlumnosAsync(grupoId, ct)).Where(a => a.EstaActivo).ToList(), ct);
-        var pro = await acceso.TieneProAsync(grupo, ct);
+        var pro = await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.AvisosUrgentes, ct);
         var restantes = pro ? await plan.UrgentesRestantesAsync(grupoId, ct) : _ => 0;
         return new DestinatariosDto(
             grupoId,
@@ -126,7 +126,7 @@ public sealed class CrearAvisoCasoUso(
             return Resultado.Fallo<AvisoDto>(ErroresGrupos.GrupoArchivado);
         }
 
-        if (comando.Urgente && !await acceso.TieneProAsync(grupo, ct))
+        if (comando.Urgente && !await acceso.TieneFuncionAsync(grupo, Domain.Planes.FuncionCatalogo.AvisosUrgentes, ct))
         {
             return Resultado.Fallo<AvisoDto>(Domain.Planes.ErroresPlanes.WhatsappRequierePro);
         }

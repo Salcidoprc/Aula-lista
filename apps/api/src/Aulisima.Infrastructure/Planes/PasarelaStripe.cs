@@ -23,7 +23,11 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
 
     public async Task<SesionPago> CheckoutSuscripcionAsync(NuevaSuscripcion datos, CancellationToken cancellationToken)
     {
-        var o = opciones.Value;
+        if (datos.PrecioPrimeraId is null || datos.PrecioAdicionalId is null)
+        {
+            throw new InvalidOperationException("El precio a la venta no está sincronizado con Stripe.");
+        }
+
         var campos = new List<KeyValuePair<string, string>>
         {
             new("mode", "subscription"),
@@ -33,12 +37,13 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
             new("client_reference_id", datos.DocenteId.ToString()),
             new("metadata[docente_id]", datos.DocenteId.ToString()),
             new("subscription_data[metadata][docente_id]", datos.DocenteId.ToString()),
-            new("line_items[0][price]", o.PrecioPrimerGrupoId!),
+            new("subscription_data[metadata][precio_id]", datos.PrecioId.ToString()),
+            new("line_items[0][price]", datos.PrecioPrimeraId),
             new("line_items[0][quantity]", "1"),
         };
         if (datos.Grupos.Count > 1)
         {
-            campos.Add(new("line_items[1][price]", o.PrecioGrupoAdicionalId!));
+            campos.Add(new("line_items[1][price]", datos.PrecioAdicionalId));
             campos.Add(new("line_items[1][quantity]", (datos.Grupos.Count - 1).ToString(CultureInfo.InvariantCulture)));
         }
 
@@ -66,6 +71,11 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
             new("metadata[tipo]", datos.Tipo),
             new("metadata[meses]", datos.Meses.ToString(CultureInfo.InvariantCulture)),
         };
+        if (datos.PrecioId is { } precio)
+        {
+            campos.Add(new("metadata[precio_id]", precio.ToString()));
+        }
+
         if (datos.SoloOxxo)
         {
             campos.Add(new("payment_method_options[oxxo][expires_after_days]", datos.DiasFicha.ToString(CultureInfo.InvariantCulture)));
@@ -79,11 +89,18 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
         return Sesion(json.RootElement, datos.SoloOxxo ? reloj.GetUtcNow().AddDays(datos.DiasFicha) : null);
     }
 
-    /// <summary>RN-083: cantidades nuevas; con prorrateo al agregar y sin él al quitar (aplica al siguiente corte).</summary>
+    /// <summary>
+    /// RN-083: cantidades nuevas; con prorrateo al agregar y sin él al quitar (aplica al siguiente corte). Con los precios
+    /// de la versión que paga el docente (ADR-0017).
+    /// </summary>
     public async Task ActualizarGruposAsync(
-        Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, bool prorratear, CancellationToken cancellationToken)
+        Guid docenteId, string suscripcion, IReadOnlyList<Guid> grupos, PreciosSuscripcion precios, bool prorratear, CancellationToken cancellationToken)
     {
-        var o = opciones.Value;
+        if (precios.PrimeraId is not { } primera || precios.AdicionalId is not { } adicional)
+        {
+            throw new InvalidOperationException("La versión de precio de la suscripción no tiene sus precios en Stripe.");
+        }
+
         using var actual = await GetAsync($"v1/subscriptions/{Uri.EscapeDataString(suscripcion)}", cancellationToken);
         var items = actual.RootElement.GetProperty("items").GetProperty("data").EnumerateArray()
             .Select(i => (Id: i.GetProperty("id").GetString()!, Precio: i.GetProperty("price").GetProperty("id").GetString()))
@@ -115,11 +132,11 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
             }
         }
 
-        Item(items.FirstOrDefault(i => i.Precio == o.PrecioPrimerGrupoId).Id, o.PrecioPrimerGrupoId!, 1);
-        var adicional = items.FirstOrDefault(i => i.Precio == o.PrecioGrupoAdicionalId).Id;
-        if (adicional is not null || grupos.Count > 1)
+        Item(items.FirstOrDefault(i => i.Precio == primera).Id, primera, 1);
+        var itemAdicional = items.FirstOrDefault(i => i.Precio == adicional).Id;
+        if (itemAdicional is not null || grupos.Count > 1)
         {
-            Item(adicional, o.PrecioGrupoAdicionalId!, grupos.Count - 1);
+            Item(itemAdicional, adicional, grupos.Count - 1);
         }
 
         campos.AddRange(Grupos("metadata", grupos, borrarSobrantes: true));
@@ -180,7 +197,7 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
 
                     return new EventoPagoRecibido(
                         id, TipoEventoPago.SuscripcionActualizada, docente, Cliente: Texto(objeto, "customer"), Suscripcion: Texto(objeto, "id"),
-                        Grupos: GruposDe(Metadatos(objeto)), PeriodoFin: FinDePeriodo(objeto), Activa: true);
+                        Grupos: GruposDe(Metadatos(objeto)), PeriodoFin: FinDePeriodo(objeto), Activa: true, PrecioId: Precio(Metadatos(objeto)));
                 }
 
             case "invoice.paid" or "invoice.payment_failed":
@@ -282,6 +299,9 @@ internal sealed class PasarelaStripe(HttpClient http, IOptions<OpcionesPagos> op
 
         return factura.TryGetProperty("subscription_details", out var viejo) && viejo.ValueKind == JsonValueKind.Object ? Metadatos(viejo) : null;
     }
+
+    private static Guid? Precio(JsonElement? metadatos) =>
+        metadatos is { } m && m.TryGetProperty("precio_id", out var valor) && Guid.TryParse(valor.GetString(), out var id) ? id : null;
 
     private static Guid? Docente(JsonElement? metadatos) =>
         metadatos is { } m && m.TryGetProperty("docente_id", out var valor) && Guid.TryParse(valor.GetString(), out var id) ? id : null;
