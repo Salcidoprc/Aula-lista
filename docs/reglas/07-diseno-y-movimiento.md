@@ -139,6 +139,7 @@ Toda animación responde "¿para qué?": consistencia espacial, indicar un cambi
 | Avisos: "Leído por n de m" | La barra crece con `transform` en 240 ms cuando el refresco trae lecturas nuevas; al abrir la pantalla ya está en su lugar. Las listas de avisos no se animan al entrar | SPEC-07 |
 | Portal del tutor: cambiar entre hijos | Pestañas con indicador que se desliza y contenido con fundido | SPEC-06 |
 | Abrir boleta en el portal | La tarjeta del periodo se expande hacia la vista de detalle con View Transition compartida | SPEC-06 |
+| Landing pública: primera pantalla | Al cargar, el texto entra escalonado (60 ms) con 12 px de subida en 300 ms y el titular se enfoca desde 6 px de desenfoque; la app sube 16 px en 400 ms. Con mouse, el libro del estante se asoma 8 px. Nada más se anima al desplazarse | SPEC-01 |
 | Estados vacíos y de carga | Esqueletos sin brillo animado continuo; el contenido real entra con fundido | Todas |
 
 Cualquier animación fuera de este catálogo se justifica en el PR con la tabla de frecuencia y el peso de criterios de arriba.

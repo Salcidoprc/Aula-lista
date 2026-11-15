@@ -422,6 +422,7 @@
     "zacatecas": "Zacatecas"
   },
   "titulos": {
+    "landing": "Calificaciones, observaciones y boletas para docentes",
     "inicio": "Mis grupos",
     "bienvenida": "Bienvenida",
     "ajustes": "Ajustes",
@@ -2425,6 +2426,274 @@
       "no": "No",
       "mas": "Ver cambios anteriores",
       "vacioValor": "(vacío)"
+    }
+  },
+  "landing": {
+    "titulo": "Aulísima: calificaciones, observaciones y boletas para docentes",
+    "nav": {
+      "etiqueta": "Aulísima",
+      "funciones": "Qué hace",
+      "precios": "Precios",
+      "preguntas": "Preguntas",
+      "entrar": "Entrar",
+      "crear": "Crear cuenta gratis"
+    },
+    "hero": {
+      "titulo1": "Califica en clase.",
+      "titulo2": "Cierra el periodo sin desvelarte.",
+      "entrada": "Aulísima es tu libreta de calificaciones en el celular. Capturas con un toque, pasas lista sin internet y, al cerrar, la IA te deja un borrador de observación por alumno que tú revisas. Las boletas llegan al WhatsApp de cada familia.",
+      "crear": "Crear cuenta gratis",
+      "entrar": "Ya tengo cuenta",
+      "datos": {
+        "0": "Gratis con todos tus grupos",
+        "1": "Primaria y secundaria",
+        "2": "Funciona sin internet"
+      },
+      "capturaCel": "Captura de calificaciones en el celular: lista del grupo con el teclado rápido 10, 9, 8",
+      "capturaEsc": "Mis grupos en la computadora: un libro de color por grado"
+    },
+    "estante": {
+      "titulo": "Un color por grado, como tus libros de texto",
+      "primaria": "primaria",
+      "secundaria": "secundaria",
+      "grado": "{{n}}.° de {{nivel}}"
+    },
+    "antes": {
+      "titulo": "Lo que hoy te quita las noches",
+      "entrada": "Cada fin de periodo es lo mismo: papeles, calculadora y horas escribiendo. Así cambia con Aulísima.",
+      "colAntes": "Hoy",
+      "colDespues": "Con Aulísima",
+      "filas": {
+        "0": {
+          "0": "Pasar la lista de papel a Excel, alumno por alumno",
+          "1": "Pegas la lista o le tomas foto y queda lista en un minuto"
+        },
+        "1": {
+          "0": "Sacar promedios con calculadora y revisar dos veces",
+          "1": "Cada rubro pesa lo que tú dices y el promedio sale solo, con dos decimales"
+        },
+        "2": {
+          "0": "Escribir 35 observaciones distintas a mano",
+          "1": "La IA redacta un borrador con tus notas y tú lo apruebas"
+        },
+        "3": {
+          "0": "Imprimir boletas que no siempre llegan a casa",
+          "1": "Cada familia recibe su boleta por WhatsApp o correo"
+        },
+        "4": {
+          "0": "Avisos que se pierden en el grupo de WhatsApp",
+          "1": "Ves quién ya leyó cada aviso"
+        }
+      }
+    },
+    "capitulos": {
+      "titulo": "Un periodo completo, en seis pasos",
+      "entrada": "Del primer día de clases a la boleta en casa. Todo con capturas reales de la app.",
+      "ejemplo": "Datos de ejemplo",
+      "uno": {
+        "titulo": "Arma tu grupo en un minuto",
+        "texto": "Pega la lista desde Word o WhatsApp, sube el Excel de la escuela o tómale foto a la lista impresa. Aulísima separa apellidos y nombres y te deja revisar antes de guardar.",
+        "puntos": {
+          "0": "Primaria y secundaria, varios grupos a la vez",
+          "1": "Hasta 50 alumnos por grupo",
+          "2": "Tutores con su WhatsApp o correo"
+        },
+        "alt": "Revisión de la lista importada: apellidos y nombres separados antes de guardar"
+      },
+      "dos": {
+        "titulo": "Captura con un toque, aunque no haya señal",
+        "texto": "Eliges la actividad y tocas 10, 9, 8… El siguiente alumno aparece solo. Sin conexión se guarda en tu celular y se envía cuando vuelve la señal.",
+        "puntos": {
+          "0": "Rubros y pesos a tu manera",
+          "1": "Con número o cumplió / no cumplió",
+          "2": "Calificas por equipo y ajustas a quien haga falta"
+        },
+        "alt": "Captura de calificaciones con el teclado rápido"
+      },
+      "tres": {
+        "titulo": "Pasa lista en segundos",
+        "texto": "Tocas \"Todos presentes\" y después solo a quien faltó o llegó tarde. El historial de la unidad te da el porcentaje de cada alumno y, si quieres, la asistencia cuenta en la calificación.",
+        "puntos": {
+          "0": "Falta, retardo y justificada",
+          "1": "Funciona sin internet",
+          "2": "Historial por unidad"
+        },
+        "alt": "Pase de lista con presentes, una falta y un retardo"
+      },
+      "cuatro": {
+        "titulo": "Cierra con observaciones que tú apruebas",
+        "texto": "Con tus calificaciones y tus notas, la IA redacta un borrador de observación por alumno. Lo lees, lo ajustas o pides otra versión, y lo apruebas. Nada sale sin tu visto bueno.",
+        "puntos": {
+          "0": "La IA nunca ve el nombre del alumno",
+          "1": "Eliges el tono y el largo",
+          "2": "Pides otra versión cuando quieras"
+        },
+        "alt": "Revisión de una observación redactada por la IA, con los datos del alumno al lado"
+      },
+      "cinco": {
+        "titulo": "Boletas que llegan solas a casa",
+        "texto": "Generas las boletas en PDF de todo el grupo y las publicas. Cada familia recibe un enlace: sin instalar nada ni crear cuenta, ve la boleta de todos sus hijos, aunque tengan maestros distintos.",
+        "puntos": {
+          "0": "PDF y Excel de todo el grupo",
+          "1": "Enlace personal por WhatsApp o correo",
+          "2": "Versión corregida si algo cambió"
+        },
+        "alt": "Boleta del alumno abierta desde el celular de la familia",
+        "altEsc": "Lista de boletas publicadas del grupo"
+      },
+      "seis": {
+        "titulo": "Avisos que sí se leen",
+        "texto": "Mandas un aviso a todo el grupo o solo a quien elijas. Llega por notificación o correo y ves quién ya lo leyó.",
+        "puntos": {
+          "0": "Leído por cada familia",
+          "1": "Urgentes también por WhatsApp",
+          "2": "Sin compartir tu número personal"
+        },
+        "alt": "Nuevo aviso a los tutores del grupo"
+      }
+    },
+    "demo": {
+      "titulo": "Pruébalo aquí",
+      "entrada": "Califica a estos seis alumnos con el teclado. Se mide tu tiempo.",
+      "actividad": "Proyecto: Mi comunidad",
+      "teclado": "Teclado rápido",
+      "noEntrego": "No entregó",
+      "sinCalificar": "Sin calificar",
+      "calificacionDe": "Calificación de {{nombre}}",
+      "listo": "Listo: {{n}} alumnos en {{s}} s.",
+      "ritmo": "A ese ritmo, un grupo de 35 te toma {{t}}.",
+      "segundos": "{{n}} segundos",
+      "minutos": "menos de {{n}} minutos",
+      "otraVez": "Otra vez",
+      "ayuda": "También puedes usar las teclas del 5 al 9 y el 0 para el 10."
+    },
+    "fuertes": {
+      "titulo": "Hecha para el salón, no para la oficina",
+      "filas": {
+        "0": {
+          "0": "En el celular, con una mano",
+          "1": "Botones grandes y todo a la altura del pulgar."
+        },
+        "1": {
+          "0": "Sin internet",
+          "1": "Capturas y pasas lista sin señal; se envía cuando vuelve."
+        },
+        "2": {
+          "0": "Notas que solo tú ves",
+          "1": "Apuntas lo que pasa en clase y la IA lo usa al cerrar."
+        },
+        "3": {
+          "0": "Modo oscuro",
+          "1": "Para calificar de noche sin lastimarte la vista."
+        },
+        "4": {
+          "0": "Sin instalar nada",
+          "1": "Se abre en el navegador y la agregas a tu pantalla de inicio."
+        }
+      }
+    },
+    "privacidad": {
+      "titulo": "Los datos de tus alumnos, cuidados",
+      "puntos": {
+        "0": {
+          "0": "La IA trabaja con seudónimo",
+          "1": "Nunca recibe nombres, teléfonos ni correos de alumnos o familias."
+        },
+        "1": {
+          "0": "Nada llega a una familia sin ti",
+          "1": "Cada observación y cada boleta las apruebas tú antes de publicarlas."
+        },
+        "2": {
+          "0": "Tus grupos son solo tuyos",
+          "1": "Nadie más ve tus alumnos ni tus calificaciones."
+        }
+      },
+      "aviso": "Lee el aviso de privacidad"
+    },
+    "precios": {
+      "titulo": "Gratis para siempre. Pro cuando cierres el periodo.",
+      "entrada": "Usa Aulísima gratis todo el ciclo. Paga Pro solo en los grupos donde quieras cerrar con IA y publicar boletas.",
+      "gratis": "Gratis",
+      "gratisPrecio": "0 MXN",
+      "gratisNota": "Sin tarjeta y sin fecha de vencimiento",
+      "gratisIncluye": {
+        "0": "Todos los grupos y alumnos que necesites",
+        "1": "Importar con Excel, texto o foto",
+        "2": "Captura, rubros y equipos",
+        "3": "Notas por alumno",
+        "4": "Pase de lista e historial"
+      },
+      "pro": "Pro",
+      "alMes": "al mes",
+      "primerGrupo": "{{precio}} {{moneda}} el primer grupo",
+      "adicional": "+ {{precio}} {{moneda}} cada grupo adicional",
+      "todoGratis": "Todo lo de Gratis, más:",
+      "calcular": "¿Cuántos grupos?",
+      "menos": "Un grupo menos",
+      "mas": "Un grupo más",
+      "grupos": {
+        "uno": "{{n}} grupo",
+        "otros": "{{n}} grupos"
+      },
+      "total": "{{total}} {{moneda}} al mes",
+      "desglose": "{{primero}} + {{n}} × {{adicional}}",
+      "pago": "Con tarjeta cada mes, o en OXXO por {{meses}} meses.",
+      "pagoTarjeta": "Con tarjeta cada mes.",
+      "prueba": "Tu primer cierre va por nuestra cuenta: prueba Pro gratis en un grupo.",
+      "sinPrecio": "Los precios de Pro se anuncian muy pronto.",
+      "cargando": "Cargando precios…",
+      "accion": "Empezar gratis",
+      "funcion": {
+        "promedios": "Promedios por rubro y de la unidad",
+        "exportar_excel": "Exportar a Excel",
+        "avisos": "Avisos a tutores",
+        "cierre_ia": "Cierre con observaciones por IA",
+        "boletas": "Boletas en PDF para las familias",
+        "whatsapp_boletas": "Boletas por WhatsApp",
+        "avisos_urgentes": "Avisos urgentes por WhatsApp"
+      }
+    },
+    "preguntas": {
+      "titulo": "Preguntas frecuentes",
+      "lista": {
+        "0": {
+          "0": "¿Tengo que instalar algo?",
+          "1": "No. Aulísima se abre en el navegador del celular o la computadora. Si quieres, la agregas a tu pantalla de inicio y se ve como una app."
+        },
+        "1": {
+          "0": "¿Las familias necesitan crear cuenta?",
+          "1": "No. Cada tutor recibe un enlace personal por WhatsApp o correo y con él ve las boletas y avisos de todos sus hijos."
+        },
+        "2": {
+          "0": "¿La boleta es el formato oficial de la SEP?",
+          "1": "No. Es un reporte tuyo para las familias, en PDF. También puedes exportar las calificaciones a Excel para tus formatos oficiales."
+        },
+        "3": {
+          "0": "¿Qué hace la IA con los datos de mis alumnos?",
+          "1": "Solo redacta borradores de observación con tus calificaciones y notas. Recibe un seudónimo, nunca el nombre, y nada se publica sin tu aprobación."
+        },
+        "4": {
+          "0": "¿Cómo se paga Pro?",
+          "1": "Con tarjeta de crédito o débito cada mes, o en efectivo en OXXO por varios meses. Pagas por grupo, solo en los que lo uses."
+        },
+        "5": {
+          "0": "¿Sirve para secundaria?",
+          "1": "Sí. Primaria y secundaria desde el primer día, con varios grupos y materias."
+        }
+      }
+    },
+    "final": {
+      "titulo": "Tu próximo cierre puede ser distinto.",
+      "entrada": "Crea tu cuenta en un minuto y arma tu primer grupo hoy.",
+      "crear": "Crear cuenta gratis",
+      "entrar": "Ya tengo cuenta"
+    },
+    "pie": {
+      "lema": "Calificaciones, observaciones y boletas para docentes de México.",
+      "privacidad": "Aviso de privacidad",
+      "terminos": "Términos de uso",
+      "entrar": "Entrar",
+      "derechos": "© {{anio}} Aulísima"
     }
   }
 }

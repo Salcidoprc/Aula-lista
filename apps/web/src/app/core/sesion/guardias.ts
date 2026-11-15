@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { PerfilService } from './perfil.service';
 import { SesionService } from './sesion.service';
 
@@ -34,3 +34,6 @@ export const requierePerfilCompleto: CanActivateFn = async () => {
   }
   return router.createUrlTree(['/bienvenida']);
 };
+
+/** La landing (RF-010) solo existe sin sesión: con sesión, la raíz es Mis grupos. */
+export const sinSesion: CanMatchFn = async () => !(await inject(SesionService).asegurar());

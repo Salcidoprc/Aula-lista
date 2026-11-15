@@ -1,6 +1,6 @@
 # SPEC-01: Cuenta y acceso del docente
 
-**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-001 a RF-008, RNF-002, RNF-004, RNF-005, RNF-006
+**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-001 a RF-010, RNF-002, RNF-004, RNF-005, RNF-006
 
 ## Objetivo
 
@@ -11,6 +11,7 @@ Que un docente cree su cuenta en menos de 2 minutos desde el celular, con la bas
 - Como docente, quiero registrarme con mi correo o con Google para empezar sin trámites.
 - Como docente, quiero recuperar mi contraseña si la olvido.
 - Como docente, quiero exportar mis datos y borrar mi cuenta cuando ya no use la app.
+- Como docente que todavía no usa Aulísima, quiero ver qué hace, cómo se ve y cuánto cuesta antes de crear mi cuenta.
 
 ## Reglas de negocio
 
@@ -24,6 +25,7 @@ Que un docente cree su cuenta en menos de 2 minutos desde el celular, con la bas
 | RN-006 | Al solicitar la eliminación, la cuenta se desactiva de inmediato, los enlaces de tutores de sus grupos se revocan y los datos se borran a los 30 días. |
 | RN-007 | Los vínculos de tutores con alumnos de otros docentes no se tocan al borrar una cuenta. |
 | RN-008 | El tema (RF-009) es una preferencia del dispositivo, no de la cuenta: se guarda en el navegador, no viaja a la API y vale para todo lo que se abra en ese navegador (docente, portal de tutores y administración). Sin elección, sigue al sistema y cambia en cuanto el sistema cambia. |
+| RN-009 | La landing (RF-010) solo existe sin sesión. Sus precios salen de `GET /planes` (el producto a la venta del catálogo, ADR-0017), nunca escritos en la página; si no hay producto a la venta, Pro se muestra sin precio. Las capturas son de la app real con datos de ejemplo, marcados como tales; no se inventan testimonios, clientes ni cifras. |
 
 ## Sesión
 
@@ -64,6 +66,7 @@ Google se activa solo si la API tiene `Google__ClientId` y `Google__ClientSecret
 
 Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable como base, mejorado con los skills de animación y diseño); los movimientos de este módulo están en su catálogo.
 
+0. **Landing (RF-010):** la portada azul de la app crecida a toda la página, con navegación propia (Qué hace, Precios, Preguntas, Entrar), el titular, "Crear cuenta gratis" y la app real cruzando el borde; el estante con un libro por grado; "Lo que hoy te quita las noches" (hoy contra Aulísima); los seis pasos del periodo como capítulos de libro (portadilla del color del grado y página con la captura), con "Pruébalo aquí" en la captura; "Hecha para el salón"; privacidad; planes Gratis y Pro con "¿Cuántos grupos?"; preguntas frecuentes; cierre y pie con aviso de privacidad y términos. Sin la cabecera de la app.
 1. **Registro e inicio de sesión:** correo y contraseña, botón de Google, enlace a recuperar.
 2. **Bienvenida:** perfil (nombre, nivel, escuela, CCT opcional, estado) y aceptación legal en un solo paso.
 3. **Ajustes de cuenta:** perfil, apariencia (Automática, Clara u Oscura, RF-009), cerrar sesiones, exportar datos, eliminar cuenta, plan. La apariencia cambia al tocarla, sin botón de guardar y sin animar el cambio de colores.
@@ -81,6 +84,9 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - Dado un token de actualización ya usado, cuando alguien lo reutiliza, entonces se revocan todas las sesiones de ese docente y queda en auditoría.
 - Dado un docente que pide eliminar su cuenta, cuando confirma, entonces no puede iniciar sesión, los enlaces de sus tutores dejan de funcionar para sus grupos y a los 30 días no quedan datos suyos en la base.
 - Dados 6 intentos fallidos de inicio de sesión en un minuto, entonces el sexto se rechaza con `demasiados_intentos`.
+- Dado un visitante sin sesión, cuando abre la raíz, entonces ve la landing sin fallas de axe en claro y oscuro, con el precio de Pro del catálogo; "Crear cuenta gratis" lleva a `/cuenta/registro` y "Entrar" a `/cuenta/entrar` (RF-010, RN-009).
+- Dado un visitante en "Pruébalo aquí", cuando califica a los seis alumnos de ejemplo, entonces ve cuánto tardó y cuánto le tomaría un grupo de 35; nada se guarda (RF-010).
+- Dado un docente con sesión, cuando abre la raíz, entonces ve Mis grupos y no la landing (RF-010).
 - Dado un docente con el sistema en modo claro, cuando elige Oscura en Ajustes, entonces toda la app cambia al tema oscuro sin fallas de axe y sigue oscura al recargar; al volver a Automática, la app sigue al sistema y cambia sola si el sistema pasa a oscuro (RF-009, RN-008).
 
 ## Fuera de alcance

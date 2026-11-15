@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export type NombreIcono =
   | 'volver'
   | 'mas'
+  | 'menos'
   | 'archivo'
   | 'pegar'
   | 'persona'
@@ -33,6 +34,7 @@ const TRAZOS: Record<NombreIcono, string> = {
   volver: 'M10 3.5 5.5 8l4.5 4.5',
   siguiente: 'm6 3.5 4.5 4.5L6 12.5',
   mas: 'M8 3v10M3 8h10',
+  menos: 'M3 8h10',
   archivo:
     'M9.5 1.75H4.25a1 1 0 0 0-1 1v10.5a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5L9.5 1.75Zm0 0V5h3.25M5.75 8.5h4.5M5.75 11h4.5',
   pegar:
