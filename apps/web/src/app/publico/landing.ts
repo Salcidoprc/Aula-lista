@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Icono } from '../shared/iconos';
+import { Aparece } from './aparece';
 import { CapturaApp } from './captura-app';
 import { Capitulo } from './capitulo';
 import { DemoCaptura } from './demo-captura';
@@ -20,6 +21,7 @@ import { PreguntasLanding } from './preguntas-landing';
     RouterLink,
     TranslocoDirective,
     Icono,
+    Aparece,
     CapturaApp,
     Capitulo,
     DemoCaptura,
@@ -32,8 +34,8 @@ import { PreguntasLanding } from './preguntas-landing';
     <ng-container *transloco="let t; prefix: 'landing'">
       <app-portada-landing />
 
-      <section class="bloque antes" aria-labelledby="antes-titulo">
-        <div class="cabeza">
+      <section class="bloque antes" aria-labelledby="antes-titulo" appAparece>
+        <div class="cabeza revela">
           <h2 id="antes-titulo">{{ t('antes.titulo') }}</h2>
           <p>{{ t('antes.entrada') }}</p>
         </div>
@@ -43,7 +45,7 @@ import { PreguntasLanding } from './preguntas-landing';
             <span role="columnheader">{{ t('antes.colDespues') }}</span>
           </div>
           @for (i of cinco; track i) {
-            <div class="renglon" role="row">
+            <div class="renglon revela" role="row" [style.--i]="i + 1">
               <span class="hoy" role="cell">{{ t('antes.filas.' + i + '.0') }}</span>
               <span class="con" role="cell">
                 <app-icono nombre="siguiente" />{{ t('antes.filas.' + i + '.1') }}
@@ -54,7 +56,7 @@ import { PreguntasLanding } from './preguntas-landing';
       </section>
 
       <section id="funciones" class="bloque" aria-labelledby="funciones-titulo">
-        <div class="cabeza">
+        <div class="cabeza revela" appAparece>
           <h2 id="funciones-titulo">{{ t('capitulos.titulo') }}</h2>
           <p>{{ t('capitulos.entrada') }} {{ t('capitulos.ejemplo') }}.</p>
         </div>
@@ -154,11 +156,11 @@ import { PreguntasLanding } from './preguntas-landing';
         </div>
       </section>
 
-      <section class="bloque fuertes" aria-labelledby="fuertes-titulo">
-        <h2 id="fuertes-titulo">{{ t('fuertes.titulo') }}</h2>
+      <section class="bloque fuertes" aria-labelledby="fuertes-titulo" appAparece>
+        <h2 id="fuertes-titulo" class="revela">{{ t('fuertes.titulo') }}</h2>
         <dl>
           @for (i of cinco; track i) {
-            <div>
+            <div class="revela" [style.--i]="i + 1">
               <dt>{{ t('fuertes.filas.' + i + '.0') }}</dt>
               <dd>{{ t('fuertes.filas.' + i + '.1') }}</dd>
             </div>
@@ -167,11 +169,13 @@ import { PreguntasLanding } from './preguntas-landing';
       </section>
 
       <section class="privacidad" aria-labelledby="privacidad-titulo">
-        <div class="bloque">
-          <h2 id="privacidad-titulo"><app-icono nombre="candado" />{{ t('privacidad.titulo') }}</h2>
+        <div class="bloque" appAparece>
+          <h2 id="privacidad-titulo" class="revela">
+            <app-icono nombre="candado" />{{ t('privacidad.titulo') }}
+          </h2>
           <ul>
             @for (i of [0, 1, 2]; track i) {
-              <li>
+              <li class="revela" [style.--i]="i + 1">
                 <strong>{{ t('privacidad.puntos.' + i + '.0') }}</strong>
                 <span>{{ t('privacidad.puntos.' + i + '.1') }}</span>
               </li>
@@ -181,24 +185,24 @@ import { PreguntasLanding } from './preguntas-landing';
         </div>
       </section>
 
-      <section id="precios" class="bloque" aria-labelledby="precios-titulo">
-        <div class="cabeza">
+      <section id="precios" class="bloque" aria-labelledby="precios-titulo" appAparece>
+        <div class="cabeza revela">
           <h2 id="precios-titulo">{{ t('precios.titulo') }}</h2>
           <p>{{ t('precios.entrada') }}</p>
         </div>
-        <app-precios-landing />
+        <app-precios-landing class="revela" style="--i: 1" />
       </section>
 
-      <section id="preguntas" class="bloque angosto" aria-labelledby="preguntas-titulo">
-        <h2 id="preguntas-titulo">{{ t('preguntas.titulo') }}</h2>
-        <app-preguntas-landing />
+      <section id="preguntas" class="bloque angosto" aria-labelledby="preguntas-titulo" appAparece>
+        <h2 id="preguntas-titulo" class="revela">{{ t('preguntas.titulo') }}</h2>
+        <app-preguntas-landing class="revela" style="--i: 1" />
       </section>
 
       <section class="final" aria-labelledby="final-titulo">
-        <div class="bloque">
-          <h2 id="final-titulo">{{ t('final.titulo') }}</h2>
-          <p>{{ t('final.entrada') }}</p>
-          <div class="acciones">
+        <div class="bloque" appAparece>
+          <h2 id="final-titulo" class="revela">{{ t('final.titulo') }}</h2>
+          <p class="revela" style="--i: 1">{{ t('final.entrada') }}</p>
+          <div class="acciones revela" style="--i: 2">
             <a class="boton crear" routerLink="/cuenta/registro">{{ t('final.crear') }}</a>
             <a class="ya" routerLink="/cuenta/entrar">{{ t('final.entrar') }}</a>
           </div>

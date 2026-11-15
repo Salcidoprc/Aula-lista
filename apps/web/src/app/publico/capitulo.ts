@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { ClaveGrado } from '../shared/portada/portada';
+import { Aparece } from './aparece';
 
 /**
  * Un paso del periodo en la landing (RF-010), como un libro abierto: la página izquierda es la portada del
@@ -9,6 +10,7 @@ import { ClaveGrado } from '../shared/portada/portada';
 @Component({
   selector: 'app-capitulo',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [Aparece],
   host: { '[attr.data-grado]': 'grado()', '[class.invertido]': 'invertido()' },
   template: `
     <div class="portadilla">
@@ -107,6 +109,60 @@ import { ClaveGrado } from '../shared/portada/portada';
       padding: var(--espacio-6) var(--espacio-4);
       background: var(--grado-tinte);
       box-shadow: inset 0 1rem 1.25rem -1rem var(--color-pliegue);
+    }
+
+    /*
+     * Al llegar al capítulo (una vez): el número entra deslizándose por la orilla, el texto sube escalonado
+     * y la captura se asienta en su página. Animación con relleno hacia atrás; al terminar no deja estilos.
+     */
+    :host(:not([data-visto])) :is(.numero, .portadilla > :not(.numero), .pagina > *) {
+      opacity: 0;
+    }
+
+    :host([data-visto]) .numero {
+      animation: numero calc(var(--dur-revela) * 1.5) var(--ease-out) backwards;
+    }
+
+    :host([data-visto]) .portadilla > :not(.numero) {
+      animation: subir var(--dur-revela) var(--ease-out) backwards;
+    }
+
+    :host([data-visto]) h3 {
+      animation-delay: calc(var(--escalon-revela) * 2);
+    }
+
+    :host([data-visto]) .portadilla > p {
+      animation-delay: calc(var(--escalon-revela) * 3);
+    }
+
+    :host([data-visto]) .portadilla > ul {
+      animation-delay: calc(var(--escalon-revela) * 4);
+    }
+
+    :host([data-visto]) .pagina > * {
+      animation: asentar var(--dur-revela) var(--ease-out) var(--dur-large) backwards;
+    }
+
+    @keyframes numero {
+      from {
+        opacity: 0;
+        translate: calc(var(--desplazamiento-revela) * 4) 0;
+      }
+    }
+
+    @keyframes subir {
+      from {
+        opacity: 0;
+        translate: 0 var(--desplazamiento-revela);
+      }
+    }
+
+    @keyframes asentar {
+      from {
+        opacity: 0;
+        translate: 0 calc(var(--desplazamiento-revela) * 1.5);
+        scale: var(--escala-entrada);
+      }
     }
 
     @media (min-width: 60rem) {

@@ -157,6 +157,10 @@
   --dur-hoja: 400ms;
   --dur-icono: 200ms;
   --dur-giro: 1s;
+  /* Solo la landing (RF-010): lo que aparece al bajar, una vez por visita; explicativo, por eso más largo. */
+  --dur-revela: 600ms;
+  --escalon-revela: 70ms;
+  --desplazamiento-revela: 1.5rem;
   --desplazamiento-pantalla: 8px;
   --desplazamiento-aviso: 1rem;
   --escala-presion: 0.97;
@@ -347,5 +351,6 @@
     --desplazamiento-aviso: 0px;
     --escala-presion: 1;
     --escala-entrada: 1;
+    --desplazamiento-revela: 0px;
   }
 }

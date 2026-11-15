@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Icono } from '../shared/iconos';
 import { ClaveGrado } from '../shared/portada/portada';
+import { Aparece } from './aparece';
 import { CapturaApp } from './captura-app';
 
 /** Los nueve grados con el alto de su libro en el estante, para que no parezcan una gráfica de barras. */
@@ -31,7 +32,7 @@ const LIBROS: readonly {
  */
 @Component({
   selector: 'app-portada-landing',
-  imports: [RouterLink, TranslocoDirective, Icono, CapturaApp],
+  imports: [RouterLink, TranslocoDirective, Icono, Aparece, CapturaApp],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container *transloco="let t; prefix: 'landing'">
@@ -83,11 +84,16 @@ const LIBROS: readonly {
         </div>
       </div>
 
-      <section class="estante" aria-labelledby="estante-titulo">
-        <h2 id="estante-titulo">{{ t('estante.titulo') }}</h2>
+      <section class="estante" aria-labelledby="estante-titulo" appAparece>
+        <h2 id="estante-titulo" class="revela">{{ t('estante.titulo') }}</h2>
         <ul>
-          @for (libro of libros; track libro.grado) {
-            <li [attr.data-grado]="libro.grado" [style.--alto.%]="libro.alto">
+          @for (libro of libros; track libro.grado; let n = $index) {
+            <li
+              class="revela"
+              [attr.data-grado]="libro.grado"
+              [style.--alto.%]="libro.alto"
+              [style.--i]="n + 1"
+            >
               <span class="cifras">{{
                 t('estante.grado', { n: libro.n, nivel: t('estante.' + libro.nivel) })
               }}</span>
