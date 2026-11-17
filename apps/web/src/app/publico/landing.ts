@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Icono } from '../shared/iconos';
+import { Marca } from '../shared/marca';
 import { Aparece } from './aparece';
 import { CapturaApp } from './captura-app';
 import { Capitulo } from './capitulo';
@@ -21,6 +22,7 @@ import { PreguntasLanding } from './preguntas-landing';
     RouterLink,
     TranslocoDirective,
     Icono,
+    Marca,
     Aparece,
     CapturaApp,
     Capitulo,
@@ -212,7 +214,7 @@ import { PreguntasLanding } from './preguntas-landing';
       <footer class="pie">
         <div class="bloque">
           <p>
-            <strong>Aulísima</strong><br />
+            <app-marca class="logo-pie" /><br />
             {{ t('pie.lema') }}
           </p>
           <nav [attr.aria-label]="t('pie.lema')">

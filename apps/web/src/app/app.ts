@@ -48,6 +48,7 @@ import { PortadaService } from './shared/portada/portada.service';
             [subtitulo]="portada()?.subtitulo"
             [numero]="portada()?.numero"
             [grado]="portada()?.grado"
+            [marca]="!portada() ? 'titulo' : portada()?.marcaEnSubtitulo ? 'subtitulo' : undefined"
           >
             @if (sesion.activa()) {
               <nav

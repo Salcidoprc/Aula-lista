@@ -26,4 +26,19 @@ describe('Portada', () => {
     expect(numero?.textContent?.trim()).toBe('4');
     expect(numero?.getAttribute('aria-hidden')).toBe('true');
   });
+
+  it('sin grupo muestra el logo como título, con nombre para lectores de pantalla', () => {
+    const el = crear({ titulo: 'Aulísima', marca: 'titulo' });
+    const logo = el.querySelector('app-marca');
+    expect(logo?.getAttribute('role')).toBe('img');
+    expect(logo?.getAttribute('aria-label')).toBe('Aulísima');
+    expect(el.querySelector('span.titulo')).toBeNull();
+  });
+
+  it('en administración el logo va chico como subtítulo', () => {
+    const el = crear({ titulo: 'Administración', subtitulo: 'Aulísima', marca: 'subtitulo' });
+    expect(el.querySelector('span.titulo')?.textContent).toBe('Administración');
+    expect(el.querySelector('app-marca.logo--chico')).not.toBeNull();
+    expect(el.querySelector('.subtitulo')).toBeNull();
+  });
 });

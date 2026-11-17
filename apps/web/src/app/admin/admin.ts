@@ -167,6 +167,7 @@ export class Admin {
     controlarPortada()({
       titulo: inject(TranslocoService).translate('admin.titulo'),
       subtitulo: 'Aulísima',
+      marcaEnSubtitulo: true,
     });
   }
 

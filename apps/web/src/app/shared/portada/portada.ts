@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Marca } from '../marca';
 
 /** Clave del grado: p1 … p6 (primaria) o s1 … s3 (secundaria). Define el color de la portada. */
 export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' | 's3';
@@ -10,6 +11,7 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
  */
 @Component({
   selector: 'app-portada',
+  imports: [Marca],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[attr.data-grado]': 'grado() ?? null',
@@ -19,8 +21,14 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
     @if (numero(); as n) {
       <span class="numero" aria-hidden="true">{{ n }}</span>
     }
-    <span class="titulo">{{ titulo() }}</span>
-    @if (subtitulo(); as s) {
+    @if (marca() === 'titulo') {
+      <app-marca class="titulo logo" />
+    } @else {
+      <span class="titulo">{{ titulo() }}</span>
+    }
+    @if (marca() === 'subtitulo') {
+      <app-marca class="logo logo--chico" />
+    } @else if (subtitulo(); as s) {
       <span class="subtitulo">{{ s }}</span>
     }
     <ng-content />
@@ -68,6 +76,18 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
       overflow-wrap: anywhere;
     }
 
+    /* El logo toma el color del texto de la portada; el acento de la "í" queda en el tono del rótulo. */
+    .logo {
+      --marca-tinta: var(--color-sobre-grado);
+      --marca-acento: var(--grado-rotulo);
+      justify-self: start;
+      block-size: 2rem;
+    }
+
+    .logo--chico {
+      block-size: 1.125rem;
+    }
+
     .subtitulo {
       font-size: var(--texto-sm);
       color: var(--grado-rotulo);
@@ -93,6 +113,14 @@ export type ClaveGrado = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 's1' | 's2' |
       .titulo {
         font-size: var(--texto-xl);
       }
+
+      .logo {
+        block-size: 2.5rem;
+      }
+
+      .logo--chico {
+        block-size: 1.25rem;
+      }
     }
   `,
 })
@@ -102,4 +130,6 @@ export class Portada {
   /** Número del grado tal como se muestra ("4"). Decorativo: el título ya nombra el grupo. */
   readonly numero = input<string>();
   readonly grado = input<ClaveGrado>();
+  /** Dónde va el logo en lugar del texto: como título (pantallas de la app) o como subtítulo (admin). */
+  readonly marca = input<'titulo' | 'subtitulo'>();
 }

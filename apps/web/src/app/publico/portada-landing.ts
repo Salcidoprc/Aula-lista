@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { Icono } from '../shared/iconos';
+import { Marca } from '../shared/marca';
 import { ClaveGrado } from '../shared/portada/portada';
 import { Aparece } from './aparece';
 import { CapturaApp } from './captura-app';
@@ -32,13 +33,13 @@ const LIBROS: readonly {
  */
 @Component({
   selector: 'app-portada-landing',
-  imports: [RouterLink, TranslocoDirective, Icono, Aparece, CapturaApp],
+  imports: [RouterLink, TranslocoDirective, Icono, Marca, Aparece, CapturaApp],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container *transloco="let t; prefix: 'landing'">
       <div class="portada">
         <nav class="barra" [attr.aria-label]="t('nav.etiqueta')">
-          <a class="logo" routerLink="/"><span class="libro" aria-hidden="true"></span>Aulísima</a>
+          <a class="logo" routerLink="/"><app-marca /></a>
           <div class="enlaces">
             <a href="#funciones">{{ t('nav.funciones') }}</a>
             <a href="#precios">{{ t('nav.precios') }}</a>
