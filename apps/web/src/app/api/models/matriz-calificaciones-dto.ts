@@ -7,6 +7,7 @@ import { CeldaDto } from '../models/celda-dto';
 import { ComposicionDto } from '../models/composicion-dto';
 import { ConfiguracionMatrizDto } from '../models/configuracion-matriz-dto';
 import { EquipoDto } from '../models/equipo-dto';
+import { ParticipacionesAlumnoDto } from '../models/participaciones-alumno-dto';
 import { ResultadoAlumnoDto } from '../models/resultado-alumno-dto';
 import { RubroMatrizDto } from '../models/rubro-matriz-dto';
 export interface MatrizCalificacionesDto {
@@ -19,6 +20,7 @@ export interface MatrizCalificacionesDto {
   equipos: Array<EquipoDto>;
   estado: string;
   grupoId: string;
+  participaciones?: Array<ParticipacionesAlumnoDto>;
   periodoId: string;
   resultados: Array<ResultadoAlumnoDto>;
   rubros: Array<RubroMatrizDto>;

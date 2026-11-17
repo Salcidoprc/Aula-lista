@@ -42,6 +42,17 @@ export function leerCalificacion(texto: string): string | null {
   return centesimas(limpio) <= 1000 ? limpio : null;
 }
 
+/** RN-121: lo que vale una participación, de 0.01 a 1.00 con hasta dos decimales, con punto o coma. */
+export function leerValorParticipacion(texto: string): string | null {
+  const limpio = texto.trim().replace(',', '.');
+  if (!/^\d(\.\d{1,2})?$|^\.\d{1,2}$/.test(limpio)) {
+    return null;
+  }
+  const normal = limpio.startsWith('.') ? `0${limpio}` : limpio;
+  const valor = centesimas(normal);
+  return valor >= 1 && valor <= 100 ? normal : null;
+}
+
 /** "7.5" son 750 centésimas: compara calificaciones con enteros. */
 export function centesimas(calificacion: string): number {
   const [enteros, decimales = ''] = calificacion.split('.');
@@ -222,6 +233,31 @@ export function redondearEjemplo(milesimas: number, decimales: number, redondeo:
                 {{ t('ejemplo') }}
                 <span class="cifras">7.456 → {{ ejemplo() }}</span>
               </p>
+              <div class="campo campo-participacion">
+                <label for="config-participacion">{{ t('participacion') }}</label>
+                <input
+                  id="config-participacion"
+                  name="participacion"
+                  class="cifras"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  [readonly]="!!g.archivadoEn"
+                  [value]="participacion()"
+                  (input)="participacion.set(valor($event))"
+                  [attr.aria-invalid]="intento() && !leerValorParticipacion(participacion())"
+                  [attr.aria-describedby]="
+                    intento() && !leerValorParticipacion(participacion())
+                      ? 'config-participacion-error config-participacion-ayuda'
+                      : 'config-participacion-ayuda'
+                  "
+                />
+                <p id="config-participacion-ayuda" class="ayuda">{{ t('participacionAyuda') }}</p>
+                @if (intento() && !leerValorParticipacion(participacion())) {
+                  <p id="config-participacion-error" class="error">
+                    {{ t('errores.participacion') }}
+                  </p>
+                }
+              </div>
               <fieldset class="eleccion en-columna" [disabled]="!!g.archivadoEn">
                 <legend>{{ t('retardo') }}</legend>
                 @for (r of retardos; track r) {
@@ -432,6 +468,9 @@ export class ConfiguracionGrupo implements OnInit {
   /** RN-102: cuánto vale un retardo en el promedio de asistencia. */
   protected readonly retardos = ['1', '0.5', '0'] as const;
   protected readonly retardo = signal<string>('1');
+  /** RN-121: lo que suma cada participación extra. */
+  protected readonly participacion = signal('0.10');
+  protected readonly leerValorParticipacion = leerValorParticipacion;
   protected readonly intento = signal(false);
   protected readonly guardando = signal(false);
   protected readonly ocupado = signal(false);
@@ -477,7 +516,11 @@ export class ConfiguracionGrupo implements OnInit {
   protected async guardar(): Promise<void> {
     this.intento.set(true);
     this.error.set(null);
-    if (!this.nombre().trim() || this.errorCalificacion()) {
+    if (
+      !this.nombre().trim() ||
+      this.errorCalificacion() ||
+      !leerValorParticipacion(this.participacion())
+    ) {
       this.enfocar(PRIMER_ERROR);
       return;
     }
@@ -494,6 +537,7 @@ export class ConfiguracionGrupo implements OnInit {
           decimalesFinal: this.decimales(),
           redondeo: this.redondeo(),
           valorRetardo: this.retardo(),
+          valorParticipacion: leerValorParticipacion(this.participacion())!,
         },
       });
       this.servicio.recordar(grupo);
@@ -554,5 +598,6 @@ export class ConfiguracionGrupo implements OnInit {
     this.decimales.set(Number(grupo.decimalesFinal));
     this.redondeo.set(grupo.redondeo as Redondeo);
     this.retardo.set(String(Number(grupo.valorRetardo)));
+    this.participacion.set(Number(grupo.valorParticipacion ?? 0.1).toFixed(2));
   }
 }

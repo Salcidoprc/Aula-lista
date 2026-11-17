@@ -47,6 +47,10 @@ export function mayor(a: Fraccion, b: Fraccion): Fraccion {
   return comparar(a, b) >= 0 ? a : b;
 }
 
+export function menor(a: Fraccion, b: Fraccion): Fraccion {
+  return comparar(a, b) <= 0 ? a : b;
+}
+
 /** RN-035: hacia arriba, hacia abajo o al más cercano con el medio hacia arriba (lejos del cero). */
 export function redondear(valor: Fraccion, decimales: number, sentido: Sentido): Fraccion {
   const factor = 10n ** BigInt(decimales);

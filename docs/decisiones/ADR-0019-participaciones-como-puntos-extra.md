@@ -17,7 +17,7 @@ Preguntas que había que cerrar: dónde entra el extra en el cálculo, si puede 
 - **Mismo cálculo en los dos lados (RN-036).** `Calculo.Periodo` y `calcularPeriodo` reciben el número de participaciones y el valor; los vectores compartidos tienen casos con participaciones.
 - **Captura de un toque y sin señal.** Pestaña "Participaciones" en el grupo: buscador, la lista del día y un toque por alumno que suma una. Se guarda en IndexedDB y la cola la manda cuando hay red, como la asistencia. Quitar una es otro toque, también sin señal.
 - **Se ve en todos lados con el mismo dato.** La matriz trae cuántas participaciones tiene cada alumno y los puntos que suman. La boleta guarda en su foto la cantidad y los puntos (renglón "Participaciones extra" bajo los rubros), el Excel agrega las columnas "Participaciones" y "Puntos extra", y el tutor ve el mismo renglón en la boleta publicada. El tutor nunca ve participaciones sueltas por fecha (RN-064).
-- **Plan.** Capturar participaciones es Gratis, como toda la captura. Los puntos extra dentro del promedio se ven donde se ven los promedios (Pro, RN-097).
+- **Plan.** Capturar participaciones es Gratis, como toda la captura, y la pantalla muestra a todos cuántas lleva cada alumno y sus puntos. La calificación con los puntos sumados se ve donde se ven los promedios (Pro, RN-097).
 
 ## Alternativas
 

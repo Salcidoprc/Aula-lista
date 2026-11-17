@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Api } from '../../api/api';
+import { darParticipacion } from '../../api/fn/participaciones/dar-participacion';
+import { quitarParticipacion } from '../../api/fn/participaciones/quitar-participacion';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CrearNota } from '../../api/models/crear-nota';
 import { GuardarAsistencia } from '../../api/models/guardar-asistencia';
@@ -13,6 +15,7 @@ import {
   CambioEnCola,
   MatrizGuardada,
   NotaEnCola,
+  ParticipacionEnCola,
 } from './almacen-local';
 import { ColaSincronizacion } from './cola-sincronizacion';
 
@@ -50,7 +53,9 @@ class AlmacenMemoria implements AlmacenLocal {
   }
   notas: NotaEnCola[] = [];
   async contar() {
-    return this.cola.length + this.notas.length + this.asistencias.length;
+    return (
+      this.cola.length + this.notas.length + this.asistencias.length + this.participaciones.length
+    );
   }
   async encolarNota(nota: NotaEnCola) {
     this.notas = [...this.notas.filter((n) => n.id !== nota.id), nota];
@@ -71,6 +76,18 @@ class AlmacenMemoria implements AlmacenLocal {
   async quitarAsistencia(id: string) {
     this.asistencias = this.asistencias.filter((a) => a.id !== id);
   }
+  participaciones: ParticipacionEnCola[] = [];
+  async encolarParticipacion(p: ParticipacionEnCola) {
+    this.participaciones = [...this.participaciones.filter((x) => x.id !== p.id), p];
+  }
+  async participacionesPendientes(grupoId?: string) {
+    return this.participaciones
+      .filter((p) => grupoId === undefined || p.grupoId === grupoId)
+      .sort((a, b) => a.creado - b.creado);
+  }
+  async quitarParticipacion(id: string) {
+    this.participaciones = this.participaciones.filter((p) => p.id !== id);
+  }
   async masAntiguo() {
     return this.cola[0]?.creado ?? null;
   }
@@ -87,6 +104,7 @@ class AlmacenMemoria implements AlmacenLocal {
     this.cola = [];
     this.notas = [];
     this.asistencias = [];
+    this.participaciones = [];
   }
 }
 
@@ -97,6 +115,8 @@ class ServidorFalso {
   sinRed = false;
 
   readonly notas = new Map<string, number>();
+  /** Participaciones por id, como la tabla `participacion`: el mismo id no se duplica. */
+  readonly participaciones = new Set<string>();
   /** La toma de cada fecha por alumno y las claves ya aplicadas, como `cambio_sincronizado`. */
   readonly tomas = new Map<string, Map<string, string>>();
   readonly claves = new Set<string>();
@@ -104,8 +124,9 @@ class ServidorFalso {
   readonly recibidos: SincronizarCambios['cambios'] = [];
 
   async invoke(
-    _fn: unknown,
+    fn: unknown,
     params: {
+      id?: string;
       body: SincronizarCambios | CrearNota | GuardarAsistencia;
       fecha?: string;
       'Idempotency-Key'?: string;
@@ -113,6 +134,17 @@ class ServidorFalso {
   ) {
     if (this.sinRed) {
       throw new HttpErrorResponse({ status: 0 });
+    }
+    if (fn === darParticipacion) {
+      const { id } = params.body as unknown as { id: string };
+      this.participaciones.add(id);
+      return { ...params.body };
+    }
+    if (fn === quitarParticipacion) {
+      if (!this.participaciones.delete(params.id!)) {
+        throw new HttpErrorResponse({ status: 404 });
+      }
+      return undefined;
     }
     if ('alumnos' in params.body) {
       // PUT /grupos/{id}/asistencias/{fecha}: la toma nace con todos presentes y una clave repetida no se aplica.
@@ -308,6 +340,37 @@ describe('Cola de sincronización sin conexión (RF-037)', () => {
     expect(servidor.tomas.size).toBe(1);
     expect(servidor.claves.size).toBe(2);
     expect(servidor.tomas.get('2026-10-19')!.get('al2')).toBe('justificada');
+  });
+
+  it('RF-111: 5 participaciones sin conexión y 1 quitada llegan como 4, sin duplicados', async () => {
+    servidor.sinRed = true;
+    const dadas = [];
+    for (let i = 0; i < 5; i++) {
+      dadas.push(await cola.darParticipacion('g1', 'al1', '2026-09-07'));
+    }
+    // Quitar una que aún no sale del dispositivo solo la saca de la cola.
+    await cola.quitarParticipacion(dadas[4]);
+    await cola.enviar();
+    expect(cola.pendientes()).toBe(4);
+
+    servidor.sinRed = false;
+    window.dispatchEvent(new Event('online'));
+    await cola.enviar();
+    // Se reenvían otra vez (la app se cerró antes de confirmar): no se duplican.
+    for (const d of dadas.slice(0, 4)) {
+      await almacen.encolarParticipacion(d);
+    }
+    await cola.enviar();
+
+    expect(servidor.participaciones.size).toBe(4);
+    expect(cola.pendientes()).toBe(0);
+
+    // Quitar una que ya llegó manda el borrado; repetirlo (404) cuenta como hecho.
+    await cola.quitarParticipacion(dadas[0]);
+    await cola.quitarParticipacion(dadas[0]);
+    await cola.enviar();
+    expect(servidor.participaciones.size).toBe(3);
+    expect(cola.pendientes()).toBe(0);
   });
 
   it('al cerrar sesión no deja calificaciones en el dispositivo', async () => {

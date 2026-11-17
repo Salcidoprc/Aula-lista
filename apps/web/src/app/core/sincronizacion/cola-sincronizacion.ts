@@ -4,6 +4,8 @@ import { Api } from '../../api/api';
 import { guardarAsistencia } from '../../api/fn/asistencia/guardar-asistencia';
 import { sincronizar } from '../../api/fn/calificaciones/sincronizar';
 import { crearNota } from '../../api/fn/notas/crear-nota';
+import { darParticipacion } from '../../api/fn/participaciones/dar-participacion';
+import { quitarParticipacion } from '../../api/fn/participaciones/quitar-participacion';
 import { CambioCelda } from '../../api/models/cambio-celda';
 import { CrearNota } from '../../api/models/crear-nota';
 import { EstadoAlumno } from '../../api/models/estado-alumno';
@@ -11,7 +13,13 @@ import { TomaAsistenciaDto } from '../../api/models/toma-asistencia-dto';
 import { CeldaDto } from '../../api/models/celda-dto';
 import { CeldaRechazada } from '../../api/models/celda-rechazada';
 import { MatrizCalificacionesDto } from '../../api/models/matriz-calificaciones-dto';
-import { ALMACEN_LOCAL, AsistenciaEnCola, CambioEnCola, NotaEnCola } from './almacen-local';
+import {
+  ALMACEN_LOCAL,
+  AsistenciaEnCola,
+  CambioEnCola,
+  NotaEnCola,
+  ParticipacionEnCola,
+} from './almacen-local';
 import { conCambios, conCeldas, llaveCelda, llavesDeCambio } from './celdas';
 
 /** 02-arquitectura: lotes de hasta 100 cambios. */
@@ -39,6 +47,12 @@ export interface AsistenciaEnviada {
   readonly codigo: string | null;
 }
 
+/** Lo que respondió el servidor a una participación de la cola; `codigo` si se descartó (unidad cerrada, baja). */
+export interface ParticipacionEnviada {
+  readonly pendiente: ParticipacionEnCola;
+  readonly codigo: string | null;
+}
+
 /** Desde dónde se capturó (SPEC-09, evento `calificacion_capturada`). */
 export type VistaCaptura = 'actividad' | 'tabla' | 'alumno';
 
@@ -54,6 +68,7 @@ export class ColaSincronizacion {
   private readonly oyentes = new Set<(resultado: ResultadoLote) => void>();
   private readonly oyentesNotas = new Set<(alumnoId: string) => void>();
   private readonly oyentesAsistencia = new Set<(enviada: AsistenciaEnviada) => void>();
+  private readonly oyentesParticipacion = new Set<(enviada: ParticipacionEnviada) => void>();
   private envio: Promise<void> | null = null;
   private otraVez = false;
   private reintento: ReturnType<typeof setTimeout> | null = null;
@@ -223,6 +238,67 @@ export class ColaSincronizacion {
     return () => this.oyentesAsistencia.delete(oyente);
   }
 
+  /**
+   * Una participación extra (SPEC-03, RF-111): se guarda en el dispositivo y la cola la manda cuando hay red. Cada una
+   * es un registro con su id, así que reenviarla no la duplica (02-arquitectura).
+   */
+  async darParticipacion(
+    grupoId: string,
+    alumnoId: string,
+    fecha: string,
+    id: string = crypto.randomUUID(),
+  ): Promise<ParticipacionEnCola> {
+    const pendiente: ParticipacionEnCola = {
+      id,
+      grupoId,
+      alumnoId,
+      fecha,
+      creado: Date.now(),
+      operacion: 'dar',
+    };
+    await this.almacen.encolarParticipacion(pendiente);
+    await this.contar();
+    void this.enviar();
+    return pendiente;
+  }
+
+  /**
+   * Quita una participación. Si todavía no salía del dispositivo, solo se borra de la cola; si ya llegó, se encola su
+   * borrado.
+   */
+  async quitarParticipacion(participacion: {
+    readonly id: string;
+    readonly grupoId: string;
+    readonly alumnoId: string;
+    readonly fecha: string;
+  }): Promise<void> {
+    const pendiente = (await this.almacen.participacionesPendientes(participacion.grupoId)).find(
+      (p) => p.id === participacion.id && p.operacion === 'dar',
+    );
+    if (pendiente) {
+      await this.almacen.quitarParticipacion(pendiente.id);
+    } else {
+      await this.almacen.encolarParticipacion({
+        ...participacion,
+        creado: Date.now(),
+        operacion: 'quitar',
+      });
+    }
+    await this.contar();
+    void this.enviar();
+  }
+
+  /** Las participaciones del grupo que todavía no llegan al servidor, en orden. */
+  async participacionesPendientes(grupoId: string): Promise<readonly ParticipacionEnCola[]> {
+    return this.almacen.participacionesPendientes(grupoId).catch(() => []);
+  }
+
+  /** Avisa de cada participación que llegó al servidor (o se descartó). Devuelve cómo dejar de escuchar. */
+  alEnviarParticipacion(oyente: (enviada: ParticipacionEnviada) => void): () => void {
+    this.oyentesParticipacion.add(oyente);
+    return () => this.oyentesParticipacion.delete(oyente);
+  }
+
   async matrizGuardada(periodoId: string): Promise<MatrizCalificacionesDto | null> {
     return (await this.almacen.leerMatriz(periodoId))?.matriz ?? null;
   }
@@ -301,6 +377,52 @@ export class ColaSincronizacion {
     await this.enviarCeldas();
     await this.enviarNotas();
     await this.enviarAsistencias();
+    await this.enviarParticipaciones();
+  }
+
+  /**
+   * Una por una y en orden. Quitar una que el servidor ya no tiene (404) cuenta como hecho; un 4xx al darla (unidad
+   * cerrada, alumno dado de baja) la descarta con su motivo.
+   */
+  private async enviarParticipaciones(): Promise<void> {
+    for (const pendiente of await this.almacen.participacionesPendientes()) {
+      if (!this.conexion()) {
+        return;
+      }
+      this.mandando.set(true);
+      let codigo: string | null = null;
+      try {
+        if (pendiente.operacion === 'dar') {
+          await this.api.invoke(darParticipacion, {
+            id: pendiente.grupoId,
+            body: { id: pendiente.id, alumnoId: pendiente.alumnoId, fecha: pendiente.fecha },
+          });
+        } else {
+          await this.api.invoke(quitarParticipacion, { id: pendiente.id });
+        }
+      } catch (error) {
+        const estado = error instanceof HttpErrorResponse ? error.status : 0;
+        if (estado === 0) {
+          this.conexion.set(false);
+        }
+        if (estado === 0 || estado === 401 || estado >= 500) {
+          if (estado !== 401) {
+            this.programarReintento();
+          }
+          return;
+        }
+        if (!(pendiente.operacion === 'quitar' && estado === 404)) {
+          const cuerpo =
+            error instanceof HttpErrorResponse ? (error.error as { codigo?: string }) : null;
+          codigo = cuerpo?.codigo ?? 'desconocido';
+        }
+      }
+      await this.almacen.quitarParticipacion(pendiente.id);
+      await this.contar();
+      for (const oyente of this.oyentesParticipacion) {
+        oyente({ pendiente, codigo });
+      }
+    }
   }
 
   /** Una por una y en orden. Un 4xx (fecha fuera de unidad, unidad cerrada) la descarta con su motivo. */

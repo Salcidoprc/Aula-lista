@@ -69,6 +69,8 @@ Puntos que el docente da en clase y que se suman encima de la calificación ordi
 
 **Pantalla Participaciones (pestaña del grupo):** el día (hoy por defecto, con flechas y calendario como la asistencia), el valor de cada participación con "Cambiar", un buscador por nombre o número de lista y la lista del grupo. Tocar la fila de un alumno le suma una participación; la fila muestra cuántas lleva hoy y cuántos puntos suma en la unidad. "Quitar una" aparece en la fila cuando el alumno tiene participaciones ese día. En computadora, escribir en el buscador y presionar Enter suma una al único alumno que coincide. Nada se anima al sumar (reglas/07, acciones repetidas): solo cambian el número y el fondo de la fila. Funciona sin conexión como la asistencia (RF-111).
 
+**Dónde se ven los puntos:** la pantalla de participaciones muestra a todos los planes cuántas lleva cada alumno y sus puntos (participaciones × valor), porque es la captura. La calificación con los puntos sumados sale donde salen los promedios (Pro, RN-097): en la tabla, una columna "Extra" antes de la calificación de la unidad cuando alguien tiene participaciones; en la ficha del alumno, un renglón "Participaciones extra" bajo los rubros.
+
 ## Captura
 
 Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable como base, mejorado con los skills de animación y diseño); los movimientos de este módulo están en su catálogo.
