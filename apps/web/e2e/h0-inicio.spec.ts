@@ -2,8 +2,9 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 test.describe('H0: la app arranca y habla con la API', () => {
-  test('sin sesión, el inicio lleva a entrar, en español', async ({ page }) => {
-    await page.goto('/');
+  test('sin sesión, una pantalla del docente lleva a entrar, en español', async ({ page }) => {
+    // La raíz sin sesión es la landing (RF-010); las pantallas del docente piden entrar.
+    await page.goto('/ajustes');
 
     await expect(page).toHaveURL(/\/cuenta\/entrar/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Entra a tu aula');

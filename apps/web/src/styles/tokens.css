@@ -86,6 +86,8 @@
    */
   --color-marca: oklch(0.5 0.15 265);
   --color-marca-rotulo: var(--color-accion-tinte);
+  /* Texto de los botones claros sobre la portada azul de la landing (RF-010). */
+  --color-sobre-portada-tinta: var(--color-accion-tinta);
 
   /* Grado activo. Sin grupo, la portada usa el color de la marca. */
   --grado: var(--color-marca);
@@ -136,6 +138,8 @@
   --sombra-lomo-chica: inset 0.1875rem 0 0 oklch(0.2 0.03 260 / 0.16);
   --sombra-flotante: 0 1px 2px oklch(0.25 0.03 260 / 0.08), 0 8px 24px oklch(0.25 0.03 260 / 0.12);
   --sombra-hoja: 0 -4px 32px oklch(0.25 0.03 260 / 0.16);
+  /* Sombra del pliegue entre las dos páginas de un capítulo en la landing (RF-010). */
+  --color-pliegue: oklch(0.2 0.03 260 / 0.22);
   /* Anillo doble: hoja por dentro y acción por fuera, visible sobre papel y sobre cualquier color (WCAG 1.4.11). */
   --foco: 0 0 0 2px var(--color-superficie), 0 0 0 4px var(--color-accion);
   /* Velo detrás de los diálogos. */
@@ -153,6 +157,10 @@
   --dur-hoja: 400ms;
   --dur-icono: 200ms;
   --dur-giro: 1s;
+  /* Solo la landing (RF-010): lo que aparece al bajar, una vez por visita; explicativo, por eso más largo. */
+  --dur-revela: 600ms;
+  --escalon-revela: 70ms;
+  --desplazamiento-revela: 1.5rem;
   --desplazamiento-pantalla: 8px;
   --desplazamiento-aviso: 1rem;
   --escala-presion: 0.97;
@@ -266,6 +274,7 @@
   --color-sobre-grado: oklch(0.97 0.006 95);
   --color-marca: oklch(0.47 0.14 265);
   --color-marca-rotulo: oklch(0.92 0.02 265);
+  --color-sobre-portada-tinta: oklch(0.34 0.11 265);
   --grado-p1: oklch(0.5 0.17 27);
   --grado-p1-tinta: oklch(0.84 0.08 27);
   --grado-p1-tinte: oklch(0.3 0.06 27);
@@ -305,6 +314,7 @@
 
   /* En la pizarra la sombra necesita más cuerpo para separar lo que flota. */
   --sombra-flotante: 0 1px 2px oklch(0.1 0.02 260 / 0.4), 0 8px 24px oklch(0.1 0.02 260 / 0.55);
+  --color-pliegue: oklch(0.08 0.02 260 / 0.5);
   --sombra-hoja: 0 -4px 32px oklch(0.1 0.02 260 / 0.6);
   --color-velo: oklch(0.1 0.02 260 / 0.6);
   --color-velo-transparente: oklch(0.1 0.02 260 / 0);
@@ -341,5 +351,6 @@
     --desplazamiento-aviso: 0px;
     --escala-presion: 1;
     --escala-entrada: 1;
+    --desplazamiento-revela: 0px;
   }
 }

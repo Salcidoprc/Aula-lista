@@ -1,8 +1,21 @@
 import { Routes } from '@angular/router';
 import { confirmarSalida } from './shared/rutas';
-import { requierePerfilCompleto, requiereSesion, soloSinSesion } from './core/sesion/guardias';
+import {
+  requierePerfilCompleto,
+  requiereSesion,
+  sinSesion,
+  soloSinSesion,
+} from './core/sesion/guardias';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canMatch: [sinSesion],
+    title: 'titulos.landing',
+    data: { pantallaCompleta: true },
+    loadComponent: () => import('./publico/landing').then((m) => m.Landing),
+  },
   {
     path: '',
     canActivate: [requiereSesion, requierePerfilCompleto],

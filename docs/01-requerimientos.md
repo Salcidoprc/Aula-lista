@@ -20,6 +20,7 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-007 | El docente puede cerrar sesión en todos sus dispositivos. | M |
 | RF-008 | El docente puede exportar todos sus datos (Excel y PDF) y solicitar la eliminación de su cuenta. | M |
 | RF-009 | La app tiene tema claro y oscuro. Por defecto sigue el modo del celular o la computadora; en Ajustes el docente elige Automática, Clara u Oscura y la elección se guarda en ese dispositivo. | D |
+| RF-010 | Quien llega sin sesión a la raíz ve una página pública (landing) que explica Aulísima con capturas reales de la app, deja probar la captura, muestra los planes con los precios del catálogo y lleva a crear cuenta o entrar. Con sesión, la raíz abre Mis grupos. | D |
 
 ### Grupos, alumnos y tutores (SPEC-02)
 

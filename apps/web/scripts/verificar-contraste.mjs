@@ -53,6 +53,7 @@ const pares = [
   ['color-accion', 'color-accion-tinte', 3],
   ['color-sobre-grado', 'color-marca', 4.5],
   ['color-marca-rotulo', 'color-marca', 4.5],
+  ['color-sobre-portada-tinta', 'color-sobre-grado', 4.5],
   ...['exito', 'aviso', 'peligro'].flatMap((e) => [
     [`color-${e}-tinta`, `color-${e}-tinte`, 4.5],
     [`color-${e}-tinta`, 'color-fondo', 4.5],

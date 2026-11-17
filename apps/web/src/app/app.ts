@@ -6,9 +6,17 @@ import {
   afterNextRender,
   effect,
   inject,
+  signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs';
 import { TranslocoDirective } from '@jsverse/transloco';
 import { SesionService } from './core/sesion/sesion.service';
@@ -33,34 +41,36 @@ import { PortadaService } from './shared/portada/portada.service';
   template: `
     <ng-container *transloco="let t">
       <a class="saltar" href="#contenido">{{ t('app.saltar') }}</a>
-      <header>
-        <app-portada
-          [titulo]="portada()?.titulo ?? t('app.nombre')"
-          [subtitulo]="portada()?.subtitulo"
-          [numero]="portada()?.numero"
-          [grado]="portada()?.grado"
-        >
-          @if (sesion.activa()) {
-            <nav
-              class="navegacion"
-              [class.bajo-titulo]="!!portada()?.numero"
-              [attr.aria-label]="t('app.navegacion')"
-            >
-              <a
-                routerLink="/"
-                routerLinkActive="activo"
-                [routerLinkActiveOptions]="{ exact: true }"
-                ariaCurrentWhenActive="page"
-                >{{ t('app.inicio') }}</a
+      @if (!pantallaCompleta()) {
+        <header>
+          <app-portada
+            [titulo]="portada()?.titulo ?? t('app.nombre')"
+            [subtitulo]="portada()?.subtitulo"
+            [numero]="portada()?.numero"
+            [grado]="portada()?.grado"
+          >
+            @if (sesion.activa()) {
+              <nav
+                class="navegacion"
+                [class.bajo-titulo]="!!portada()?.numero"
+                [attr.aria-label]="t('app.navegacion')"
               >
-              <a routerLink="/ajustes" routerLinkActive="activo" ariaCurrentWhenActive="page">{{
-                t('app.ajustes')
-              }}</a>
-              <app-indicador-sincronizacion />
-            </nav>
-          }
-        </app-portada>
-      </header>
+                <a
+                  routerLink="/"
+                  routerLinkActive="activo"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  ariaCurrentWhenActive="page"
+                  >{{ t('app.inicio') }}</a
+                >
+                <a routerLink="/ajustes" routerLinkActive="activo" ariaCurrentWhenActive="page">{{
+                  t('app.ajustes')
+                }}</a>
+                <app-indicador-sincronizacion />
+              </nav>
+            }
+          </app-portada>
+        </header>
+      }
       <main id="contenido" tabindex="-1">
         <router-outlet />
       </main>
@@ -155,6 +165,8 @@ export class App {
   protected readonly sesion = inject(SesionService);
   protected readonly portada = inject(PortadaService).datos;
   private readonly tema = inject(TemaService).tema;
+  /** La landing (RF-010) trae su propia portada y navegación: la cabecera de la app no se pinta. */
+  protected readonly pantallaCompleta = signal(location.pathname === '/');
 
   constructor() {
     const injector = inject(Injector);
@@ -164,8 +176,19 @@ export class App {
     // Si solo cambia la consulta (otro día, otra unidad), la pantalla es la misma y el foco se queda donde está.
     let ruta = '';
     const sinConsulta = (url: string) => url.split(/[?#]/)[0];
-    inject(Router)
-      .events.pipe(
+    const router = inject(Router);
+    router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() =>
+        this.pantallaCompleta.set(
+          hoja(router.routerState.snapshot.root).data['pantallaCompleta'] === true,
+        ),
+      );
+    router.events
+      .pipe(
         filter((e) => e instanceof NavigationEnd),
         filter((e) => {
           const anterior = ruta;
@@ -215,4 +238,8 @@ function aRgb(color: string): string | null {
   contexto.fillRect(0, 0, 1, 1);
   const [r, g, b] = contexto.getImageData(0, 0, 1, 1).data;
   return `rgb(${r}, ${g}, ${b})`;
+}
+
+function hoja(ruta: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
+  return ruta.firstChild ? hoja(ruta.firstChild) : ruta;
 }

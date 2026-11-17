@@ -1,0 +1,345 @@
+:host {
+  display: block;
+  --orilla: max(max(var(--espacio-4), env(safe-area-inset-left)), (100% - var(--ancho-app)) / 2);
+}
+
+/* La portada: azul de la marca que termina a media escena, para que la app cruce el borde. */
+.portada {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  padding: env(safe-area-inset-top) var(--orilla) 0;
+  background: linear-gradient(var(--color-marca) calc(100% - 7rem), transparent 0);
+  color: var(--color-sobre-grado);
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-4);
+  min-block-size: 4.5rem;
+}
+
+.barra a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tactil-minimo);
+  color: var(--color-sobre-grado);
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+  text-underline-offset: 0.3em;
+}
+
+.barra a:focus-visible,
+.acciones a:focus-visible {
+  outline: 2px solid var(--color-sobre-grado);
+  outline-offset: 3px;
+  border-radius: var(--radio-sm);
+}
+
+.barra .logo {
+  gap: var(--espacio-2);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: -0.02em;
+}
+
+/* Un libro chiquito como marca: tapa clara con su lomo. */
+.libro {
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 1.125rem;
+  border-radius: var(--radio-tapa);
+  background: var(--color-sobre-grado);
+  box-shadow: var(--sombra-lomo-chica);
+}
+
+.enlaces {
+  display: none;
+  gap: var(--espacio-5);
+  margin-inline-start: auto;
+}
+
+.enlaces a {
+  color: var(--color-marca-rotulo);
+}
+
+.entrar {
+  margin-inline-start: auto;
+}
+
+.titular {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: var(--espacio-5);
+  padding-block: var(--espacio-6) var(--espacio-4);
+}
+
+/* El número de la portada, ahora una calificación: 10, enorme y recortado. */
+.diez {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -0.12em;
+  inset-inline-end: -0.08em;
+  font-size: clamp(13rem, 46vw, 36rem);
+  font-weight: var(--peso-fuerte);
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  color: color-mix(in oklab, var(--color-marca) 84%, var(--color-sobre-grado));
+  user-select: none;
+}
+
+h1 {
+  margin: 0;
+  max-inline-size: 15ch;
+  font-size: clamp(2.5rem, 7.4vw, 5.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+h1 span {
+  display: block;
+}
+
+h1 span + span {
+  color: var(--color-marca-rotulo);
+}
+
+.entrada {
+  margin: 0;
+  max-inline-size: 38rem;
+  font-size: var(--texto-lg);
+  line-height: 1.55;
+  color: var(--color-marca-rotulo);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-5);
+}
+
+.crear {
+  min-block-size: 3.25rem;
+  padding-inline: var(--espacio-6);
+  background: var(--color-sobre-grado);
+  color: var(--color-sobre-portada-tinta);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+  text-decoration: none;
+}
+
+.ya {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tactil-minimo);
+  color: var(--color-sobre-grado);
+  font-weight: var(--peso-medio);
+  text-underline-offset: 0.3em;
+}
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2) var(--espacio-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-marca-rotulo);
+  font-size: var(--texto-sm);
+}
+
+.datos li {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.escena {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding-block: var(--espacio-6) var(--espacio-4);
+}
+
+.compu {
+  display: none;
+}
+
+.tel {
+  --ancho-captura: 16rem;
+}
+
+/* Entrada de la página: el texto escalonado y la app un poco después, desde un estado ya visible al final. */
+.titular > :not(.diez),
+.escena {
+  transition:
+    opacity var(--dur-large) var(--ease-out),
+    translate var(--dur-large) var(--ease-out);
+}
+
+.titular > :nth-child(3) {
+  transition-delay: 60ms;
+}
+.titular > :nth-child(4) {
+  transition-delay: 120ms;
+}
+.titular > :nth-child(5) {
+  transition-delay: 180ms;
+}
+
+.escena {
+  transition-duration: var(--dur-hoja);
+  transition-delay: 200ms;
+}
+
+/* Pulido (Krehel): el titular además se enfoca, de 6 px de desenfoque a nítido. */
+.titular h1 {
+  transition-property: opacity, translate, filter;
+}
+
+@starting-style {
+  .titular > :not(.diez) {
+    opacity: 0;
+    translate: 0 0.75rem;
+  }
+
+  .titular h1 {
+    filter: blur(6px);
+  }
+
+  .escena {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .titular > :not(.diez),
+    .escena {
+      translate: none;
+    }
+
+    .titular h1 {
+      filter: none;
+    }
+  }
+
+  .estante li:hover {
+    translate: none;
+  }
+}
+
+/* El estante: un libro por grado, parados sobre la repisa. */
+.estante {
+  display: grid;
+  gap: var(--espacio-5);
+  padding: var(--espacio-6) var(--orilla) var(--espacio-7);
+}
+
+.estante h2 {
+  margin: 0;
+  max-inline-size: 20ch;
+  font-size: var(--texto-xl);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.estante ul {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+  block-size: 10rem;
+  margin: 0;
+  padding: 0 var(--espacio-2);
+  list-style: none;
+  border-block-end: 0.5rem solid var(--color-divisoria);
+}
+
+.estante li {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  max-inline-size: 4rem;
+  block-size: var(--alto);
+  display: grid;
+  place-items: center;
+  border-radius: 0.375rem 0.375rem 0.125rem 0.125rem;
+  background: var(--grado);
+  box-shadow: var(--sombra-lomo);
+  color: var(--color-sobre-grado);
+}
+
+.estante li span {
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+/* El detalle con juego (Tompkins): con mouse, el libro se asoma de la repisa. */
+@media (hover: hover) and (pointer: fine) {
+  .estante li {
+    transition: translate var(--dur-small) var(--ease-out);
+  }
+
+  .estante li:hover {
+    translate: 0 -0.5rem;
+  }
+
+  .barra a:hover,
+  .ya:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (min-width: 48rem) {
+  .portada {
+    background: linear-gradient(var(--color-marca) calc(100% - 11rem), transparent 0);
+  }
+
+  .enlaces {
+    display: flex;
+  }
+
+  .entrar {
+    margin-inline-start: var(--espacio-3);
+  }
+
+  .titular {
+    padding-block-start: var(--espacio-7);
+  }
+
+  .escena {
+    justify-items: start;
+    padding-block-end: var(--espacio-7);
+  }
+
+  .compu {
+    display: block;
+    inline-size: 82%;
+  }
+
+  .tel {
+    --ancho-captura: clamp(13rem, 20vw, 17rem);
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-end: -2rem;
+  }
+
+  .estante {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    align-items: end;
+    padding-block-start: var(--espacio-7);
+  }
+
+  .estante ul {
+    block-size: 13rem;
+  }
+}

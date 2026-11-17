@@ -1,0 +1,23 @@
+/*
+ * Landing (RF-010): lo que aparece al bajar. La directiva Aparece marca el contenedor con data-aparece y,
+ * la primera vez que entra en pantalla, con data-visto. Cada hijo con .revela sube y se funde con un escalón
+ * de --i. Va con animación y relleno hacia atrás: al terminar no deja estilos, así que el hover sigue igual.
+ * Con movimiento reducido, --desplazamiento-revela es 0 y solo funde.
+ */
+@keyframes revela {
+  from {
+    opacity: 0;
+    translate: 0 var(--desplazamiento-revela);
+  }
+}
+
+[data-aparece]:not([data-visto]) .revela,
+.revela[data-aparece]:not([data-visto]) {
+  opacity: 0;
+}
+
+[data-visto] .revela,
+.revela[data-visto] {
+  animation: revela var(--dur-revela) var(--ease-out) calc(var(--i, 0) * var(--escalon-revela))
+    backwards;
+}
