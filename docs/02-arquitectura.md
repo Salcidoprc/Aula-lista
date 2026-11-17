@@ -100,7 +100,7 @@ erDiagram
 | `exportacion` | docente_id, estado (pendiente, lista, fallida), ruta_excel, ruta_pdf, expira_en | Archivos en `IAlmacenArchivos` durante 24 h (RF-008) |
 | `ciclo_escolar` | docente_id, nombre (ej. 2026-2027), inicio, fin, tipo_unidad (bimestre, trimestre, cuatrimestre, semestre, mensual, personalizada) | Del docente (RN-022); máximo 13 meses |
 | `unidad` | ciclo_escolar_id, docente_id, nombre, orden, inicio, fin | Sin traslape dentro del ciclo (RN-023); restricción de exclusión sobre `daterange` |
-| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), pro_hasta, calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
+| `grupo` | docente_id, nombre, nivel, grado, materia, ciclo_escolar_id, plan (gratis, pro), pro_hasta, calif_minima, calif_aprobatoria, decimales_final (0, 1, 2), redondeo (arriba, abajo, cercano), valor_retardo (1, 0.5, 0; decimal 3,2), valor_participacion (0.01 a 1.00; decimal 3,2), archivado_en | Máximo 50 alumnos activos |
 | `periodo` | grupo_id, unidad_id, estado (abierto, en_cierre, cerrado) | Uno por grupo y unidad (RN-025); nombre y fechas vienen de la unidad |
 | `tipo_rubro` | nombre, descripcion, icono, comportamiento (actividades, asistencia), forma_sugerida (numerica, cumplimiento), nombres_sugeridos (text[]), orden, activo | Catálogo global sin `docente_id`; lo edita solo `admin` (ADR-0012) |
 | `auditoria_admin` | admin_id, accion, entidad, entidad_id, antes (jsonb), despues (jsonb), fecha | Inmutable |
@@ -111,6 +111,7 @@ erDiagram
 | `equipo_alumno` | equipo_id, alumno_id | Un alumno en un equipo a la vez (RN-114) |
 | `actividad_equipo` | actividad_id, equipo_id, nombre_equipo, alumno_id | Composición con que se calificó (RN-116); `equipo_id` sin llave foránea, el equipo puede ya no existir |
 | `toma_asistencia` | grupo_id, docente_id, fecha | Única por grupo y fecha (RN-100); la unidad se deduce de la fecha |
+| `participacion` | id (lo genera el cliente), grupo_id, periodo_id, alumno_id, docente_id, fecha | Puntos extra del periodo (RN-122 a RN-124, ADR-0019) |
 | `asistencia` | toma_asistencia_id, alumno_id, estado (presente, retardo, falta, justificada), version | Única por toma y alumno |
 | `calificacion` | actividad_id, alumno_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio, no_entrego, exento), origen (individual, equipo, ajustada), version | Única por actividad y alumno; con criterios, `valor` es el resultado de RN-112 |
 | `calificacion_criterio` | calificacion_id, criterio_id, valor (decimal 4,2, nulo), marca (ninguna, cumplio, no_cumplio) | Detalle por criterio; único por calificación y criterio; se borra con su calificación |
@@ -177,7 +178,7 @@ Excepción: `cuenta`, `token_cuenta` y `sesion` no tienen RLS porque se leen ant
 2. Cada cambio local se guarda en IndexedDB y en una cola de salida con un UUID de idempotencia y la `version` conocida del registro.
 3. Al haber conexión, la cola se envía en orden a `POST /api/v1/sincronizacion` en lotes de hasta 100 cambios.
    La asistencia va aparte, una toma por envío, a `PUT /api/v1/grupos/{id}/asistencias/{fecha}` con su UUID en `Idempotency-Key`.
-4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; en la asistencia gana la última escritura por alumno; las notas nunca chocan porque cada nota es un registro nuevo. El cliente recibe la versión vigente y actualiza su copia.
+4. Conflictos: por celda de calificación gana la última escritura según la hora del servidor; en la asistencia gana la última escritura por alumno; las notas y las participaciones nunca chocan porque cada una es un registro nuevo (quitar una participación borra ese registro). El cliente recibe la versión vigente y actualiza su copia.
 5. La UI muestra siempre el estado en la portada: "Guardado", "Por enviar: n", "Enviando" o "Sin conexión"; a partir del día 3 sin enviar avisa cuántos días lleva. Una celda rechazada (por ejemplo `celda_inexistente`) sale de la cola, el servidor manda su valor vigente y la pantalla marca el error en esa celda.
 6. Lo que no funciona sin conexión: generar observaciones, publicar boletas, enviar avisos y pagos.
 

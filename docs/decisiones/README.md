@@ -24,3 +24,4 @@ Formato: contexto, decisión, alternativas consideradas, consecuencias.
 | [ADR-0016](ADR-0016-nombre-aulisima.md) | El producto se llama Aulísima | Aceptada | 14/11/2026 |
 | [ADR-0017](ADR-0017-catalogo-de-productos.md) | Catálogo de productos y precios administrable, sincronizado con Stripe | Aceptada | 14/11/2026 |
 | [ADR-0018](ADR-0018-promedios-excel-y-avisos-en-pro.md) | Promedios, exportación a Excel y avisos pasan a Pro | Aceptada | 14/11/2026 |
+| [ADR-0019](ADR-0019-participaciones-como-puntos-extra.md) | Participaciones diarias como puntos extra sobre la calificación del periodo, con tope de 10 | Aceptada | 17/11/2026 |

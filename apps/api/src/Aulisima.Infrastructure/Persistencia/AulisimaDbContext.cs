@@ -61,6 +61,8 @@ public sealed class AulisimaDbContext : DbContext
 
     public DbSet<Nota> Notas => Set<Nota>();
 
+    public DbSet<Participacion> Participaciones => Set<Participacion>();
+
     public DbSet<TomaAsistencia> TomasAsistencia => Set<TomaAsistencia>();
 
     public DbSet<Asistencia> Asistencias => Set<Asistencia>();
@@ -140,6 +142,7 @@ public sealed class AulisimaDbContext : DbContext
         modelBuilder.Entity<EquipoAlumno>().HasQueryFilter(e => e.DocenteId == DocenteActual);
         modelBuilder.Entity<ActividadEquipo>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<Nota>().HasQueryFilter(n => n.DocenteId == DocenteActual);
+        modelBuilder.Entity<Participacion>().HasQueryFilter(p => p.DocenteId == DocenteActual);
         modelBuilder.Entity<TomaAsistencia>().HasQueryFilter(t => t.DocenteId == DocenteActual);
         modelBuilder.Entity<Asistencia>().HasQueryFilter(a => a.DocenteId == DocenteActual);
         modelBuilder.Entity<Observacion>().HasQueryFilter(o => o.DocenteId == DocenteActual);

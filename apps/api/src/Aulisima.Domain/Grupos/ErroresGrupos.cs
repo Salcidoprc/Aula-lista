@@ -22,7 +22,7 @@ public static class ErroresGrupos
     public static readonly ErrorNegocio GradoInvalido = new("grado_invalido", "El grado va de 1 a 6 en primaria y de 1 a 3 en secundaria.");
     public static readonly ErrorNegocio GrupoDuplicado = new("grupo_duplicado", "Ya tienes un grupo con ese grado, nombre y materia en este ciclo.");
     public static readonly ErrorNegocio LoteInvalido = new("lote_invalido", "Escribe de 1 a 15 nombres de grupo distintos.");
-    public static readonly ErrorNegocio ConfiguracionCalificacionInvalida = new("configuracion_calificacion_invalida", "La mínima va de 0 a 10 y la aprobatoria no puede ser menor que la mínima.");
+    public static readonly ErrorNegocio ConfiguracionCalificacionInvalida = new("configuracion_calificacion_invalida", "La mínima va de 0 a 10, la aprobatoria no puede ser menor que la mínima y una participación vale de 0.01 a 1.00.");
     public static readonly ErrorNegocio GrupoArchivado = new("grupo_archivado", "El grupo está archivado: se puede consultar, pero no editar.");
 
     public static readonly ErrorNegocio CorreoNoVerificado = new("correo_no_verificado", "Confirma tu correo antes de dar de alta a tus alumnos.");

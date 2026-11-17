@@ -57,7 +57,9 @@ public sealed record PublicacionDto(BoletasDto Boletas, IReadOnlyList<Avisos.Tut
 public sealed record SeleccionAlumnos(IReadOnlyList<Guid>? AlumnoIds);
 
 /// <summary>Un alumno activo con lo que diría su boleta hoy; <see cref="Datos"/> es nulo sin observación aprobada (RN-050).</summary>
-public sealed record AlumnoArmado(Alumno Alumno, Observacion? Observacion, IReadOnlyList<RubroBoleta> Rubros, decimal? Calificacion, DatosBoleta? Datos);
+public sealed record AlumnoArmado(
+    Alumno Alumno, Observacion? Observacion, IReadOnlyList<RubroBoleta> Rubros, decimal? Calificacion, DatosBoleta? Datos,
+    ParticipacionesBoleta? Participaciones = null);
 
 public sealed record PeriodoArmado(PeriodoCompleto Periodo, IReadOnlyList<RubroBoleta> Rubros, string ZonaHoraria, IReadOnlyList<AlumnoArmado> Alumnos);
 
@@ -81,6 +83,7 @@ public sealed class ArmadoBoletas(
         var alumnos = (await grupos.AlumnosAsync(grupo.Id, ct)).Where(a => a.EstaActivo).OrderBy(a => a.NumeroLista).ThenBy(a => a.Apellidos).ToList();
         var observaciones = (await cierre.ObservacionesAsync(periodoId, ct)).ToDictionary(o => o.AlumnoId);
         var resultados = datos.Resultados.ToDictionary(r => r.AlumnoId);
+        var participaciones = datos.Participaciones.ToDictionary(p => p.AlumnoId, p => p.Cantidad);
         var rubros = datos.Rubros.Select(r => new RubroBoleta(r.Rubro.Nombre, r.Rubro.Peso, null)).ToList();
 
         var armados = alumnos.Select(alumno =>
@@ -91,14 +94,17 @@ public sealed class ArmadoBoletas(
                 .Select(r => new RubroBoleta(r.Rubro.Nombre, r.Rubro.Peso, promedios.GetValueOrDefault(r.Rubro.Id)))
                 .ToList();
             var observacion = observaciones.GetValueOrDefault(alumno.Id);
+            var extra = participaciones.GetValueOrDefault(alumno.Id) is > 0 and var cantidad
+                ? new ParticipacionesBoleta(cantidad, resultado?.PuntosExtra ?? 0m)
+                : null; // RN-126
             var aprobada = observacion is { EstaAprobada: true, TextoFinal: { } texto } ? texto : null;
             var foto = aprobada is null
                 ? null
                 : new DatosBoleta(
                     docente?.EscuelaNombre, docente?.EscuelaCct, ciclo?.Nombre ?? string.Empty, periodo.Unidad.Nombre,
                     $"{alumno.Apellidos} {alumno.Nombres}".Trim(), alumno.NumeroLista, grupo.Nivel, grupo.Grado, grupo.Nombre,
-                    grupo.Materia, docente?.Nombre ?? string.Empty, suyos, resultado?.Final, grupo.DecimalesFinal, aprobada);
-            return new AlumnoArmado(alumno, observacion, suyos, resultado?.Final, foto);
+                    grupo.Materia, docente?.Nombre ?? string.Empty, suyos, resultado?.Final, grupo.DecimalesFinal, aprobada, extra);
+            return new AlumnoArmado(alumno, observacion, suyos, resultado?.Final, foto, extra);
         }).ToList();
 
         return new PeriodoArmado(periodo, rubros, docente?.ZonaHoraria ?? Domain.Cuentas.Docente.ZonaHorariaPorDefecto, armados);
@@ -447,7 +453,8 @@ public sealed class PdfDelGrupoCasoUso(ArmadoBoletas armado, IRepositorioBoletas
 }
 
 /// <summary>
-/// RF-055, RN-056: Excel con número, nombre, promedio por rubro, final y observación aprobada, en el orden de la lista.
+/// RF-055, RN-056: Excel con número, nombre, promedio por rubro, participaciones extra (RN-126), final y observación
+/// aprobada, en el orden de la lista.
 /// Es de Pro (RN-097).
 /// </summary>
 public sealed class ExportarPeriodoCasoUso(
@@ -468,7 +475,7 @@ public sealed class ExportarPeriodoCasoUso(
         var p = periodo.Periodo;
         var filas = periodo.Alumnos.Select(a => new FilaExportacion(
             a.Alumno.NumeroLista, $"{a.Alumno.Apellidos} {a.Alumno.Nombres}".Trim(), a.Rubros.Select(r => r.Promedio).ToList(), a.Calificacion,
-            a.Observacion is { EstaAprobada: true } o ? o.TextoFinal : null)).ToList();
+            a.Observacion is { EstaAprobada: true } o ? o.TextoFinal : null, a.Participaciones?.Cantidad ?? 0, a.Participaciones?.Puntos ?? 0m)).ToList();
         var titulo = $"{p.Grupo.Grado}° {p.Grupo.Nombre}{(p.Grupo.Materia is { } m ? $" {m}" : string.Empty)}, {p.Unidad.Nombre}";
         var contenido = generador.Excel(new ExportacionPeriodo(titulo, periodo.Rubros, p.Grupo.DecimalesFinal, filas));
         auditoria.Registrar(AccionAuditoria.CalificacionesExportadas, "periodo", periodoId, usuario.DocenteId, filas.Count);

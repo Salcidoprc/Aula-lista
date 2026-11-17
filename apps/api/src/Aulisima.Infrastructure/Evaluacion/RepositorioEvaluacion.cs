@@ -96,6 +96,23 @@ internal sealed class RepositorioEvaluacion(AulisimaDbContext db) : IRepositorio
 
     public void Agregar(Nota nota) => db.Notas.Add(nota);
 
+    public async Task<IReadOnlyList<Participacion>> ParticipacionesAsync(
+        Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken) =>
+        await db.Participaciones.Where(p => p.GrupoId == grupoId && p.Fecha >= desde && p.Fecha <= hasta)
+            .OrderBy(p => p.Fecha).ThenBy(p => p.CreatedAt).ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyDictionary<Guid, int>> ParticipacionesDelPeriodoAsync(Guid periodoId, CancellationToken cancellationToken) =>
+        await db.Participaciones.Where(p => p.PeriodoId == periodoId).GroupBy(p => p.AlumnoId)
+            .Select(g => new { g.Key, Cantidad = g.Count() })
+            .ToDictionaryAsync(x => x.Key, x => x.Cantidad, cancellationToken);
+
+    public Task<Participacion?> ParticipacionAsync(Guid id, CancellationToken cancellationToken) =>
+        db.Participaciones.SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+    public void Agregar(Participacion participacion) => db.Participaciones.Add(participacion);
+
+    public void Borrar(Participacion participacion) => db.Participaciones.Remove(participacion);
+
     public async Task<IReadOnlyList<TomaAsistencia>> TomasAsync(Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken) =>
         await db.TomasAsistencia.Include(t => t.Alumnos).Where(t => t.GrupoId == grupoId && t.Fecha >= desde && t.Fecha <= hasta)
             .OrderBy(t => t.Fecha).AsSplitQuery().ToListAsync(cancellationToken);

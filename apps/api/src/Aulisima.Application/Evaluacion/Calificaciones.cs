@@ -22,13 +22,22 @@ public sealed record AlumnoMatrizDto(Guid Id, int NumeroLista, string Nombres, s
 
 public sealed record PromedioRubroDto(Guid RubroId, decimal? Promedio);
 
-/// <summary>RN-033 a RN-035: promedios con 2 decimales, el del periodo y el final con la configuración del grupo.</summary>
+/// <summary>
+/// RN-033 a RN-035: promedios con 2 decimales, el del periodo y el final con la configuración del grupo, ya con los
+/// <see cref="PuntosExtra"/> de las participaciones (RN-123, RN-124).
+/// </summary>
 public sealed record ResultadoAlumnoDto(
-    Guid AlumnoId, IReadOnlyList<PromedioRubroDto> Rubros, decimal? Periodo, decimal? Final, IReadOnlyList<Guid> RubrosSinDatos);
+    Guid AlumnoId, IReadOnlyList<PromedioRubroDto> Rubros, decimal? Periodo, decimal? Final, IReadOnlyList<Guid> RubrosSinDatos,
+    decimal PuntosExtra = 0m);
 
 public sealed record RubroMatrizDto(RubroDto Rubro, IReadOnlyList<ActividadDto> Actividades);
 
-public sealed record ConfiguracionMatrizDto(decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo, decimal ValorRetardo);
+public sealed record ConfiguracionMatrizDto(
+    decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo, decimal ValorRetardo,
+    decimal ValorParticipacion = Domain.Grupos.ValorParticipacion.PorDefecto);
+
+/// <summary>Cuántas participaciones extra tiene el alumno en la unidad (RN-122).</summary>
+public sealed record ParticipacionesAlumnoDto(Guid AlumnoId, int Cantidad);
 
 /// <summary>El estado del alumno en cada toma de la unidad, en orden de fecha (RN-103).</summary>
 public sealed record AsistenciaAlumnoDto(Guid AlumnoId, IReadOnlyList<string> Estados);
@@ -54,7 +63,11 @@ public sealed record MatrizCalificacionesDto(
     IReadOnlyList<ComposicionDto> Composiciones,
     int Tomas,
     IReadOnlyList<AsistenciaAlumnoDto> Asistencia,
-    bool ConPromedios = true);
+    bool ConPromedios = true)
+{
+    /// <summary>Participaciones extra de cada alumno en la unidad; solo los que tienen alguna (RN-122).</summary>
+    public IReadOnlyList<ParticipacionesAlumnoDto> Participaciones { get; init; } = [];
+}
 
 /// <summary>RF-033, RF-034: matriz del periodo. Alumnos activos y, de solo lectura, las bajas con calificaciones.</summary>
 public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepositorioEvaluacion repositorio, ConsultaRubros consulta)
@@ -84,30 +97,37 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
             actividades.Where(a => a.Modo == ModoActividad.PorEquipo).Select(a => a.Id).ToList(), ct);
         var tomas = await repositorio.TomasAsync(grupo.Id, periodo.Unidad.Inicio, periodo.Unidad.Fin, ct);
         var asistencia = ReglasAsistencia.PorAlumno(tomas);
+        var participaciones = await repositorio.ParticipacionesDelPeriodoAsync(periodo.Periodo.Id, ct);
         return new MatrizCalificacionesDto(
             periodo.Periodo.Id,
             grupo.Id,
             periodo.Periodo.Estado,
             ReglasPeriodo.PuedeCapturar(periodo) is not null,
-            new ConfiguracionMatrizDto(grupo.CalifMinima, grupo.CalifAprobatoria, grupo.DecimalesFinal, grupo.Redondeo, grupo.ValorRetardo),
+            new ConfiguracionMatrizDto(
+                grupo.CalifMinima, grupo.CalifAprobatoria, grupo.DecimalesFinal, grupo.Redondeo, grupo.ValorRetardo, grupo.ValorParticipacion),
             rubros.SumaPesos,
             rubros.Rubros.Select(r => new RubroMatrizDto(
                 r, porRubro[r.Id].OrderBy(a => a.Orden).Select(a => ActividadDto.De(a, capturadas.GetValueOrDefault(a.Id))).ToList())).ToList(),
             alumnos.Select(a => new AlumnoMatrizDto(a.Id, a.NumeroLista, a.Nombres, a.Apellidos, !a.EstaActivo)).ToList(),
             celdas.Select(CeldaDto.De).ToList(),
-            Calcular(rubros.Rubros, porRubro, celdas, asistencia, alumnos, ReglasPeriodo.Configuracion(grupo)),
+            Calcular(rubros.Rubros, porRubro, celdas, asistencia, participaciones, alumnos, ReglasPeriodo.Configuracion(grupo)),
             equipos.Select(EquipoDto.De).ToList(),
             composiciones
                 .GroupBy(c => (c.ActividadId, c.EquipoId))
                 .Select(g => new ComposicionDto(g.Key.ActividadId, g.Key.EquipoId, g.First().NombreEquipo, g.Select(c => c.AlumnoId).ToList()))
                 .ToList(),
             tomas.Count,
-            alumnos.Where(a => asistencia.ContainsKey(a.Id)).Select(a => new AsistenciaAlumnoDto(a.Id, asistencia[a.Id])).ToList());
+            alumnos.Where(a => asistencia.ContainsKey(a.Id)).Select(a => new AsistenciaAlumnoDto(a.Id, asistencia[a.Id])).ToList())
+        {
+            Participaciones = alumnos.Where(a => participaciones.ContainsKey(a.Id))
+                .Select(a => new ParticipacionesAlumnoDto(a.Id, participaciones[a.Id])).ToList(),
+        };
     }
 
     private static List<ResultadoAlumnoDto> Calcular(
         IReadOnlyList<RubroDto> rubros, ILookup<Guid, Actividad> porRubro, IReadOnlyList<Calificacion> celdas,
-        IReadOnlyDictionary<Guid, IReadOnlyList<string>> asistencia, IReadOnlyList<Alumno> alumnos, ConfiguracionCalculo configuracion)
+        IReadOnlyDictionary<Guid, IReadOnlyList<string>> asistencia, IReadOnlyDictionary<Guid, int> participaciones,
+        IReadOnlyList<Alumno> alumnos, ConfiguracionCalculo configuracion)
     {
         var porCelda = celdas.ToDictionary(c => (c.ActividadId, c.AlumnoId));
         return alumnos.Select(alumno =>
@@ -118,13 +138,14 @@ public sealed class MatrizCalificacionesCasoUso(IRepositorioGrupos grupos, IRepo
                 porRubro[r.Id].Select(a => porCelda.TryGetValue((a.Id, alumno.Id), out var c) ? c.ACalculo() : CeldaCalculo.Vacia).ToList(),
                 asistencia.GetValueOrDefault(alumno.Id)))
                 .ToList();
-            var resultado = Calculo.Periodo(entrada, configuracion);
+            var resultado = Calculo.Periodo(entrada, configuracion, participaciones.GetValueOrDefault(alumno.Id));
             return new ResultadoAlumnoDto(
                 alumno.Id,
                 resultado.Rubros.Select(r => new PromedioRubroDto(r.RubroId, r.Promedio is { } p ? Calculo.Redondear(p, 2, Redondeo.Cercano) : null)).ToList(),
                 resultado.Periodo,
                 resultado.Final,
-                resultado.RubrosSinDatos);
+                resultado.RubrosSinDatos,
+                resultado.PuntosExtra);
         }).ToList();
     }
 }

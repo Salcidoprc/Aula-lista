@@ -25,5 +25,6 @@ internal static class ReglasPeriodo
         _ => null,
     };
 
-    public static ConfiguracionCalculo Configuracion(Grupo grupo) => new(grupo.CalifMinima, grupo.DecimalesFinal, grupo.Redondeo, grupo.ValorRetardo);
+    public static ConfiguracionCalculo Configuracion(Grupo grupo) =>
+        new(grupo.CalifMinima, grupo.DecimalesFinal, grupo.Redondeo, grupo.ValorRetardo, grupo.ValorParticipacion);
 }

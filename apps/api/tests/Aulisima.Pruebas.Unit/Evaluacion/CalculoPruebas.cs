@@ -51,7 +51,9 @@ public sealed class CalculoPruebas
 
         var resultado = Calculo.Periodo(rubros, new ConfiguracionCalculo(
             Numero(configuracion, "califMinima")!.Value, configuracion.GetProperty("decimalesFinal").GetInt32(), configuracion.GetProperty("redondeo").GetString()!,
-            Numero(configuracion, "valorRetardo") ?? 1m));
+            Numero(configuracion, "valorRetardo") ?? 1m,
+            Numero(configuracion, "valorParticipacion") ?? 0.10m),
+            caso.TryGetProperty("participaciones", out var participaciones) ? participaciones.GetInt32() : 0);
 
         var esperado = caso.GetProperty("esperado");
         foreach (var rubro in esperado.GetProperty("rubros").EnumerateObject())
@@ -62,6 +64,11 @@ public sealed class CalculoPruebas
 
         Assert.Equal(Numero(esperado, "periodo"), resultado.Periodo);
         Assert.Equal(Numero(esperado, "final"), resultado.Final);
+        if (Numero(esperado, "puntosExtra") is { } puntos)
+        {
+            Assert.Equal(puntos, resultado.PuntosExtra);
+        }
+
         Assert.Equal(
             esperado.GetProperty("sinDatos").EnumerateArray().Select(s => Id(s.GetString()!)).ToHashSet(),
             resultado.RubrosSinDatos.ToHashSet());

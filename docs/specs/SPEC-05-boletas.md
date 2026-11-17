@@ -16,13 +16,13 @@ Convertir lo aprobado en el cierre en una boleta PDF clara, publicarla para los 
 | RN-053 | Publicar requiere conexión y es una acción explícita del docente, por grupo completo o por alumnos seleccionados. |
 | RN-054 | Al publicar se notifica a cada tutor vinculado por WhatsApp del sistema (plantilla `boleta_disponible`, cuenta para el límite, RN-086) y por push o correo si los tiene. Si se agotó el límite, el docente recibe la lista para compartir desde su WhatsApp. |
 | RN-055 | La boleta de la app no sustituye documentos oficiales de la SEP; el PDF lo indica en el pie: "Reporte de evaluación del docente. No es un documento oficial." |
-| RN-056 | La exportación a Excel incluye por alumno: número de lista, nombre, promedio por rubro, calificación final y observación aprobada, en el orden de la lista. |
+| RN-056 | La exportación a Excel incluye por alumno: número de lista, nombre, promedio por rubro, participaciones y puntos extra (RN-126), calificación final y observación aprobada, en el orden de la lista. |
 
 ## Contenido del PDF
 
 1. Encabezado: nombre de la escuela, CCT si existe, ciclo escolar, periodo.
 2. Datos: alumno, grado y grupo, materia (si aplica), docente.
-3. Tabla de rubros: nombre, peso, promedio; calificación final destacada.
+3. Tabla de rubros: nombre, peso, promedio; si el alumno tuvo participaciones, el renglón "Participaciones extra" con cuántas y los puntos que sumaron (RN-126); calificación final destacada.
 4. Observación del docente.
 5. Pie: fecha de emisión, versión, leyenda de RN-055 y código corto de verificación.
 

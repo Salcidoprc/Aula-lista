@@ -31,8 +31,16 @@ public static class Comportamiento
     public static readonly IReadOnlyList<string> Todos = [Actividades, Asistencia];
 }
 
-/// <summary>Configuración del grupo para calcular; <see cref="ValorRetardo"/> es lo que vale un retardo (RN-102).</summary>
-public sealed record ConfiguracionCalculo(decimal CalifMinima, int DecimalesFinal, string Redondeo, decimal ValorRetardo = Grupos.ValorRetardo.PorDefecto);
+/// <summary>
+/// Configuración del grupo para calcular; <see cref="ValorRetardo"/> es lo que vale un retardo (RN-102) y
+/// <see cref="ValorParticipacion"/>, lo que suma cada participación extra (RN-121).
+/// </summary>
+public sealed record ConfiguracionCalculo(
+    decimal CalifMinima,
+    int DecimalesFinal,
+    string Redondeo,
+    decimal ValorRetardo = Grupos.ValorRetardo.PorDefecto,
+    decimal ValorParticipacion = Grupos.ValorParticipacion.PorDefecto);
 
 public sealed record CriterioCalculo(Guid Id, decimal Peso, string Forma, decimal CalifMinima);
 
@@ -61,18 +69,24 @@ public sealed record RubroCalculo(
 public sealed record ResultadoRubro(Guid RubroId, decimal? Promedio);
 
 /// <summary>
-/// Resultado de un alumno en el periodo. <see cref="Exacto"/> es el cálculo sin redondear; <see cref="Periodo"/>
-/// se muestra con 2 decimales y <see cref="Final"/> sigue la configuración del grupo; ambos respetan la mínima.
+/// Resultado de un alumno en el periodo. <see cref="Exacto"/> es el cálculo sin redondear, ya con los puntos extra;
+/// <see cref="Periodo"/> se muestra con 2 decimales y <see cref="Final"/> sigue la configuración del grupo; ambos
+/// respetan la mínima. <see cref="PuntosExtra"/> son las participaciones por su valor (RN-123), aunque el tope de 10
+/// no deje sumarlas todas.
 /// </summary>
 public sealed record ResultadoPeriodo(
-    IReadOnlyList<ResultadoRubro> Rubros, decimal? Exacto, decimal? Periodo, decimal? Final, IReadOnlyList<Guid> RubrosSinDatos);
+    IReadOnlyList<ResultadoRubro> Rubros, decimal? Exacto, decimal? Periodo, decimal? Final, IReadOnlyList<Guid> RubrosSinDatos,
+    decimal PuntosExtra = 0m);
 
 /// <summary>
-/// Cálculo de calificaciones (RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118, RN-119). Decimales exactos sin redondeos
+/// Cálculo de calificaciones (RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118, RN-119, RN-123, RN-124). Decimales exactos sin redondeos
 /// intermedios; su gemelo en el frontend (<c>core/calculo</c>) pasa los mismos vectores de prueba (RN-036).
 /// </summary>
 public static class Calculo
 {
+    /// <summary>La escala llega a 10 (RN-030); los puntos extra no la rebasan (RN-124).</summary>
+    public const decimal Maximo = 10m;
+
     /// <summary>Valor de una actividad para el promedio, o nulo si no cuenta (vacía o exenta).</summary>
     public static decimal? ValorActividad(RubroCalculo rubro, CeldaCalculo celda)
     {
@@ -155,9 +169,14 @@ public static class Calculo
         return cuenta == 0 ? null : suma * 10m / cuenta;
     }
 
-    /// <summary>RN-033 y RN-034: rubros con datos ponderados por su peso; los sin datos reparten el suyo.</summary>
-    public static ResultadoPeriodo Periodo(IReadOnlyList<RubroCalculo> rubros, ConfiguracionCalculo configuracion)
+    /// <summary>
+    /// RN-033 y RN-034: rubros con datos ponderados por su peso; los sin datos reparten el suyo. RN-124: encima de esa
+    /// calificación ordinaria (ya sin bajar de la mínima) se suman los puntos de las <paramref name="participaciones"/>,
+    /// sin pasar de 10; sin calificación ordinaria no hay calificación.
+    /// </summary>
+    public static ResultadoPeriodo Periodo(IReadOnlyList<RubroCalculo> rubros, ConfiguracionCalculo configuracion, int participaciones = 0)
     {
+        var puntos = ReglasParticipacion.Puntos(participaciones, configuracion.ValorParticipacion);
         var resultados = new List<ResultadoRubro>();
         var sinDatos = new List<Guid>();
         decimal suma = 0m, pesos = 0m;
@@ -183,13 +202,18 @@ public static class Calculo
 
         if (pesos == 0m)
         {
-            return new ResultadoPeriodo(resultados, null, null, null, sinDatos);
+            return new ResultadoPeriodo(resultados, null, null, null, sinDatos, puntos);
         }
 
         var exacto = suma / pesos;
+        if (puntos > 0m)
+        {
+            exacto = Math.Min(Maximo, Math.Max(configuracion.CalifMinima, exacto) + puntos); // RN-124
+        }
+
         var periodo = Math.Max(configuracion.CalifMinima, Redondear(exacto, 2, Grupos.Redondeo.Cercano)); // RN-034
         var final = Math.Max(configuracion.CalifMinima, Redondear(exacto, configuracion.DecimalesFinal, configuracion.Redondeo)); // RN-035
-        return new ResultadoPeriodo(resultados, exacto, periodo, final, sinDatos);
+        return new ResultadoPeriodo(resultados, exacto, periodo, final, sinDatos, puntos);
     }
 
     /// <summary>RN-035: hacia arriba, hacia abajo o al más cercano con medio hacia arriba.</summary>

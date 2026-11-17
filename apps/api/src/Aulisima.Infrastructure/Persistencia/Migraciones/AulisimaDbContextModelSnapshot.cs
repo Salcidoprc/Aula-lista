@@ -1450,6 +1450,58 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         });
                 });
 
+            modelBuilder.Entity("Aulisima.Domain.Evaluacion.Participacion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AlumnoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("alumno_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("DocenteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("docente_id");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<Guid>("GrupoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("grupo_id");
+
+                    b.Property<Guid>("PeriodoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("periodo_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_participacion");
+
+                    b.HasIndex("AlumnoId")
+                        .HasDatabaseName("ix_participacion_alumno_id");
+
+                    b.HasIndex("DocenteId")
+                        .HasDatabaseName("ix_participacion_docente_id");
+
+                    b.HasIndex("GrupoId", "Fecha")
+                        .HasDatabaseName("ix_participacion_grupo_id_fecha");
+
+                    b.HasIndex("PeriodoId", "AlumnoId")
+                        .HasDatabaseName("ix_participacion_periodo_id_alumno_id");
+
+                    b.ToTable("participacion", (string)null);
+                });
+
             modelBuilder.Entity("Aulisima.Domain.Evaluacion.Rubro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1836,6 +1888,13 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<decimal>("ValorParticipacion")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(3, 2)
+                        .HasColumnType("numeric(3,2)")
+                        .HasDefaultValue(0.10m)
+                        .HasColumnName("valor_participacion");
+
                     b.Property<decimal>("ValorRetardo")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(3, 2)
@@ -1865,6 +1924,8 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                             t.HasCheckConstraint("ck_grupo_plan", "plan IN ('gratis', 'pro')");
 
                             t.HasCheckConstraint("ck_grupo_redondeo", "redondeo IN ('arriba', 'abajo', 'cercano')");
+
+                            t.HasCheckConstraint("ck_grupo_valor_participacion", "valor_participacion BETWEEN 0.01 AND 1");
 
                             t.HasCheckConstraint("ck_grupo_valor_retardo", "valor_retardo IN (0, 0.5, 1)");
                         });
@@ -3090,6 +3151,30 @@ namespace Aulisima.Infrastructure.Persistencia.Migraciones
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_nota_periodos_periodo_id");
+                });
+
+            modelBuilder.Entity("Aulisima.Domain.Evaluacion.Participacion", b =>
+                {
+                    b.HasOne("Aulisima.Domain.Grupos.Alumno", null)
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_participacion_alumno_alumno_id");
+
+                    b.HasOne("Aulisima.Domain.Grupos.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_participacion_grupo_grupo_id");
+
+                    b.HasOne("Aulisima.Domain.Grupos.Periodo", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_participacion_periodos_periodo_id");
                 });
 
             modelBuilder.Entity("Aulisima.Domain.Evaluacion.Rubro", b =>

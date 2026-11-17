@@ -54,7 +54,8 @@ internal sealed class GeneradorBoletas : IGeneradorBoletas
         var hoja = libro.Worksheets.Add("Calificaciones");
         string[] encabezados =
         [
-            "Número", "Alumno", .. exportacion.Rubros.Select(r => $"{r.Nombre} ({r.Peso.ToString("0.##", Mx)}%)"), "Final", "Observación",
+            "Número", "Alumno", .. exportacion.Rubros.Select(r => $"{r.Nombre} ({r.Peso.ToString("0.##", Mx)}%)"), "Participaciones", "Puntos extra", "Final",
+            "Observación",
         ];
         for (var c = 0; c < encabezados.Length; c++)
         {
@@ -72,6 +73,9 @@ internal sealed class GeneradorBoletas : IGeneradorBoletas
             {
                 Numero(hoja.Cell(fila, columna++), promedio, "0.00");
             }
+
+            hoja.Cell(fila, columna++).Value = f.Participaciones; // RN-126
+            Numero(hoja.Cell(fila, columna++), f.PuntosExtra, "0.00");
 
             Numero(hoja.Cell(fila, columna++), f.Calificacion, formatoFinal);
             hoja.Cell(fila, columna).Value = f.Observacion ?? string.Empty;
@@ -177,6 +181,13 @@ internal sealed class GeneradorBoletas : IGeneradorBoletas
                         Celda(t.Cell()).Text(rubro.Nombre);
                         Celda(t.Cell()).AlignRight().Text($"{rubro.Peso.ToString("0.##", Mx)}%").FontFamily(Cifras, Texto);
                         Celda(t.Cell()).AlignRight().Text(Cifra(rubro.Promedio, 2)).FontFamily(Cifras, Texto).SemiBold();
+                    }
+
+                    if (d.Participaciones is { } extra) // RN-126: encima de la calificación ordinaria, sin peso
+                    {
+                        Celda(t.Cell()).Text($"Participaciones extra ({extra.Cantidad.ToString(Mx)})");
+                        Celda(t.Cell()).AlignRight().Text("—").FontFamily(Cifras, Texto);
+                        Celda(t.Cell()).AlignRight().Text($"+{Cifra(extra.Puntos, 2)}").FontFamily(Cifras, Texto).SemiBold();
                     }
                 });
                 r.ConstantItem(46, Unit.Millimetre).Border(1.5f).BorderColor(Tinta).Padding(10).Column(final =>
