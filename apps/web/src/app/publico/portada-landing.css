@@ -45,14 +45,11 @@
   letter-spacing: -0.02em;
 }
 
-/* Un libro chiquito como marca: tapa clara con su lomo. */
-.libro {
-  flex: none;
-  inline-size: 0.875rem;
-  block-size: 1.125rem;
-  border-radius: var(--radio-tapa);
-  background: var(--color-sobre-grado);
-  box-shadow: var(--sombra-lomo-chica);
+/* El logo sobre la portada azul: del color del texto de la portada, el acento en el tono del rótulo. */
+.barra .logo app-marca {
+  --marca-tinta: var(--color-sobre-grado);
+  --marca-acento: var(--color-marca-rotulo);
+  block-size: 1.75rem;
 }
 
 .enlaces {

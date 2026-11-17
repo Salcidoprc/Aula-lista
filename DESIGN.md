@@ -337,6 +337,13 @@ La cabecera de la app y de cada pantalla de grupo. Entradas: `titulo` (obligator
 - **Número:** 120 px, peso 700, en el color del grado mezclado al 80% con `sobre-grado`, pegado arriba a la derecha y recortado. Decorativo (`aria-hidden`); el título ya nombra el grupo.
 - Con número, el texto reserva 5.5rem a la derecha para no encimarse.
 - Cambiar de grupo cambia el color sin animación: es navegación frecuente.
+- **Logo:** sin grupo, el título es el logo (`marca="titulo"`); en el panel de administración va chico como subtítulo. Sobre la portada el logo es de un solo tono, `sobre-grado`, con el acento de la "í" en `--grado-rotulo`.
+
+### Logo (`app-marca`, `src/app/shared/marca.ts`)
+La libreta con la palomita y el nombre, del archivo original en `docs/marca/`. Se pinta con dos máscaras (`public/marca/aulisima-tinta.png` y `aulisima-acento.png`) para que tome el color de donde está: `--marca-tinta` y `--marca-acento`, o `currentColor` si no se dan. Sobre una superficie usa los colores propios del logo, `logo-tinta` (verde) y `logo-acento` (naranja), que en oscuro se aclaran. `variante="libreta"` muestra solo el ícono. Con colores forzados, `CanvasText`. Lleva `role="img"` y `aria-label="Aulísima"`.
+
+### Íconos de la app
+Libreta blanca sobre el verde del logo. `favicon.ico` (16 a 64 px, esquinas redondeadas), `apple-touch-icon.png` (180 px) y los de la PWA en `public/icons/` (maskable: la libreta ocupa la mitad para quedar dentro del círculo seguro).
 
 ### Tapa de libro
 El grupo en la lista "Mis grupos". 56 × 64 px, fondo `--grado`, texto `sobre-grado` con el grado ("4°", 22 px, 700, `.cifras`), esquinas `--radio-tapa` y `--sombra-lomo`. A la derecha: nombre del grupo (700), datos en etiqueta `texto-suave` y una barra de avance de 6 px (pista `superficie-hundida`, relleno `--grado`, `--radio-sm`). La fila entera es el objetivo táctil. Dos grupos del mismo grado comparten color; los distingue la letra del grupo y la materia.

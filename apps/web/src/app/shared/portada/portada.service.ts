@@ -6,6 +6,8 @@ export interface DatosPortada {
   readonly subtitulo?: string;
   readonly numero?: string;
   readonly grado?: ClaveGrado;
+  /** El logo en lugar del subtítulo (panel de administración). */
+  readonly marcaEnSubtitulo?: boolean;
 }
 
 /**

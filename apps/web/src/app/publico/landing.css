@@ -245,6 +245,13 @@ h2 {
   margin: 0;
 }
 
+.pie .logo-pie {
+  --marca-tinta: var(--color-logo-tinta);
+  --marca-acento: var(--color-logo-acento);
+  block-size: 1.5rem;
+  margin-block-end: var(--espacio-2);
+}
+
 .pie strong {
   color: var(--color-texto);
   font-size: var(--texto-base);

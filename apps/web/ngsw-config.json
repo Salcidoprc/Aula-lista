@@ -11,6 +11,7 @@
           "/index.csr.html",
           "/index.html",
           "/manifest.webmanifest",
+          "/marca/*.png",
           "/*.css",
           "/*.js"
         ]
