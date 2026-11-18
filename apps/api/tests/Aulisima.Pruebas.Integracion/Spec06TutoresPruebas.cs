@@ -198,8 +198,9 @@ public sealed class Spec06TutoresPruebas(BaseDeDatosFixture baseDeDatos) : IDisp
         }
     }
 
+    // RN-126: "participaciones" es el renglón de puntos extra de la boleta (cantidad y puntos), nunca las fechas sueltas.
     private static readonly string[] CamposBoletaTutor =
-        ["id", "unidad", "ciclo", "calificacion", "decimalesFinal", "rubros", "observacion", "version", "codigo", "publicadaEn", "escuela"];
+        ["id", "unidad", "ciclo", "calificacion", "decimalesFinal", "rubros", "observacion", "version", "codigo", "publicadaEn", "escuela", "participaciones"];
 
     private sealed record Hijo(HttpClient Cliente, Guid DocenteId, string Correo, Guid PeriodoId, Guid Alumno, Guid Tutor, Guid Boleta);
 
