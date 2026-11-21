@@ -18,5 +18,6 @@ export interface GrupoDto {
   plan: string;
   planVigente?: string;
   redondeo: string;
+  valorParticipacion?: (number | string);
   valorRetardo: (number | string);
 }

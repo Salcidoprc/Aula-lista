@@ -35,6 +35,20 @@ export interface AsistenciaEnCola {
   readonly alumnos: readonly EstadoAlumno[];
 }
 
+/**
+ * Una participación extra por enviar (SPEC-03, RF-111). Su id es el de la participación: darla la crea con ese id y
+ * quitarla la borra. Quitar una que aún no se envía solo la saca de la cola.
+ */
+export interface ParticipacionEnCola {
+  readonly id: string;
+  readonly grupoId: string;
+  readonly alumnoId: string;
+  /** "2026-10-17". */
+  readonly fecha: string;
+  readonly creado: number;
+  readonly operacion: 'dar' | 'quitar';
+}
+
 /** La matriz del periodo como se vio por última vez, con los cambios locales ya encima. */
 export interface MatrizGuardada {
   readonly periodoId: string;
@@ -66,6 +80,10 @@ export interface AlmacenLocal {
   /** Las más antiguas primero; con grupo, solo las suyas. */
   asistenciasPendientes(grupoId?: string): Promise<AsistenciaEnCola[]>;
   quitarAsistencia(id: string): Promise<void>;
+  encolarParticipacion(participacion: ParticipacionEnCola): Promise<void>;
+  /** Las más antiguas primero; con grupo, solo las suyas. */
+  participacionesPendientes(grupoId?: string): Promise<ParticipacionEnCola[]>;
+  quitarParticipacion(id: string): Promise<void>;
   /** Lo demás que la captura necesita sin red: el grupo y sus periodos. */
   leerDato<T>(clave: string): Promise<T | undefined>;
   guardarDato(clave: string, valor: unknown): Promise<void>;
@@ -83,6 +101,7 @@ class BaseLocal extends Dexie {
   datos!: Table<Dato, string>;
   notas!: Table<NotaEnCola, string>;
   asistencias!: Table<AsistenciaEnCola, string>;
+  participaciones!: Table<ParticipacionEnCola, string>;
 
   constructor() {
     super('aulisima');
@@ -93,6 +112,7 @@ class BaseLocal extends Dexie {
     });
     this.version(2).stores({ notas: 'id, creado, alumnoId' });
     this.version(3).stores({ asistencias: 'id, creado, grupoId' });
+    this.version(4).stores({ participaciones: 'id, creado, grupoId' });
   }
 }
 
@@ -138,21 +158,23 @@ export class AlmacenDexie implements AlmacenLocal {
   }
 
   async contar(): Promise<number> {
-    const [celdas, notas, asistencias] = await Promise.all([
+    const [celdas, notas, asistencias, participaciones] = await Promise.all([
       this.db.cola.count(),
       this.db.notas.count(),
       this.db.asistencias.count(),
+      this.db.participaciones.count(),
     ]);
-    return celdas + notas + asistencias;
+    return celdas + notas + asistencias + participaciones;
   }
 
   async masAntiguo(): Promise<number | null> {
-    const [celda, nota, asistencia] = await Promise.all([
+    const [celda, nota, asistencia, participacion] = await Promise.all([
       this.db.cola.orderBy('creado').first(),
       this.db.notas.orderBy('creado').first(),
       this.db.asistencias.orderBy('creado').first(),
+      this.db.participaciones.orderBy('creado').first(),
     ]);
-    const fechas = [celda?.creado, nota?.creado, asistencia?.creado].filter(
+    const fechas = [celda?.creado, nota?.creado, asistencia?.creado, participacion?.creado].filter(
       (f): f is number => f !== undefined,
     );
     return fechas.length ? Math.min(...fechas) : null;
@@ -190,6 +212,22 @@ export class AlmacenDexie implements AlmacenLocal {
     await this.db.asistencias.delete(id);
   }
 
+  async encolarParticipacion(participacion: ParticipacionEnCola): Promise<void> {
+    await this.db.participaciones.put(participacion);
+  }
+
+  async participacionesPendientes(grupoId?: string): Promise<ParticipacionEnCola[]> {
+    const lista =
+      grupoId === undefined
+        ? await this.db.participaciones.toArray()
+        : await this.db.participaciones.where('grupoId').equals(grupoId).toArray();
+    return lista.sort((a, b) => a.creado - b.creado);
+  }
+
+  async quitarParticipacion(id: string): Promise<void> {
+    await this.db.participaciones.delete(id);
+  }
+
   async leerDato<T>(clave: string): Promise<T | undefined> {
     return (await this.db.datos.get(clave))?.valor as T | undefined;
   }
@@ -201,13 +239,21 @@ export class AlmacenDexie implements AlmacenLocal {
   async borrarTodo(): Promise<void> {
     await this.db.transaction(
       'rw',
-      [this.db.matrices, this.db.cola, this.db.datos, this.db.notas, this.db.asistencias],
+      [
+        this.db.matrices,
+        this.db.cola,
+        this.db.datos,
+        this.db.notas,
+        this.db.asistencias,
+        this.db.participaciones,
+      ],
       async () => {
         await this.db.matrices.clear();
         await this.db.cola.clear();
         await this.db.datos.clear();
         await this.db.notas.clear();
         await this.db.asistencias.clear();
+        await this.db.participaciones.clear();
       },
     );
   }

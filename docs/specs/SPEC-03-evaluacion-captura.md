@@ -1,6 +1,6 @@
 # SPEC-03: Evaluación y captura
 
-**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-030 a RF-039, RNF-010, RNF-014
+**Estado:** Aprobada para desarrollo · **Requerimientos:** RF-030 a RF-039, RF-110, RF-111, RNF-010, RNF-014
 
 ## Objetivo
 
@@ -15,6 +15,7 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 - Como docente, quiero que un rubro como Exposición tenga criterios propios (información, presentación, dominio del tema) con su porcentaje.
 - Como docente, quiero armar equipos en mi grupo y calificar una actividad por equipo, o a cada integrante por separado si así lo decido.
 - Como docente, quiero anotar en el momento que un alumno participó o se distrajo, para usarlo al cerrar el periodo.
+- Como docente, quiero buscar rápido a un alumno en clase y darle una participación que le sume puntos extra a su calificación del periodo, con el valor que yo elija para el grupo.
 
 ## Escala y cálculo
 
@@ -53,6 +54,23 @@ Que capturar una calificación tome un toque y que el docente nunca pierda lo ca
 - El dictado por voz usa el micrófono del teclado del sistema operativo; la app no graba audio.
 - Las notas son privadas del docente: nunca se muestran a tutores. Solo alimentan el borrador de observación.
 
+## Participaciones extra
+
+Puntos que el docente da en clase y que se suman encima de la calificación ordinaria del periodo (ADR-0019). No son un rubro y no tienen peso; el tipo de rubro "Participaciones" (RN-110) sigue existiendo para quien quiera calificarlas como tareas.
+
+| ID | Regla |
+| --- | --- |
+| RN-121 | Cada grupo tiene un valor por participación de 0.01 a 1.00 punto, con hasta 2 decimales; por defecto 0.10. Se cambia en la configuración del grupo o desde la pantalla de participaciones. Un valor fuera de rango se rechaza con `configuracion_calificacion_invalida`. |
+| RN-122 | Una participación es un registro de un alumno activo en una fecha. La fecha decide la unidad (periodo) a la que pertenece; fuera de toda unidad se rechaza con `fecha_fuera_de_unidad`. Se pueden dar varias al mismo alumno el mismo día. Su id lo genera el cliente: reenviarla no la duplica. |
+| RN-123 | Puntos extra del periodo = participaciones del alumno en la unidad × valor vigente del grupo (RN-121). Cambiar el valor recalcula los promedios; una boleta emitida no cambia (RN-051). |
+| RN-124 | Calificación con extra: a la calificación ordinaria (RN-033, ya sin bajar de la mínima, RN-034) se le suman los puntos extra y el resultado nunca pasa de 10. Después se redondea como dice RN-035. Sin puntos extra, el resultado es el de siempre. Si el alumno no tiene calificación ordinaria (ningún rubro con datos), las participaciones no crean una. Ejemplo: ordinaria 8.10 con 4 participaciones de 0.10 da 8.50; ordinaria 9.80 con 5 participaciones de 0.10 da 10.00. |
+| RN-125 | Las participaciones se dan y se quitan mientras la unidad admita captura: también durante el cierre (la observación del alumno se marca "datos cambiaron", RN-037) y nunca con la unidad cerrada (`periodo_cerrado`) ni el grupo archivado (`grupo_archivado`). |
+| RN-126 | La boleta guarda en su foto cuántas participaciones tuvo el alumno y cuántos puntos sumaron (renglón "Participaciones extra" bajo los rubros). El Excel agrega las columnas "Participaciones" y "Puntos extra". El tutor ve el renglón de la boleta publicada, nunca las participaciones sueltas por fecha (RN-064). |
+
+**Pantalla Participaciones (pestaña del grupo):** el día (hoy por defecto, con flechas y calendario como la asistencia), el valor de cada participación con "Cambiar", un buscador por nombre o número de lista y la lista del grupo. Tocar la fila de un alumno le suma una participación; la fila muestra cuántas lleva hoy y cuántos puntos suma en la unidad. "Quitar una" aparece en la fila cuando el alumno tiene participaciones ese día. En computadora, escribir en el buscador y presionar Enter suma una al único alumno que coincide. Nada se anima al sumar (reglas/07, acciones repetidas): solo cambian el número y el fondo de la fila. Funciona sin conexión como la asistencia (RF-111).
+
+**Dónde se ven los puntos:** la pantalla de participaciones muestra a todos los planes cuántas lleva cada alumno y sus puntos (participaciones × valor), porque es la captura. La calificación con los puntos sumados sale donde salen los promedios (Pro, RN-097): en la tabla, una columna "Extra" antes de la calificación de la unidad cuando alguien tiene participaciones; en la ficha del alumno, un renglón "Participaciones extra" bajo los rubros.
+
 ## Captura
 
 Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable como base, mejorado con los skills de animación y diseño); los movimientos de este módulo están en su catálogo.
@@ -78,15 +96,20 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 | `PUT /api/v1/calificaciones` | Lote de celdas `{actividadId, alumnoId o equipoId, valor o criterios[], marca, version}` con `Idempotency-Key`; por equipo (`alumnoId` vacío) escribe a cada integrante no ajustado (RN-115) y la primera vez guarda la composición (RN-116). Calificar por separado a un integrante marca su celda `ajustada`; vaciarla la regresa al equipo |
 | `GET` / `PUT /api/v1/grupos/{id}/equipos` | Lee y reemplaza los equipos del grupo (RN-114): cada equipo con `id` se conserva, sin `id` es nuevo y el que falta se quita. Nombres distintos de hasta 40 caracteres, hasta 30 equipos; un alumno en dos equipos responde `equipos_invalidos` |
 | `GET` / `POST /api/v1/alumnos/{id}/notas` | Lista y crea notas `{id, periodoId, texto, etiqueta, fecha}`. El `id` lo genera el cliente: reenviar la misma nota no la duplica |
+| `GET /api/v1/grupos/{id}/participaciones` | Participaciones del grupo `{id, alumnoId, fecha}`, con `desde` y `hasta` opcionales (inclusive) |
+| `POST /api/v1/grupos/{id}/participaciones` | Da una participación `{id, alumnoId, fecha}` (RN-122); sin fecha, hoy. Un `id` que ya llegó responde la guardada |
+| `DELETE /api/v1/participaciones/{id}` | Quita una participación (RN-125). Una que no existe o es ajena responde 404 |
 | `POST /api/v1/sincronizacion` | Recibe la cola sin conexión (hasta 100 cambios con UUID único; ver arquitectura). Responde `aplicadas` y `rechazadas` con su código y la celda vigente |
 
-Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_suman_100`, `rubros_invalidos`, `criterios_invalidos`, `tipo_rubro_invalido`, `forma_invalida`, `minima_invalida`, `forma_con_calificaciones`, `borrado_requiere_confirmacion`, `periodo_en_cierre`, `periodo_cerrado`, `periodo_con_rubros`, `actividad_invalida`, `fecha_fuera_de_unidad`, `rubro_sin_actividades`, `calificacion_fuera_de_rango`, `calificacion_invalida`, `calificacion_menor_a_minima`, `calificaciones_menores_a_minima`, `marca_invalida`, `criterio_inexistente`, `celda_inexistente`, `equipos_invalidos`, `nota_invalida`, `alumno_dado_de_baja`, `grupo_con_calificaciones` (borrar grupo, SPEC-02) y `unidad_con_datos` (quitar una unidad con rubros, SPEC-02).
+Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_suman_100`, `rubros_invalidos`, `criterios_invalidos`, `tipo_rubro_invalido`, `forma_invalida`, `minima_invalida`, `forma_con_calificaciones`, `borrado_requiere_confirmacion`, `periodo_en_cierre`, `periodo_cerrado`, `periodo_con_rubros`, `actividad_invalida`, `fecha_fuera_de_unidad`, `rubro_sin_actividades`, `calificacion_fuera_de_rango`, `calificacion_invalida`, `calificacion_menor_a_minima`, `calificaciones_menores_a_minima`, `marca_invalida`, `criterio_inexistente`, `celda_inexistente`, `equipos_invalidos`, `nota_invalida`, `participacion_invalida`, `alumno_dado_de_baja`, `grupo_con_calificaciones` (borrar grupo, SPEC-02) y `unidad_con_datos` (quitar una unidad con rubros, SPEC-02).
 
 ## Casos borde
 
 - Valor fuera de rango (por ejemplo 11 o -1): se rechaza en la UI y en la API con `calificacion_fuera_de_rango`.
 - Dos dispositivos editan la misma celda sin conexión: gana la última que llega al servidor; el otro dispositivo ve el valor actualizado al sincronizar.
 - Se borra una actividad con calificaciones: se pide confirmación y se recalculan promedios.
+- Se toca dos veces por error a un alumno en Participaciones: "Quitar una" borra la más reciente de ese día, también sin conexión. Si aún no se enviaba, solo se quita de la cola.
+- Un alumno con muchas participaciones: el tope de 10 aplica a la calificación, no al conteo; las participaciones siguen registradas.
 - El docente sin conexión por más de 7 días: la cola se conserva; se muestra una advertencia a partir del día 3.
 
 ## Criterios de aceptación
@@ -105,6 +128,14 @@ Códigos de error de este módulo: `pesos_no_suman_100`, `pesos_criterios_no_sum
 - Dado un rubro por cumplimiento con mínima 5, cuando un alumno tiene 4 ✅ y 1 ❌, entonces su promedio del rubro es 9.00.
 - Dado un rubro numérico con mínima 5, cuando el docente captura 3, entonces se rechaza con `calificacion_menor_a_minima`.
 - Dado un criterio por cumplimiento con mínima 0 y peso 30, cuando el alumno obtiene ❌, entonces ese criterio aporta 0 a la actividad.
+- Dado un grupo con valor de participación 0.10 y un alumno con calificación ordinaria 8.10, cuando recibe 4 participaciones en la unidad, entonces su calificación del periodo es 8.50.
+- Dado un alumno con ordinaria 9.80 y 5 participaciones de 0.10, entonces su calificación del periodo es 10.00 (RN-124).
+- Dado un alumno con ordinaria 4.00, mínima 5 y 5 participaciones de 0.10, entonces su calificación del periodo es 5.50.
+- Dado un alumno sin calificaciones ordinarias y 3 participaciones, entonces no tiene calificación del periodo.
+- Dado un valor de participación de 1.50 o de 0, cuando el docente lo guarda, entonces se rechaza con `configuracion_calificacion_invalida`.
+- Dado un docente sin conexión, cuando da 5 participaciones y quita 1, entonces al volver la red el servidor tiene 4 y ninguna duplicada.
+- Dada una boleta generada de un alumno con 3 participaciones de 0.25, entonces la boleta y el Excel muestran 3 participaciones y 0.75 puntos extra.
+- Dada una unidad cerrada, cuando el docente intenta dar una participación con fecha en ella, entonces se rechaza con `periodo_cerrado`.
 - Dada la vista por actividad en un Android de gama baja, entonces capturar 30 calificaciones con los botones rápidos toma menos de 90 segundos en prueba de usabilidad.
 
 ## Fuera de alcance

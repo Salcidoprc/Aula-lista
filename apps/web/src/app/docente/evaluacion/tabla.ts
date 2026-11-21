@@ -38,6 +38,7 @@ import {
   interpretar,
   leerPegado,
   numero,
+  participacionesDe,
   resultadoAlumno,
   textoCelda,
   validarValor,
@@ -144,6 +145,9 @@ interface Problema {
                   </th>
                 }
                 @if (conPromedios()) {
+                  @if (hayExtra()) {
+                    <th scope="col" rowspan="2" class="total">{{ t('extra') }}</th>
+                  }
                   <th scope="col" rowspan="2" class="total">{{ t('periodo') }}</th>
                   <th scope="col" rowspan="2" class="total">{{ t('final') }}</th>
                 }
@@ -227,6 +231,20 @@ interface Problema {
                     }
                   }
                   @if (conPromedios()) {
+                    @if (hayExtra()) {
+                      @let n = participaciones(a.id);
+                      <td
+                        class="total cifras"
+                        [title]="n ? t('extraDetalle', { cantidad: n }) : ''"
+                      >
+                        @if (n) {
+                          +{{ dos(res?.puntosExtra ?? null) }}
+                          <span class="solo-lector">{{ t('extraDetalle', { cantidad: n }) }}</span>
+                        } @else {
+                          —
+                        }
+                      </td>
+                    }
                     <td class="total cifras">
                       {{ dos(res?.periodo) }}
                       @if (parcial(res)) {
@@ -659,6 +677,16 @@ export class Tabla implements OnInit {
   /** RN-033: algún rubro sin datos y su peso se repartió entre los demás. */
   protected parcial(res: ResultadoPeriodo | undefined): boolean {
     return !!res?.periodo && res.sinDatos.length > 0;
+  }
+
+  /** RN-123: la columna de puntos extra sale solo si alguien de la unidad tiene participaciones. */
+  protected readonly hayExtra = computed(() =>
+    (this.matriz()?.participaciones ?? []).some((p) => Number(p.cantidad) > 0),
+  );
+
+  protected participaciones(alumnoId: string): number {
+    const m = this.matriz();
+    return m ? participacionesDe(m, alumnoId) : 0;
   }
 
   protected readonly hayParciales = computed(() =>

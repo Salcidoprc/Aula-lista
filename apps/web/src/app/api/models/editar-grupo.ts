@@ -9,5 +9,6 @@ export interface EditarGrupo {
   materia: (string | null);
   nombre: string;
   redondeo: string;
+  valorParticipacion?: (number | string | null);
   valorRetardo?: (number | string | null);
 }

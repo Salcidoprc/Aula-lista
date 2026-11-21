@@ -5,7 +5,7 @@ import { Icono } from '../../shared/iconos';
 import { ClaveGrado } from '../../shared/portada/portada';
 
 /**
- * Las vistas del grupo: Calificaciones (la que abre, por decisión del docente), Alumnos, Asistencia y Avisos. Son páginas, no
+ * Las vistas del grupo: Calificaciones (la que abre, por decisión del docente), Alumnos, Asistencia, Participaciones y Avisos. Son páginas, no
  * paneles: van como navegación con `aria-current`, no como pestañas ARIA. La configuración queda a la derecha.
  */
 @Component({
@@ -40,6 +40,14 @@ import { ClaveGrado } from '../../shared/portada/portada';
           (isActiveChange)="aLaVista($event, v3)"
           ariaCurrentWhenActive="page"
           >{{ t('asistencia') }}</a
+        >
+        <a
+          [routerLink]="['/grupos', id(), 'participaciones']"
+          routerLinkActive="activa"
+          #v5
+          (isActiveChange)="aLaVista($event, v5)"
+          ariaCurrentWhenActive="page"
+          >{{ t('participaciones') }}</a
         >
         <a
           [routerLink]="['/grupos', id(), 'avisos']"

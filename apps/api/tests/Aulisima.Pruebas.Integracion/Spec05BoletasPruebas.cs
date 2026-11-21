@@ -146,7 +146,9 @@ public sealed partial class Spec05BoletasPruebas(BaseDeDatosFixture baseDeDatos)
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
         using var libro = new XLWorkbook(await respuesta.Content.ReadAsStreamAsync());
         var hoja = libro.Worksheet("Calificaciones");
-        Assert.Equal(["Número", "Alumno", "Tareas (100%)", "Final", "Observación"], hoja.Row(1).CellsUsed().Select(c => c.GetString()).ToArray());
+        Assert.Equal(
+            ["Número", "Alumno", "Tareas (100%)", "Participaciones", "Puntos extra", "Final", "Observación"],
+            hoja.Row(1).CellsUsed().Select(c => c.GetString()).ToArray());
         for (var i = 0; i < 3; i++)
         {
             var fila = hoja.Row(i + 2);
@@ -154,12 +156,56 @@ public sealed partial class Spec05BoletasPruebas(BaseDeDatosFixture baseDeDatos)
             Assert.Equal(datos.GetProperty("numeroLista").GetInt32(), fila.Cell(1).GetValue<int>());
             Assert.Equal(datos.GetProperty("alumno").GetString(), fila.Cell(2).GetString());
             Assert.Equal(datos.GetProperty("rubros")[0].GetProperty("promedio").GetDecimal(), fila.Cell(3).GetValue<decimal>());
-            Assert.Equal(datos.GetProperty("calificacion").GetDecimal(), fila.Cell(4).GetValue<decimal>());
-            Assert.Equal(datos.GetProperty("observacion").GetString(), fila.Cell(5).GetString());
+            Assert.Equal(0, fila.Cell(4).GetValue<int>());
+            Assert.Equal(datos.GetProperty("calificacion").GetDecimal(), fila.Cell(6).GetValue<decimal>());
+            Assert.Equal(datos.GetProperty("observacion").GetString(), fila.Cell(7).GetString());
         }
 
         Assert.Equal(7.25m, hoja.Row(3).Cell(3).GetValue<decimal>());
         Assert.Equal(1, await ContarAsync($"SELECT count(*) FROM auditoria WHERE accion = 'calificaciones_exportadas' AND entidad_id = '{g.PeriodoId}' AND cantidad = 3"));
+    }
+
+    [Fact]
+    public async Task RN126_TresParticipacionesDe025_BoletaYExcelMuestran3Y075()
+    {
+        var g = await PrepararAsync(2, aprobar: 0);
+        var grupo = await g.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/grupos/{g.GrupoId}");
+        var edicion = await g.Cliente.PutAsJsonAsync($"/api/v1/grupos/{g.GrupoId}", new
+        {
+            nombre = "B",
+            grado = 4,
+            materia = (string?)null,
+            califMinima = 5m,
+            califAprobatoria = 6m,
+            decimalesFinal = 2,
+            redondeo = "cercano",
+            valorParticipacion = 0.25m,
+        });
+        Assert.Equal(HttpStatusCode.OK, edicion.StatusCode);
+        Assert.Equal(0.10m, grupo.GetProperty("valorParticipacion").GetDecimal());
+        for (var i = 0; i < 3; i++)
+        {
+            var dada = await g.Cliente.PostAsJsonAsync(
+                $"/api/v1/grupos/{g.GrupoId}/participaciones", new { id = Guid.NewGuid(), alumnoId = g.Alumnos[0], fecha = "2026-09-07" });
+            Assert.Equal(HttpStatusCode.Created, dada.StatusCode);
+        }
+
+        await AprobarAsync(g, g.Alumnos[0]);
+        await AprobarAsync(g, g.Alumnos[1]);
+        await GenerarAsync(g);
+
+        var datos = JsonDocument.Parse(await EscalarAsync($"SELECT datos::text FROM boleta WHERE alumno_id = '{g.Alumnos[0]}'")).RootElement;
+        var sinExtra = JsonDocument.Parse(await EscalarAsync($"SELECT datos::text FROM boleta WHERE alumno_id = '{g.Alumnos[1]}'")).RootElement;
+        Assert.Equal(3, datos.GetProperty("participaciones").GetProperty("cantidad").GetInt32());
+        Assert.Equal(0.75m, datos.GetProperty("participaciones").GetProperty("puntos").GetDecimal());
+        Assert.Equal(10m, datos.GetProperty("calificacion").GetDecimal()); // 9.50 + 0.75 no pasa de 10 (RN-124)
+        Assert.True(!sinExtra.TryGetProperty("participaciones", out var nada) || nada.ValueKind == JsonValueKind.Null);
+
+        using var libro = new XLWorkbook(await (await g.Cliente.GetAsync($"/api/v1/periodos/{g.PeriodoId}/exportacion.xlsx")).Content.ReadAsStreamAsync());
+        var fila = libro.Worksheet("Calificaciones").Row(2);
+        Assert.Equal(3, fila.Cell(4).GetValue<int>());
+        Assert.Equal(0.75m, fila.Cell(5).GetValue<decimal>());
+        Assert.Equal(10m, fila.Cell(6).GetValue<decimal>());
     }
 
     [Fact]

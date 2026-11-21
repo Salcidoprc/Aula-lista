@@ -65,6 +65,18 @@ public interface IRepositorioEvaluacion
 
     void Agregar(Nota nota);
 
+    /// <summary>Participaciones del grupo con fecha en el rango (inclusive), por fecha y hora de creación (RN-122).</summary>
+    Task<IReadOnlyList<Participacion>> ParticipacionesAsync(Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken);
+
+    /// <summary>Cuántas participaciones tiene cada alumno en el periodo (RN-123).</summary>
+    Task<IReadOnlyDictionary<Guid, int>> ParticipacionesDelPeriodoAsync(Guid periodoId, CancellationToken cancellationToken);
+
+    Task<Participacion?> ParticipacionAsync(Guid id, CancellationToken cancellationToken);
+
+    void Agregar(Participacion participacion);
+
+    void Borrar(Participacion participacion);
+
     /// <summary>Tomas del grupo con fecha en el rango (inclusive), con el estado de cada alumno (RN-100).</summary>
     Task<IReadOnlyList<TomaAsistencia>> TomasAsync(Guid grupoId, DateOnly desde, DateOnly hasta, CancellationToken cancellationToken);
 

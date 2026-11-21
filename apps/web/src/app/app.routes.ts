@@ -70,6 +70,12 @@ export const routes: Routes = [
           import('./docente/asistencia/historial-asistencia').then((m) => m.HistorialAsistencia),
       },
       {
+        path: ':id/participaciones',
+        title: 'titulos.participaciones',
+        loadComponent: () =>
+          import('./docente/participaciones/participaciones-dia').then((m) => m.ParticipacionesDia),
+      },
+      {
         path: ':id/avisos',
         title: 'titulos.avisos',
         loadComponent: () => import('./docente/avisos/avisos-grupo').then((m) => m.AvisosGrupo),

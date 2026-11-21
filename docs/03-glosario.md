@@ -21,6 +21,7 @@
 | Calificación | Valor de 0 a 10 de un alumno en una actividad, o marca "No entregó" o "Exento". | `Calificacion` |
 | Calificación del periodo | Promedio ponderado de los rubros (RN-033). | `CalificacionPeriodo` |
 | Toma de asistencia | La lista de un grupo en una fecha, con el estado de cada alumno (presente, retardo, falta, justificada). | `TomaAsistencia` |
+| Participación | Punto extra que el docente da a un alumno en clase. Cada grupo decide cuánto vale (0.01 a 1.00) y se suma encima de la calificación del periodo sin pasar de 10. No es un rubro. | `Participacion` |
 | Nota | Apunte privado del docente sobre un alumno. Nunca lo ve el tutor. | `Nota` |
 | Observación | Texto por alumno y periodo para la boleta; la IA propone y el docente aprueba. | `Observacion` |
 | Borrador | Observación generada o editada sin aprobar. | estado `borrador` |

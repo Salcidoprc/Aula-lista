@@ -66,7 +66,7 @@ Diseño y transiciones según `reglas/07-diseno-y-movimiento.md` (Impeccable com
 - **Respuestas:** token alterado, vencido o revocado responden igual, 401 `enlace_invalido`, y la web lleva a "Este enlace ya no funciona". Un alumno o boleta no vinculado responde 404. El PDF de la boleta es el mismo endpoint del docente y acepta cualquiera de las dos sesiones.
 - **Aislamiento (RNF-001):** `enlace_tutor` y `sesion_tutor` tienen RLS forzado. Antes de conocer al tutor, las funciones `tutor_del_enlace(hash)` y `tutor_de_la_sesion(hash)` (invoker) fijan `app.token_hash` solo dentro de la búsqueda. Con `app.tutor_id` fijo, políticas de lectura del tutor en `vinculo_tutor`, `alumno`, `grupo`, `docente`, `boleta` (solo publicadas y vigentes), `periodo` y `unidad`.
 - **Configuración:** sección `Tutores` (`DiasSesion` 90, `DiasGraciaEnlace` 30, `DispositivosPorEnlace` 5, `DiasVentanaDispositivos` 30, `CanjesPorMinuto` 10).
-- **Lo que ve el tutor (RN-064):** la boleta vigente publicada con su final, el promedio y peso de cada rubro y la observación; nunca actividades individuales, notas ni borradores. La versión corregida dice "Versión corregida el dd/mm/aaaa" (RN-052).
+- **Lo que ve el tutor (RN-064):** la boleta vigente publicada con su final, el promedio y peso de cada rubro, el renglón de participaciones extra si lo tiene (RN-126) y la observación; nunca actividades individuales, notas ni borradores. La versión corregida dice "Versión corregida el dd/mm/aaaa" (RN-052).
 - **Texto del WhatsApp:** el docente lo manda desde su propio WhatsApp con `wa.me` y el mensaje prellenado; el servidor no envía nada en H5.1.
 
 ## Fuera de alcance

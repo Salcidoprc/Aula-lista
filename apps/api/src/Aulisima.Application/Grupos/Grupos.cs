@@ -22,6 +22,9 @@ public sealed record GrupoDto(
     decimal ValorRetardo,
     DateTimeOffset? ArchivadoEn)
 {
+    /// <summary>Lo que suma cada participación extra (RN-121).</summary>
+    public decimal ValorParticipacion { get; init; } = Domain.Grupos.ValorParticipacion.PorDefecto;
+
     /// <summary>SPEC-08: <c>gratis</c>, <c>pro</c> o <c>prueba</c> hoy (no solo lo guardado en <see cref="Plan"/>).</summary>
     public string PlanVigente { get; init; } = Planes.PlanVigente.Gratis;
 
@@ -33,7 +36,10 @@ public sealed record GrupoDto(
     public static GrupoDto De(GrupoConConteo g) => new(
         g.Grupo.Id, g.Grupo.Nombre, g.Grupo.Nivel, g.Grupo.Grado, g.Grupo.Materia, g.Grupo.CicloEscolarId, g.CicloNombre,
         g.Grupo.Plan, g.AlumnosActivos, g.Grupo.CalifMinima, g.Grupo.CalifAprobatoria, g.Grupo.DecimalesFinal,
-        g.Grupo.Redondeo, g.Grupo.ValorRetardo, g.Grupo.ArchivadoEn);
+        g.Grupo.Redondeo, g.Grupo.ValorRetardo, g.Grupo.ArchivadoEn)
+    {
+        ValorParticipacion = g.Grupo.ValorParticipacion,
+    };
 }
 
 public sealed record PeriodoDto(Guid Id, Guid UnidadId, string Nombre, int Orden, DateOnly Inicio, DateOnly Fin, string Estado);
@@ -159,10 +165,10 @@ public sealed class CrearGruposCasoUso(
             && string.Equals(e.Materia ?? string.Empty, materia ?? string.Empty, StringComparison.OrdinalIgnoreCase));
 }
 
-/// <summary>Sin <see cref="ValorRetardo"/>, el retardo conserva su valor (RN-102).</summary>
+/// <summary>Sin <see cref="ValorRetardo"/> o <see cref="ValorParticipacion"/>, conservan su valor (RN-102, RN-121).</summary>
 public sealed record EditarGrupo(
     string Nombre, int Grado, string? Materia, decimal CalifMinima, decimal CalifAprobatoria, int DecimalesFinal, string Redondeo,
-    decimal? ValorRetardo = null);
+    decimal? ValorRetardo = null, decimal? ValorParticipacion = null);
 
 internal sealed class EditarGrupoValidador : AbstractValidator<EditarGrupo>
 {
@@ -174,7 +180,7 @@ internal sealed class EditarGrupoValidador : AbstractValidator<EditarGrupo>
     }
 }
 
-/// <summary>Edita datos y configuración de calificación del grupo (RN-030, RN-035, RN-102). Archivado no se edita (RN-018).</summary>
+/// <summary>Edita datos y configuración de calificación del grupo (RN-030, RN-035, RN-102, RN-121). Archivado no se edita (RN-018).</summary>
 public sealed class EditarGrupoCasoUso(IRepositorioGrupos repositorio, IUnidadDeTrabajo unidad, TimeProvider reloj)
 {
     public async Task<Resultado?> EjecutarAsync(Guid id, EditarGrupo comando, CancellationToken ct)
@@ -192,7 +198,7 @@ public sealed class EditarGrupoCasoUso(IRepositorioGrupos repositorio, IUnidadDe
         }
 
         var configuracion = new ConfiguracionCalificacion(comando.CalifMinima, comando.CalifAprobatoria, comando.DecimalesFinal, comando.Redondeo);
-        var resultado = grupo.Editar(comando.Nombre, comando.Grado, comando.Materia, configuracion, reloj.GetUtcNow(), comando.ValorRetardo);
+        var resultado = grupo.Editar(comando.Nombre, comando.Grado, comando.Materia, configuracion, reloj.GetUtcNow(), comando.ValorRetardo, comando.ValorParticipacion);
         if (resultado.EsExito)
         {
             await unidad.GuardarAsync(ct);

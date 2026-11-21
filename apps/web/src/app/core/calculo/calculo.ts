@@ -5,14 +5,15 @@ import {
   dividir,
   fraccion,
   mayor,
+  menor,
   multiplicar,
   redondear,
   sumar,
 } from './decimal';
 
 /**
- * Gemelo del cálculo del backend (`Domain/Evaluacion/Calculo.cs`): RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118
- * y RN-119.
+ * Gemelo del cálculo del backend (`Domain/Evaluacion/Calculo.cs`): RN-032 a RN-035, RN-102 a RN-104, RN-112, RN-118,
+ * RN-119, RN-123 y RN-124.
  * Sirve para mostrar promedios al capturar sin conexión. Pasa los mismos vectores de prueba (RN-036).
  */
 export type Forma = 'numerica' | 'cumplimiento';
@@ -57,6 +58,8 @@ export interface ConfiguracionCalculo {
   readonly redondeo: Sentido;
   /** Lo que vale un retardo (RN-102); por defecto 1. */
   readonly valorRetardo?: Numero;
+  /** Lo que suma cada participación extra (RN-121); por defecto 0.10. */
+  readonly valorParticipacion?: Numero;
 }
 
 export interface ResultadoPeriodo {
@@ -65,6 +68,8 @@ export interface ResultadoPeriodo {
   readonly periodo: Fraccion | null;
   readonly final: Fraccion | null;
   readonly sinDatos: readonly string[];
+  /** Participaciones por su valor (RN-123), aunque el tope de 10 no deje sumarlas todas. */
+  readonly puntosExtra: Fraccion;
 }
 
 const DIEZ = fraccion(10);
@@ -147,11 +152,22 @@ export function promedioAsistencia(
   return cuenta === 0 ? null : dividir(multiplicar(suma, DIEZ), fraccion(cuenta));
 }
 
-/** RN-033 a RN-035: rubros con datos por su peso; los sin datos reparten el suyo; nunca bajo la mínima. */
+/** RN-123: participaciones de la unidad por el valor del grupo. */
+export function puntosExtra(participaciones: number, valor: Numero = '0.10'): Fraccion {
+  return multiplicar(fraccion(participaciones), fraccion(valor));
+}
+
+/**
+ * RN-033 a RN-035: rubros con datos por su peso; los sin datos reparten el suyo; nunca bajo la mínima. RN-124: encima
+ * de esa calificación ordinaria (ya sin bajar de la mínima) se suman los puntos de las participaciones, sin pasar de
+ * 10; sin calificación ordinaria no hay calificación.
+ */
 export function calcularPeriodo(
   rubros: readonly RubroCalculo[],
   configuracion: ConfiguracionCalculo,
+  participaciones = 0,
 ): ResultadoPeriodo {
+  const extra = puntosExtra(participaciones, configuracion.valorParticipacion);
   const promedios = new Map<string, Fraccion | null>();
   const sinDatos: string[] = [];
   let suma = CERO;
@@ -175,16 +191,27 @@ export function calcularPeriodo(
   }
 
   if (pesos.n === 0n) {
-    return { rubros: promedios, exacto: null, periodo: null, final: null, sinDatos };
+    return {
+      rubros: promedios,
+      exacto: null,
+      periodo: null,
+      final: null,
+      sinDatos,
+      puntosExtra: extra,
+    };
   }
-  const exacto = dividir(suma, pesos);
   const minima = fraccion(configuracion.califMinima);
+  let exacto = dividir(suma, pesos);
+  if (extra.n > 0n) {
+    exacto = menor(DIEZ, sumar(mayor(minima, exacto), extra)); // RN-124
+  }
   return {
     rubros: promedios,
     exacto,
     periodo: mayor(minima, redondear(exacto, 2, 'cercano')),
     final: mayor(minima, redondear(exacto, configuracion.decimalesFinal, configuracion.redondeo)),
     sinDatos,
+    puntosExtra: extra,
   };
 }
 

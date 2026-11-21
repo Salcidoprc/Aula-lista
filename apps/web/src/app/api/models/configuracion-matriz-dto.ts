@@ -6,5 +6,6 @@ export interface ConfiguracionMatrizDto {
   califMinima: (number | string);
   decimalesFinal: (number | string);
   redondeo: string;
+  valorParticipacion?: (number | string);
   valorRetardo: (number | string);
 }

@@ -6,7 +6,7 @@ using static Aulisima.Api.Comun.Respuestas;
 
 namespace Aulisima.Api.Evaluacion;
 
-/// <summary>SPEC-03 y SPEC-10: tipos de rubro, rubros y criterios, actividades, calificaciones, equipos, notas, asistencia y la cola sin conexión.</summary>
+/// <summary>SPEC-03 y SPEC-10: tipos de rubro, rubros y criterios, actividades, calificaciones, equipos, notas, participaciones, asistencia y la cola sin conexión.</summary>
 internal static class EvaluacionEndpoints
 {
     public static RouteGroupBuilder MapEvaluacion(this RouteGroupBuilder api)
@@ -54,6 +54,15 @@ internal static class EvaluacionEndpoints
             .Produces<ResultadoAsistencia>().ProducesProblem(StatusCodes.Status409Conflict).ProducesProblem(StatusCodes.Status422UnprocessableEntity);
         asistencias.MapDelete("/{id:guid}/asistencias/{fecha}", BorrarAsistencia).WithName("BorrarAsistencia")
             .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status409Conflict);
+
+        var participaciones = api.MapGroup("/grupos").WithTags("Participaciones");
+        participaciones.MapGet("/{id:guid}/participaciones", ListarParticipaciones).WithName("ListarParticipaciones")
+            .Produces<IReadOnlyList<ParticipacionDto>>().Produces(StatusCodes.Status404NotFound);
+        participaciones.MapPost("/{id:guid}/participaciones", DarParticipacion).WithName("DarParticipacion")
+            .Produces<ParticipacionDto>(StatusCodes.Status201Created).ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status422UnprocessableEntity);
+        api.MapDelete("/participaciones/{id:guid}", QuitarParticipacion).WithTags("Participaciones").WithName("QuitarParticipacion")
+            .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound).ProducesProblem(StatusCodes.Status409Conflict);
 
         var alumnos = api.MapGroup("/alumnos").WithTags("Notas");
         alumnos.MapGet("/{id:guid}/notas", ListarNotas).WithName("ListarNotas")
@@ -115,6 +124,18 @@ internal static class EvaluacionEndpoints
     private static async Task<IResult> CrearNota(
         Guid id, CrearNota cuerpo, IValidator<CrearNota> validador, CrearNotaCasoUso caso, CancellationToken ct) =>
         await validador.ValidarAsync(cuerpo, ct) ?? Creado(await caso.EjecutarAsync(id, cuerpo, ct), n => $"/api/v1/alumnos/{n.AlumnoId}/notas");
+
+    private static async Task<IResult> ListarParticipaciones(
+        Guid id, DateOnly? desde, DateOnly? hasta, ListarParticipacionesCasoUso caso, CancellationToken ct) =>
+        await caso.EjecutarAsync(id, desde, hasta, ct) is { } lista ? TypedResults.Ok(lista) : TypedResults.NotFound();
+
+    private static async Task<IResult> DarParticipacion(
+        Guid id, DarParticipacion cuerpo, IValidator<DarParticipacion> validador, DarParticipacionCasoUso caso, CancellationToken ct) =>
+        await validador.ValidarAsync(cuerpo, ct)
+            ?? Creado(await caso.EjecutarAsync(id, cuerpo, ct), p => $"/api/v1/grupos/{id}/participaciones");
+
+    private static async Task<IResult> QuitarParticipacion(Guid id, QuitarParticipacionCasoUso caso, CancellationToken ct) =>
+        SinContenido(await caso.EjecutarAsync(id, ct));
 
     private static async Task<IResult> ListarAsistencias(
         Guid id, DateOnly? desde, DateOnly? hasta, ListarAsistenciasCasoUso caso, CancellationToken ct) =>

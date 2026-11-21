@@ -216,6 +216,24 @@ internal sealed class NotaConfiguracion : IEntityTypeConfiguration<Nota>
     }
 }
 
+/// <summary>RN-122: participaciones extra; el id lo genera el cliente.</summary>
+internal sealed class ParticipacionConfiguracion : IEntityTypeConfiguration<Participacion>
+{
+    public void Configure(EntityTypeBuilder<Participacion> builder)
+    {
+        builder.ToTable("participacion");
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.Id).ValueGeneratedNever();
+        builder.HasIndex(p => new { p.GrupoId, p.Fecha });
+        builder.HasIndex(p => new { p.PeriodoId, p.AlumnoId });
+        builder.HasIndex(p => p.AlumnoId);
+        builder.HasIndex(p => p.DocenteId);
+        builder.HasOne<Grupo>().WithMany().HasForeignKey(p => p.GrupoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Alumno>().WithMany().HasForeignKey(p => p.AlumnoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Periodo>().WithMany().HasForeignKey(p => p.PeriodoId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 internal sealed class TomaAsistenciaConfiguracion : IEntityTypeConfiguration<TomaAsistencia>
 {
     public void Configure(EntityTypeBuilder<TomaAsistencia> builder)

@@ -6,6 +6,9 @@ namespace Aulisima.Domain.Boletas;
 /// <summary>Un rubro como sale en la boleta: nombre, peso y promedio con 2 decimales.</summary>
 public sealed record RubroBoleta(string Nombre, decimal Peso, decimal? Promedio);
 
+/// <summary>RN-126: cuántas participaciones extra tuvo el alumno en la unidad y los puntos que sumaron.</summary>
+public sealed record ParticipacionesBoleta(int Cantidad, decimal Puntos);
+
 /// <summary>
 /// RN-051: la foto de lo que dice la boleta. Se guarda completa (jsonb) para que cambios posteriores en el grupo, el
 /// perfil o las calificaciones no alteren una boleta emitida. No lleva fechas: dos fotos iguales son la misma boleta.
@@ -25,7 +28,8 @@ public sealed record DatosBoleta(
     IReadOnlyList<RubroBoleta> Rubros,
     decimal? Calificacion,
     int DecimalesFinal,
-    string Observacion)
+    string Observacion,
+    ParticipacionesBoleta? Participaciones = null)
 {
     /// <summary>Igualdad por contenido, también de los rubros (los registros comparan listas por referencia).</summary>
     public bool MismoContenido(DatosBoleta otra) =>

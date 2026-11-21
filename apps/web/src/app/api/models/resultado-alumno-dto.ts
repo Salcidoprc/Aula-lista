@@ -6,6 +6,7 @@ export interface ResultadoAlumnoDto {
   alumnoId: string;
   final: (number | string | null);
   periodo: (number | string | null);
+  puntosExtra?: (number | string);
   rubros: Array<PromedioRubroDto>;
   rubrosSinDatos: Array<string>;
 }

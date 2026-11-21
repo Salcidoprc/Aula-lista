@@ -17,11 +17,13 @@ public sealed record BoletaPublicadaDto(
     int Version,
     string Codigo,
     DateTimeOffset PublicadaEn,
-    string? Escuela)
+    string? Escuela,
+    ParticipacionesBoleta? Participaciones = null)
 {
+    /// <summary>RN-126: el renglón de participaciones extra viaja como quedó en la foto; las boletas viejas no lo tienen.</summary>
     public static BoletaPublicadaDto De(Boleta b) => new(
         b.Id, b.Datos.Unidad, b.Datos.Ciclo, b.Datos.Calificacion, b.Datos.DecimalesFinal, b.Datos.Rubros, b.Datos.Observacion,
-        b.Version, b.Codigo, b.PublicadaEn!.Value, b.Datos.Escuela);
+        b.Version, b.Codigo, b.PublicadaEn!.Value, b.Datos.Escuela, b.Datos.Participaciones);
 }
 
 /// <summary>La boleta más reciente, para la tarjeta de "Mis hijos".</summary>

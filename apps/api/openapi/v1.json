@@ -1491,6 +1491,43 @@
         }
       }
     },
+    "/api/v1/participaciones/{id}": {
+      "delete": {
+        "tags": [
+          "Participaciones"
+        ],
+        "operationId": "QuitarParticipacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/planes": {
       "get": {
         "tags": [
@@ -2128,6 +2165,118 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grupos/{id}/participaciones": {
+      "get": {
+        "tags": [
+          "Participaciones"
+        ],
+        "operationId": "ListarParticipaciones",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParticipacionDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Participaciones"
+        ],
+        "operationId": "DarParticipacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DarParticipacion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipacionDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5543,6 +5692,16 @@
               "null",
               "string"
             ]
+          },
+          "participaciones": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ParticipacionesBoleta"
+              }
+            ]
           }
         }
       },
@@ -6083,6 +6242,15 @@
               "string"
             ],
             "format": "double"
+          },
+          "valorParticipacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0.1
           }
         }
       },
@@ -6817,6 +6985,31 @@
           }
         }
       },
+      "DarParticipacion": {
+        "required": [
+          "id",
+          "alumnoId",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fecha": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "DatosActividad": {
         "required": [
           "nombre",
@@ -7281,6 +7474,15 @@
             "type": "string"
           },
           "valorRetardo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "valorParticipacion": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
               "null",
@@ -7799,6 +8001,14 @@
             ],
             "format": "date-time"
           },
+          "valorParticipacion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
           "planVigente": {
             "type": "string"
           },
@@ -8222,6 +8432,12 @@
           "conPromedios": {
             "type": "boolean",
             "default": true
+          },
+          "participaciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParticipacionesAlumnoDto"
+            }
           }
         }
       },
@@ -8531,6 +8747,74 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "ParticipacionDto": {
+        "required": [
+          "id",
+          "alumnoId",
+          "fecha"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ParticipacionesAlumnoDto": {
+        "required": [
+          "alumnoId",
+          "cantidad"
+        ],
+        "type": "object",
+        "properties": {
+          "alumnoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cantidad": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ParticipacionesBoleta": {
+        "required": [
+          "cantidad",
+          "puntos"
+        ],
+        "type": "object",
+        "properties": {
+          "cantidad": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "puntos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
         }
       },
@@ -9511,6 +9795,15 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "puntosExtra": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
           }
         }
       },
@@ -11024,6 +11317,9 @@
     },
     {
       "name": "Calificaciones"
+    },
+    {
+      "name": "Participaciones"
     },
     {
       "name": "Planes"

@@ -30,6 +30,7 @@ import {
   dosDecimales,
   hoy,
   indexar,
+  participacionesDe,
   resultadoAlumno,
   textoCelda,
   unidadDeHoy,
@@ -161,6 +162,21 @@ interface NotaVista {
                   }
                 </ul>
               }
+              @if (participaciones() > 0) {
+                <p class="extra">
+                  <span class="nombre">{{ t('participaciones.titulo') }}</span>
+                  <span class="dato-suave cifras">{{
+                    participaciones() === 1
+                      ? t('participaciones.cantidad.uno')
+                      : t('participaciones.cantidad.otros', { n: participaciones() })
+                  }}</span>
+                  <span class="valor-rubro cifras">{{
+                    conPromedios()
+                      ? t('participaciones.puntos', { puntos: puntosExtra() })
+                      : t('participaciones.sinPro')
+                  }}</span>
+                </p>
+              }
             }
           </section>
 
@@ -284,6 +300,26 @@ interface NotaVista {
 
     .parcial {
       font-size: var(--texto-sm);
+    }
+
+    /* RN-123: las participaciones extra bajo los rubros, como un renglón más. */
+    .extra {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: var(--espacio-3);
+      margin: 0;
+      padding-block: var(--espacio-3);
+      border-block-end: 1px solid var(--color-divisoria);
+    }
+
+    .extra .nombre {
+      font-weight: var(--peso-medio);
+    }
+
+    .extra .valor-rubro {
+      margin-inline-start: auto;
+      color: var(--grado-tinta);
     }
 
     .rubros,
@@ -496,6 +532,15 @@ export class AvanceAlumno {
     const m = this.matriz();
     const i = this.indice();
     return m && i && this.conPromedios() ? resultadoAlumno(m, i, this.alumno().id) : null;
+  });
+  /** RN-123: cuántas participaciones extra lleva en la unidad y cuánto suman. */
+  protected readonly participaciones = computed(() => {
+    const m = this.matriz();
+    return m ? participacionesDe(m, this.alumno().id) : 0;
+  });
+  protected readonly puntosExtra = computed(() => {
+    const r = this.resultado();
+    return r ? dosDecimales(r.puntosExtra) : '';
   });
   /** El promedio de la unidad con los decimales y el redondeo del grupo (RN-035). */
   protected readonly promedio = computed(() => {

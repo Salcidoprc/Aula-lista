@@ -103,6 +103,12 @@ export type { Sincronizar$Params as Sincronizar$Params } from './fn/calificacion
 export { sincronizar as sincronizar } from './fn/calificaciones/sincronizar';
 export type { ObtenerMatrizCalificaciones$Params as ObtenerMatrizCalificaciones$Params } from './fn/calificaciones/obtener-matriz-calificaciones';
 export { obtenerMatrizCalificaciones as obtenerMatrizCalificaciones } from './fn/calificaciones/obtener-matriz-calificaciones';
+export type { QuitarParticipacion$Params as QuitarParticipacion$Params } from './fn/participaciones/quitar-participacion';
+export { quitarParticipacion as quitarParticipacion } from './fn/participaciones/quitar-participacion';
+export type { ListarParticipaciones$Params as ListarParticipaciones$Params } from './fn/participaciones/listar-participaciones';
+export { listarParticipaciones as listarParticipaciones } from './fn/participaciones/listar-participaciones';
+export type { DarParticipacion$Params as DarParticipacion$Params } from './fn/participaciones/dar-participacion';
+export { darParticipacion as darParticipacion } from './fn/participaciones/dar-participacion';
 export type { ObtenerPlanes$Params as ObtenerPlanes$Params } from './fn/planes/obtener-planes';
 export { obtenerPlanes as obtenerPlanes } from './fn/planes/obtener-planes';
 export type { ObtenerSuscripcion$Params as ObtenerSuscripcion$Params } from './fn/planes/obtener-suscripcion';

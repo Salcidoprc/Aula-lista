@@ -9,13 +9,16 @@ interface Caso {
     decimalesFinal: number;
     redondeo: 'arriba' | 'abajo' | 'cercano';
     valorRetardo?: string;
+    valorParticipacion?: string;
   };
+  participaciones?: number;
   rubros: RubroCalculo[];
   esperado: {
     rubros: Record<string, string | null>;
     periodo: string | null;
     final: string | null;
     sinDatos: string[];
+    puntosExtra?: string;
   };
 }
 
@@ -46,7 +49,7 @@ const comparar = (valor: ReturnType<typeof fraccion> | null, esperado: string | 
 describe('Cálculo de calificaciones con los vectores compartidos (RN-036)', () => {
   for (const caso of vectores.casos as unknown as Caso[]) {
     it(caso.nombre, () => {
-      const resultado = calcularPeriodo(rubros(caso), caso.configuracion);
+      const resultado = calcularPeriodo(rubros(caso), caso.configuracion, caso.participaciones);
       for (const [id, esperado] of Object.entries(caso.esperado.rubros)) {
         const promedio = resultado.rubros.get(id) ?? null;
         comparar(promedio && redondear(promedio, 2, 'cercano'), esperado);
@@ -54,6 +57,9 @@ describe('Cálculo de calificaciones con los vectores compartidos (RN-036)', () 
       comparar(resultado.periodo, caso.esperado.periodo);
       comparar(resultado.final, caso.esperado.final);
       expect([...resultado.sinDatos].sort()).toEqual([...caso.esperado.sinDatos].sort());
+      if (caso.esperado.puntosExtra !== undefined) {
+        comparar(resultado.puntosExtra, caso.esperado.puntosExtra);
+      }
     });
   }
 

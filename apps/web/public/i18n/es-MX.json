@@ -282,7 +282,7 @@
     "grado_invalido": "El grado va de 1 a 6 en primaria y de 1 a 3 en secundaria.",
     "grupo_duplicado": "Ya tienes un grupo con ese grado, nombre y materia en este ciclo.",
     "lote_invalido": "Escribe de 1 a 15 nombres de grupo distintos.",
-    "configuracion_calificacion_invalida": "La mínima va de 0 a 10 y la aprobatoria no puede ser menor que la mínima.",
+    "configuracion_calificacion_invalida": "La mínima va de 0 a 10, la aprobatoria no puede ser menor que la mínima y una participación vale de 0.01 a 1.00.",
     "grupo_archivado": "El grupo está archivado: se puede consultar, pero no editar.",
     "correo_no_verificado": "Confirma tu correo antes de dar de alta a tus alumnos.",
     "limite_alumnos_grupo": "El grupo ya tiene 50 alumnos activos.",
@@ -385,7 +385,8 @@
     "sin_plan_a_la_venta": "Por ahora no se puede contratar Pro. Intenta más tarde.",
     "sincronizacion_fallida": "Stripe no respondió. Lo guardado no se perdió; reintenta en un momento.",
     "excel_requiere_pro": "La exportación a Excel es de Pro. Activa Pro en este grupo para descargarla.",
-    "avisos_requieren_pro": "Los avisos a tutores son de Pro. Activa Pro en este grupo para enviarlos."
+    "avisos_requieren_pro": "Los avisos a tutores son de Pro. Activa Pro en este grupo para enviarlos.",
+    "participacion_invalida": "La participación necesita un alumno del grupo."
   },
   "entidades": {
     "aguascalientes": "Aguascalientes",
@@ -469,7 +470,8 @@
     "adminErrores": "Errores de procesos",
     "adminTiposRubro": "Tipos de rubro",
     "adminProductos": "Productos y precios",
-    "adminAuditoria": "Auditoría"
+    "adminAuditoria": "Auditoría",
+    "participaciones": "Participaciones"
   },
   "ciclo": {
     "volver": "Volver",
@@ -648,7 +650,8 @@
     "ejemplo": "Por ejemplo:",
     "errores": {
       "fueraDeEscala": "Escribe calificaciones de 0 a 10 con hasta dos decimales.",
-      "aprobatoriaMenor": "La aprobatoria no puede ser menor que la mínima."
+      "aprobatoriaMenor": "La aprobatoria no puede ser menor que la mínima.",
+      "participacion": "Escribe un valor de 0.01 a 1.00 con hasta dos decimales."
     },
     "guardar": "Guardar cambios",
     "guardado": "Cambios guardados.",
@@ -668,7 +671,9 @@
       "confirmarTitulo": "¿Borrar {{grupo}}?",
       "confirmarTexto": "Se borran el grupo, sus alumnos y los tutores que no estén en otros grupos. No se puede deshacer.",
       "hecho": "{{grupo}} se borró."
-    }
+    },
+    "participacion": "Cada participación extra suma",
+    "participacionAyuda": "De 0.01 a 1.00 punto. Se suma encima de la calificación de la unidad, sin pasar de 10."
   },
   "alumno": {
     "volver": "Alumnos",
@@ -868,6 +873,7 @@
     "calificaciones": "Calificaciones",
     "alumnos": "Alumnos",
     "asistencia": "Asistencia",
+    "participaciones": "Participaciones",
     "configuracion": "Configuración",
     "avisos": "Avisos"
   },
@@ -1181,7 +1187,9 @@
     "pegadoConErrores": "Se pegaron {{cantidad}}; {{errores}} no se aceptaron. Revisa las celdas en rojo.",
     "parcial": "Calificación parcial: hay rubros sin datos.",
     "notaParcial": "Calificación parcial: algún rubro todavía no tiene calificaciones y su peso se repartió entre los demás.",
-    "porEquipo": "Por equipo: "
+    "porEquipo": "Por equipo: ",
+    "extra": "Extra",
+    "extraDetalle": "{{cantidad}} participaciones extra"
   },
   "equipos": {
     "volver": "Alumnos",
@@ -1272,7 +1280,16 @@
       "mejora": "Área de mejora",
       "conducta": "Conducta"
     },
-    "sinCalificacion": "sin calificación"
+    "sinCalificacion": "sin calificación",
+    "participaciones": {
+      "titulo": "Participaciones extra",
+      "cantidad": {
+        "uno": "1 participación",
+        "otros": "{{n}} participaciones"
+      },
+      "puntos": "+{{puntos}} a la unidad",
+      "sinPro": "Se suman al promedio de la unidad"
+    }
   },
   "cierre": {
     "volver": "Calificaciones",
@@ -1601,7 +1618,8 @@
         "quitado": "Ya no recibirás correos",
         "error": "No se pudo guardar. Inténtalo de nuevo."
       }
-    }
+    },
+    "participacionesExtra": "Participaciones extra ({{cantidad}})"
   },
   "avisos": {
     "titulo": "Avisos",
@@ -2694,6 +2712,47 @@
       "terminos": "Términos de uso",
       "entrar": "Entrar",
       "derechos": "© {{anio}} Aulísima"
+    }
+  },
+  "participaciones": {
+    "titulo": "Participaciones",
+    "misGrupos": "Mis grupos",
+    "valor": "Cada una vale {{valor}}",
+    "cambiarValor": "Cambiar",
+    "buscar": "Buscar alumno",
+    "buscarAyuda": "Nombre o número de lista. Con Enter se suma una al único que coincide.",
+    "sinCoincidencias": "Nadie coincide con «{{texto}}».",
+    "limpiar": "Limpiar búsqueda",
+    "lista": "Alumnos",
+    "ayudaFila": "Toca a un alumno para sumarle una participación.",
+    "dar": "Sumar una participación a {{alumno}}",
+    "quitar": "Quitar una",
+    "quitarA": "Quitar una participación a {{alumno}}",
+    "hoyCuenta": {
+      "uno": "1 hoy",
+      "otros": "{{n}} hoy"
+    },
+    "unidadCuenta": "{{n}} en la unidad · +{{puntos}}",
+    "anuncioDar": "{{alumno}}: {{n}} hoy.",
+    "anuncioQuitar": "Se quitó una a {{alumno}}: {{n}} hoy.",
+    "resumen": "Resumen del día",
+    "totalHoy": "Participaciones hoy",
+    "alumnosHoy": "Alumnos que participaron",
+    "comoCuenta": "Se suman encima de la calificación de la unidad y nunca pasan de 10. No son un rubro.",
+    "sinGuardar": "No se pudo guardar en este dispositivo. Intenta de nuevo.",
+    "cargando": "Cargando la lista",
+    "reintentar": "Reintentar",
+    "archivado": "El grupo está archivado: las participaciones son de solo lectura.",
+    "cerrada": "La unidad está cerrada: las participaciones de este día son de solo lectura.",
+    "valorDialogo": {
+      "titulo": "¿Cuánto vale cada participación?",
+      "texto": "De 0.01 a 1.00 punto. Cambiarlo recalcula los puntos de todas las participaciones del grupo; las boletas ya emitidas no cambian.",
+      "etiqueta": "Valor por participación",
+      "otro": "Otro valor",
+      "guardar": "Guardar",
+      "cancelar": "Cancelar",
+      "listo": "Ahora cada participación vale {{valor}}.",
+      "enLinea": "Cambiar el valor necesita conexión."
     }
   }
 }

@@ -23,6 +23,16 @@ public static class ValorRetardo
     public static bool EsValido(decimal valor) => Todos.Contains(valor);
 }
 
+/// <summary>Cuánto vale una participación extra (RN-121): de 0.01 a 1.00 con hasta 2 decimales; por defecto 0.10.</summary>
+public static class ValorParticipacion
+{
+    public const decimal PorDefecto = 0.10m;
+    public const decimal Minimo = 0.01m;
+    public const decimal Maximo = 1m;
+
+    public static bool EsValido(decimal valor) => valor is >= Minimo and <= Maximo && decimal.Round(valor, 2) == valor;
+}
+
 public static class PlanGrupo
 {
     public const string Gratis = "gratis";
@@ -99,6 +109,9 @@ public sealed class Grupo : Entidad
     /// <summary>Lo que vale un retardo en la asistencia (RN-102).</summary>
     public decimal ValorRetardo { get; private set; } = Grupos.ValorRetardo.PorDefecto;
 
+    /// <summary>Lo que suma cada participación extra a la calificación del periodo (RN-121).</summary>
+    public decimal ValorParticipacion { get; private set; } = Grupos.ValorParticipacion.PorDefecto;
+
     public DateTimeOffset? ArchivadoEn { get; private set; }
 
     public bool EstaArchivado => ArchivadoEn is not null;
@@ -121,10 +134,10 @@ public sealed class Grupo : Entidad
     public IReadOnlyList<Periodo> CrearPeriodos(IEnumerable<Unidad> unidades, DateTimeOffset ahora) =>
         unidades.Select(u => new Periodo(this, u, ahora)).ToList();
 
-    /// <summary>Sin <paramref name="valorRetardo"/>, el retardo conserva su valor.</summary>
+    /// <summary>Sin <paramref name="valorRetardo"/> o <paramref name="valorParticipacion"/>, conservan su valor.</summary>
     public Resultado Editar(
         string nombre, int grado, string? materia, ConfiguracionCalificacion configuracion, DateTimeOffset ahora,
-        decimal? valorRetardo = null)
+        decimal? valorRetardo = null, decimal? valorParticipacion = null)
     {
         if (EstaArchivado)
         {
@@ -136,7 +149,9 @@ public sealed class Grupo : Entidad
             return Resultado.Fallo(error);
         }
 
-        if (!configuracion.EsValida || valorRetardo is { } v && !Grupos.ValorRetardo.EsValido(v))
+        if (!configuracion.EsValida
+            || valorRetardo is { } v && !Grupos.ValorRetardo.EsValido(v)
+            || valorParticipacion is { } p && !Grupos.ValorParticipacion.EsValido(p))
         {
             return Resultado.Fallo(ErroresGrupos.ConfiguracionCalificacionInvalida);
         }
@@ -149,6 +164,7 @@ public sealed class Grupo : Entidad
         DecimalesFinal = configuracion.DecimalesFinal;
         Redondeo = configuracion.Redondeo;
         ValorRetardo = valorRetardo ?? ValorRetardo;
+        ValorParticipacion = valorParticipacion ?? ValorParticipacion;
         MarcarActualizada(ahora);
         return Resultado.Exito();
     }

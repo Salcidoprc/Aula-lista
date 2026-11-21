@@ -104,6 +104,17 @@ import { PortalService, urlPdf } from './portal.service';
                   </tr>
                 }
               </tbody>
+              @if (b.participaciones; as p) {
+                <tfoot>
+                  <tr>
+                    <th scope="row">
+                      {{ t('participacionesExtra', { cantidad: p.cantidad }) }}
+                    </th>
+                    <td class="cifras">—</td>
+                    <td class="cifras">+{{ final(p.puntos, 2) }}</td>
+                  </tr>
+                </tfoot>
+              }
             </table>
           </section>
 

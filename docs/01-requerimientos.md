@@ -54,6 +54,8 @@ Fuente de verdad de lo que el sistema debe hacer (funcionales, `RF`) y de cómo 
 | RF-037 | La captura de calificaciones y notas funciona sin conexión y se sincroniza sola al recuperar la señal. | M |
 | RF-038 | Un rubro puede tener criterios (subrubros) con nombre y peso que suman 100; cada actividad del rubro se califica por criterio. | M |
 | RF-039 | El docente arma equipos en el grupo y califica una actividad por equipo, con la opción de ajustar a cada integrante por separado. | M |
+| RF-110 | El docente da participaciones diarias a sus alumnos con un toque, buscándolos por nombre o número; cada grupo configura cuánto vale una participación (de 0.01 a 1.00) y los puntos se suman encima de la calificación del periodo sin pasar de 10. | M |
+| RF-111 | Dar y quitar participaciones funciona sin conexión y se sincroniza igual que la captura. | M |
 
 ### Asistencia (SPEC-10)
 

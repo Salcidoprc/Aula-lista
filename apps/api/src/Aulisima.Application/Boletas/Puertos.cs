@@ -19,7 +19,9 @@ public interface IRepositorioBoletas
 public sealed record BoletaParaPdf(DatosBoleta Datos, int Version, string Codigo, DateOnly Emitida, DateOnly? Corregida);
 
 /// <summary>Una fila de la exportación a Excel (RN-056).</summary>
-public sealed record FilaExportacion(int NumeroLista, string Alumno, IReadOnlyList<decimal?> Rubros, decimal? Calificacion, string? Observacion);
+public sealed record FilaExportacion(
+    int NumeroLista, string Alumno, IReadOnlyList<decimal?> Rubros, decimal? Calificacion, string? Observacion,
+    int Participaciones = 0, decimal PuntosExtra = 0m);
 
 /// <summary>Las calificaciones del periodo para llenar formatos oficiales (RF-055).</summary>
 public sealed record ExportacionPeriodo(

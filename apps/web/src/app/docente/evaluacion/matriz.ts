@@ -62,7 +62,15 @@ export function celdaVacia(celda: CeldaDto | undefined): boolean {
   );
 }
 
-/** RN-033 a RN-035 para un alumno, con lo que hay en la matriz (incluidos cambios sin enviar y su asistencia). */
+/** Cuántas participaciones extra tiene el alumno en la unidad (RN-122). */
+export function participacionesDe(matriz: MatrizCalificacionesDto, alumnoId: string): number {
+  return Number(matriz.participaciones?.find((p) => p.alumnoId === alumnoId)?.cantidad ?? 0);
+}
+
+/**
+ * RN-033 a RN-035 y RN-124 para un alumno, con lo que hay en la matriz (incluidos cambios sin enviar, su asistencia y
+ * sus participaciones extra).
+ */
 export function resultadoAlumno(
   matriz: MatrizCalificacionesDto,
   indice: IndiceMatriz,
@@ -85,7 +93,9 @@ export function resultadoAlumno(
       decimalesFinal: Number(matriz.configuracion.decimalesFinal),
       redondeo: matriz.configuracion.redondeo as Sentido,
       valorRetardo: matriz.configuracion.valorRetardo ?? 1,
+      valorParticipacion: matriz.configuracion.valorParticipacion ?? '0.10',
     },
+    participacionesDe(matriz, alumnoId),
   );
 }
 
