@@ -68,6 +68,8 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment=staging
     volumes:
       - archivos:/var/lib/aulisima/archivos
+      # Llaves de Data Protection: sin volumen se pierden al recrear la API.
+      - claves:/home/app/.aspnet/DataProtection-Keys
     depends_on:
       migraciones:
         condition: service_completed_successfully
@@ -89,6 +91,7 @@ services:
 volumes:
   datos:
   archivos:
+  claves:
 
 networks:
   # Red del Caddy que ya atiende 80/443 en el servidor (docker network ls).

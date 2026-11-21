@@ -18,6 +18,9 @@ COPY --from=build /app .
 ENV ASPNETCORE_HTTP_PORTS=8080
 # Almacén local de archivos (Almacen__Ruta). El volumen hereda este dueño al montarse por primera vez.
 RUN mkdir -p /var/lib/aulisima/archivos && chown $APP_UID /var/lib/aulisima/archivos
+# Llaves de Data Protection (cookie temporal del inicio con Google). Se montan en un volumen para que
+# sobrevivan al recrear el contenedor; sin él, un inicio con Google a mitad de un despliegue falla.
+RUN mkdir -p /home/app/.aspnet/DataProtection-Keys && chown -R $APP_UID /home/app/.aspnet
 EXPOSE 8080
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Aulisima.Api.dll"]

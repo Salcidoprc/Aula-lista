@@ -10,7 +10,7 @@ Esto reemplaza por ahora el plan con Coolify de `infra/coolify.md`: el servidor 
 | --- | --- | --- |
 | `db` | `postgres:18-alpine`, volumen `aulisima_datos` | interna |
 | `migraciones` | API con `--migrar`; corre y termina | interna |
-| `api` | API, volumen `aulisima_archivos` | interna |
+| `api` | API, volúmenes `aulisima_archivos` y `aulisima_claves` (llaves de Data Protection) | interna |
 | `aulisima-web` | web (nginx), puerto 8080 | interna y la del Caddy |
 
 Ningún contenedor publica puertos en el servidor. Caddy entra a `aulisima-web:8080` por su red (`deploy_default`; cámbiala con `RED_CADDY` si se llama distinto).
@@ -54,8 +54,10 @@ Todo arranca en modo simulado (correo en buzón interno, IA, WhatsApp, push y pa
 Cada push a `main` publica imágenes nuevas con la etiqueta `main`:
 
 ```sh
-cd ~/aulisima && git pull && cd infra/staging && docker compose pull && docker compose up -d && docker image prune -f
+cd ~/aulisima && git pull && cd infra/staging && docker compose pull && docker compose up -d --force-recreate api aulisima-web
 ```
+
+`--force-recreate` asegura que la API y la web arranquen con la imagen recién bajada (una vez `up -d` dejó la API en la imagen anterior). No uses `docker image prune` a secas: borra también imágenes colgantes de la otra app; borra solo las de `ghcr.io/salcidoprc/aula-lista-*`.
 
 Para fijar una versión, `VERSION=<sha>` en `.env`.
 

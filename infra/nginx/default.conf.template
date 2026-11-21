@@ -10,11 +10,7 @@ server {
   server_name _;
   root /usr/share/nginx/html;
 
-  # Content Security Policy estricta (reglas/02-frontend-angular.md).
-  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
-  add_header X-Content-Type-Options "nosniff" always;
-  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-  add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+  include /etc/nginx/snippets/seguridad.conf;
 
   gzip on;
   gzip_types text/css application/javascript application/json image/svg+xml application/manifest+json;
@@ -35,14 +31,23 @@ server {
   include /etc/nginx/faro/*.conf;
 
   location = /ngsw-worker.js {
+    include /etc/nginx/snippets/seguridad.conf;
     add_header Cache-Control "no-cache" always;
   }
 
   location = /index.html {
+    include /etc/nginx/snippets/seguridad.conf;
     add_header Cache-Control "no-cache" always;
   }
 
+  # mime.types de nginx no conoce .webmanifest.
+  location = /manifest.webmanifest {
+    types { }
+    default_type application/manifest+json;
+  }
+
   location ~* \.(?:js|css|woff2)$ {
+    include /etc/nginx/snippets/seguridad.conf;
     add_header Cache-Control "public, max-age=31536000, immutable" always;
   }
 
