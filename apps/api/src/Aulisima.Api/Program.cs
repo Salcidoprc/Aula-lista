@@ -173,11 +173,12 @@ builder.Services.AddRateLimiter(o =>
     };
 });
 
-// Detrás de nginx: la IP real llega en X-Forwarded-For desde el proxy inmediato.
+// Detrás de nginx: la IP real llega en X-Forwarded-For. Proxies:Saltos cuenta los proxies delante de la API
+// (1 = solo nginx; 2 = Caddy y nginx en el VPS), para que el límite por IP de RNF-004 vea al usuario y no a Caddy.
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
     o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    o.ForwardLimit = 1;
+    o.ForwardLimit = builder.Configuration.GetValue("Proxies:Saltos", 1);
     o.KnownIPNetworks.Clear();
     o.KnownProxies.Clear();
 });

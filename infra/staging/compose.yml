@@ -37,6 +37,8 @@ services:
     restart: unless-stopped
     environment:
       ConnectionStrings__Aulisima: Host=db;Database=aulisima;Username=app_runtime;Password=${CLAVE_APP_RUNTIME};GSS Encryption Mode=Disable
+      # Caddy y luego nginx: la IP del usuario está dos saltos atrás en X-Forwarded-For (RNF-004).
+      Proxies__Saltos: 2
       Jwt__ClaveFirma: ${JWT_CLAVE_FIRMA:?Define JWT_CLAVE_FIRMA en .env}
       Cuentas__UrlWeb: ${URL_WEB:?Define URL_WEB en .env}
       Ia__Proveedor: ${IA_PROVEEDOR:-simulado}

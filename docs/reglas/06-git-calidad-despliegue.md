@@ -30,7 +30,7 @@ Un PR no se fusiona con CI en rojo.
 ## Despliegue
 
 - Imágenes Docker de `web` y `api` construidas en CI y publicadas en un registro (GitHub Container Registry), etiquetadas con el SHA del commit.
-- Coolify despliega automáticamente `main` a staging. Producción se despliega a mano desde Coolify eligiendo una etiqueta ya probada en staging.
+- Staging corre la etiqueta `main` y se actualiza a mano (`docs/operacion/staging-oracle.md`). Producción se despliega a mano fijando en `VERSION` un SHA ya probado en staging (`docs/operacion/produccion-oracle.md`, ADR-0020).
 - Las migraciones se aplican como paso previo al arranque de la nueva versión, con el rol `app_migraciones`.
 - Toda versión en producción se puede revertir a la etiqueta anterior en menos de 15 minutos; las migraciones deben ser compatibles con la versión anterior durante un despliegue.
 
