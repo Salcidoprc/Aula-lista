@@ -25,7 +25,8 @@ using Microsoft.IdentityModel.Tokens;
 namespace Aulisima.Pruebas.Integracion;
 
 public sealed partial class FabricaApi(
-    BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000, int solicitudesIaPorHora = 200, bool registrosDetallados = false)
+    BaseDeDatosFixture baseDeDatos, int intentosInicioSesionPorMinuto = 1000, int solicitudesIaPorHora = 200, bool registrosDetallados = false,
+    int saltosProxy = 1)
     : WebApplicationFactory<Program>
 {
     public const string ContrasenaValida = "lapiz-azul-del-salon-4B";
@@ -71,6 +72,7 @@ public sealed partial class FabricaApi(
         builder.UseSetting("Correo:Proveedor", OpcionesCorreo.ProveedorBuzon);
         builder.UseSetting("Ia:SolicitudesPorHora", solicitudesIaPorHora.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.UseSetting("Almacen:Ruta", _almacen);
+        builder.UseSetting("Proxies:Saltos", saltosProxy.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.UseSetting("Trabajos:Servidor", "false");
         builder.UseSetting("Whatsapp:SecretoApp", SecretoWebhook);
         builder.UseSetting("Pagos:SecretoWebhook", SecretoPagos);

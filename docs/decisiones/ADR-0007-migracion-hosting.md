@@ -1,6 +1,6 @@
 # ADR-0007: Oracle solo para pruebas; producción en Azure o similar
 
-**Estado:** Aceptada · **Fecha:** 11/10/2026
+**Estado:** Aceptada, complementada por [ADR-0020](ADR-0020-beta-de-produccion-en-oracle.md) · **Fecha:** 11/10/2026
 
 ## Contexto
 

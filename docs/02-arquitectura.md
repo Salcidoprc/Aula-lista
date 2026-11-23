@@ -215,9 +215,9 @@ Hangfire con almacenamiento en PostgreSQL (esquema `hangfire`, instalado por el 
 | Entorno | Dónde | Datos |
 | --- | --- | --- |
 | Local | docker-compose en la máquina del desarrollador | Datos ficticios generados |
-| Staging | Servidor de prueba de Oracle con Coolify, subdominio aparte | Datos ficticios |
-| Pruebas con docentes | Servidor de prueba de Oracle con Coolify | Datos reales del piloto; respaldos externos obligatorios |
-| Producción | Azure o similar, tras las pruebas (ADR-0007) | Datos reales migrados con `pg_dump` y verificación |
+| Staging | VPS de Oracle con Docker Compose, `staging.aulisima.com` (`docs/operacion/staging-oracle.md`) | Datos ficticios |
+| Producción (beta) | Mismo VPS de Oracle, proyecto de Compose aparte, `aulisima.com` (ADR-0020, `docs/operacion/produccion-oracle.md`) | Datos reales; servicios reales; respaldos cifrados externos obligatorios |
+| Producción (después) | Azure o similar (ADR-0007) | Datos de la beta migrados con `pg_dump` y verificación |
 
 Las imágenes se construyen para `linux/amd64` y `linux/arm64`, porque el servidor gratuito de Oracle suele ser ARM y Azure suele ser x86. Ningún componente depende de un servicio exclusivo de Oracle.
 

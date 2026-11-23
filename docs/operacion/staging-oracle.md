@@ -73,5 +73,7 @@ Las 08:00 UTC son las 02:00 del centro de México. Antes del piloto se cambia po
 
 ## Límites conocidos
 
-- La API ve la IP de Caddy y no la del usuario, porque hay dos proxies (Caddy y nginx) y solo confía en uno. El límite de 5 inicios de sesión por minuto (RNF-004) se comparte entre todos. En staging no importa; se arregla antes del piloto.
+- Hay dos proxies delante de la API (Caddy y nginx); `Proxies__Saltos: 2` en el compose hace que la API tome la IP del usuario para el límite de RNF-004. Si algún día se enciende el proxy de Cloudflare (nube naranja), habría un tercer salto y la IP vista sería la de Cloudflare.
 - Con 1 OCPU y 6 GB alcanza para pruebas. La cuota gratuita permite subir la instancia hasta 4 OCPU y 24 GB, y el disco de arranque hasta 200 GB; requiere reiniciarla.
+
+Producción (beta) corre en este mismo servidor como proyecto aparte: ver `docs/operacion/produccion-oracle.md` (ADR-0020).

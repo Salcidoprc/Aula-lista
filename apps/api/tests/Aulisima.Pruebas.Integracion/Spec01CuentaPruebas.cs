@@ -176,6 +176,35 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
     }
 
     [Fact]
+    public async Task RNF004_DetrasDeCaddyYNginx_ElLimiteEsPorLaIpDelUsuario()
+    {
+        // En el VPS la API ve "usuario, caddy" en X-Forwarded-For: con dos saltos el límite separa a cada usuario.
+        using var fabrica = new FabricaApi(baseDeDatos, intentosInicioSesionPorMinuto: 5, saltosProxy: 2);
+        using var cliente = fabrica.Cliente();
+
+        async Task<string?> IntentoAsync(string ipUsuario, string correo)
+        {
+            using var solicitud = new HttpRequestMessage(HttpMethod.Post, "/api/v1/cuentas/sesion")
+            {
+                Content = JsonContent.Create(new { correo, contrasena = "otra-contrasena-123" }),
+            };
+            solicitud.Headers.Add("X-Forwarded-For", $"{ipUsuario}, 172.18.0.5");
+            return await CodigoAsync(await cliente.SendAsync(solicitud));
+        }
+
+        var primerUsuario = new List<string?>();
+        for (var i = 0; i < 6; i++)
+        {
+            primerUsuario.Add(await IntentoAsync("203.0.113.10", $"nadie{i}@prueba.mx"));
+        }
+        var otroUsuario = await IntentoAsync("203.0.113.20", "alguien@prueba.mx");
+
+        Assert.All(primerUsuario.Take(5), c => Assert.Equal("credenciales_invalidas", c));
+        Assert.Equal("demasiados_intentos", primerUsuario[5]);
+        Assert.Equal("credenciales_invalidas", otroUsuario);
+    }
+
+    [Fact]
     public async Task SPEC01_RN002_ContrasenaComunOCorta_SeRechaza()
     {
         using var cliente = _fabrica.Cliente();
