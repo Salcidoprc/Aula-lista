@@ -26,10 +26,7 @@ public sealed class AccesoAdmin(IRepositorioCuentas cuentas, IContextoUsuario us
             return false;
         }
 
-        var porConfiguracion = opciones.Value.CorreosAdmin
-            .Where(c => !string.IsNullOrWhiteSpace(c))
-            .Any(c => Cuenta.NormalizarCorreo(c) == cuenta.Correo);
-        if (!cuenta.EsAdmin && !porConfiguracion)
+        if (!EsAdmin(cuenta, opciones.Value))
         {
             return false;
         }
@@ -37,6 +34,13 @@ public sealed class AccesoAdmin(IRepositorioCuentas cuentas, IContextoUsuario us
         usuario.AsumirAdmin(id);
         return true;
     }
+
+    /// <summary>Rol <c>admin</c> por la cuenta (<c>--admin</c>) o por configuración, con la cuenta activa y verificada.</summary>
+    public static bool EsAdmin(Cuenta cuenta, OpcionesOperacion opciones) =>
+        cuenta is { EstaActiva: true, CorreoVerificado: true }
+        && (cuenta.EsAdmin || opciones.CorreosAdmin
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Any(c => Cuenta.NormalizarCorreo(c) == cuenta.Correo));
 }
 
 /// <summary>Semana del lunes (hora del centro de México) en que cae un instante.</summary>
