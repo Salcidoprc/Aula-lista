@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { confirmarSalida } from './shared/rutas';
 import {
+  adminAlPanel,
   requierePerfilCompleto,
   requiereSesion,
   sinSesion,
@@ -18,7 +19,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [requiereSesion, requierePerfilCompleto],
+    canActivate: [requiereSesion, adminAlPanel, requierePerfilCompleto],
     title: 'titulos.inicio',
     loadComponent: () => import('./docente/inicio/inicio').then((m) => m.Inicio),
   },

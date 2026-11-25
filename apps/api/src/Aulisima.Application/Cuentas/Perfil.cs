@@ -19,7 +19,8 @@ public sealed record PerfilDocente(
     bool TieneContrasena,
     bool ConGoogle,
     IReadOnlyList<DocumentoPendiente> AceptacionesPendientes,
-    bool DeclaracionDatosAceptada);
+    bool DeclaracionDatosAceptada,
+    bool EsAdmin);
 
 /// <summary>Documento legal cuya versión vigente el docente no ha aceptado (RN-003).</summary>
 public sealed record DocumentoPendiente(string Documento, string Version);
@@ -28,7 +29,8 @@ public sealed class ObtenerPerfilCasoUso(
     IRepositorioCuentas cuentas,
     IRepositorioDocentes docentes,
     IContextoUsuario contexto,
-    IOptions<OpcionesCuentas> opciones)
+    IOptions<OpcionesCuentas> opciones,
+    IOptions<Operacion.OpcionesOperacion> operacion)
 {
     public async Task<PerfilDocente?> EjecutarAsync(CancellationToken ct)
     {
@@ -63,7 +65,8 @@ public sealed class ObtenerPerfilCasoUso(
             cuenta.HashContrasena is not null,
             cuenta.GoogleSub is not null,
             pendientes,
-            Aceptada(DocumentoLegal.DeclaracionDatos));
+            Aceptada(DocumentoLegal.DeclaracionDatos),
+            Operacion.AccesoAdmin.Es(cuenta, operacion.Value));
     }
 }
 

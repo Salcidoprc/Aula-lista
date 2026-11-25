@@ -35,5 +35,18 @@ export const requierePerfilCompleto: CanActivateFn = async () => {
   return router.createUrlTree(['/bienvenida']);
 };
 
+/**
+ * SPEC-09: el administrador entra directo al panel. Al iniciar sesión o abrir la raíz, si el perfil dice que la cuenta
+ * es admin, se le lleva a `/admin`; un docente sigue a Mis grupos. Va antes de la bienvenida: el panel no la necesita.
+ */
+export const adminAlPanel: CanActivateFn = async () => {
+  const router = inject(Router);
+  if (!(await inject(SesionService).asegurar())) {
+    return true;
+  }
+  const perfil = await inject(PerfilService).cargar();
+  return perfil?.esAdmin ? router.createUrlTree(['/admin']) : true;
+};
+
 /** La landing (RF-010) solo existe sin sesión: con sesión, la raíz es Mis grupos. */
 export const sinSesion: CanMatchFn = async () => !(await inject(SesionService).asegurar());

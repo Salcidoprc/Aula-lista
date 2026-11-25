@@ -21,15 +21,7 @@ public sealed class AccesoAdmin(IRepositorioCuentas cuentas, IContextoUsuario us
 {
     public async Task<bool> ComprobarAsync(CancellationToken ct)
     {
-        if (usuario.DocenteId is not { } id || await cuentas.PorIdAsync(id, ct) is not { EstaActiva: true, CorreoVerificado: true } cuenta)
-        {
-            return false;
-        }
-
-        var porConfiguracion = opciones.Value.CorreosAdmin
-            .Where(c => !string.IsNullOrWhiteSpace(c))
-            .Any(c => Cuenta.NormalizarCorreo(c) == cuenta.Correo);
-        if (!cuenta.EsAdmin && !porConfiguracion)
+        if (usuario.DocenteId is not { } id || await cuentas.PorIdAsync(id, ct) is not { } cuenta || !Es(cuenta, opciones.Value))
         {
             return false;
         }
@@ -37,6 +29,16 @@ public sealed class AccesoAdmin(IRepositorioCuentas cuentas, IContextoUsuario us
         usuario.AsumirAdmin(id);
         return true;
     }
+
+    /// <summary>
+    /// Una cuenta activa y verificada con rol <c>admin</c> (por <c>--admin</c> o por <c>Operacion__CorreosAdmin</c>). El
+    /// perfil lo usa para llevar al administrador directo al panel.
+    /// </summary>
+    public static bool Es(Cuenta cuenta, OpcionesOperacion opciones) =>
+        cuenta is { EstaActiva: true, CorreoVerificado: true }
+        && (cuenta.EsAdmin || opciones.CorreosAdmin
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Any(c => Cuenta.NormalizarCorreo(c) == cuenta.Correo));
 }
 
 /// <summary>Semana del lunes (hora del centro de México) en que cae un instante.</summary>

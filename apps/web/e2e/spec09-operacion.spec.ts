@@ -39,6 +39,18 @@ test.describe('SPEC-09: operación y métricas', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Mis grupos' })).toBeVisible();
   });
 
+  test('SPEC-09: el admin que abre la app entra directo al panel, no a Mis grupos', async ({
+    page,
+    request,
+  }) => {
+    const correo = await docenteVerificado(page, request);
+    hacerAdmin(correo);
+
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/admin\/resumen$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Resumen' })).toBeVisible();
+  });
+
   test('RN-092, RN-094, RN-095: el admin crea un tipo que el docente ve al instante, lo desactiva y queda en la auditoría', async ({
     page,
     request,
