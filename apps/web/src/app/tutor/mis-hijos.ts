@@ -97,6 +97,7 @@ import { PortalService } from './portal.service';
           <a class="enlace enlace--solo" routerLink="/tutor/notificaciones">
             {{ t('notificaciones.enlace') }}
           </a>
+          <a class="enlace enlace--solo" routerLink="/legal/tutores">{{ t('avisoPrivacidad') }}</a>
         }
       }
     </section>

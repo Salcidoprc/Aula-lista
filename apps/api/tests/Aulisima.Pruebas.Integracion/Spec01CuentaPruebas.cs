@@ -294,7 +294,7 @@ public sealed class Spec01CuentaPruebas(BaseDeDatosFixture baseDeDatos) : IDispo
         var (cliente, _, _) = await _fabrica.RegistrarDocenteAsync();
 
         var vieja = await cliente.PostAsJsonAsync("/api/v1/docente/aceptaciones", new { documento = "declaracion_datos", version = "2020-01-01" });
-        var vigente = await cliente.PostAsJsonAsync("/api/v1/docente/aceptaciones", new { documento = "declaracion_datos", version = "2026-10-11" });
+        var vigente = await cliente.PostAsJsonAsync("/api/v1/docente/aceptaciones", new { documento = "declaracion_datos", version = "2026-11-25" });
 
         Assert.Equal("version_no_vigente", await CodigoAsync(vieja));
         Assert.Equal(HttpStatusCode.NoContent, vigente.StatusCode);
