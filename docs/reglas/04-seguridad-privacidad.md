@@ -37,6 +37,8 @@ El sistema guarda datos de menores. Ante la duda, se recolecta menos y se compar
 ## Cumplimiento (LFPDPPP)
 
 - Aviso de privacidad visible en el registro y en el portal del tutor, con la versión vigente.
+- Los textos legales (términos, aviso de privacidad integral, declaración de autorización de datos y aviso para tutores) viven en `apps/web/src/app/legal/documentos.ts` y se publican en `/legal/<documento>`. La `version` de cada documento aceptado debe ser igual a `Cuentas:VersionesLegales` de la API; una prueba lo verifica. Cambiar el fondo de un documento sube su versión y obliga a aceptarlo de nuevo (RN-003).
+- Responsable de los datos: Jesús Antonio Salcido Gaxiola, persona física (Torreón, Coahuila). Derechos ARCO en privacidad@aulisima.com; soporte en soporte@aulisima.com.
 - Solicitudes ARCO por correo dedicado; respuesta en máximo 20 días hábiles (RNF-006).
 - Registro de aceptación legal por docente (RF-005, RF-006).
 - Revisión legal externa antes de abrir el piloto a docentes reales.

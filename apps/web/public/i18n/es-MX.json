@@ -230,9 +230,9 @@
     }
   },
   "legal": {
-    "enRevision": "El texto completo está en revisión legal y se publica antes de abrir el piloto.",
+    "actualizado": "Última actualización: {{ fecha }}",
     "terminos": {
-      "titulo": "Términos de uso",
+      "titulo": "Términos y condiciones",
       "resumen": "Las reglas para usar Aulísima como docente."
     },
     "privacidad": {
@@ -242,6 +242,10 @@
     "declaracion_datos": {
       "titulo": "Declaración de autorización de datos",
       "resumen": "Tu confirmación de que puedes registrar los datos de tus alumnos para fines escolares."
+    },
+    "tutores": {
+      "titulo": "Aviso de privacidad para tutores",
+      "resumen": "Qué datos tuyos y de tu hija o hijo vemos, para qué y cómo ejercer tus derechos."
     }
   },
   "errores": {
@@ -1619,7 +1623,8 @@
         "error": "No se pudo guardar. Inténtalo de nuevo."
       }
     },
-    "participacionesExtra": "Participaciones extra ({{cantidad}})"
+    "participacionesExtra": "Participaciones extra ({{cantidad}})",
+    "avisoPrivacidad": "Aviso de privacidad"
   },
   "avisos": {
     "titulo": "Avisos",
