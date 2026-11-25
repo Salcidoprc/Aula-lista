@@ -1,5 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
+import { PerfilService } from '../core/sesion/perfil.service';
 import { AdminService } from './admin.service';
 
 /**
@@ -8,11 +10,17 @@ import { AdminService } from './admin.service';
  */
 export const requiereAdmin: CanActivateFn = async () => {
   const router = inject(Router);
+  const perfil = inject(PerfilService);
   try {
     await inject(AdminService).comportamientos();
     return true;
-  } catch {
-    return router.createUrlTree(['/']);
+  } catch (error) {
+    if (error instanceof HttpErrorResponse && error.status === 404) {
+      // El inicio manda al panel a quien su perfil dice admin: se relee para no rebotar entre los dos.
+      await perfil.cargar(true);
+      return router.createUrlTree(['/']);
+    }
+    return false;
   }
 };
 

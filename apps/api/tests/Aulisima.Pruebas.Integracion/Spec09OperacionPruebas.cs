@@ -79,6 +79,19 @@ public sealed class Spec09OperacionPruebas(BaseDeDatosFixture baseDeDatos) : IDi
     }
 
     [Fact]
+    public async Task SPEC09_ElPerfilDiceSiLaCuentaEsAdmin_ParaQueLaAppAbraElPanel()
+    {
+        var admin = await AdminAsync();
+        var (docente, _, _) = await _fabrica.RegistrarDocenteVerificadoAsync();
+
+        var perfilAdmin = await admin.GetFromJsonAsync<JsonElement>("/api/v1/docente/perfil");
+        var perfilDocente = await docente.GetFromJsonAsync<JsonElement>("/api/v1/docente/perfil");
+
+        Assert.True(perfilAdmin.GetProperty("esAdmin").GetBoolean());
+        Assert.False(perfilDocente.GetProperty("esAdmin").GetBoolean());
+    }
+
+    [Fact]
     public async Task SPEC09_DocenteSinRolAdmin_RecibeEn404TodoElPanel()
     {
         var (docente, _, _) = await _fabrica.RegistrarDocenteAsync();

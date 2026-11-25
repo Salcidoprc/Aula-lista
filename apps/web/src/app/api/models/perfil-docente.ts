@@ -9,6 +9,7 @@ export interface PerfilDocente {
   correoVerificado: boolean;
   declaracionDatosAceptada: boolean;
   entidadFederativa: (string | null);
+  esAdmin: boolean;
   escuelaCct: (string | null);
   escuelaNombre: (string | null);
   nivel: (string | null);

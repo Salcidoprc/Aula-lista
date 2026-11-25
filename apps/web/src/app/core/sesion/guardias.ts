@@ -19,6 +19,20 @@ export const soloSinSesion: CanActivateFn = async () => {
 };
 
 /**
+ * SPEC-09: la cuenta admin abre directo en el panel. Va antes de `requierePerfilCompleto`, así un admin no pasa por la
+ * bienvenida del docente.
+ */
+export const adminAlPanel: CanActivateFn = async () => {
+  const router = inject(Router);
+  const servicio = inject(PerfilService);
+  if (!(await inject(SesionService).asegurar())) {
+    return true;
+  }
+  const perfil = await servicio.cargar();
+  return perfil?.esAdmin ? router.createUrlTree(['/admin']) : true;
+};
+
+/**
  * Mientras falte el perfil o una aceptación legal vigente (RN-003), se pasa por la bienvenida.
  * Angular corre las guardias de una ruta a la vez: sin sesión, deja que `requiereSesion` redirija.
  */

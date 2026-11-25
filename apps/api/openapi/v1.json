@@ -8872,7 +8872,8 @@
           "tieneContrasena",
           "conGoogle",
           "aceptacionesPendientes",
-          "declaracionDatosAceptada"
+          "declaracionDatosAceptada",
+          "esAdmin"
         ],
         "type": "object",
         "properties": {
@@ -8931,6 +8932,9 @@
             }
           },
           "declaracionDatosAceptada": {
+            "type": "boolean"
+          },
+          "esAdmin": {
             "type": "boolean"
           }
         }

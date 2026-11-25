@@ -48,8 +48,9 @@ test.describe('SPEC-09: operación y métricas', () => {
     hacerAdmin(correo);
     const nombre = nombreNuevo();
 
-    // RF-094: el panel abre en el Resumen, con sus cinco bloques y el embudo completo.
-    await page.goto('/admin');
+    // SPEC-09: la cuenta admin entra directo al panel. RF-094: el panel abre en el Resumen, con sus cinco bloques.
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/admin\/resumen$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Resumen' })).toBeVisible();
     for (const bloque of ['Uso', 'Dinero', 'Activación', 'Valor entregado', 'Retención']) {
       await expect(page.getByRole('heading', { level: 2, name: bloque })).toBeVisible();
